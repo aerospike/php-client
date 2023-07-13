@@ -1,0 +1,19 @@
+[package]
+name = "aerospike"
+version = "0.1.0"
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+#ext-php-rs = { git = "https://github.com/davidcole1340/ext-php-rs.git" }
+ordered-float = { version = "3", default-features = false }
+ext-php-rs = { git = "https://github.com/khaf/ext-php-rs.git", branch = "persistent_resource" }
+aerospike-sync = { git = "https://github.com/aerospike/aerospike-client-rust.git", branch = "php-rs", package = "aerospike-sync" }
+aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust.git", branch = "php-rs", package = "aerospike-core" }
+colored = "2.0.0"
+hex = "0.4"
+
+[profile.release]
+strip = "debuginfo"
