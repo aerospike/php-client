@@ -2,21 +2,19 @@
 use ext_php_rs::prelude::*;
 
 use std::collections::HashMap;
-use std::convert::TryFrom;
-use std::convert::TryInto;
-use std::fmt;
+
 use std::hash::{Hash, Hasher};
-use std::ops::Deref;
+use std::{fmt, usize};
+
 use std::str;
 use std::sync::Arc;
-use std::thread;
 use std::time::Duration;
 
 use ext_php_rs::boxed::ZBox;
-use ext_php_rs::convert::FromZvalMut;
+
 use ext_php_rs::convert::IntoZendObject;
 use ext_php_rs::convert::{FromZval, IntoZval};
-use ext_php_rs::error::Error;
+
 use ext_php_rs::error::Result;
 use ext_php_rs::flags::DataType;
 use ext_php_rs::php_class;
@@ -25,10 +23,515 @@ use ext_php_rs::types::ZendHashTable;
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
 
-use aerospike_core::as_geo;
 use aerospike_core::as_val;
+use aerospike_core::as_geo;
 
 use colored::*;
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Priority
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[derive(Debug, Clone)]
+pub enum _Priority {
+    Default,
+    Low,
+    Medium,
+    High,
+}
+
+#[php_class]
+pub struct Priority {
+    _as: aerospike_core::Priority,
+    v: _Priority,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl Priority {
+    pub fn Default() -> Self {
+        Priority {
+            _as: aerospike_core::Priority::Default,
+            v: _Priority::Default,
+        }
+    }
+    pub fn Low() -> Self {
+        Priority {
+            _as: aerospike_core::Priority::Low,
+            v: _Priority::Low,
+        }
+    }
+    pub fn Medium() -> Self {
+        Priority {
+            _as: aerospike_core::Priority::Medium,
+            v: _Priority::Medium,
+        }
+    }
+    pub fn High() -> Self {
+        Priority {
+            _as: aerospike_core::Priority::High,
+            v: _Priority::High,
+        }
+    }
+}
+
+impl From<&Priority> for aerospike_core::Priority {
+    fn from(input: &Priority) -> Self {
+        match &input.v {
+            _Priority::Default => aerospike_core::Priority::Default,
+            _Priority::Low => aerospike_core::Priority::Low,
+            _Priority::Medium => aerospike_core::Priority::Medium,
+            _Priority::High => aerospike_core::Priority::High,
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  RecordExistsAction
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum _RecordExistsAction {
+    Update,
+    UpdateOnly,
+    Replace,
+    ReplaceOnly,
+    CreateOnly,
+}
+
+#[php_class]
+pub struct RecordExistsAction {
+    _as: aerospike_core::RecordExistsAction,
+    v: _RecordExistsAction,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl RecordExistsAction {
+    pub fn Update() -> Self {
+        RecordExistsAction {
+            _as: aerospike_core::RecordExistsAction::Update,
+            v: _RecordExistsAction::Update,
+        }
+    }
+
+    pub fn UpdateOnly() -> Self {
+        RecordExistsAction {
+            _as: aerospike_core::RecordExistsAction::UpdateOnly,
+            v: _RecordExistsAction::UpdateOnly,
+        }
+    }
+
+    pub fn Replace() -> Self {
+        RecordExistsAction {
+            _as: aerospike_core::RecordExistsAction::Replace,
+            v: _RecordExistsAction::Replace,
+        }
+    }
+
+    pub fn ReplaceOnly() -> Self {
+        RecordExistsAction {
+            _as: aerospike_core::RecordExistsAction::ReplaceOnly,
+            v: _RecordExistsAction::ReplaceOnly,
+        }
+    }
+
+    pub fn CreateOnly() -> Self {
+        RecordExistsAction {
+            _as: aerospike_core::RecordExistsAction::CreateOnly,
+            v: _RecordExistsAction::CreateOnly,
+        }
+    }
+}
+
+impl From<&RecordExistsAction> for aerospike_core::RecordExistsAction {
+    fn from(input: &RecordExistsAction) -> Self {
+        match &input.v {
+            _RecordExistsAction::Update => aerospike_core::RecordExistsAction::Update,
+            _RecordExistsAction::UpdateOnly => aerospike_core::RecordExistsAction::UpdateOnly,
+            _RecordExistsAction::Replace => aerospike_core::RecordExistsAction::Replace,
+            _RecordExistsAction::ReplaceOnly => aerospike_core::RecordExistsAction::ReplaceOnly,
+            _RecordExistsAction::CreateOnly => aerospike_core::RecordExistsAction::CreateOnly,
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CommitLevel
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+
+#[derive(Debug, Clone)]
+pub enum _CommitLevel {
+    CommitAll,
+    CommitMaster,
+}
+
+#[php_class]
+pub struct CommitLevel {
+    _as: aerospike_core::CommitLevel,
+    v: _CommitLevel,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CommitLevel {
+    pub fn CommitAll() -> Self {
+        CommitLevel {
+            _as: aerospike_core::CommitLevel::CommitAll,
+            v: _CommitLevel::CommitAll,
+        }
+    }
+
+    pub fn CommitMaster() -> Self {
+        CommitLevel {
+            _as: aerospike_core::CommitLevel::CommitMaster,
+            v: _CommitLevel::CommitMaster,
+        }
+    }
+}
+
+impl From<&CommitLevel> for aerospike_core::CommitLevel {
+    fn from(input: &CommitLevel) -> Self {
+        match &input.v {
+            _CommitLevel::CommitAll => aerospike_core::CommitLevel::CommitAll,
+            _CommitLevel::CommitMaster => aerospike_core::CommitLevel::CommitMaster,
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  ConsistencyLevel
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+pub enum _ConsistencyLevel {
+    ConsistencyOne,
+    ConsistencyAll,
+}
+
+#[php_class]
+pub struct ConsistencyLevel {
+    _as: aerospike_core::ConsistencyLevel,
+    v: _ConsistencyLevel,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl ConsistencyLevel {
+    pub fn ConsistencyOne() -> Self {
+        ConsistencyLevel {
+            _as: aerospike_core::ConsistencyLevel::ConsistencyOne,
+            v: _ConsistencyLevel::ConsistencyOne,
+        }
+    }
+
+    pub fn ConsistencyAll() -> Self {
+        ConsistencyLevel {
+            _as: aerospike_core::ConsistencyLevel::ConsistencyAll,
+            v: _ConsistencyLevel::ConsistencyAll,
+        }
+    }
+}
+
+impl From<&ConsistencyLevel> for aerospike_core::ConsistencyLevel {
+    fn from(input: &ConsistencyLevel) -> Self {
+        match &input.v {
+            _ConsistencyLevel::ConsistencyOne => aerospike_core::ConsistencyLevel::ConsistencyOne,
+            _ConsistencyLevel::ConsistencyAll => aerospike_core::ConsistencyLevel::ConsistencyAll,
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  GenerationPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum _GenerationPolicy {
+    None,
+    ExpectGenEqual,
+    ExpectGenGreater,
+}
+
+#[php_class]
+pub struct GenerationPolicy {
+    _as: aerospike_core::GenerationPolicy,
+    v: _GenerationPolicy,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl GenerationPolicy {
+    pub fn None() -> Self {
+        GenerationPolicy {
+            _as: aerospike_core::GenerationPolicy::None,
+            v: _GenerationPolicy::None,
+        }
+    }
+
+    pub fn ExpectGenEqual() -> Self {
+        GenerationPolicy {
+            _as: aerospike_core::GenerationPolicy::ExpectGenEqual,
+            v: _GenerationPolicy::ExpectGenEqual,
+        }
+    }
+
+    pub fn ExpectGenGreater() -> Self {
+        GenerationPolicy {
+            _as: aerospike_core::GenerationPolicy::ExpectGenGreater,
+            v: _GenerationPolicy::ExpectGenGreater,
+        }
+    }
+}
+
+impl From<&GenerationPolicy> for aerospike_core::GenerationPolicy {
+    fn from(input: &GenerationPolicy) -> Self {
+        match &input.v {
+            _GenerationPolicy::None => aerospike_core::GenerationPolicy::None,
+            _GenerationPolicy::ExpectGenEqual => aerospike_core::GenerationPolicy::ExpectGenEqual,
+            _GenerationPolicy::ExpectGenGreater => aerospike_core::GenerationPolicy::ExpectGenGreater,
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Expiration
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+const NAMESPACE_DEFAULT: u32 = 0x0000_0000;
+const NEVER_EXPIRE: u32 = 0xFFFF_FFFF; // -1 as i32
+const DONT_UPDATE: u32 = 0xFFFF_FFFE;
+
+#[derive(Debug, Clone, Copy)]
+pub enum _Expiration {
+    Seconds(u32),
+    NamespaceDefault,
+    Never,
+    DontUpdate,
+}
+
+#[php_class]
+pub struct Expiration {
+    _as: aerospike_core::Expiration,
+    v: _Expiration,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl Expiration {
+    pub fn Seconds(seconds: u32) -> Self {
+        Expiration {
+            _as: aerospike_core::Expiration::Seconds(seconds),
+            v: _Expiration::Seconds(seconds),
+        }
+    }
+
+    pub fn NamespaceDefault() -> Self {
+        Expiration {
+            _as: aerospike_core::Expiration::NamespaceDefault,
+            v: _Expiration::NamespaceDefault,
+        }
+    }
+
+    pub fn Never() -> Self {
+        Expiration {
+            _as: aerospike_core::Expiration::Never,
+            v: _Expiration::Never,
+        }
+    }
+
+    pub fn DontUpdate() -> Self {
+        Expiration {
+            _as: aerospike_core::Expiration::DontUpdate,
+            v: _Expiration::DontUpdate,
+        }
+    }
+}
+
+impl From<&Expiration> for u32 {
+    fn from(exp: &Expiration) -> u32 {
+        match &exp.v {
+            _Expiration::Seconds(secs) => *secs,
+            _Expiration::NamespaceDefault => NAMESPACE_DEFAULT,
+            _Expiration::Never => NEVER_EXPIRE,
+            _Expiration::DontUpdate => DONT_UPDATE,
+        }
+    }
+}
+
+impl From<&Expiration> for aerospike_core::Expiration {
+    fn from(exp: &Expiration) -> Self {
+        match &exp.v {
+            _Expiration::Seconds(secs) => aerospike_core::Expiration::Seconds(*secs),
+            _Expiration::NamespaceDefault => aerospike_core::Expiration::NamespaceDefault,
+            _Expiration::Never => aerospike_core::Expiration::Never,
+            _Expiration::DontUpdate => aerospike_core::Expiration::DontUpdate,
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Concurrency
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+pub enum _Concurrency {
+    Sequential,
+    Parallel,
+    MaxThreads(usize),
+}
+
+#[php_class]
+pub struct Concurrency {
+    _as: aerospike_core::Concurrency,
+    v: _Concurrency,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl Concurrency {
+    pub fn Sequential() -> Self {
+        Concurrency {
+            _as: aerospike_core::Concurrency::Sequential,
+            v: _Concurrency::Sequential,
+        }
+    }
+    pub fn Parallel() -> Self {
+        Concurrency {
+            _as: aerospike_core::Concurrency::Parallel,
+            v: _Concurrency::Parallel,
+        }
+    }
+    pub fn MaxThreads(threads: usize) -> Self {
+        Concurrency {
+            _as: aerospike_core::Concurrency::MaxThreads(threads),
+            v: _Concurrency::MaxThreads(threads),
+        }
+    }
+}
+
+impl From<&Concurrency> for aerospike_core::Concurrency {
+    fn from(input: &Concurrency) -> Self {
+        match &input.v {
+            _Concurrency::Sequential => aerospike_core::Concurrency::Sequential,
+            _Concurrency::Parallel => aerospike_core::Concurrency::Parallel,
+            _Concurrency::MaxThreads(threads) => aerospike_core::Concurrency::MaxThreads(*threads),
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  BasePolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class]
+pub struct BasePolicyWrapper {
+    _as: aerospike_core::policy::BasePolicy,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl BasePolicyWrapper {
+    #[getter]
+    pub fn get_priority(&self) -> Priority {
+        Priority {
+            _as: self._as.priority,
+            v: match &self._as.priority {
+                aerospike_core::Priority::Default => _Priority::Default,
+                aerospike_core::Priority::Low => _Priority::Low,
+                aerospike_core::Priority::Medium => _Priority::Medium,
+                aerospike_core::Priority::High => _Priority::High,
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_priority(&self, priority: &Priority) {
+        self._as.priority = priority._as;
+    }
+
+    #[getter]
+    pub fn get_consistency_level(&self) -> ConsistencyLevel {
+        ConsistencyLevel {
+            _as: self._as.consistency_level,
+            v: match &self._as.consistency_level {
+                aerospike_core::ConsistencyLevel::ConsistencyOne => {
+                    _ConsistencyLevel::ConsistencyOne
+                }
+                aerospike_core::ConsistencyLevel::ConsistencyAll => {
+                    _ConsistencyLevel::ConsistencyAll
+                }
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_consistency_level(&self, consistency_level: &ConsistencyLevel) {
+        self._as.consistency_level = consistency_level._as;
+    }
+
+    #[getter]
+    pub fn get_timeout(&self) -> Option<DurationWrapper> {
+        self._as.timeout.map(DurationWrapper)
+    }
+
+    #[setter]
+    pub fn set_timeout(&mut self, timeout: Option<DurationWrapper>) {
+        self._as.timeout = timeout.map(|duration_wrapper| duration_wrapper.0);
+    }
+
+    #[getter]
+    pub fn get_max_retries(&self) -> Option<usize> {
+        self._as.max_retries
+    }
+
+    #[setter]
+    pub fn set_max_retries(&mut self, max_retries: Option<usize>) {
+        self._as.max_retries = max_retries;
+    }
+
+    #[getter]
+    pub fn get_sleep_between_retries(&self) -> Option<DurationWrapper> {
+        self._as.sleep_between_retries.map(DurationWrapper)
+    }
+
+    #[setter]
+    pub fn set_sleep_between_retries(&mut self, sleep_between_retries: Option<DurationWrapper>) {
+        self._as.sleep_between_retries = sleep_between_retries.map(|duration_wrapper| duration_wrapper.0);
+    }
+
+    // #[getter]
+    // pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+    //     self._as.filter_expression
+    // }
+
+    // #[setter]
+    // pub fn set_durable_delete(&mut self, filter_expression: FilterExpression) {
+    //     self._as.filter_expression = Some(filter_expression);
+    // }
+}
+
+// impl IntoZval for BasePolicy {
+//     const TYPE: DataType = DataType::Mixed;
+
+//     fn set_zval(self, zv: &mut Zval, persistent: bool) -> Result<()> {
+
+//     }
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -49,6 +552,67 @@ impl BatchPolicy {
             _as: aerospike_core::BatchPolicy::default(),
         }
     }
+
+    #[getter]
+    pub fn get_base_policy(&self) -> BasePolicyWrapper {
+        BasePolicyWrapper {
+            _as: self._as.base_policy,
+        }
+    }
+
+    #[setter]
+    pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
+        self._as.base_policy = base_policy._as;
+    }
+
+    #[getter]
+    pub fn get_concurrency(&self) -> Concurrency {
+        Concurrency {
+            _as: self._as.concurrency, // Assuming _as.concurrency is the corresponding field in aerospike_core
+            v: match &self._as.concurrency {
+                aerospike_core::Concurrency::Sequential => _Concurrency::Sequential,
+                aerospike_core::Concurrency::Parallel => _Concurrency::Parallel,
+                aerospike_core::Concurrency::MaxThreads(threads) => {
+                    _Concurrency::MaxThreads(*threads)
+                }
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_concurrency(&mut self, concurrency: &Concurrency) {
+        self._as.concurrency = concurrency._as;
+    }
+
+    #[getter]
+    pub fn get_allow_inline(&self) -> bool {
+        self._as.allow_inline
+    }
+
+    #[setter]
+    pub fn set_allow_inline(&mut self, allow_inline: bool) {
+        self._as.allow_inline = allow_inline;
+    }
+
+    #[getter]
+    pub fn get_send_set_name(&self) -> bool {
+        self._as.send_set_name
+    }
+
+    #[setter]
+    pub fn set_send_key(&mut self, send_set_name: bool) {
+        self._as.send_set_name = send_set_name;
+    }
+
+    // #[getter]
+    // pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+    //     self._as.filter_expression
+    // }
+
+    // #[setter]
+    // pub fn set_filter_expression(&mut self, filter_expression: FilterExpression) {
+    //     self._as.filter_expression = Some(filter_expression);
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -101,6 +665,54 @@ impl ReadPolicy {
             _as: aerospike_core::ReadPolicy::default(),
         }
     }
+
+    #[getter]
+    pub fn get_priority(&self) -> Priority {
+        Priority {
+            _as: self._as.priority,
+            v: match &self._as.priority {
+                aerospike_sync::Priority::Default => _Priority::Default,
+                aerospike_sync::Priority::Low => _Priority::Low,
+                aerospike_sync::Priority::Medium => _Priority::Medium,
+                aerospike_sync::Priority::High => _Priority::High,
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_priority(&self, priority: &Priority) {
+        self._as.priority = priority._as;
+    }
+
+    #[getter]
+    pub fn get_max_retries(&self) -> Option<usize> {
+        self._as.max_retries
+    }
+
+    #[setter]
+    pub fn set_max_retries(&mut self, max_retries: Option<usize>) {
+        self._as.max_retries = max_retries;
+    }
+
+    #[getter]
+    pub fn get_timeout(&self) -> Option<DurationWrapper> {
+        self._as.timeout.map(DurationWrapper)
+    }
+
+    #[setter]
+    pub fn set_timeout(&mut self, timeout: Option<DurationWrapper>) {
+        self._as.timeout = timeout.map(|duration_wrapper| duration_wrapper.0);
+    }
+
+    // #[getter]
+    // pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+    //     self._as.filter_expression
+    // }
+
+    // #[setter]
+    // pub fn set_filter_expression(&mut self, filter_expression: FilterExpression) {
+    //     self._as.filter_expression = Some(filter_expression);
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -122,6 +734,214 @@ impl WritePolicy {
             _as: aerospike_core::WritePolicy::default(),
         }
     }
+
+    #[getter]
+    pub fn get_base_policy(&self) -> BasePolicyWrapper {
+        BasePolicyWrapper {
+            _as: self._as.base_policy,
+        }
+    }
+
+    #[setter]
+    pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
+        self._as.base_policy = base_policy._as;
+    }
+
+    #[getter]
+    pub fn get_record_exists_action(&self) -> RecordExistsAction {
+        RecordExistsAction{
+            _as: self._as.record_exists_action, // Assuming _as.record_exists_action is the corresponding field in aerospike_core
+            v: match &self._as.record_exists_action {
+                aerospike_core::RecordExistsAction::Update => _RecordExistsAction::Update,
+                aerospike_core::RecordExistsAction::UpdateOnly => _RecordExistsAction::UpdateOnly,
+                aerospike_core::RecordExistsAction::Replace => _RecordExistsAction::Replace,
+                aerospike_core::RecordExistsAction::ReplaceOnly => _RecordExistsAction::ReplaceOnly,
+                aerospike_core::RecordExistsAction::CreateOnly => _RecordExistsAction::CreateOnly,
+            }
+        }
+    }
+    
+
+    #[setter]
+    pub fn set_record_exists_action(&mut self, record_exists_action: &RecordExistsAction) {
+        self._as.record_exists_action = record_exists_action._as;
+    }
+
+    #[getter]
+    pub fn get_generation_policy(&self) -> GenerationPolicy{
+        GenerationPolicy{
+            _as: self._as.generation_policy, // Assuming _as.generation_policy is the corresponding field in aerospike_core
+            v: match &self._as.generation_policy {
+                aerospike_core::GenerationPolicy::None => _GenerationPolicy::None,
+                aerospike_core::GenerationPolicy::ExpectGenEqual => _GenerationPolicy::ExpectGenEqual,
+                aerospike_core::GenerationPolicy::ExpectGenGreater => _GenerationPolicy::ExpectGenGreater,
+            }
+        }
+    }
+    
+
+    #[setter]
+    pub fn set_generation_policy(&mut self, generation_policy: &GenerationPolicy) {
+        self._as.generation_policy = generation_policy._as;
+    }
+
+    #[getter]
+    pub fn get_commit_level(&self) -> CommitLevel {
+        CommitLevel {
+            _as: self._as.commit_level, // Assuming _as.commit_level is the corresponding field in aerospike_core
+            v: match &self._as.commit_level {
+                aerospike_core::CommitLevel::CommitAll => _CommitLevel::CommitAll,
+                aerospike_core::CommitLevel::CommitMaster => _CommitLevel::CommitMaster,
+            }
+        }
+    }
+
+    #[setter]
+    pub fn set_commit_level(&mut self, commit_level: &CommitLevel) {
+        self._as.commit_level = commit_level._as;
+    }
+
+    #[getter]
+    pub fn get_generation(&self) -> u32 {
+        self._as.generation
+    }
+
+    #[setter]
+    pub fn set_generation(&mut self, generation: u32) {
+        self._as.generation = generation;
+    }
+
+    #[getter]
+    pub fn get_expiration(&self) -> Expiration {
+        Expiration {
+            _as: self._as.expiration, // Assuming _as.expiration is the corresponding field in aerospike_core
+            v: match &self._as.expiration {
+                aerospike_core::Expiration::Seconds(secs) => _Expiration::Seconds(*secs),
+                aerospike_core::Expiration::NamespaceDefault => _Expiration::NamespaceDefault,
+                aerospike_core::Expiration::Never => _Expiration::Never,
+                aerospike_core::Expiration::DontUpdate => _Expiration::DontUpdate,
+            }
+        }
+    }
+    
+
+    #[setter]
+    pub fn set_expiration(&mut self, expiration: &Expiration) {
+        self._as.expiration = expiration._as;
+    }
+
+    #[getter]
+    pub fn get_send_key(&self) -> bool {
+        self._as.send_key
+    }
+
+    #[setter]
+    pub fn set_send_key(&mut self, send_key: bool) {
+        self._as.send_key = send_key;
+    }
+
+    #[getter]
+    pub fn get_respond_per_each_op(&self) -> bool {
+        self._as.respond_per_each_op
+    }
+
+    #[setter]
+    pub fn set_respond_per_each_op(&mut self, respond_per_each_op: bool) {
+        self._as.respond_per_each_op = respond_per_each_op;
+    }
+
+    #[getter]
+    pub fn get_durable_delete(&self) -> bool {
+        self._as.respond_per_each_op
+    }
+
+    #[setter]
+    pub fn set_durable_delete(&mut self, durable_delete: bool) {
+        self._as.durable_delete = durable_delete;
+    }
+
+    // #[getter]
+    // pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+    //     self._as.filter_expression
+    // }
+
+    // #[setter]
+    // pub fn set_filter_expression(&mut self, filter_expression: FilterExpression) {
+    //     self._as.filter_expression = Some(filter_expression);
+    // }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  QueryPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class]
+pub struct QueryPolicy {
+    _as: aerospike_core::QueryPolicy,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl QueryPolicy {
+    pub fn __construct() -> Self {
+        QueryPolicy {
+            _as: aerospike_core::QueryPolicy::default(),
+        }
+    }
+
+    #[getter]
+    pub fn get_base_policy(&self) -> BasePolicyWrapper {
+        BasePolicyWrapper {
+            _as: self._as.base_policy,
+        }
+    }
+
+    #[setter]
+    pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
+        self._as.base_policy = base_policy._as;
+    }
+
+    #[getter]
+    pub fn get_max_concurrent_nodes(&self) -> usize {
+        self._as.max_concurrent_nodes
+    }
+
+    #[setter]
+    pub fn set_max_concurrent_nodes(&mut self, max_concurrent_nodes: usize) {
+        self._as.max_concurrent_nodes = max_concurrent_nodes;
+    }
+
+    #[getter]
+    pub fn get_record_queue_size(&self) -> usize {
+        self._as.record_queue_size
+    }
+
+    #[setter]
+    pub fn set_record_queue_size(&mut self, record_queue_size: usize) {
+        self._as.record_queue_size = record_queue_size;
+    }
+
+    #[getter]
+    pub fn get_fail_on_cluster_change(&self) -> bool {
+        self._as.fail_on_cluster_change
+    }
+
+    #[setter]
+    pub fn set_fail_on_cluster_change(&mut self, fail_on_cluster_change: bool) {
+        self._as.fail_on_cluster_change = fail_on_cluster_change;
+    }
+
+    // #[getter]
+    // pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+    //     self._as.filter_expression
+    // }
+
+    // #[setter]
+    // pub fn set_filter_expression(&mut self, filter_expression: FilterExpression) {
+    //     self._as.filter_expression = Some(filter_expression);
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,6 +963,78 @@ impl ScanPolicy {
             _as: aerospike_core::ScanPolicy::default(),
         }
     }
+
+    #[getter]
+    pub fn get_base_policy(&self) -> BasePolicyWrapper {
+        BasePolicyWrapper {
+            _as: self._as.base_policy,
+        }
+    }
+
+    #[setter]
+    pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
+        self._as.base_policy = base_policy._as;
+    }
+
+    #[getter]
+    pub fn get_scan_percent(&self) -> u8 {
+        self._as.scan_percent
+    }
+
+    #[setter]
+    pub fn set_scan_percent(&mut self, scan_percent: u8) {
+        self._as.scan_percent = scan_percent;
+    }
+
+    #[getter]
+    pub fn get_max_concurrent_nodes(&self) -> usize {
+        self._as.max_concurrent_nodes
+    }
+
+    #[setter]
+    pub fn set_max_concurrent_nodes(&mut self, max_concurrent_nodes: usize) {
+        self._as.max_concurrent_nodes = max_concurrent_nodes;
+    }
+
+    #[getter]
+    pub fn get_record_queue_size(&self) -> usize {
+        self._as.record_queue_size
+    }
+
+    #[setter]
+    pub fn set_record_queue_size(&mut self, record_queue_size: usize) {
+        self._as.record_queue_size = record_queue_size;
+    }
+
+    #[getter]
+    pub fn get_fail_on_cluster_change(&self) -> bool {
+        self._as.fail_on_cluster_change
+    }
+
+    #[setter]
+    pub fn set_fail_on_cluster_change(&mut self, fail_on_cluster_change: bool) {
+        self._as.fail_on_cluster_change = fail_on_cluster_change;
+    }
+
+    #[getter]
+    pub fn get_socket_timeout(&self) -> u32 {
+        self._as.socket_timeout
+    }
+
+    #[setter]
+    pub fn set_socket_timeout(&mut self, socket_timeout: u32) {
+        self._as.socket_timeout = socket_timeout;
+    }
+
+    // #[getter]
+    // pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+    //     self._as.filter_expression
+    // }
+
+    // #[setter]
+    // pub fn set_filter_expression(&mut self, filter_expression: FilterExpression) {
+    //     self._as.filter_expression = Some(filter_expression);
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -393,11 +1285,6 @@ impl Statement {
     }
 
     #[getter]
-    pub fn hello_world(&self) -> String {
-        "Hello world!".into()
-    }
-
-    #[getter]
     pub fn get_filters(&self) -> Option<Vec<Filter>> {
         self._as
             .filters
@@ -414,27 +1301,6 @@ impl Statement {
             }
         };
         // Ok(())
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  QueryPolicy
-//
-////////////////////////////////////////////////////////////////////////////////////////////
-
-#[php_class]
-pub struct QueryPolicy {
-    _as: aerospike_core::QueryPolicy,
-}
-
-#[php_impl]
-#[derive(ZvalConvert)]
-impl QueryPolicy {
-    pub fn __construct() -> Self {
-        QueryPolicy {
-            _as: aerospike_core::QueryPolicy::default(),
-        }
     }
 }
 
@@ -1083,7 +1949,7 @@ fn from_zval(zval: &Zval) -> Option<Value> {
                 } else {
                     // it's a hashmap with string keys
                     let mut h = HashMap::with_capacity(arr.len());
-                    arr.iter().for_each(|(idx, k, v)| {
+                    arr.iter().for_each(|(_idx, k, v)| {
                         h.insert(
                             Value::String(k.expect("Invalid key in hashmap".into())),
                             from_zval(v).expect("Invalid value in hashmap".into()),
@@ -1240,6 +2106,41 @@ impl From<Arc<aerospike_core::Recordset>> for Recordset {
 //         Self(e.to_string())
 //     }
 // }
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  DurationWrapper
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+pub struct DurationWrapper(Duration);
+
+impl DurationWrapper {
+    pub fn new(duration: Duration) -> Self {
+        DurationWrapper(duration)
+    }
+}
+
+impl IntoZval for DurationWrapper {
+    const TYPE: DataType = DataType::Long;
+    fn set_zval(self, zv: &mut Zval, persistent: bool) -> Result<()> {
+        let php_duration = self.0.as_millis() as i64;
+        zv.set_long(php_duration);
+        Ok(())
+    }
+}
+
+impl FromZval<'_> for DurationWrapper {
+    const TYPE: DataType = DataType::Long;
+    fn from_zval(zval: &'_ Zval) -> Option<Self> {
+        if let Some(r_duation) = zval.long() {
+            let duration = Duration::from_millis(r_duation as u64);
+            Some(DurationWrapper(duration))
+        } else {
+            None
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
