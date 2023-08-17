@@ -23,8 +23,8 @@ use ext_php_rs::types::ZendHashTable;
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
 
-use aerospike_core::as_val;
 use aerospike_core::as_geo;
+use aerospike_core::as_val;
 
 use colored::*;
 
@@ -34,7 +34,7 @@ use colored::*;
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum _Priority {
     Default,
     Low,
@@ -46,6 +46,19 @@ pub enum _Priority {
 pub struct Priority {
     _as: aerospike_core::Priority,
     v: _Priority,
+}
+
+impl FromZval<'_> for Priority {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &Priority = zval.extract()?;
+
+        Some(Priority {
+            _as: f._as.clone(),
+            v: f.v.clone(),
+        })
+    }
 }
 
 #[php_impl]
@@ -109,6 +122,19 @@ pub struct RecordExistsAction {
     v: _RecordExistsAction,
 }
 
+impl FromZval<'_> for RecordExistsAction {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &RecordExistsAction = zval.extract()?;
+
+        Some(RecordExistsAction {
+            _as: f._as.clone(),
+            v: f.v.clone(),
+        })
+    }
+}
+
 #[php_impl]
 #[derive(ZvalConvert)]
 impl RecordExistsAction {
@@ -166,7 +192,6 @@ impl From<&RecordExistsAction> for aerospike_core::RecordExistsAction {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-
 #[derive(Debug, Clone)]
 pub enum _CommitLevel {
     CommitAll,
@@ -177,6 +202,19 @@ pub enum _CommitLevel {
 pub struct CommitLevel {
     _as: aerospike_core::CommitLevel,
     v: _CommitLevel,
+}
+
+impl FromZval<'_> for CommitLevel {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CommitLevel = zval.extract()?;
+
+        Some(CommitLevel {
+            _as: f._as.clone(),
+            v: f.v.clone(),
+        })
+    }
 }
 
 #[php_impl]
@@ -211,6 +249,7 @@ impl From<&CommitLevel> for aerospike_core::CommitLevel {
 //  ConsistencyLevel
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
+#[derive(Debug, Clone, Copy)]
 pub enum _ConsistencyLevel {
     ConsistencyOne,
     ConsistencyAll,
@@ -220,6 +259,19 @@ pub enum _ConsistencyLevel {
 pub struct ConsistencyLevel {
     _as: aerospike_core::ConsistencyLevel,
     v: _ConsistencyLevel,
+}
+
+impl FromZval<'_> for ConsistencyLevel {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &ConsistencyLevel = zval.extract()?;
+
+        Some(ConsistencyLevel {
+            _as: f._as.clone(),
+            v: f.v,
+        })
+    }
 }
 
 #[php_impl]
@@ -268,6 +320,19 @@ pub struct GenerationPolicy {
     v: _GenerationPolicy,
 }
 
+impl FromZval<'_> for GenerationPolicy {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &GenerationPolicy = zval.extract()?;
+
+        Some(GenerationPolicy {
+            _as: f._as.clone(),
+            v: f.v.clone(),
+        })
+    }
+}
+
 #[php_impl]
 #[derive(ZvalConvert)]
 impl GenerationPolicy {
@@ -298,7 +363,9 @@ impl From<&GenerationPolicy> for aerospike_core::GenerationPolicy {
         match &input.v {
             _GenerationPolicy::None => aerospike_core::GenerationPolicy::None,
             _GenerationPolicy::ExpectGenEqual => aerospike_core::GenerationPolicy::ExpectGenEqual,
-            _GenerationPolicy::ExpectGenGreater => aerospike_core::GenerationPolicy::ExpectGenGreater,
+            _GenerationPolicy::ExpectGenGreater => {
+                aerospike_core::GenerationPolicy::ExpectGenGreater
+            }
         }
     }
 }
@@ -325,6 +392,19 @@ pub enum _Expiration {
 pub struct Expiration {
     _as: aerospike_core::Expiration,
     v: _Expiration,
+}
+
+impl FromZval<'_> for Expiration {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &Expiration = zval.extract()?;
+
+        Some(Expiration {
+            _as: f._as.clone(),
+            v: f.v.clone(),
+        })
+    }
 }
 
 #[php_impl]
@@ -387,6 +467,7 @@ impl From<&Expiration> for aerospike_core::Expiration {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+#[derive(Debug, Clone, Copy)]
 pub enum _Concurrency {
     Sequential,
     Parallel,
@@ -397,6 +478,19 @@ pub enum _Concurrency {
 pub struct Concurrency {
     _as: aerospike_core::Concurrency,
     v: _Concurrency,
+}
+
+impl FromZval<'_> for Concurrency {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &Concurrency = zval.extract()?;
+
+        Some(Concurrency {
+            _as: f._as.clone(),
+            v: f.v,
+        })
+    }
 }
 
 #[php_impl]
@@ -443,13 +537,23 @@ pub struct BasePolicyWrapper {
     _as: aerospike_core::policy::BasePolicy,
 }
 
+impl FromZval<'_> for BasePolicyWrapper {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &BasePolicyWrapper = zval.extract()?;
+
+        Some(BasePolicyWrapper { _as: f._as.clone() })
+    }
+}
+
 #[php_impl]
 #[derive(ZvalConvert)]
 impl BasePolicyWrapper {
     #[getter]
     pub fn get_priority(&self) -> Priority {
         Priority {
-            _as: self._as.priority,
+            _as: self._as.priority.clone(),
             v: match &self._as.priority {
                 aerospike_core::Priority::Default => _Priority::Default,
                 aerospike_core::Priority::Low => _Priority::Low,
@@ -460,14 +564,14 @@ impl BasePolicyWrapper {
     }
 
     #[setter]
-    pub fn set_priority(&self, priority: &Priority) {
+    pub fn set_priority(&mut self, priority: Priority) {
         self._as.priority = priority._as;
     }
 
     #[getter]
     pub fn get_consistency_level(&self) -> ConsistencyLevel {
         ConsistencyLevel {
-            _as: self._as.consistency_level,
+            _as: self._as.consistency_level.clone(),
             v: match &self._as.consistency_level {
                 aerospike_core::ConsistencyLevel::ConsistencyOne => {
                     _ConsistencyLevel::ConsistencyOne
@@ -480,7 +584,7 @@ impl BasePolicyWrapper {
     }
 
     #[setter]
-    pub fn set_consistency_level(&self, consistency_level: &ConsistencyLevel) {
+    pub fn set_consistency_level(&mut self, consistency_level: ConsistencyLevel) {
         self._as.consistency_level = consistency_level._as;
     }
 
@@ -511,7 +615,8 @@ impl BasePolicyWrapper {
 
     #[setter]
     pub fn set_sleep_between_retries(&mut self, sleep_between_retries: Option<DurationWrapper>) {
-        self._as.sleep_between_retries = sleep_between_retries.map(|duration_wrapper| duration_wrapper.0);
+        self._as.sleep_between_retries =
+            sleep_between_retries.map(|duration_wrapper| duration_wrapper.0);
     }
 
     // #[getter]
@@ -553,17 +658,17 @@ impl BatchPolicy {
         }
     }
 
-    #[getter]
-    pub fn get_base_policy(&self) -> BasePolicyWrapper {
-        BasePolicyWrapper {
-            _as: self._as.base_policy,
-        }
-    }
+    // #[getter]
+    // pub fn get_base_policy(&self) -> BasePolicyWrapper {
+    //     BasePolicyWrapper {
+    //         _as: self._as.base_policy,
+    //     }
+    // }
 
-    #[setter]
-    pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
-        self._as.base_policy = base_policy._as;
-    }
+    // #[setter]
+    // pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
+    //     self._as.base_policy = base_policy._as;
+    // }
 
     #[getter]
     pub fn get_concurrency(&self) -> Concurrency {
@@ -580,7 +685,7 @@ impl BatchPolicy {
     }
 
     #[setter]
-    pub fn set_concurrency(&mut self, concurrency: &Concurrency) {
+    pub fn set_concurrency(&mut self, concurrency: Concurrency) {
         self._as.concurrency = concurrency._as;
     }
 
@@ -669,7 +774,7 @@ impl ReadPolicy {
     #[getter]
     pub fn get_priority(&self) -> Priority {
         Priority {
-            _as: self._as.priority,
+            _as: self._as.priority.clone(),
             v: match &self._as.priority {
                 aerospike_sync::Priority::Default => _Priority::Default,
                 aerospike_sync::Priority::Low => _Priority::Low,
@@ -680,7 +785,7 @@ impl ReadPolicy {
     }
 
     #[setter]
-    pub fn set_priority(&self, priority: &Priority) {
+    pub fn set_priority(&mut self, priority: Priority) {
         self._as.priority = priority._as;
     }
 
@@ -735,69 +840,71 @@ impl WritePolicy {
         }
     }
 
-    #[getter]
-    pub fn get_base_policy(&self) -> BasePolicyWrapper {
-        BasePolicyWrapper {
-            _as: self._as.base_policy,
-        }
-    }
+    // #[getter]
+    // pub fn get_base_policy(&self) -> BasePolicyWrapper {
+    //     BasePolicyWrapper {
+    //         _as: self._as.base_policy,
+    //     }
+    // }
 
-    #[setter]
-    pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
-        self._as.base_policy = base_policy._as;
-    }
+    // #[setter]
+    // pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
+    //     self._as.base_policy = base_policy._as;
+    // }
 
     #[getter]
     pub fn get_record_exists_action(&self) -> RecordExistsAction {
-        RecordExistsAction{
-            _as: self._as.record_exists_action, // Assuming _as.record_exists_action is the corresponding field in aerospike_core
+        RecordExistsAction {
+            _as: self._as.record_exists_action.clone(), // Assuming _as.record_exists_action is the corresponding field in aerospike_core
             v: match &self._as.record_exists_action {
                 aerospike_core::RecordExistsAction::Update => _RecordExistsAction::Update,
                 aerospike_core::RecordExistsAction::UpdateOnly => _RecordExistsAction::UpdateOnly,
                 aerospike_core::RecordExistsAction::Replace => _RecordExistsAction::Replace,
                 aerospike_core::RecordExistsAction::ReplaceOnly => _RecordExistsAction::ReplaceOnly,
                 aerospike_core::RecordExistsAction::CreateOnly => _RecordExistsAction::CreateOnly,
-            }
+            },
         }
     }
-    
 
     #[setter]
-    pub fn set_record_exists_action(&mut self, record_exists_action: &RecordExistsAction) {
+    pub fn set_record_exists_action(&mut self, record_exists_action: RecordExistsAction) {
         self._as.record_exists_action = record_exists_action._as;
     }
 
     #[getter]
-    pub fn get_generation_policy(&self) -> GenerationPolicy{
-        GenerationPolicy{
-            _as: self._as.generation_policy, // Assuming _as.generation_policy is the corresponding field in aerospike_core
+    pub fn get_generation_policy(&self) -> GenerationPolicy {
+        GenerationPolicy {
+            _as: self._as.generation_policy.clone(), // Assuming _as.generation_policy is the corresponding field in aerospike_core
             v: match &self._as.generation_policy {
                 aerospike_core::GenerationPolicy::None => _GenerationPolicy::None,
-                aerospike_core::GenerationPolicy::ExpectGenEqual => _GenerationPolicy::ExpectGenEqual,
-                aerospike_core::GenerationPolicy::ExpectGenGreater => _GenerationPolicy::ExpectGenGreater,
-            }
+                aerospike_core::GenerationPolicy::ExpectGenEqual => {
+                    _GenerationPolicy::ExpectGenEqual
+                }
+                aerospike_core::GenerationPolicy::ExpectGenGreater => {
+                    _GenerationPolicy::ExpectGenGreater
+                }
+            },
         }
     }
-    
 
     #[setter]
-    pub fn set_generation_policy(&mut self, generation_policy: &GenerationPolicy) {
+    pub fn set_generation_policy(&mut self, generation_policy: GenerationPolicy) {
         self._as.generation_policy = generation_policy._as;
     }
 
     #[getter]
     pub fn get_commit_level(&self) -> CommitLevel {
         CommitLevel {
-            _as: self._as.commit_level, // Assuming _as.commit_level is the corresponding field in aerospike_core
+            _as: self._as.commit_level.clone(), // Assuming _as.commit_level is the corresponding field in aerospike_core
             v: match &self._as.commit_level {
                 aerospike_core::CommitLevel::CommitAll => _CommitLevel::CommitAll,
                 aerospike_core::CommitLevel::CommitMaster => _CommitLevel::CommitMaster,
-            }
+            },
         }
     }
 
     #[setter]
-    pub fn set_commit_level(&mut self, commit_level: &CommitLevel) {
+    pub fn set_commit_level(&mut self, commit_level: CommitLevel) {
         self._as.commit_level = commit_level._as;
     }
 
@@ -820,13 +927,12 @@ impl WritePolicy {
                 aerospike_core::Expiration::NamespaceDefault => _Expiration::NamespaceDefault,
                 aerospike_core::Expiration::Never => _Expiration::Never,
                 aerospike_core::Expiration::DontUpdate => _Expiration::DontUpdate,
-            }
+            },
         }
     }
-    
 
     #[setter]
-    pub fn set_expiration(&mut self, expiration: &Expiration) {
+    pub fn set_expiration(&mut self, expiration: Expiration) {
         self._as.expiration = expiration._as;
     }
 
@@ -891,17 +997,17 @@ impl QueryPolicy {
         }
     }
 
-    #[getter]
-    pub fn get_base_policy(&self) -> BasePolicyWrapper {
-        BasePolicyWrapper {
-            _as: self._as.base_policy,
-        }
-    }
+    // #[getter]
+    // pub fn get_base_policy(&self) -> BasePolicyWrapper {
+    //     BasePolicyWrapper {
+    //         _as: self._as.base_policy,
+    //     }
+    // }
 
-    #[setter]
-    pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
-        self._as.base_policy = base_policy._as;
-    }
+    // #[setter]
+    // pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
+    //     self._as.base_policy = base_policy._as;
+    // }
 
     #[getter]
     pub fn get_max_concurrent_nodes(&self) -> usize {
@@ -964,17 +1070,17 @@ impl ScanPolicy {
         }
     }
 
-    #[getter]
-    pub fn get_base_policy(&self) -> BasePolicyWrapper {
-        BasePolicyWrapper {
-            _as: self._as.base_policy,
-        }
-    }
+    // #[getter]
+    // pub fn get_base_policy(&self) -> BasePolicyWrapper {
+    //     BasePolicyWrapper {
+    //         _as: self._as.base_policy,
+    //     }
+    // }
 
-    #[setter]
-    pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
-        self._as.base_policy = base_policy._as;
-    }
+    // #[setter]
+    // pub fn set_base_policy(&mut self, base_policy: &BasePolicyWrapper) {
+    //     self._as.base_policy = base_policy._as;
+    // }
 
     #[getter]
     pub fn get_scan_percent(&self) -> u8 {
