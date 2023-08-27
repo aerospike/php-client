@@ -2,25 +2,19 @@
 use ext_php_rs::prelude::*;
 
 use std::collections::HashMap;
-use std::convert::TryFrom;
-use std::convert::TryInto;
 use std::fmt;
+use std::fs::File;
 use std::hash::{Hash, Hasher};
-use std::ops::Deref;
-use std::str;
+use std::io::Write;
 use std::sync::Arc;
-use std::thread;
-use std::time::Duration;
+use std::sync::Mutex;
 
 use ext_php_rs::boxed::ZBox;
-use ext_php_rs::convert::FromZvalMut;
 use ext_php_rs::convert::IntoZendObject;
 use ext_php_rs::convert::{FromZval, IntoZval};
-use ext_php_rs::error::Error;
 use ext_php_rs::error::Result;
 use ext_php_rs::flags::DataType;
 use ext_php_rs::php_class;
-use ext_php_rs::rc::PhpRc;
 use ext_php_rs::types::ZendHashTable;
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
@@ -28,7 +22,15 @@ use ext_php_rs::types::Zval;
 use aerospike_core::as_geo;
 use aerospike_core::as_val;
 
+use chrono::Local;
 use colored::*;
+use lazy_static::lazy_static;
+use log::*;
+
+lazy_static! {
+    static ref CLIENTS: Mutex<HashMap<String, Arc<aerospike_sync::Client>>> =
+        Mutex::new(HashMap::new());
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -702,33 +704,63 @@ impl Record {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+pub fn new_aerospike_client(
+    policy: &ClientPolicy,
+    hosts: &str,
+) -> PhpResult<aerospike_sync::Client> {
+    let res = aerospike_sync::Client::new(&policy._as, &hosts).map_err(|e| e.to_string())?;
+    Ok(res)
+}
+
 #[php_function]
 pub fn Aerospike(policy: &ClientPolicy, hosts: &str) -> PhpResult<Zval> {
     match get_persisted_client(hosts) {
-        Some(c) => return Ok(c.shallow_clone()),
+        Some(c) => {
+            trace!("Found Aerospike Client object for {}", hosts);
+            return Ok(c);
+        }
         None => (),
     }
 
-    let hr = format!("Creating a new Aerospike Client object for {}", hosts);
-    print_header(&hr, 1);
-    let client = Client::new(&policy, &hosts)?;
-    persist_client(hosts, client)?;
+    trace!("Creating a new Aerospike Client object for {}", hosts);
 
-    let c = get_persisted_client(hosts).expect("Client could not be connected or retrieved");
-    Ok(c.shallow_clone())
+    let c = Arc::new(new_aerospike_client(&policy, &hosts)?);
+    persist_client(hosts, c)?;
+
+    match get_persisted_client(hosts) {
+        Some(c) => {
+            return Ok(c);
+        }
+        None => Err("Error connecting to the database".into()),
+    }
 }
 
 #[php_class]
 pub struct Client {
-    _as: aerospike_sync::Client,
+    _as: Arc<aerospike_sync::Client>,
+    hosts: String,
+}
+
+// This trivial implementation of `drop` adds a print to console.
+impl Drop for Client {
+    fn drop(&mut self) {
+        trace!("Dropping client: {}, ptr: {:p}", self.hosts, &self);
+    }
 }
 
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Client {
-    pub fn new(policy: &ClientPolicy, hosts: &str) -> PhpResult<Self> {
-        let _as = aerospike_sync::Client::new(&policy._as, &hosts).map_err(|e| e.to_string())?;
-        Ok(Client { _as: _as })
+    pub fn hosts(&self) -> &str {
+        &self.hosts
+    }
+
+    pub fn close(&self) -> PhpResult<()> {
+        trace!("Closing the client pointer: {:p}", &self);
+        self._as.close().map_err(|e| e.to_string())?;
+        let mut clients = CLIENTS.lock().unwrap();
+        clients.remove(&self.hosts);
+        Ok(())
     }
 
     pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
@@ -1041,7 +1073,8 @@ impl IntoZval for Value {
             Value::HashMap(h) => {
                 let mut arr = ZendHashTable::with_capacity(h.len() as u32);
                 h.iter().for_each(|(k, v)| {
-                    arr.insert::<Value>(&k.to_string(), v.clone().into());
+                    arr.insert::<Value>(&k.to_string(), v.clone().into())
+                        .expect("error converting hash");
                 });
 
                 zv.set_hashtable(arr)
@@ -1083,7 +1116,7 @@ fn from_zval(zval: &Zval) -> Option<Value> {
                 } else {
                     // it's a hashmap with string keys
                     let mut h = HashMap::with_capacity(arr.len());
-                    arr.iter().for_each(|(idx, k, v)| {
+                    arr.iter().for_each(|(_, k, v)| {
                         h.insert(
                             Value::String(k.expect("Invalid key in hashmap".into())),
                             from_zval(v).expect("Invalid value in hashmap".into()),
@@ -1278,24 +1311,47 @@ fn bins_flag(bins: Option<Vec<String>>) -> aerospike_core::Bins {
     }
 }
 
-fn persist_client(key: &str, c: Client) -> Result<()> {
-    let mut zval = Zval::new();
-    let mut zo: ZBox<ZendObject> = c.into_zend_object()?;
-    zo.dec_count();
-    zval.set_object(zo.into_raw());
-
-    // persist_value(key, Box::new(zval)).expect("Could not persist_client the value");
-    zval.persist(key)
-        .expect("Could not persist_client the value");
+fn persist_client(key: &str, c: Arc<aerospike_sync::Client>) -> Result<()> {
+    trace!("Persisting Client pointer: {:p}", &c);
+    let mut clients = CLIENTS.lock().unwrap();
+    clients.insert(key.into(), c);
     Ok(())
 }
 
-fn get_persisted_client(key: &str) -> Option<&Zval> {
-    // get_persisted_value(key)
-    Zval::from_persistence(key)
+fn get_persisted_client(key: &str) -> Option<Zval> {
+    let clients = CLIENTS.lock().unwrap();
+    let as_client = clients.get(key.into())?;
+    let client = Client {
+        _as: as_client.to_owned(),
+        hosts: key.into(),
+    };
+
+    let mut zval = Zval::new();
+    let zo: ZBox<ZendObject> = client.into_zend_object().ok()?;
+    zval.set_object(zo.into_raw());
+    Some(zval)
 }
 
 #[php_module]
 pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
+    let target = Box::new(File::create("/var/log/client_php.log").expect("Can't create file"));
+
+    env_logger::Builder::new()
+        .target(env_logger::Target::Pipe(target))
+        .filter(None, LevelFilter::Info)
+        .format(|buf, record| {
+            writeln!(
+                buf,
+                "[{} {} {}:{}] {}",
+                Local::now().format("%Y-%m-%d %H:%M:%S%.3f"),
+                record.level(),
+                record.file().unwrap_or("unknown"),
+                record.line().unwrap_or(0),
+                record.args()
+            )
+        })
+        .init();
+
+    info!("Module Aerospike loaded");
     module
 }
