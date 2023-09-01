@@ -100,8 +100,13 @@ $client->append($wp, $key, [new Bin("bin2", "_suffix")]);
 ////////////////////////////////////////////////////////////////////////////////
 
 $rp = new ReadPolicy();
+
+$rp->setMaxRetries(3);
+$timeInMillis = 3000;
+$rp->timeout = $timeInMillis;
+
 for ($x = 0; $x <= 1000; $x++) {
-$client = Aerospike($cp, "localhost:3000");
+	$client = Aerospike($cp, "localhost:3000");
 	$record = $client->get($rp, $key, ["bin1"]);
 }
 
@@ -260,3 +265,5 @@ echo "Query results sum: $sum\n";
 
 
 print_header("Tests were all run successfully", 1);
+
+
