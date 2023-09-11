@@ -1,0 +1,2 @@
+log_level: info
+log_file_path: myapp.log

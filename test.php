@@ -8,9 +8,9 @@ $cp = new ClientPolicy();
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client = Aerospike($cp, "172.17.0.2:3000");
-$client = Aerospike($cp, "172.17.0.2:3000");
-$client = Aerospike($cp, "172.17.0.2:3000");
+$client = Aerospike($cp, "127.0.0.1:3000");
+// $client = Aerospike($cp, "172.17.0.2:3000");
+// $client = Aerospike($cp, "172.17.0.2:3000");
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -266,4 +266,7 @@ echo "Query results sum: $sum\n";
 
 print_header("Tests were all run successfully", 1);
 
+$geoVal = ValueType::geoJson("{\"type\":\"Point\",\"coordinates\":[-80.590003, 28.60009]}");
+$geoBin = new Bin("Geo_Location", $geoVal); 
 
+$client->close();
