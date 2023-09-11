@@ -7,9 +7,11 @@ use std::fmt;
 use std::fs::File;
 use std::hash::{Hash, Hasher};
 use std::io::Write;
+use std::io::Read;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::Duration;
+use std::collections::BTreeMap;
 
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::convert::IntoZendObject;
@@ -27,7 +29,8 @@ use aerospike_core::as_val;
 use chrono::Local;
 use colored::*;
 use lazy_static::lazy_static;
-use log::*;
+use log::{info, warn, trace, debug};
+use log::LevelFilter;
 
 lazy_static! {
     static ref CLIENTS: Mutex<HashMap<String, Arc<aerospike_sync::Client>>> =
@@ -40,6 +43,7 @@ lazy_static! {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Expression Data Types for usage in some `FilterExpressions`
 #[derive(Debug, Clone, Copy)]
 pub enum _ExpType {
     NIL,
@@ -164,533 +168,6 @@ impl From<&ExpType> for aerospike_core::expressions::ExpType {
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  ExpressionOperations (ExpOp)
-//
-////////////////////////////////////////////////////////////////////////////////////////////
-
-#[derive(Debug, Clone, Copy)]
-pub enum _ExpOp {
-    Unknown,
-    EQ,
-    NE,
-    GT,
-    GE,
-    LT,
-    LE,
-    Regex,
-    Geo,
-    And,
-    Or,
-    Not,
-    Xor,
-    Add,
-    Sub,
-    Mul,
-    Div,
-    Pow,
-    Log,
-    Mod,
-    Abs,
-    Floor,
-    Ceil,
-    ToInt,
-    ToFloat,
-    IntAnd,
-    IntOr,
-    IntXor,
-    IntNot,
-    IntLshift,
-    IntRshift,
-    IntARshift,
-    IntCount,
-    IntLscan,
-    IntRscan,
-    Min,
-    Max,
-    DigestModulo,
-    DeviceSize,
-    LastUpdate,
-    SinceUpdate,
-    VoidTime,
-    TTL,
-    SetName,
-    KeyExists,
-    IsTombstone,
-    Key,
-    Bin,
-    BinType,
-    Cond,
-    Var,
-    Let,
-    Quoted,
-    Call,
-}
-
-#[php_class]
-pub struct ExpOp {
-    _as: aerospike_core::expressions::ExpOp,
-    v: _ExpOp,
-}
-
-impl FromZval<'_> for ExpOp {
-    const TYPE: DataType = DataType::Mixed;
-
-    fn from_zval(zval: &Zval) -> Option<Self> {
-        let f: &ExpOp = zval.extract()?;
-
-        Some(ExpOp {
-            _as: f._as.clone(),
-            v: f.v.clone(),
-        })
-    }
-}
-
-#[php_impl]
-#[derive(ZvalConvert)]
-impl ExpOp {
-    pub fn unknown() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Unknown,
-            v: _ExpOp::Unknown,
-        }
-    }
-
-    pub fn eq() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::EQ,
-            v: _ExpOp::EQ,
-        }
-    }
-
-    pub fn ne() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::NE,
-            v: _ExpOp::NE,
-        }
-    }
-
-    pub fn gt() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::GT,
-            v: _ExpOp::GT,
-        }
-    }
-
-    pub fn ge() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::GE,
-            v: _ExpOp::GE,
-        }
-    }
-
-    pub fn lt() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::LT,
-            v: _ExpOp::LT,
-        }
-    }
-
-    pub fn le() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::LE,
-            v: _ExpOp::LE,
-        }
-    }
-
-    pub fn regex() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Regex,
-            v: _ExpOp::Regex,
-        }
-    }
-
-    pub fn geo() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Geo,
-            v: _ExpOp::Geo,
-        }
-    }
-
-    pub fn and() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::And,
-            v: _ExpOp::And,
-        }
-    }
-
-    pub fn or() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Or,
-            v: _ExpOp::Or,
-        }
-    }
-
-    pub fn not() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Not,
-            v: _ExpOp::Not,
-        }
-    }
-
-    pub fn xor() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Xor,
-            v: _ExpOp::Xor,
-        }
-    }
-
-    pub fn add() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Add,
-            v: _ExpOp::Add,
-        }
-    }
-
-    pub fn sub() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Sub,
-            v: _ExpOp::Sub,
-        }
-    }
-
-    pub fn mul() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Mul,
-            v: _ExpOp::Mul,
-        }
-    }
-
-    pub fn div() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Div,
-            v: _ExpOp::Div,
-        }
-    }
-
-    pub fn pow() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Pow,
-            v: _ExpOp::Pow,
-        }
-    }
-
-    pub fn log() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Log,
-            v: _ExpOp::Log,
-        }
-    }
-
-    pub fn mod_op() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Mod,
-            v: _ExpOp::Mod,
-        }
-    }
-
-    pub fn abs() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Abs,
-            v: _ExpOp::Abs,
-        }
-    }
-
-    pub fn floor() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Floor,
-            v: _ExpOp::Floor,
-        }
-    }
-
-    pub fn ceil() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Ceil,
-            v: _ExpOp::Ceil,
-        }
-    }
-
-    pub fn to_int() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::ToInt,
-            v: _ExpOp::ToInt,
-        }
-    }
-
-    pub fn to_float() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::ToFloat,
-            v: _ExpOp::ToFloat,
-        }
-    }
-
-    pub fn int_and() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntAnd,
-            v: _ExpOp::IntAnd,
-        }
-    }
-
-    pub fn int_or() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntOr,
-            v: _ExpOp::IntOr,
-        }
-    }
-
-    pub fn int_xor() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntXor,
-            v: _ExpOp::IntXor,
-        }
-    }
-
-    pub fn int_not() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntNot,
-            v: _ExpOp::IntNot,
-        }
-    }
-
-    pub fn int_lshift() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntLshift,
-            v: _ExpOp::IntLshift,
-        }
-    }
-
-    pub fn int_rshift() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntRshift,
-            v: _ExpOp::IntRshift,
-        }
-    }
-
-    pub fn int_arshift() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntARshift,
-            v: _ExpOp::IntARshift,
-        }
-    }
-
-    pub fn int_count() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntCount,
-            v: _ExpOp::IntCount,
-        }
-    }
-
-    pub fn int_lscan() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntLscan,
-            v: _ExpOp::IntLscan,
-        }
-    }
-
-    pub fn int_rscan() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IntRscan,
-            v: _ExpOp::IntRscan,
-        }
-    }
-
-    pub fn min() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Min,
-            v: _ExpOp::Min,
-        }
-    }
-
-    pub fn max() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Max,
-            v: _ExpOp::Max,
-        }
-    }
-
-    pub fn digest_modulo() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::DigestModulo,
-            v: _ExpOp::DigestModulo,
-        }
-    }
-
-    pub fn device_size() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::DeviceSize,
-            v: _ExpOp::DeviceSize,
-        }
-    }
-
-    pub fn last_update() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::LastUpdate,
-            v: _ExpOp::LastUpdate,
-        }
-    }
-
-    pub fn since_update() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::SinceUpdate,
-            v: _ExpOp::SinceUpdate,
-        }
-    }
-
-    pub fn void_time() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::VoidTime,
-            v: _ExpOp::VoidTime,
-        }
-    }
-
-    pub fn ttl() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::TTL,
-            v: _ExpOp::TTL,
-        }
-    }
-
-    pub fn set_name() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::SetName,
-            v: _ExpOp::SetName,
-        }
-    }
-
-    pub fn key_exists() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::KeyExists,
-            v: _ExpOp::KeyExists,
-        }
-    }
-
-    pub fn is_tombstone() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::IsTombstone,
-            v: _ExpOp::IsTombstone,
-        }
-    }
-
-    pub fn key() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Key,
-            v: _ExpOp::Key,
-        }
-    }
-
-    pub fn bin() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Bin,
-            v: _ExpOp::Bin,
-        }
-    }
-
-    pub fn bin_type() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::BinType,
-            v: _ExpOp::BinType,
-        }
-    }
-
-    pub fn cond() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Cond,
-            v: _ExpOp::Cond,
-        }
-    }
-
-    pub fn var() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Var,
-            v: _ExpOp::Var,
-        }
-    }
-
-    pub fn let_op() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Let,
-            v: _ExpOp::Let,
-        }
-    }
-
-    pub fn quoted() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Quoted,
-            v: _ExpOp::Quoted,
-        }
-    }
-
-    pub fn call() -> Self {
-        ExpOp {
-            _as: aerospike_core::expressions::ExpOp::Call,
-            v: _ExpOp::Call,
-        }
-    }
-}
-
-
-impl From<&ExpOp> for aerospike_core::expressions::ExpOp {
-    fn from(input: &ExpOp) -> Self {
-        match &input.v {
-            _ExpOp::Unknown => aerospike_core::expressions::ExpOp::Unknown,
-            _ExpOp::EQ => aerospike_core::expressions::ExpOp::EQ,
-            _ExpOp::NE => aerospike_core::expressions::ExpOp::NE,
-            _ExpOp::GT => aerospike_core::expressions::ExpOp::GT,
-            _ExpOp::GE => aerospike_core::expressions::ExpOp::GE,
-            _ExpOp::LT => aerospike_core::expressions::ExpOp::LT,
-            _ExpOp::LE => aerospike_core::expressions::ExpOp::LE,
-            _ExpOp::Regex => aerospike_core::expressions::ExpOp::Regex,
-            _ExpOp::Geo => aerospike_core::expressions::ExpOp::Geo,
-            _ExpOp::And => aerospike_core::expressions::ExpOp::And,
-            _ExpOp::Or => aerospike_core::expressions::ExpOp::Or,
-            _ExpOp::Not => aerospike_core::expressions::ExpOp::Not,
-            _ExpOp::Xor => aerospike_core::expressions::ExpOp::Xor,
-            _ExpOp::Add => aerospike_core::expressions::ExpOp::Add,
-            _ExpOp::Sub => aerospike_core::expressions::ExpOp::Sub,
-            _ExpOp::Mul => aerospike_core::expressions::ExpOp::Mul,
-            _ExpOp::Div => aerospike_core::expressions::ExpOp::Div,
-            _ExpOp::Pow => aerospike_core::expressions::ExpOp::Pow,
-            _ExpOp::Log => aerospike_core::expressions::ExpOp::Log,
-            _ExpOp::Mod => aerospike_core::expressions::ExpOp::Mod,
-            _ExpOp::Abs => aerospike_core::expressions::ExpOp::Abs,
-            _ExpOp::Floor => aerospike_core::expressions::ExpOp::Floor,
-            _ExpOp::Ceil => aerospike_core::expressions::ExpOp::Ceil,
-            _ExpOp::ToInt => aerospike_core::expressions::ExpOp::ToInt,
-            _ExpOp::ToFloat => aerospike_core::expressions::ExpOp::ToFloat,
-            _ExpOp::IntAnd => aerospike_core::expressions::ExpOp::IntAnd,
-            _ExpOp::IntOr => aerospike_core::expressions::ExpOp::IntOr,
-            _ExpOp::IntXor => aerospike_core::expressions::ExpOp::IntXor,
-            _ExpOp::IntNot => aerospike_core::expressions::ExpOp::IntNot,
-            _ExpOp::IntLshift => aerospike_core::expressions::ExpOp::IntLshift,
-            _ExpOp::IntRshift => aerospike_core::expressions::ExpOp::IntRshift,
-            _ExpOp::IntARshift => aerospike_core::expressions::ExpOp::IntARshift,
-            _ExpOp::IntCount => aerospike_core::expressions::ExpOp::IntCount,
-            _ExpOp::IntLscan => aerospike_core::expressions::ExpOp::IntLscan,
-            _ExpOp::IntRscan => aerospike_core::expressions::ExpOp::IntRscan,
-            _ExpOp::Min => aerospike_core::expressions::ExpOp::Min,
-            _ExpOp::Max => aerospike_core::expressions::ExpOp::Max,
-            _ExpOp::DigestModulo => aerospike_core::expressions::ExpOp::DigestModulo,
-            _ExpOp::DeviceSize => aerospike_core::expressions::ExpOp::DeviceSize,
-            _ExpOp::LastUpdate => aerospike_core::expressions::ExpOp::LastUpdate,
-            _ExpOp::SinceUpdate => aerospike_core::expressions::ExpOp::SinceUpdate,
-            _ExpOp::VoidTime => aerospike_core::expressions::ExpOp::VoidTime,
-            _ExpOp::TTL => aerospike_core::expressions::ExpOp::TTL,
-            _ExpOp::SetName => aerospike_core::expressions::ExpOp::SetName,
-            _ExpOp::KeyExists => aerospike_core::expressions::ExpOp::KeyExists,
-            _ExpOp::IsTombstone => aerospike_core::expressions::ExpOp::IsTombstone,
-            _ExpOp::Key => aerospike_core::expressions::ExpOp::Key,
-            _ExpOp::Bin => aerospike_core::expressions::ExpOp::Bin,
-            _ExpOp::BinType => aerospike_core::expressions::ExpOp::BinType,
-            _ExpOp::Cond => aerospike_core::expressions::ExpOp::Cond,
-            _ExpOp::Var => aerospike_core::expressions::ExpOp::Var,
-            _ExpOp::Let => aerospike_core::expressions::ExpOp::Let,
-            _ExpOp::Quoted => aerospike_core::expressions::ExpOp::Quoted,
-            _ExpOp::Call => aerospike_core::expressions::ExpOp::Call,
-        }
-    }
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -698,6 +175,8 @@ impl From<&ExpOp> for aerospike_core::expressions::ExpOp {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Filter expression, which can be applied to most commands, to control which records are
+/// affected by the command.
 #[php_class]
 pub struct FilterExpression {
     _as: aerospike_core::expressions::FilterExpression,
@@ -718,429 +197,521 @@ impl FromZval<'_> for FilterExpression {
 #[derive(ZvalConvert)]
 impl FilterExpression {
     
+    /// Create a record key expression of specified type.
     pub fn key(exp_type: ExpType) -> Self {
-        let key = ExpOp::key();
-        let val = aerospike_core::Value::from(exp_type._as as i64);
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(key._as), Some(val), None, None, None, None)
+            _as: aerospike_core::expressions::key(exp_type._as)
         }
-    }
+    }  
 
+    /// Create function that returns if the primary key is stored in the record meta data
+    /// as a boolean expression. This would occur when `send_key` is true on record write.
     pub fn key_exists() -> Self {
-        let key_exists = ExpOp::key_exists();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(key_exists._as), None, None, None, None, None)
+            _as: aerospike_core::expressions::key_exists()
         }
     }
 
+    /// Create 64 bit int bin expression.
     pub fn int_bin(name: String) -> Self {
-        let bin = ExpOp::bin();
-        let val = aerospike_core::Value::from(name);
-        let exp_type = ExpType::int();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(bin._as), Some(val), None, None, Some(exp_type._as), None)
+            _as: aerospike_core::expressions::int_bin(name)
         }
     }
 
+    /// Create string bin expression.
     pub fn string_bin(name: String) -> Self {
-        let bin = ExpOp::bin();
-        let val = aerospike_core::Value::from(name);
-        let exp_type = ExpType::string();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(bin._as), Some(val), None, None, Some(exp_type._as), None)
+            _as: aerospike_core::expressions::string_bin(name)
         }
     }
 
-    pub fn bool_bin(name: String) -> Self {
-        let bin = ExpOp::bin();
-        let val = aerospike_core::Value::from(name);
-        let exp_type = ExpType::bool();
+    /// Create blob bin expression.
+    pub fn blob_bin(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(bin._as), Some(val), None, None, Some(exp_type._as), None)
+            _as: aerospike_core::expressions::blob_bin(name)
         }
     }
     
+    /// Create 64 bit float bin expression.
     pub fn float_bin(name: String) -> Self {
-        let bin = ExpOp::bin();
-        let val = aerospike_core::Value::from(name);
-        let exp_type = ExpType::float();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(bin._as), Some(val), None, None, Some(exp_type._as), None)
+            _as: aerospike_core::expressions::float_bin(name)
         }
     }
     
+    /// Create geo bin expression.
     pub fn geo_bin(name: String) -> Self {
-        let bin = ExpOp::bin();
-        let val = aerospike_core::Value::from(name);
-        let exp_type = ExpType::geo();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(bin._as), Some(val), None, None, Some(exp_type._as), None)
+            _as: aerospike_core::expressions::geo_bin(name)
         }
     }
     
+    /// Create list bin expression.
     pub fn list_bin(name: String) -> Self {
-        let bin = ExpOp::bin();
-        let val = aerospike_core::Value::from(name);
-        let exp_type = ExpType::list();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(bin._as), Some(val), None, None, Some(exp_type._as), None)
+            _as: aerospike_core::expressions::list_bin(name)
         }
     }
     
+    /// Create map bin expression.
     pub fn map_bin(name: String) -> Self {
-        let bin = ExpOp::bin();
-        let val = aerospike_core::Value::from(name);
-        let exp_type = ExpType::map();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(bin._as), Some(val), None, None, Some(exp_type._as), None)
+            _as: aerospike_core::expressions::map_bin(name)
         }
     }
     
+    /// Create a HLL bin expression
     pub fn hll_bin(name: String) -> Self {
-        let bin = ExpOp::bin();
-        let val = aerospike_core::Value::from(name);
-        let exp_type = ExpType::hll();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(bin._as), Some(val), None, None, Some(exp_type._as), None)
+            _as: aerospike_core::expressions::hll_bin(name)
         }
     }
     
+    /// Create function that returns if bin of specified name exists.
+    pub fn bin_exists(name: String) -> Self {
+        FilterExpression {
+            _as: aerospike_core::expressions::ne(aerospike_core::expressions::bin_type(name), aerospike_core::expressions::int_val(0 as i64))
+        }
+    }
+    
+    /// Create function that returns bin's integer particle type.
     pub fn bin_type(name: String) -> Self {
-        let op = ExpOp::bin_type();
-        let val = aerospike_core::Value::from(name);
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), Some(val), None, None, None, None)
+            _as: aerospike_core::expressions::bin_type(name)
         }
     }
     
+    /// Create function that returns record set name string.
     pub fn set_name() -> Self {
-        let op = ExpOp::set_name();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), None, None, None, None, None)
+            _as: aerospike_core::expressions::set_name()
         }
     }
     
+    /// Create function that returns record size on disk.
+    /// If server storage-engine is memory, then zero is returned.
     pub fn device_size() -> Self {
-        let op = ExpOp::device_size();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), None, None, None, None, None)
+            _as: aerospike_core::expressions::device_size()
         }
     }
     
+    /// Create function that returns record last update time expressed as 64 bit integer
+    /// nanoseconds since 1970-01-01 epoch.
     pub fn last_update() -> Self {
-        let op = ExpOp::last_update();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), None, None, None, None, None)
+            _as: aerospike_core::expressions::last_update()
         }
     }
     
+    /// Create expression that returns milliseconds since the record was last updated.
+    /// This expression usually evaluates quickly because record meta data is cached in memory.
     pub fn since_update() -> Self {
-        let op = ExpOp::since_update();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), None, None, None, None, None)
+            _as: aerospike_core::expressions::since_update()
         }
     }
 
+    /// Create function that returns record expiration time expressed as 64 bit integer
+    /// nanoseconds since 1970-01-01 epoch.
     pub fn void_time() -> Self {
-        let op = ExpOp::void_time();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), None, None, None, None, None)
+            _as: aerospike_core::expressions::void_time()
         }
     }
     
+    /// Create function that returns record expiration time (time to live) in integer seconds.
     pub fn ttl() -> Self {
-        let op = ExpOp::ttl();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), None, None, None, None, None)
+            _as: aerospike_core::expressions::ttl()
         }
     }
     
+    /// Create expression that returns if record has been deleted and is still in tombstone state.
+    /// This expression usually evaluates quickly because record meta data is cached in memory.
     pub fn is_tombstone() -> Self {
-        let op = ExpOp::is_tombstone();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), None, None, None, None, None)
+            _as: aerospike_core::expressions::is_tombstone()
         }
     }
     
+    /// Create function that returns record digest modulo as integer.
     pub fn digest_modulo(modulo: i64) -> Self {
-        let op = ExpOp::digest_modulo();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), Some(aerospike_core::Value::from(modulo)), None, None, None, None)
+            _as: aerospike_core::expressions::digest_modulo(modulo)
         }
     }
     
+    /// Create function like regular expression string operation.
     pub fn regex_compare(regex: String, flags: i64, bin: FilterExpression) -> Self {
-        let op = ExpOp::regex();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), Some(aerospike_core::Value::from(regex)), Some(bin._as), Some(flags), None, None)
+            _as: aerospike_core::expressions::regex_compare(regex, flags, bin._as)
         }
     }
     
+    /// Create compare geospatial operation.
     pub fn geo_compare(left: FilterExpression, right: FilterExpression) -> Self{
-        let op = ExpOp::geo();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), None, None, None, None, Some(vec![left._as, right._as]))
+            _as: aerospike_core::expressions::geo_compare(left._as, right._as)
         }
     }
 
+    /// Creates 64 bit integer value
     pub fn int_val(val: i64) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(None, Some(aerospike_core::Value::from(val)), None, None, None, None)
+            _as: aerospike_core::expressions::int_val(val)
         }
     }
     
+    /// Creates a Boolean value
     pub fn bool_val(val: bool) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(None, Some(aerospike_core::Value::from(val)), None, None, None, None)
+            _as: aerospike_core::expressions::bool_val(val)
         }
     }
     
+    /// Creates String bin value
     pub fn string_val(val: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(None, Some(aerospike_core::Value::from(val)), None, None, None, None)
+            _as: aerospike_core::expressions::string_val(val)
         }
     }
     
+    /// Creates 64 bit float bin value
     pub fn float_val(val: f64) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(None, Some(aerospike_core::Value::from(val)), None, None, None, None)
+            _as: aerospike_core::expressions::float_val(val)
         }
     }
     
+    /// Creates Blob bin value
     pub fn blob_val(val: Vec<u8>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(None, Some(aerospike_core::Value::from(val)), None, None, None, None)
+            _as: aerospike_core::expressions::blob_val(val)
         }
     }
 
+    /// Create List bin Value
+    /// Not Supported in pre-alpha release
     // pub fn list_val(val: Vec<Value>) -> Self {
-    //     let op = ExpOp::quoted();
-    //     let val = aerospike_core::Value::from(val);
     //     FilterExpression {
-    //         _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), Some(aerospike_core::Value::from(val)), None, None, None, None)
+    //         _as: aerospike_core::expressions::list_val(val)
     //     }
     // }
-    
+
+    /// Create Map bin Value
+    /// Not Supported in pre-alpha release
     // pub fn map_val(val: HashMap<Value, Value>) -> Self {
     //     FilterExpression {
-    //         _as: aerospike_core::expressions::FilterExpression::new(None, Some(aerospike_core::Value::from(val)), None, None, None, None)
+    //         _as: aerospike_core::expressions::map_val(val)
     //     }
     // }
     
+    /// Create geospatial json string value.
     pub fn geo_val(val: String) -> Self {
-        let op = ExpOp::geo();
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(op._as), Some(aerospike_core::Value::from(val)), None, None, None, None)
+            _as: aerospike_core::expressions::geo_val(val)
         }
     }
     
+    /// Create a Nil Value
     pub fn nil() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(None, Some(aerospike_core::Value::Nil), None, None, None, None)
+            _as: aerospike_core::expressions::nil()
         }
     }
     
+    /// Create "not" operator expression.
     pub fn not(exp: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::not()._as), None, None, None, None, Some(vec![exp._as]))
+            _as: aerospike_core::expressions::not(exp._as)
         }
     }
     
+    /// Create "and" (&&) operator that applies to a variable number of expressions.
+    /// // (a > 5 || a == 0) && b < 3
     pub fn and(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::and()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::and(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Create "or" (||) operator that applies to a variable number of expressions.
     pub fn or(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::or()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::or(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
 
+    /// Create "xor" (^) operator that applies to a variable number of expressions.
     pub fn xor(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::xor()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::xor(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Create equal (==) expression.
     pub fn eq(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::eq()._as), None, None, None, None, Some(vec![left._as, right._as]))
+            _as: aerospike_core::expressions::eq(left._as, right._as)
         }
     }
     
+    /// Create not equal (!=) expression
     pub fn ne(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::ne()._as), None, None, None, None, Some(vec![left._as, right._as]))
+            _as: aerospike_core::expressions::ne(left._as, right._as)
         }
     }
     
+    /// Create greater than (>) operation.
     pub fn gt(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::gt()._as), None, None, None, None, Some(vec![left._as, right._as]))
+            _as: aerospike_core::expressions::gt(left._as, right._as)
         }
     }
     
+    /// Create greater than or equal (>=) operation.
     pub fn ge(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::ge()._as), None, None, None, None, Some(vec![left._as, right._as]))
+            _as: aerospike_core::expressions::ge(left._as, right._as)
         }
     }
     
+
+    /// Create less than (<) operation.
     pub fn lt(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::lt()._as), None, None, None, None, Some(vec![left._as, right._as]))
+            _as: aerospike_core::expressions::lt(left._as, right._as)
         }
     }
     
+    /// Create less than or equals (<=) operation.
     pub fn le(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::le()._as), None, None, None, None, Some(vec![left._as, right._as]))
+            _as: aerospike_core::expressions::le(left._as, right._as)
         }
     }
 
+    /// Create "add" (+) operator that applies to a variable number of expressions.
+    /// Return sum of all `FilterExpressions` given. All arguments must resolve to the same type (integer or float).
+    /// Requires server version 5.6.0+.
     pub fn num_add(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::add()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::num_add(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
 
+    /// Create "subtract" (-) operator that applies to a variable number of expressions.
+    /// If only one `FilterExpressions` is provided, return the negation of that argument.
+    /// Otherwise, return the sum of the 2nd to Nth `FilterExpressions` subtracted from the 1st
+    /// `FilterExpressions`. All `FilterExpressions` must resolve to the same type (integer or float).
+    /// Requires server version 5.6.0+.
     pub fn num_sub(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::sub()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::num_sub(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
 
+    /// Create "multiply" (*) operator that applies to a variable number of expressions.
+    /// Return the product of all `FilterExpressions`. If only one `FilterExpressions` is supplied, return
+    /// that `FilterExpressions`. All `FilterExpressions` must resolve to the same type (integer or float).
+    /// Requires server version 5.6.0+.
     pub fn num_mul(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::mul()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::num_mul(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Create "divide" (/) operator that applies to a variable number of expressions.
+    /// If there is only one `FilterExpressions`, returns the reciprocal for that `FilterExpressions`.
+    /// Otherwise, return the first `FilterExpressions` divided by the product of the rest.
+    /// All `FilterExpressions` must resolve to the same type (integer or float).
+    /// Requires server version 5.6.0+.
     pub fn num_div(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::div()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::num_div(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Create "power" operator that raises a "base" to the "exponent" power.
+    /// All arguments must resolve to floats.
+    /// Requires server version 5.6.0+.
     pub fn num_pow(base: FilterExpression, exponent: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::pow()._as), None, None, None, None, Some(vec![base._as, exponent._as]))
+            _as: aerospike_core::expressions::num_pow(base._as, exponent._as)
         }
     }
     
+    /// Create "log" operator for logarithm of "num" with base "base".
+    /// All arguments must resolve to floats.
+    /// Requires server version 5.6.0+.
     pub fn num_log(num: FilterExpression, base: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::log()._as), None, None, None, None, Some(vec![num._as, base._as]))
+            _as: aerospike_core::expressions::num_log(num._as, base._as)
         }
     }
     
+    /// Create "modulo" (%) operator that determines the remainder of "numerator"
+    /// divided by "denominator". All arguments must resolve to integers.
+    /// Requires server version 5.6.0+.
     pub fn num_mod(numerator: FilterExpression, denominator: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::mod_op()._as), None, None, None, None, Some(vec![numerator._as, denominator._as]))
+            _as: aerospike_core::expressions::num_mod(numerator._as, denominator._as)
         }
     }
     
+    /// Create operator that returns absolute value of a number.
+    /// All arguments must resolve to integer or float.
+    /// Requires server version 5.6.0+.
     pub fn num_abs(value: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::abs()._as), None, None, None, None, Some(vec![value._as]))
+            _as: aerospike_core::expressions::num_abs(value._as)
         }
     }
     
+    /// Create expression that rounds a floating point number down to the closest integer value.
+    /// The return type is float.
+    // Requires server version 5.6.0+.
     pub fn num_floor(num: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::floor()._as), None, None, None, None, Some(vec![num._as]))
+            _as: aerospike_core::expressions::num_floor(num._as)
         }
     }
     
+    /// Create expression that rounds a floating point number up to the closest integer value.
+    /// The return type is float.
+    /// Requires server version 5.6.0+.
     pub fn num_ceil(num: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::ceil()._as), None, None, None, None, Some(vec![num._as]))
+            _as: aerospike_core::expressions::num_ceil(num._as)
         }
     }
     
+    /// Create expression that converts an integer to a float.
+    /// Requires server version 5.6.0+.
     pub fn to_int(num: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::to_int()._as), None, None, None, None, Some(vec![num._as]))
+            _as: aerospike_core::expressions::to_int(num._as)
         }
     }
     
+    /// Create expression that converts a float to an integer.
+    /// Requires server version 5.6.0+.
     pub fn to_float(num: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::to_float()._as), None, None, None, None, Some(vec![num._as]))
+            _as: aerospike_core::expressions::to_float(num._as)
         }
     }
     
+    /// Create integer "and" (&) operator that is applied to two or more integers.
+    /// All arguments must resolve to integers.
+    /// Requires server version 5.6.0+.
     pub fn int_and(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_and()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::int_and(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Create integer "or" (|) operator that is applied to two or more integers.
+    /// All arguments must resolve to integers.
+    /// Requires server version 5.6.0+.
     pub fn int_or(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_or()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::int_or(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Create integer "xor" (^) operator that is applied to two or more integers.
+    /// All arguments must resolve to integers.
+    /// Requires server version 5.6.0+.
     pub fn int_xor(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_xor()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::int_xor(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Create integer "not" (~) operator.
+    /// Requires server version 5.6.0+.
     pub fn int_not(exp: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_not()._as), None, None, None, None, Some(vec![exp._as]))
+            _as: aerospike_core::expressions::int_not(exp._as)
         }
     }
     
+    /// Create integer "left shift" (<<) operator.
+    /// Requires server version 5.6.0+.
     pub fn int_lshift(value: FilterExpression, shift: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_lshift()._as), None, None, None, None, Some(vec![value._as, shift._as]))
+            _as: aerospike_core::expressions::int_lshift(value._as, shift._as)
         }
     }
     
+    /// Create integer "logical right shift" (>>>) operator.
+    /// Requires server version 5.6.0+.
     pub fn int_rshift(value: FilterExpression, shift: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_rshift()._as), None, None, None, None, Some(vec![value._as, shift._as]))
+            _as: aerospike_core::expressions::int_rshift(value._as, shift._as)
         }
     }
     
+    /// Create integer "arithmetic right shift" (>>) operator.
+    /// The sign bit is preserved and not shifted.
+    /// Requires server version 5.6.0+.
     pub fn int_arshift(value: FilterExpression, shift: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_arshift()._as), None, None, None, None, Some(vec![value._as, shift._as]))
+            _as: aerospike_core::expressions::int_arshift(value._as, shift._as)
         }
     }
-    
+
+    /// Create expression that returns count of integer bits that are set to 1.
+    /// Requires server version 5.6.0+ 
     pub fn int_count(exp: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_count()._as), None, None, None, None, Some(vec![exp._as]))
+            _as: aerospike_core::expressions::int_count(exp._as)
         }
     }
 
+    /// Create expression that scans integer bits from left (most significant bit) to
+    /// right (least significant bit), looking for a search bit value. When the
+    /// search value is found, the index of that bit (where the most significant bit is
+    /// index 0) is returned. If "search" is true, the scan will search for the bit
+    /// value 1. If "search" is false it will search for bit value 0.
+    /// Requires server version 5.6.0+.
     pub fn int_lscan(value: FilterExpression, search: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_lscan()._as), None, None, None, None, Some(vec![value._as, search._as]))
+            _as: aerospike_core::expressions::int_lscan(value._as, search._as)
         }
     }
 
+    /// Create expression that scans integer bits from right (least significant bit) to
+    /// left (most significant bit), looking for a search bit value. When the
+    /// search value is found, the index of that bit (where the most significant bit is
+    /// index 0) is returned. If "search" is true, the scan will search for the bit
+    /// value 1. If "search" is false it will search for bit value 0.
+    /// Requires server version 5.6.0+.
     pub fn int_rscan(value: FilterExpression, search: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::int_rscan()._as), None, None, None, None, Some(vec![value._as, search._as]))
+            _as: aerospike_core::expressions::int_rscan(value._as, search._as)
         }
     }
     
+    /// Create expression that returns the minimum value in a variable number of expressions.
+    /// All arguments must be the same type (integer or float).
+    /// Requires server version 5.6.0+.
     pub fn min(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::min()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::min(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Create expression that returns the maximum value in a variable number of expressions.
+    /// All arguments must be the same type (integer or float).
+    /// Requires server version 5.6.0+.
     pub fn max(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::max()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::max(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
 
@@ -1149,33 +720,53 @@ impl FilterExpression {
     // Variables
     //--------------------------------------------------
 
+    /// Conditionally select an expression from a variable number of expression pairs
+    /// followed by default expression action.
+    /// Requires server version 5.6.0+.
+    /// ```
+    /// // Args Format: bool exp1, action exp1, bool exp2, action exp2, ..., action-default
+    /// // Apply operator based on type.
     pub fn cond(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::cond()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::cond(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Define variables and expressions in scope.
+    /// Requires server version 5.6.0+.
+    /// ```
+    /// // 5 < a < 10
     pub fn exp_let(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::let_op()._as), None, None, None, None, Some(exps.into_iter().map(|exp| exp._as).collect()))
+            _as: aerospike_core::expressions::exp_let(exps.into_iter().map(|exp| exp._as).collect())
         }
     }
     
+    /// Assign variable to an expression that can be accessed later.
+    /// Requires server version 5.6.0+.
+    /// ```
+    /// // 5 < a < 10
     pub fn def(name: String, value: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(None, Some(aerospike_core::Value::from(name)), None, None, None, Some(vec![value._as]))
+            _as: aerospike_core::expressions::def(name, value._as)
         }
     }
     
+    /// Retrieve expression value from a variable.
+    /// Requires server version 5.6.0+.
     pub fn var(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::var()._as), Some(aerospike_core::Value::from(name)), None, None, None, None)
+            _as: aerospike_core::expressions::var(name)
         }
     }
     
+    /// Create unknown value. Used to intentionally fail an expression.
+    /// The failure can be ignored with `ExpWriteFlags` `EVAL_NO_FAIL`
+    /// or `ExpReadFlags` `EVAL_NO_FAIL`.
+    /// Requires server version 5.6.0+.
     pub fn unknown() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::FilterExpression::new(Some(ExpOp::unknown()._as), None, None, None, None, None)
+            _as: aerospike_core::expressions::unknown()
         }
     }
 
@@ -1189,6 +780,7 @@ impl FilterExpression {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Priority of operations on database server.
 #[derive(Debug, Clone, Copy)]
 pub enum _Priority {
     Default,
@@ -1219,24 +811,32 @@ impl FromZval<'_> for Priority {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Priority {
+
+    /// Default determines that the server defines the priority.
     pub fn default() -> Self {
         Priority {
             _as: aerospike_core::Priority::Default,
             v: _Priority::Default,
         }
     }
+
+    /// Low determines that the server should run the operation in a background thread.
     pub fn low() -> Self {
         Priority {
             _as: aerospike_core::Priority::Low,
             v: _Priority::Low,
         }
     }
+
+    /// Medium determines that the server should run the operation at medium priority.
     pub fn medium() -> Self {
         Priority {
             _as: aerospike_core::Priority::Medium,
             v: _Priority::Medium,
         }
     }
+
+    /// High determines that the server should run the operation at the highest priority.
     pub fn high() -> Self {
         Priority {
             _as: aerospike_core::Priority::High,
@@ -1262,6 +862,7 @@ impl From<&Priority> for aerospike_core::Priority {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// `RecordExistsAction` determines how to handle record writes based on record generation.
 #[derive(Debug, PartialEq, Clone)]
 pub enum _RecordExistsAction {
     Update,
@@ -1293,6 +894,9 @@ impl FromZval<'_> for RecordExistsAction {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl RecordExistsAction {
+
+    /// Update means: Create or update record.
+    /// Merge write command bins with existing bins.
     pub fn update() -> Self {
         RecordExistsAction {
             _as: aerospike_core::RecordExistsAction::Update,
@@ -1300,6 +904,8 @@ impl RecordExistsAction {
         }
     }
 
+    /// UpdateOnly means: Update record only. Fail if record does not exist.
+    /// Merge write command bins with existing bins.
     pub fn update_only() -> Self {
         RecordExistsAction {
             _as: aerospike_core::RecordExistsAction::UpdateOnly,
@@ -1307,6 +913,10 @@ impl RecordExistsAction {
         }
     }
 
+    /// Replace means: Create or replace record.
+    /// Delete existing bins not referenced by write command bins.
+    /// Supported by Aerospike 2 server versions >= 2.7.5 and
+    /// Aerospike 3 server versions >= 3.1.6.
     pub fn replace() -> Self {
         RecordExistsAction {
             _as: aerospike_core::RecordExistsAction::Replace,
@@ -1314,6 +924,10 @@ impl RecordExistsAction {
         }
     }
 
+    /// ReplaceOnly means: Replace record only. Fail if record does not exist.
+    /// Delete existing bins not referenced by write command bins.
+    /// Supported by Aerospike 2 server versions >= 2.7.5 and
+    /// Aerospike 3 server versions >= 3.1.6.
     pub fn replace_only() -> Self {
         RecordExistsAction {
             _as: aerospike_core::RecordExistsAction::ReplaceOnly,
@@ -1321,6 +935,7 @@ impl RecordExistsAction {
         }
     }
 
+    /// CreateOnly means: Create only. Fail if record exists.
     pub fn create_only() -> Self {
         RecordExistsAction {
             _as: aerospike_core::RecordExistsAction::CreateOnly,
@@ -1375,6 +990,9 @@ impl FromZval<'_> for CommitLevel {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CommitLevel {
+
+    /// CommitAll indicates the server should wait until successfully committing master and all
+    /// replicas.
     pub fn commit_all() -> Self {
         CommitLevel {
             _as: aerospike_core::CommitLevel::CommitAll,
@@ -1382,6 +1000,7 @@ impl CommitLevel {
         }
     }
 
+    /// CommitMaster indicates the server should wait until successfully committing master only.
     pub fn commit_master() -> Self {
         CommitLevel {
             _as: aerospike_core::CommitLevel::CommitMaster,
@@ -1410,6 +1029,8 @@ pub enum _ConsistencyLevel {
     ConsistencyAll,
 }
 
+/// `ConsistencyLevel` indicates how replicas should be consulted in a read
+/// operation to provide the desired consistency guarantee.
 #[php_class]
 pub struct ConsistencyLevel {
     _as: aerospike_core::ConsistencyLevel,
@@ -1432,6 +1053,9 @@ impl FromZval<'_> for ConsistencyLevel {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ConsistencyLevel {
+
+    /// ConsistencyOne indicates only a single replica should be consulted in
+    /// the read operation.
     pub fn consistency_one() -> Self {
         ConsistencyLevel {
             _as: aerospike_core::ConsistencyLevel::ConsistencyOne,
@@ -1439,6 +1063,8 @@ impl ConsistencyLevel {
         }
     }
 
+    /// ConsistencyAll indicates that all replicas should be consulted in
+    /// the read operation.
     pub fn consistency_all() -> Self {
         ConsistencyLevel {
             _as: aerospike_core::ConsistencyLevel::ConsistencyAll,
@@ -1469,6 +1095,7 @@ pub enum _GenerationPolicy {
     ExpectGenGreater,
 }
 
+/// `GenerationPolicy` determines how to handle record writes based on record generation.
 #[php_class]
 pub struct GenerationPolicy {
     _as: aerospike_core::GenerationPolicy,
@@ -1491,6 +1118,8 @@ impl FromZval<'_> for GenerationPolicy {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl GenerationPolicy {
+
+    /// None means: Do not use record generation to restrict writes.
     pub fn none() -> Self {
         GenerationPolicy {
             _as: aerospike_core::GenerationPolicy::None,
@@ -1498,6 +1127,8 @@ impl GenerationPolicy {
         }
     }
 
+    /// ExpectGenEqual means: Update/delete record if expected generation is equal to server
+    /// generation. Otherwise, fail.
     pub fn expect_gen_equal() -> Self {
         GenerationPolicy {
             _as: aerospike_core::GenerationPolicy::ExpectGenEqual,
@@ -1505,6 +1136,8 @@ impl GenerationPolicy {
         }
     }
 
+    /// ExpectGenGreater means: Update/delete record if expected generation greater than the server
+    /// generation. Otherwise, fail. This is useful for restore after backup.
     pub fn expect_gen_greater() -> Self {
         GenerationPolicy {
             _as: aerospike_core::GenerationPolicy::ExpectGenGreater,
@@ -1543,6 +1176,7 @@ pub enum _Expiration {
     DontUpdate,
 }
 
+/// Record expiration, also known as time-to-live (TTL).
 #[php_class]
 pub struct Expiration {
     _as: aerospike_core::Expiration,
@@ -1565,6 +1199,8 @@ impl FromZval<'_> for Expiration {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Expiration {
+
+    /// Set the record to expire X seconds from now
     pub fn seconds(seconds: u32) -> Self {
         Expiration {
             _as: aerospike_core::Expiration::Seconds(seconds),
@@ -1572,6 +1208,7 @@ impl Expiration {
         }
     }
 
+    /// Set the record's expiry time using the default time-to-live (TTL) value for the namespace
     pub fn namespace_default() -> Self {
         Expiration {
             _as: aerospike_core::Expiration::NamespaceDefault,
@@ -1579,6 +1216,8 @@ impl Expiration {
         }
     }
 
+    /// Set the record to never expire. Requires Aerospike 2 server version 2.7.2 or later or
+    /// Aerospike 3 server version 3.1.4 or later. Do not use with older servers.
     pub fn never() -> Self {
         Expiration {
             _as: aerospike_core::Expiration::Never,
@@ -1586,6 +1225,8 @@ impl Expiration {
         }
     }
 
+    /// Do not change the record's expiry time when updating the record; requires Aerospike server
+    /// version 3.10.1 or later.
     pub fn dont_update() -> Self {
         Expiration {
             _as: aerospike_core::Expiration::DontUpdate,
@@ -1629,6 +1270,9 @@ pub enum _Concurrency {
     MaxThreads(usize),
 }
 
+/// Specifies whether a command, that needs to be executed on multiple cluster nodes, should be
+/// executed sequentially, one node at a time, or in parallel on multiple nodes using the client's
+/// thread pool.
 #[php_class]
 pub struct Concurrency {
     _as: aerospike_core::Concurrency,
@@ -1651,18 +1295,36 @@ impl FromZval<'_> for Concurrency {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Concurrency {
+    
+    /// Issue commands sequentially. This mode has a performance advantage for small to
+    /// medium sized batch sizes because requests can be issued in the main transaction thread.
+    /// This is the default.
     pub fn sequential() -> Self {
         Concurrency {
             _as: aerospike_core::Concurrency::Sequential,
             v: _Concurrency::Sequential,
         }
     }
+
+    /// Issue all commands in parallel threads. This mode has a performance advantage for
+    /// extremely large batch sizes because each node can process the request immediately. The
+    /// downside is extra threads will need to be created (or takedn from a thread pool).
     pub fn parallel() -> Self {
         Concurrency {
             _as: aerospike_core::Concurrency::Parallel,
             v: _Concurrency::Parallel,
         }
     }
+    
+    /// Issue up to N commands in parallel threads. When a request completes, a new request
+    /// will be issued until all threads are complete. This mode prevents too many parallel threads
+    /// being created for large cluster implementations. The downside is extra threads will still
+    /// need to be created (or taken from a thread pool).
+    ///
+    /// E.g. if there are 16 nodes/namespace combinations requested and concurrency is set to
+    /// `MaxThreads(8)`, then batch requests will be made for 8 node/namespace combinations in
+    /// parallel threads. When a request completes, a new request will be issued until all 16
+    /// requests are complete.
     pub fn max_threads(threads: usize) -> Self {
         Concurrency {
             _as: aerospike_core::Concurrency::MaxThreads(threads),
@@ -1702,6 +1364,8 @@ impl FromZval<'_> for BasePolicyWrapper {
     }
 }
 
+/// Trait implemented by most policy types; policies that implement this trait typically encompass
+/// an instance of `BasePolicy`.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl BasePolicyWrapper {
@@ -1804,6 +1468,7 @@ pub struct BatchPolicy {
     _as: aerospike_core::BatchPolicy,
 }
 
+/// `BatchPolicy` encapsulates parameters for all batch operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl BatchPolicy {
@@ -1850,8 +1515,8 @@ impl BatchPolicy {
     }
 
     #[setter]
-    pub fn set_allow_inline(&mut self, allow_inline: bool) {
-        self._as.allow_inline = allow_inline;
+    pub fn set_send_set_name(&mut self, send_set_name: bool) {
+        self._as.send_set_name = send_set_name;
     }
 
     #[getter]
@@ -1860,8 +1525,8 @@ impl BatchPolicy {
     }
 
     #[setter]
-    pub fn set_send_key(&mut self, send_set_name: bool) {
-        self._as.send_set_name = send_set_name;
+    pub fn set_allow_inline(&mut self, allow_inline: bool) {
+        self._as.allow_inline = allow_inline;
     }
 
     #[getter]
@@ -1923,6 +1588,8 @@ pub struct ReadPolicy {
     _as: aerospike_core::ReadPolicy,
 }
 
+/// `ReadPolicy` excapsulates parameters for transaction policy attributes
+/// used in all database operation calls.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ReadPolicy {
@@ -2001,6 +1668,7 @@ pub struct WritePolicy {
     _as: aerospike_core::WritePolicy,
 }
 
+/// `WritePolicy` encapsulates parameters for all write operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl WritePolicy {
@@ -2164,6 +1832,7 @@ pub struct QueryPolicy {
     _as: aerospike_core::QueryPolicy,
 }
 
+/// `QueryPolicy` encapsulates parameters for query operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl QueryPolicy {
@@ -2242,6 +1911,7 @@ pub struct ScanPolicy {
     _as: aerospike_core::ScanPolicy,
 }
 
+/// `ScanPolicy` encapsulates optional parameters used in scan operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ScanPolicy {
@@ -2336,6 +2006,7 @@ impl ScanPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Secondary index collection type.
 enum _CollectionIndexType {
     Default,
     List,
@@ -2397,6 +2068,7 @@ impl From<&CollectionIndexType> for aerospike_core::query::CollectionIndexType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Underlying data type of secondary index.
 enum _IndexType {
     Numeric,
     String,
@@ -2450,6 +2122,18 @@ impl From<&IndexType> for aerospike_core::query::IndexType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Query filter definition. Currently, only one filter is allowed in a Statement, and must be on a
+/// bin which has a secondary index defined.
+///
+/// Filter instances should be instantiated using one of the provided macros:
+///
+/// - `as_eq`
+/// - `as_range`
+/// - `as_contains`
+/// - `as_contains_range`
+/// - `as_within_region`
+/// - `as_within_radius`
+/// - `as_regions_containing_point`
 #[php_class]
 pub struct Filter {
     _as: aerospike_core::query::Filter,
@@ -2540,6 +2224,9 @@ impl Filter {
         }
     }
 
+    // Example code : 
+    // $pointString = '{"type":"Point","coordinates":[-89.0000,23.0000]}'
+    // Filter::regionsContainingPoint("binName", $pointString)
     pub fn regions_containing_point(
         bin_name: &str,
         point: &str,
@@ -2563,6 +2250,7 @@ impl Filter {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Query statement parameters.
 #[php_class]
 pub struct Statement {
     _as: aerospike_core::Statement,
@@ -2603,6 +2291,10 @@ impl Statement {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Virtual collection of records retrieved through queries and scans. During a query/scan,
+/// multiple threads will retrieve records from the server nodes and put these records on an
+/// internal queue managed by the recordset. The single user thread consumes these records from the
+/// queue.
 #[php_class]
 pub struct Recordset {
     _as: Arc<aerospike_core::Recordset>,
@@ -2635,6 +2327,7 @@ impl Recordset {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// `ClientPolicy` encapsulates parameters for client policy command.
 #[php_class]
 pub struct ClientPolicy {
     _as: aerospike_core::ClientPolicy,
@@ -2779,6 +2472,7 @@ impl ClientPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Host name/port of database server.
 #[php_class]
 pub struct Host {
     _as: aerospike_core::Host,
@@ -2820,6 +2514,7 @@ impl Host {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Container object for a record bin, comprising a name and a value.
 #[php_class]
 pub struct Bin {
     _as: aerospike_core::Bin,
@@ -2832,12 +2527,6 @@ impl Bin {
         let _as = aerospike_core::Bin::new(name.into(), value.into());
         Bin { _as: _as }
     }
-
-    pub fn put_geo_json(name: &str, value: String) -> Self {
-        let geojson_value = Value::GeoJSON(value);
-        let _as = aerospike_core::Bin::new(name.into(), geojson_value.into());
-        Bin { _as: _as }
-    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -2846,6 +2535,7 @@ impl Bin {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Container object for a database record.
 #[php_class]
 pub struct Record {
     _as: aerospike_core::Record,
@@ -2881,6 +2571,19 @@ impl Record {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Instantiate a Client instance to access an Aerospike database cluster and perform database
+/// operations.
+///
+/// The client is thread-safe. Only one client instance should be used per cluster. Multiple
+/// threads should share this cluster instance.
+///
+/// Your application uses this class' API to perform database operations such as writing and
+/// reading records, and selecting sets of records. Write operations include specialized
+/// functionality such as append/prepend and arithmetic addition.
+///
+/// Each record may have multiple bins, unless the Aerospike server nodes are configured as
+/// "single-bin". In "multi-bin" mode, partial records may be written or read by specifying the
+/// relevant subset of bins.
 pub fn new_aerospike_client(
     policy: &ClientPolicy,
     hosts: &str,
@@ -2888,6 +2591,7 @@ pub fn new_aerospike_client(
     let res = aerospike_sync::Client::new(&policy._as, &hosts).map_err(|e| e.to_string())?;
     Ok(res)
 }
+
 
 #[php_function]
 pub fn Aerospike(policy: &ClientPolicy, hosts: &str) -> PhpResult<Zval> {
@@ -2940,6 +2644,8 @@ impl Client {
         Ok(())
     }
 
+    /// Write record bin(s). The policy specifies the transaction timeout, record expiration and
+    /// how the transaction is handled when the record already exists.
     pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
         self._as
@@ -2948,6 +2654,9 @@ impl Client {
         Ok(())
     }
 
+    /// Read record for the specified key. Depending on the bins value provided, all record bins,
+    /// only selected record bins or only the record headers will be returned. The policy can be
+    /// used to specify timeouts.
     pub fn get(
         &self,
         policy: &ReadPolicy,
@@ -2961,6 +2670,9 @@ impl Client {
         Ok(res.into())
     }
 
+    /// Add integer bin values to existing record bin values. The policy specifies the transaction
+    /// timeout, record expiration and how the transaction is handled when the record already
+    /// exists. This call only works for integer values.
     pub fn add(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
         self._as
@@ -2969,6 +2681,9 @@ impl Client {
         Ok(())
     }
 
+    /// Append bin string values to existing record bin values. The policy specifies the
+    /// transaction timeout, record expiration and how the transaction is handled when the record
+    /// already exists. This call only works for string values.
     pub fn append(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
         self._as
@@ -2977,6 +2692,9 @@ impl Client {
         Ok(())
     }
 
+    /// Prepend bin string values to existing record bin values. The policy specifies the
+    /// transaction timeout, record expiration and how the transaction is handled when the record
+    /// already exists. This call only works for string values.
     pub fn prepend(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
         self._as
@@ -2985,6 +2703,8 @@ impl Client {
         Ok(())
     }
 
+    /// Delete record for specified key. The policy specifies the transaction timeout.
+    /// The call returns `true` if the record existed on the server before deletion.
     pub fn delete(&self, policy: &WritePolicy, key: &Key) -> PhpResult<bool> {
         let res = self
             ._as
@@ -2993,6 +2713,8 @@ impl Client {
         Ok(res)
     }
 
+    /// Reset record's time to expiration using the policy's expiration. Fail if the record does
+    /// not exist.
     pub fn touch(&self, policy: &WritePolicy, key: &Key) -> PhpResult<()> {
         self._as
             .touch(&policy._as, &key._as)
@@ -3000,6 +2722,7 @@ impl Client {
         Ok(())
     }
 
+    /// Determine if a record key exists. The policy can be used to specify timeouts.
     pub fn exists(&self, policy: &WritePolicy, key: &Key) -> PhpResult<bool> {
         let res = self
             ._as
@@ -3008,6 +2731,7 @@ impl Client {
         Ok(res)
     }
 
+    /// Removes all records in the specified namespace/set efficiently.
     pub fn truncate(
         &self,
         namespace: &str,
@@ -3021,6 +2745,12 @@ impl Client {
         Ok(())
     }
 
+
+    /// Read all records in the specified namespace and set and return a record iterator. The scan
+    /// executor puts records on a queue in separate threads. The calling thread concurrently pops
+    /// records off the queue through the record iterator. Up to `policy.max_concurrent_nodes`
+    /// nodes are scanned in parallel. If concurrent nodes is set to zero, the server nodes are
+    /// read in series.
     pub fn scan(
         &self,
         policy: &ScanPolicy,
@@ -3035,6 +2765,10 @@ impl Client {
         Ok(res.into())
     }
 
+
+    /// Execute a query on all server nodes and return a record iterator. The query executor puts
+    /// records on a queue in separate threads. The calling thread concurrently pops records off
+    /// the queue through the record iterator.
     pub fn query(&self, policy: &QueryPolicy, statement: &Statement) -> PhpResult<Recordset> {
         let stmt = statement._as.clone();
         let res = self
@@ -3045,6 +2779,8 @@ impl Client {
         Ok(res.into())
     }
 
+    /// Create a secondary index on a bin containing scalar values. This asynchronous server call
+    /// returns before the command is complete.
     pub fn create_index(
         &self,
         namespace: &str,
@@ -3152,6 +2888,7 @@ impl FromZval<'_> for Key {
 
 // Container for bin values stored in the Aerospike database.
 #[derive(Debug, Clone, PartialEq, Eq)]
+//TODO: underlying_value
 pub enum Value {
     /// Empty value.
     Nil,
@@ -3188,6 +2925,8 @@ pub enum Value {
     /// HLL value
     HLL(Vec<u8>),
 }
+
+
 
 #[allow(clippy::derive_hash_xor_eq)]
 impl Hash for Value {
@@ -3256,7 +2995,12 @@ impl IntoZval for Value {
 
                 zv.set_hashtable(arr)
             }
-            Value::GeoJSON(gj) => zv.set_string(&gj, persistent)?,
+            Value::GeoJSON(gj) =>
+                // let mut obj = ZendObject::new_stdclass();;
+                // let val = Value::GeoJSON(gj);
+                // obj.set_property("geo_json", val);
+                // zv.set_object(&mut obj);
+                zv.set_string(&gj, persistent)?,
             Value::HLL(b) => zv.set_binary(b),
         }
 
@@ -3303,7 +3047,7 @@ fn from_zval(zval: &Zval) -> Option<Value> {
                 }
             })
         }
-        // DataType::Object(_) => panic!("OBJECT?!"),
+        // DataType::Object(_) => zval.string().map(|v| Value::GeoJSON(v)),
         _ => unreachable!(),
     }
 }
@@ -3383,6 +3127,49 @@ impl From<aerospike_core::Value> for Value {
             _ => unreachable!(),
         }
     }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Value
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+#[php_class]
+pub struct ValueType;
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl ValueType{
+    
+    pub fn nil() -> Value {
+        Value::Nil
+    }
+
+    pub fn int(val: i64) -> Value { 
+        Value::Int(val)
+    }
+
+    pub fn uint(val: u64) -> Value { 
+        Value::UInt(val)
+    }
+
+    pub fn string(val: String) -> Value { 
+        Value::String(val)
+    }
+
+    pub fn blob(val: Vec<u8>) -> Value { 
+        Value::Blob(val)
+    }
+
+    pub fn geo_json(val: String) -> Value { 
+        Value::GeoJSON(val)
+    }
+
+    pub fn hll(val: Vec<u8>) -> Value { 
+        Value::HLL(val)
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -3476,10 +3263,6 @@ pub fn print_header(desc: &str, emph: u8) {
     println!("******************************************************************************");
 }
 
-#[php_function]
-fn create_geo_json(value: String) -> Value {
-    Value::GeoJSON(value)
-}
 
 fn bins_flag(bins: Option<Vec<String>>) -> aerospike_core::Bins {
     match bins {
@@ -3517,7 +3300,7 @@ fn get_persisted_client(key: &str) -> Option<Zval> {
 
 #[php_module]
 pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
-    let target = Box::new(File::create("/var/log/client_php.log").expect("Can't create file"));
+    let target = Box::new(File::create("./log/client_php.log").expect("Can't create file"));
 
     env_logger::Builder::new()
         .target(env_logger::Target::Pipe(target))
