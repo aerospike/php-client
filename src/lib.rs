@@ -3099,11 +3099,15 @@ impl IntoZval for PHPValue {
                 zv.set_hashtable(arr)
             }
             PHPValue::GeoJSON(s) => {
-                let geo = GeoJSON { v: s.clone() };
+                let geo = GeoJSON { v: s };
                 let zo: ZBox<ZendObject> = geo.into_zend_object()?;
                 zv.set_object(zo.into_raw());
             }
-            PHPValue::HLL(b) => zv.set_binary(b),
+            PHPValue::HLL(b) => {
+                let hll = HLL { v: b };
+                let zo: ZBox<ZendObject> = hll.into_zend_object()?;
+                zv.set_object(zo.into_raw());
+            }
         }
 
         Ok(())
@@ -3152,6 +3156,8 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
         DataType::Object(_) => {
             if let Some(o) = zval.extract::<GeoJSON>() {
                 return Some(PHPValue::GeoJSON(o.v));
+            } else if let Some(o) = zval.extract::<HLL>() {
+                return Some(PHPValue::HLL(o.v));
             }
             panic!("Invalid value");
         }
