@@ -2,16 +2,16 @@
 
 use ext_php_rs::prelude::*;
 
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::fmt;
 use std::fs::File;
 use std::hash::{Hash, Hasher};
-use std::io::Write;
 use std::io::Read;
+use std::io::Write;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::Duration;
-use std::collections::BTreeMap;
 
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::convert::IntoZendObject;
@@ -29,8 +29,8 @@ use aerospike_core::as_val;
 use chrono::Local;
 use colored::*;
 use lazy_static::lazy_static;
-use log::{info, warn, trace, debug};
 use log::LevelFilter;
+use log::{debug, info, trace, warn};
 
 lazy_static! {
     static ref CLIENTS: Mutex<HashMap<String, Arc<aerospike_sync::Client>>> =
@@ -168,7 +168,6 @@ impl From<&ExpType> for aerospike_core::expressions::ExpType {
     }
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  Filter Expression
@@ -181,7 +180,6 @@ impl From<&ExpType> for aerospike_core::expressions::ExpType {
 pub struct FilterExpression {
     _as: aerospike_core::expressions::FilterExpression,
 }
-
 
 impl FromZval<'_> for FilterExpression {
     const TYPE: DataType = DataType::Mixed;
@@ -196,120 +194,122 @@ impl FromZval<'_> for FilterExpression {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl FilterExpression {
-    
     /// Create a record key expression of specified type.
     pub fn key(exp_type: ExpType) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::key(exp_type._as)
+            _as: aerospike_core::expressions::key(exp_type._as),
         }
-    }  
+    }
 
     /// Create function that returns if the primary key is stored in the record meta data
     /// as a boolean expression. This would occur when `send_key` is true on record write.
     pub fn key_exists() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::key_exists()
+            _as: aerospike_core::expressions::key_exists(),
         }
     }
 
     /// Create 64 bit int bin expression.
     pub fn int_bin(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_bin(name)
+            _as: aerospike_core::expressions::int_bin(name),
         }
     }
 
     /// Create string bin expression.
     pub fn string_bin(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::string_bin(name)
+            _as: aerospike_core::expressions::string_bin(name),
         }
     }
 
     /// Create blob bin expression.
     pub fn blob_bin(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::blob_bin(name)
+            _as: aerospike_core::expressions::blob_bin(name),
         }
     }
-    
+
     /// Create 64 bit float bin expression.
     pub fn float_bin(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::float_bin(name)
+            _as: aerospike_core::expressions::float_bin(name),
         }
     }
-    
+
     /// Create geo bin expression.
     pub fn geo_bin(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::geo_bin(name)
+            _as: aerospike_core::expressions::geo_bin(name),
         }
     }
-    
+
     /// Create list bin expression.
     pub fn list_bin(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::list_bin(name)
+            _as: aerospike_core::expressions::list_bin(name),
         }
     }
-    
+
     /// Create map bin expression.
     pub fn map_bin(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::map_bin(name)
+            _as: aerospike_core::expressions::map_bin(name),
         }
     }
-    
+
     /// Create a HLL bin expression
     pub fn hll_bin(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::hll_bin(name)
+            _as: aerospike_core::expressions::hll_bin(name),
         }
     }
-    
+
     /// Create function that returns if bin of specified name exists.
     pub fn bin_exists(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::ne(aerospike_core::expressions::bin_type(name), aerospike_core::expressions::int_val(0 as i64))
+            _as: aerospike_core::expressions::ne(
+                aerospike_core::expressions::bin_type(name),
+                aerospike_core::expressions::int_val(0 as i64),
+            ),
         }
     }
-    
+
     /// Create function that returns bin's integer particle type.
     pub fn bin_type(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::bin_type(name)
+            _as: aerospike_core::expressions::bin_type(name),
         }
     }
-    
+
     /// Create function that returns record set name string.
     pub fn set_name() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::set_name()
+            _as: aerospike_core::expressions::set_name(),
         }
     }
-    
+
     /// Create function that returns record size on disk.
     /// If server storage-engine is memory, then zero is returned.
     pub fn device_size() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::device_size()
+            _as: aerospike_core::expressions::device_size(),
         }
     }
-    
+
     /// Create function that returns record last update time expressed as 64 bit integer
     /// nanoseconds since 1970-01-01 epoch.
     pub fn last_update() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::last_update()
+            _as: aerospike_core::expressions::last_update(),
         }
     }
-    
+
     /// Create expression that returns milliseconds since the record was last updated.
     /// This expression usually evaluates quickly because record meta data is cached in memory.
     pub fn since_update() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::since_update()
+            _as: aerospike_core::expressions::since_update(),
         }
     }
 
@@ -317,180 +317,179 @@ impl FilterExpression {
     /// nanoseconds since 1970-01-01 epoch.
     pub fn void_time() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::void_time()
+            _as: aerospike_core::expressions::void_time(),
         }
     }
-    
+
     /// Create function that returns record expiration time (time to live) in integer seconds.
     pub fn ttl() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::ttl()
+            _as: aerospike_core::expressions::ttl(),
         }
     }
-    
+
     /// Create expression that returns if record has been deleted and is still in tombstone state.
     /// This expression usually evaluates quickly because record meta data is cached in memory.
     pub fn is_tombstone() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::is_tombstone()
+            _as: aerospike_core::expressions::is_tombstone(),
         }
     }
-    
+
     /// Create function that returns record digest modulo as integer.
     pub fn digest_modulo(modulo: i64) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::digest_modulo(modulo)
+            _as: aerospike_core::expressions::digest_modulo(modulo),
         }
     }
-    
+
     /// Create function like regular expression string operation.
     pub fn regex_compare(regex: String, flags: i64, bin: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::regex_compare(regex, flags, bin._as)
+            _as: aerospike_core::expressions::regex_compare(regex, flags, bin._as),
         }
     }
-    
+
     /// Create compare geospatial operation.
-    pub fn geo_compare(left: FilterExpression, right: FilterExpression) -> Self{
+    pub fn geo_compare(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::geo_compare(left._as, right._as)
+            _as: aerospike_core::expressions::geo_compare(left._as, right._as),
         }
     }
 
     /// Creates 64 bit integer value
     pub fn int_val(val: i64) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_val(val)
-        }
-    }
-    
-    /// Creates a Boolean value
-    pub fn bool_val(val: bool) -> Self {
-        FilterExpression {
-            _as: aerospike_core::expressions::bool_val(val)
-        }
-    }
-    
-    /// Creates String bin value
-    pub fn string_val(val: String) -> Self {
-        FilterExpression {
-            _as: aerospike_core::expressions::string_val(val)
-        }
-    }
-    
-    /// Creates 64 bit float bin value
-    pub fn float_val(val: f64) -> Self {
-        FilterExpression {
-            _as: aerospike_core::expressions::float_val(val)
-        }
-    }
-    
-    /// Creates Blob bin value
-    pub fn blob_val(val: Vec<u8>) -> Self {
-        FilterExpression {
-            _as: aerospike_core::expressions::blob_val(val)
+            _as: aerospike_core::expressions::int_val(val),
         }
     }
 
-    /// Create List bin Value
+    /// Creates a Boolean value
+    pub fn bool_val(val: bool) -> Self {
+        FilterExpression {
+            _as: aerospike_core::expressions::bool_val(val),
+        }
+    }
+
+    /// Creates String bin value
+    pub fn string_val(val: String) -> Self {
+        FilterExpression {
+            _as: aerospike_core::expressions::string_val(val),
+        }
+    }
+
+    /// Creates 64 bit float bin value
+    pub fn float_val(val: f64) -> Self {
+        FilterExpression {
+            _as: aerospike_core::expressions::float_val(val),
+        }
+    }
+
+    /// Creates Blob bin value
+    pub fn blob_val(val: Vec<u8>) -> Self {
+        FilterExpression {
+            _as: aerospike_core::expressions::blob_val(val),
+        }
+    }
+
+    /// Create List bin PHPValue
     /// Not Supported in pre-alpha release
-    // pub fn list_val(val: Vec<Value>) -> Self {
+    // pub fn list_val(val: Vec<PHPValue>) -> Self {
     //     FilterExpression {
     //         _as: aerospike_core::expressions::list_val(val)
     //     }
     // }
 
-    /// Create Map bin Value
+    /// Create Map bin PHPValue
     /// Not Supported in pre-alpha release
-    // pub fn map_val(val: HashMap<Value, Value>) -> Self {
+    // pub fn map_val(val: HashMap<PHPValue, PHPValue>) -> Self {
     //     FilterExpression {
     //         _as: aerospike_core::expressions::map_val(val)
     //     }
     // }
-    
+
     /// Create geospatial json string value.
     pub fn geo_val(val: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::geo_val(val)
+            _as: aerospike_core::expressions::geo_val(val),
         }
     }
-    
-    /// Create a Nil Value
+
+    /// Create a Nil PHPValue
     pub fn nil() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::nil()
+            _as: aerospike_core::expressions::nil(),
         }
     }
-    
+
     /// Create "not" operator expression.
     pub fn not(exp: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::not(exp._as)
+            _as: aerospike_core::expressions::not(exp._as),
         }
     }
-    
+
     /// Create "and" (&&) operator that applies to a variable number of expressions.
     /// // (a > 5 || a == 0) && b < 3
     pub fn and(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::and(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::and(exps.into_iter().map(|exp| exp._as).collect()),
         }
     }
-    
+
     /// Create "or" (||) operator that applies to a variable number of expressions.
     pub fn or(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::or(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::or(exps.into_iter().map(|exp| exp._as).collect()),
         }
     }
 
     /// Create "xor" (^) operator that applies to a variable number of expressions.
     pub fn xor(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::xor(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::xor(exps.into_iter().map(|exp| exp._as).collect()),
         }
     }
-    
+
     /// Create equal (==) expression.
     pub fn eq(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::eq(left._as, right._as)
+            _as: aerospike_core::expressions::eq(left._as, right._as),
         }
     }
-    
+
     /// Create not equal (!=) expression
     pub fn ne(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::ne(left._as, right._as)
+            _as: aerospike_core::expressions::ne(left._as, right._as),
         }
     }
-    
+
     /// Create greater than (>) operation.
     pub fn gt(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::gt(left._as, right._as)
+            _as: aerospike_core::expressions::gt(left._as, right._as),
         }
     }
-    
+
     /// Create greater than or equal (>=) operation.
     pub fn ge(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::ge(left._as, right._as)
+            _as: aerospike_core::expressions::ge(left._as, right._as),
         }
     }
-    
 
     /// Create less than (<) operation.
     pub fn lt(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::lt(left._as, right._as)
+            _as: aerospike_core::expressions::lt(left._as, right._as),
         }
     }
-    
+
     /// Create less than or equals (<=) operation.
     pub fn le(left: FilterExpression, right: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::le(left._as, right._as)
+            _as: aerospike_core::expressions::le(left._as, right._as),
         }
     }
 
@@ -499,7 +498,9 @@ impl FilterExpression {
     /// Requires server version 5.6.0+.
     pub fn num_add(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_add(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::num_add(
+                exps.into_iter().map(|exp| exp._as).collect(),
+            ),
         }
     }
 
@@ -510,7 +511,9 @@ impl FilterExpression {
     /// Requires server version 5.6.0+.
     pub fn num_sub(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_sub(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::num_sub(
+                exps.into_iter().map(|exp| exp._as).collect(),
+            ),
         }
     }
 
@@ -520,10 +523,12 @@ impl FilterExpression {
     /// Requires server version 5.6.0+.
     pub fn num_mul(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_mul(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::num_mul(
+                exps.into_iter().map(|exp| exp._as).collect(),
+            ),
         }
     }
-    
+
     /// Create "divide" (/) operator that applies to a variable number of expressions.
     /// If there is only one `FilterExpressions`, returns the reciprocal for that `FilterExpressions`.
     /// Otherwise, return the first `FilterExpressions` divided by the product of the rest.
@@ -531,145 +536,151 @@ impl FilterExpression {
     /// Requires server version 5.6.0+.
     pub fn num_div(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_div(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::num_div(
+                exps.into_iter().map(|exp| exp._as).collect(),
+            ),
         }
     }
-    
+
     /// Create "power" operator that raises a "base" to the "exponent" power.
     /// All arguments must resolve to floats.
     /// Requires server version 5.6.0+.
     pub fn num_pow(base: FilterExpression, exponent: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_pow(base._as, exponent._as)
+            _as: aerospike_core::expressions::num_pow(base._as, exponent._as),
         }
     }
-    
+
     /// Create "log" operator for logarithm of "num" with base "base".
     /// All arguments must resolve to floats.
     /// Requires server version 5.6.0+.
     pub fn num_log(num: FilterExpression, base: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_log(num._as, base._as)
+            _as: aerospike_core::expressions::num_log(num._as, base._as),
         }
     }
-    
+
     /// Create "modulo" (%) operator that determines the remainder of "numerator"
     /// divided by "denominator". All arguments must resolve to integers.
     /// Requires server version 5.6.0+.
     pub fn num_mod(numerator: FilterExpression, denominator: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_mod(numerator._as, denominator._as)
+            _as: aerospike_core::expressions::num_mod(numerator._as, denominator._as),
         }
     }
-    
+
     /// Create operator that returns absolute value of a number.
     /// All arguments must resolve to integer or float.
     /// Requires server version 5.6.0+.
     pub fn num_abs(value: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_abs(value._as)
+            _as: aerospike_core::expressions::num_abs(value._as),
         }
     }
-    
+
     /// Create expression that rounds a floating point number down to the closest integer value.
     /// The return type is float.
     // Requires server version 5.6.0+.
     pub fn num_floor(num: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_floor(num._as)
+            _as: aerospike_core::expressions::num_floor(num._as),
         }
     }
-    
+
     /// Create expression that rounds a floating point number up to the closest integer value.
     /// The return type is float.
     /// Requires server version 5.6.0+.
     pub fn num_ceil(num: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::num_ceil(num._as)
+            _as: aerospike_core::expressions::num_ceil(num._as),
         }
     }
-    
+
     /// Create expression that converts an integer to a float.
     /// Requires server version 5.6.0+.
     pub fn to_int(num: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::to_int(num._as)
+            _as: aerospike_core::expressions::to_int(num._as),
         }
     }
-    
+
     /// Create expression that converts a float to an integer.
     /// Requires server version 5.6.0+.
     pub fn to_float(num: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::to_float(num._as)
+            _as: aerospike_core::expressions::to_float(num._as),
         }
     }
-    
+
     /// Create integer "and" (&) operator that is applied to two or more integers.
     /// All arguments must resolve to integers.
     /// Requires server version 5.6.0+.
     pub fn int_and(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_and(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::int_and(
+                exps.into_iter().map(|exp| exp._as).collect(),
+            ),
         }
     }
-    
+
     /// Create integer "or" (|) operator that is applied to two or more integers.
     /// All arguments must resolve to integers.
     /// Requires server version 5.6.0+.
     pub fn int_or(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_or(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::int_or(exps.into_iter().map(|exp| exp._as).collect()),
         }
     }
-    
+
     /// Create integer "xor" (^) operator that is applied to two or more integers.
     /// All arguments must resolve to integers.
     /// Requires server version 5.6.0+.
     pub fn int_xor(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_xor(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::int_xor(
+                exps.into_iter().map(|exp| exp._as).collect(),
+            ),
         }
     }
-    
+
     /// Create integer "not" (~) operator.
     /// Requires server version 5.6.0+.
     pub fn int_not(exp: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_not(exp._as)
+            _as: aerospike_core::expressions::int_not(exp._as),
         }
     }
-    
+
     /// Create integer "left shift" (<<) operator.
     /// Requires server version 5.6.0+.
     pub fn int_lshift(value: FilterExpression, shift: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_lshift(value._as, shift._as)
+            _as: aerospike_core::expressions::int_lshift(value._as, shift._as),
         }
     }
-    
+
     /// Create integer "logical right shift" (>>>) operator.
     /// Requires server version 5.6.0+.
     pub fn int_rshift(value: FilterExpression, shift: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_rshift(value._as, shift._as)
+            _as: aerospike_core::expressions::int_rshift(value._as, shift._as),
         }
     }
-    
+
     /// Create integer "arithmetic right shift" (>>) operator.
     /// The sign bit is preserved and not shifted.
     /// Requires server version 5.6.0+.
     pub fn int_arshift(value: FilterExpression, shift: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_arshift(value._as, shift._as)
+            _as: aerospike_core::expressions::int_arshift(value._as, shift._as),
         }
     }
 
     /// Create expression that returns count of integer bits that are set to 1.
-    /// Requires server version 5.6.0+ 
+    /// Requires server version 5.6.0+
     pub fn int_count(exp: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_count(exp._as)
+            _as: aerospike_core::expressions::int_count(exp._as),
         }
     }
 
@@ -681,7 +692,7 @@ impl FilterExpression {
     /// Requires server version 5.6.0+.
     pub fn int_lscan(value: FilterExpression, search: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_lscan(value._as, search._as)
+            _as: aerospike_core::expressions::int_lscan(value._as, search._as),
         }
     }
 
@@ -693,28 +704,27 @@ impl FilterExpression {
     /// Requires server version 5.6.0+.
     pub fn int_rscan(value: FilterExpression, search: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::int_rscan(value._as, search._as)
+            _as: aerospike_core::expressions::int_rscan(value._as, search._as),
         }
     }
-    
+
     /// Create expression that returns the minimum value in a variable number of expressions.
     /// All arguments must be the same type (integer or float).
     /// Requires server version 5.6.0+.
     pub fn min(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::min(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::min(exps.into_iter().map(|exp| exp._as).collect()),
         }
     }
-    
+
     /// Create expression that returns the maximum value in a variable number of expressions.
     /// All arguments must be the same type (integer or float).
     /// Requires server version 5.6.0+.
     pub fn max(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::max(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::max(exps.into_iter().map(|exp| exp._as).collect()),
         }
     }
-
 
     //--------------------------------------------------
     // Variables
@@ -728,51 +738,50 @@ impl FilterExpression {
     /// // Apply operator based on type.
     pub fn cond(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::cond(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::cond(exps.into_iter().map(|exp| exp._as).collect()),
         }
     }
-    
+
     /// Define variables and expressions in scope.
     /// Requires server version 5.6.0+.
     /// ```
     /// // 5 < a < 10
     pub fn exp_let(exps: Vec<FilterExpression>) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::exp_let(exps.into_iter().map(|exp| exp._as).collect())
+            _as: aerospike_core::expressions::exp_let(
+                exps.into_iter().map(|exp| exp._as).collect(),
+            ),
         }
     }
-    
+
     /// Assign variable to an expression that can be accessed later.
     /// Requires server version 5.6.0+.
     /// ```
     /// // 5 < a < 10
     pub fn def(name: String, value: FilterExpression) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::def(name, value._as)
+            _as: aerospike_core::expressions::def(name, value._as),
         }
     }
-    
+
     /// Retrieve expression value from a variable.
     /// Requires server version 5.6.0+.
     pub fn var(name: String) -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::var(name)
+            _as: aerospike_core::expressions::var(name),
         }
     }
-    
+
     /// Create unknown value. Used to intentionally fail an expression.
     /// The failure can be ignored with `ExpWriteFlags` `EVAL_NO_FAIL`
     /// or `ExpReadFlags` `EVAL_NO_FAIL`.
     /// Requires server version 5.6.0+.
     pub fn unknown() -> Self {
         FilterExpression {
-            _as: aerospike_core::expressions::unknown()
+            _as: aerospike_core::expressions::unknown(),
         }
     }
-
-
-}   
-
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -811,7 +820,6 @@ impl FromZval<'_> for Priority {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Priority {
-
     /// Default determines that the server defines the priority.
     pub fn default() -> Self {
         Priority {
@@ -894,7 +902,6 @@ impl FromZval<'_> for RecordExistsAction {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl RecordExistsAction {
-
     /// Update means: Create or update record.
     /// Merge write command bins with existing bins.
     pub fn update() -> Self {
@@ -990,7 +997,6 @@ impl FromZval<'_> for CommitLevel {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CommitLevel {
-
     /// CommitAll indicates the server should wait until successfully committing master and all
     /// replicas.
     pub fn commit_all() -> Self {
@@ -1053,7 +1059,6 @@ impl FromZval<'_> for ConsistencyLevel {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ConsistencyLevel {
-
     /// ConsistencyOne indicates only a single replica should be consulted in
     /// the read operation.
     pub fn consistency_one() -> Self {
@@ -1118,7 +1123,6 @@ impl FromZval<'_> for GenerationPolicy {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl GenerationPolicy {
-
     /// None means: Do not use record generation to restrict writes.
     pub fn none() -> Self {
         GenerationPolicy {
@@ -1199,7 +1203,6 @@ impl FromZval<'_> for Expiration {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Expiration {
-
     /// Set the record to expire X seconds from now
     pub fn seconds(seconds: u32) -> Self {
         Expiration {
@@ -1295,7 +1298,6 @@ impl FromZval<'_> for Concurrency {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Concurrency {
-    
     /// Issue commands sequentially. This mode has a performance advantage for small to
     /// medium sized batch sizes because requests can be issued in the main transaction thread.
     /// This is the default.
@@ -1315,7 +1317,7 @@ impl Concurrency {
             v: _Concurrency::Parallel,
         }
     }
-    
+
     /// Issue up to N commands in parallel threads. When a request completes, a new request
     /// will be issued until all threads are complete. This mode prevents too many parallel threads
     /// being created for large cluster implementations. The downside is extra threads will still
@@ -1409,7 +1411,10 @@ impl BasePolicyWrapper {
 
     #[getter]
     pub fn get_timeout(&self) -> u64 {
-        self._as.timeout.map(|duration| duration.as_millis() as u64).unwrap_or_default()
+        self._as
+            .timeout
+            .map(|duration| duration.as_millis() as u64)
+            .unwrap_or_default()
     }
 
     #[setter]
@@ -1431,7 +1436,10 @@ impl BasePolicyWrapper {
 
     #[getter]
     pub fn get_sleep_between_retries(&self) -> u64 {
-        self._as.sleep_between_retries.map(|duration| duration.as_millis() as u64).unwrap_or_default()
+        self._as
+            .sleep_between_retries
+            .map(|duration| duration.as_millis() as u64)
+            .unwrap_or_default()
     }
 
     #[setter]
@@ -1489,7 +1497,7 @@ impl BatchPolicy {
     pub fn set_base_policy(&mut self, base_policy: BasePolicyWrapper) {
         self._as.base_policy = base_policy._as;
     }
-    
+
     #[getter]
     pub fn get_concurrency(&self) -> Concurrency {
         Concurrency {
@@ -1598,7 +1606,6 @@ impl ReadPolicy {
             _as: aerospike_core::ReadPolicy::default(),
         }
     }
-    
 
     #[getter]
     pub fn get_priority(&self) -> Priority {
@@ -1630,7 +1637,10 @@ impl ReadPolicy {
 
     #[getter]
     pub fn get_timeout(&self) -> u64 {
-        self._as.timeout.map(|duration| duration.as_millis() as u64).unwrap_or_default()
+        self._as
+            .timeout
+            .map(|duration| duration.as_millis() as u64)
+            .unwrap_or_default()
     }
 
     #[setter]
@@ -2152,7 +2162,7 @@ impl FromZval<'_> for Filter {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Filter {
-    pub fn range(bin_name: &str, begin: Value, end: Value) -> Self {
+    pub fn range(bin_name: &str, begin: PHPValue, end: PHPValue) -> Self {
         Filter {
             _as: aerospike_core::as_range!(
                 bin_name,
@@ -2162,7 +2172,7 @@ impl Filter {
         }
     }
 
-    pub fn contains(bin_name: &str, value: Value, cit: Option<&CollectionIndexType>) -> Self {
+    pub fn contains(bin_name: &str, value: PHPValue, cit: Option<&CollectionIndexType>) -> Self {
         let default = CollectionIndexType::Default();
         let cit = cit.unwrap_or(&default);
         Filter {
@@ -2176,8 +2186,8 @@ impl Filter {
 
     pub fn contains_range(
         bin_name: &str,
-        begin: Value,
-        end: Value,
+        begin: PHPValue,
+        end: PHPValue,
         cit: Option<&CollectionIndexType>,
     ) -> Self {
         let default = CollectionIndexType::Default();
@@ -2224,7 +2234,7 @@ impl Filter {
         }
     }
 
-    // Example code : 
+    // Example code :
     // $pointString = '{"type":"Point","coordinates":[-89.0000,23.0000]}'
     // Filter::regionsContainingPoint("binName", $pointString)
     pub fn regions_containing_point(
@@ -2380,7 +2390,10 @@ impl ClientPolicy {
 
     #[getter]
     pub fn get_timeout(&self) -> u64 {
-        self._as.timeout.map(|duration| duration.as_millis() as u64).unwrap_or_default()
+        self._as
+            .timeout
+            .map(|duration| duration.as_millis() as u64)
+            .unwrap_or_default()
     }
 
     #[setter]
@@ -2390,13 +2403,15 @@ impl ClientPolicy {
         self._as.timeout = Some(timeout);
     }
 
-
     // /// Connection idle timeout. Every time a connection is used, its idle
     // /// deadline will be extended by this duration. When this deadline is reached,
     // /// the connection will be closed and discarded from the connection pool.
     #[getter]
     pub fn get_idle_timeout(&self) -> u64 {
-        self._as.idle_timeout.map(|duration| duration.as_millis() as u64).unwrap_or_default()
+        self._as
+            .idle_timeout
+            .map(|duration| duration.as_millis() as u64)
+            .unwrap_or_default()
     }
 
     #[setter]
@@ -2405,7 +2420,6 @@ impl ClientPolicy {
         let timeout = Duration::from_millis(timeout_in_millis);
         self._as.idle_timeout = Some(timeout);
     }
-
 
     #[getter]
     pub fn get_max_conns_per_node(&self) -> usize {
@@ -2523,7 +2537,7 @@ pub struct Bin {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Bin {
-    pub fn __construct(name: &str, value: Value) -> Self {
+    pub fn __construct(name: &str, value: PHPValue) -> Self {
         let _as = aerospike_core::Bin::new(name.into(), value.into());
         Bin { _as: _as }
     }
@@ -2544,13 +2558,13 @@ pub struct Record {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Record {
-    pub fn bin(&self, name: &str) -> Option<Value> {
+    pub fn bin(&self, name: &str) -> Option<PHPValue> {
         let b = self._as.bins.get(name);
         b.map(|v| v.to_owned().into())
     }
 
     #[getter]
-    pub fn get_bins(&self) -> Option<Value> {
+    pub fn get_bins(&self) -> Option<PHPValue> {
         Some(self._as.bins.clone().into())
     }
 
@@ -2591,7 +2605,6 @@ pub fn new_aerospike_client(
     let res = aerospike_sync::Client::new(&policy._as, &hosts).map_err(|e| e.to_string())?;
     Ok(res)
 }
-
 
 #[php_function]
 pub fn Aerospike(policy: &ClientPolicy, hosts: &str) -> PhpResult<Zval> {
@@ -2745,7 +2758,6 @@ impl Client {
         Ok(())
     }
 
-
     /// Read all records in the specified namespace and set and return a record iterator. The scan
     /// executor puts records on a queue in separate threads. The calling thread concurrently pops
     /// records off the queue through the record iterator. Up to `policy.max_concurrent_nodes`
@@ -2764,7 +2776,6 @@ impl Client {
             .map_err(|e| e.to_string())?;
         Ok(res.into())
     }
-
 
     /// Execute a query on all server nodes and return a record iterator. The query executor puts
     /// records on a queue in separate threads. The calling thread concurrently pops records off
@@ -2844,7 +2855,7 @@ pub struct Key {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Key {
-    pub fn __construct(namespace: &str, set: &str, key: Value) -> Self {
+    pub fn __construct(namespace: &str, set: &str, key: PHPValue) -> Self {
         let _as = aerospike_core::Key::new(namespace, set, key.into()).unwrap();
         Key { _as: _as }
     }
@@ -2860,7 +2871,7 @@ impl Key {
     }
 
     #[getter]
-    pub fn get_value(&self) -> Option<Value> {
+    pub fn get_value(&self) -> Option<PHPValue> {
         self._as.user_key.clone().map(|v| v.into())
     }
 
@@ -2882,14 +2893,106 @@ impl FromZval<'_> for Key {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  Value
+//  GeoJSON
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class]
+pub struct GeoJSON {
+    v: String,
+}
+
+impl FromZval<'_> for GeoJSON {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &GeoJSON = zval.extract()?;
+
+        Some(GeoJSON { v: f.v.clone() })
+    }
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl GeoJSON {
+    #[getter]
+    pub fn get_value(&self) -> String {
+        self.v.clone()
+    }
+
+    #[setter]
+    pub fn set_value(&mut self, geo: String) {
+        self.v = geo
+    }
+
+    /// Returns a string representation of the value.
+    pub fn as_string(&self) -> String {
+        PHPValue::GeoJSON(self.v.clone()).as_string()
+    }
+}
+
+impl fmt::Display for GeoJSON {
+    fn fmt(&self, f: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
+        write!(f, "{}", self.as_string())
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  HLL
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class]
+pub struct HLL {
+    v: Vec<u8>,
+}
+
+impl FromZval<'_> for HLL {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &HLL = zval.extract()?;
+
+        Some(HLL { v: f.v.clone() })
+    }
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl HLL {
+    #[getter]
+    pub fn get_value(&self) -> Vec<u8> {
+        self.v.clone()
+    }
+
+    #[setter]
+    pub fn set_value(&mut self, hll: Vec<u8>) {
+        self.v = hll
+    }
+
+    /// Returns a string representation of the value.
+    pub fn as_string(&self) -> String {
+        PHPValue::HLL(self.v.clone()).as_string()
+    }
+}
+
+impl fmt::Display for HLL {
+    fn fmt(&self, f: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
+        write!(f, "{}", self.as_string())
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  PHPValue
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 // Container for bin values stored in the Aerospike database.
 #[derive(Debug, Clone, PartialEq, Eq)]
 //TODO: underlying_value
-pub enum Value {
+pub enum PHPValue {
     /// Empty value.
     Nil,
     /// Boolean value.
@@ -2914,11 +3017,11 @@ pub enum Value {
     Blob(Vec<u8>),
     /// List data type is an ordered collection of values. Lists can contain values of any
     /// supported data type. List data order is maintained on writes and reads.
-    List(Vec<Value>),
+    List(Vec<PHPValue>),
     /// Map data type is a collection of key-value pairs. Each key can only appear once in a
     /// collection and is associated with a value. Map keys and values can be any supported data
     /// type.
-    HashMap(HashMap<Value, Value>),
+    HashMap(HashMap<PHPValue, PHPValue>),
     /// GeoJSON data type are JSON formatted strings to encode geospatial information.
     GeoJSON(String),
 
@@ -2926,133 +3029,137 @@ pub enum Value {
     HLL(Vec<u8>),
 }
 
-
-
 #[allow(clippy::derive_hash_xor_eq)]
-impl Hash for Value {
+impl Hash for PHPValue {
     fn hash<H: Hasher>(&self, state: &mut H) {
         match *self {
-            Value::Nil => {
+            PHPValue::Nil => {
                 let v: Option<u8> = None;
                 v.hash(state);
             }
-            Value::Bool(ref val) => val.hash(state),
-            Value::Int(ref val) => val.hash(state),
-            Value::UInt(ref val) => val.hash(state),
-            Value::Float(ref val) => val.hash(state),
-            Value::String(ref val) | Value::GeoJSON(ref val) => val.hash(state),
-            Value::Blob(ref val) | Value::HLL(ref val) => val.hash(state),
-            Value::List(ref val) => val.hash(state),
-            Value::HashMap(_) => panic!("HashMaps cannot be used as map keys."),
-            // Value::OrderedMap(_) => panic!("OrderedMaps cannot be used as map keys."),
+            PHPValue::Bool(ref val) => val.hash(state),
+            PHPValue::Int(ref val) => val.hash(state),
+            PHPValue::UInt(ref val) => val.hash(state),
+            PHPValue::Float(ref val) => val.hash(state),
+            PHPValue::String(ref val) | PHPValue::GeoJSON(ref val) => val.hash(state),
+            PHPValue::Blob(ref val) | PHPValue::HLL(ref val) => val.hash(state),
+            PHPValue::List(ref val) => val.hash(state),
+            PHPValue::HashMap(_) => panic!("HashMaps cannot be used as map keys."),
+            // PHPValue::OrderedMap(_) => panic!("OrderedMaps cannot be used as map keys."),
         }
     }
 }
 
-impl Value {
+impl PHPValue {
     /// Returns a string representation of the value.
     pub fn as_string(&self) -> String {
         match *self {
-            Value::Nil => "<null>".to_string(),
-            Value::Int(ref val) => val.to_string(),
-            Value::UInt(ref val) => val.to_string(),
-            Value::Bool(ref val) => val.to_string(),
-            Value::Float(ref val) => val.to_string(),
-            Value::String(ref val) | Value::GeoJSON(ref val) => val.to_string(),
-            Value::Blob(ref val) | Value::HLL(ref val) => format!("{:?}", val),
-            Value::List(ref val) => format!("{:?}", val),
-            Value::HashMap(ref val) => format!("{:?}", val),
-            // Value::OrderedMap(ref val) => format!("{:?}", val),
+            PHPValue::Nil => "<null>".to_string(),
+            PHPValue::Int(ref val) => val.to_string(),
+            PHPValue::UInt(ref val) => val.to_string(),
+            PHPValue::Bool(ref val) => val.to_string(),
+            PHPValue::Float(ref val) => val.to_string(),
+            PHPValue::String(ref val) => val.to_string(),
+            PHPValue::GeoJSON(ref val) => format!("GeoJSON('{}')", val.to_string()),
+            PHPValue::Blob(ref val) => format!("{:?}", val),
+            PHPValue::HLL(ref val) => format!("HLL('{:?}')", val),
+            PHPValue::List(ref val) => format!("{:?}", val),
+            PHPValue::HashMap(ref val) => format!("{:?}", val),
+            // PHPValue::OrderedMap(ref val) => format!("{:?}", val),
         }
     }
 }
 
-impl fmt::Display for Value {
+impl fmt::Display for PHPValue {
     fn fmt(&self, f: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
         write!(f, "{}", self.as_string())
     }
 }
 
-impl IntoZval for Value {
+impl IntoZval for PHPValue {
     const TYPE: DataType = DataType::Mixed;
 
     fn set_zval(self, zv: &mut Zval, persistent: bool) -> Result<()> {
         match self {
-            Value::Nil => zv.set_null(),
-            Value::Bool(b) => zv.set_bool(b),
-            Value::Int(i) => zv.set_long(i),
-            Value::UInt(ui) => zv.set_long(ui as i64),
-            Value::Float(f) => zv.set_double(f),
-            Value::String(s) => zv.set_string(&s, persistent)?,
-            Value::Blob(b) => zv.set_binary(b),
-            Value::List(l) => zv.set_array(l)?,
-            Value::HashMap(h) => {
+            PHPValue::Nil => zv.set_null(),
+            PHPValue::Bool(b) => zv.set_bool(b),
+            PHPValue::Int(i) => zv.set_long(i),
+            PHPValue::UInt(ui) => zv.set_long(ui as i64),
+            PHPValue::Float(f) => zv.set_double(f),
+            PHPValue::String(s) => zv.set_string(&s, persistent)?,
+            PHPValue::Blob(b) => zv.set_binary(b),
+            PHPValue::List(l) => zv.set_array(l)?,
+            PHPValue::HashMap(h) => {
                 let mut arr = ZendHashTable::with_capacity(h.len() as u32);
                 h.iter().for_each(|(k, v)| {
-                    arr.insert::<Value>(&k.to_string(), v.clone().into())
+                    arr.insert::<PHPValue>(&k.to_string(), v.clone().into())
                         .expect("error converting hash");
                 });
 
                 zv.set_hashtable(arr)
             }
-            Value::GeoJSON(gj) =>
-                // let mut obj = ZendObject::new_stdclass();;
-                // let val = Value::GeoJSON(gj);
-                // obj.set_property("geo_json", val);
-                // zv.set_object(&mut obj);
-                zv.set_string(&gj, persistent)?,
-            Value::HLL(b) => zv.set_binary(b),
+            PHPValue::GeoJSON(s) => {
+                let geo = GeoJSON { v: s.clone() };
+                let zo: ZBox<ZendObject> = geo.into_zend_object()?;
+                zv.set_object(zo.into_raw());
+            }
+            PHPValue::HLL(b) => zv.set_binary(b),
         }
 
         Ok(())
     }
 }
 
-fn from_zval(zval: &Zval) -> Option<Value> {
+fn from_zval(zval: &Zval) -> Option<PHPValue> {
     match zval.get_type() {
-        // DataType::Undef => Some(Value::Nil),
-        DataType::Null => Some(Value::Nil),
-        DataType::False => Some(Value::Bool(false)),
-        DataType::True => Some(Value::Bool(true)),
-        DataType::Bool => zval.bool().map(|v| Value::Bool(v)),
-        DataType::Long => zval.long().map(|v| Value::Int(v)),
+        // DataType::Undef => Some(PHPValue::Nil),
+        DataType::Null => Some(PHPValue::Nil),
+        DataType::False => Some(PHPValue::Bool(false)),
+        DataType::True => Some(PHPValue::Bool(true)),
+        DataType::Bool => zval.bool().map(|v| PHPValue::Bool(v)),
+        DataType::Long => zval.long().map(|v| PHPValue::Int(v)),
         DataType::Double => zval
             .double()
-            .map(|v| Value::Float(ordered_float::OrderedFloat(v))),
-        DataType::String => zval.string().map(|v| Value::String(v)),
+            .map(|v| PHPValue::Float(ordered_float::OrderedFloat(v))),
+        DataType::String => zval.string().map(|v| PHPValue::String(v)),
         DataType::Array => {
             zval.array().map(|arr| {
                 if arr.has_sequential_keys() {
                     // it's an array
-                    let val_arr: Vec<Value> =
+                    let val_arr: Vec<PHPValue> =
                         arr.iter().map(|(_, _, v)| from_zval(v).unwrap()).collect();
-                    Value::List(val_arr)
+                    PHPValue::List(val_arr)
                 } else if arr.has_numerical_keys() {
                     // it's a hashmap with numerical keys
-                    let mut h = HashMap::<Value, Value>::with_capacity(arr.len());
+                    let mut h = HashMap::<PHPValue, PHPValue>::with_capacity(arr.len());
                     arr.iter().for_each(|(i, _, v)| {
-                        h.insert(Value::UInt(i), from_zval(v).unwrap());
+                        h.insert(PHPValue::UInt(i), from_zval(v).unwrap());
                     });
-                    Value::HashMap(h)
+                    PHPValue::HashMap(h)
                 } else {
                     // it's a hashmap with string keys
                     let mut h = HashMap::with_capacity(arr.len());
                     arr.iter().for_each(|(_, k, v)| {
                         h.insert(
-                            Value::String(k.expect("Invalid key in hashmap".into())),
+                            PHPValue::String(k.expect("Invalid key in hashmap".into())),
                             from_zval(v).expect("Invalid value in hashmap".into()),
                         );
                     });
-                    Value::HashMap(h)
+                    PHPValue::HashMap(h)
                 }
             })
         }
-        // DataType::Object(_) => zval.string().map(|v| Value::GeoJSON(v)),
+        DataType::Object(_) => {
+            if let Some(o) = zval.extract::<GeoJSON>() {
+                return Some(PHPValue::GeoJSON(o.v));
+            }
+            panic!("Invalid value");
+        }
         _ => unreachable!(),
     }
 }
 
-impl FromZval<'_> for Value {
+impl FromZval<'_> for PHPValue {
     const TYPE: DataType = DataType::Mixed;
 
     fn from_zval(zval: &Zval) -> Option<Self> {
@@ -3060,75 +3167,74 @@ impl FromZval<'_> for Value {
     }
 }
 
-impl From<HashMap<String, aerospike_core::Value>> for Value {
+impl From<HashMap<String, aerospike_core::Value>> for PHPValue {
     fn from(h: HashMap<String, aerospike_core::Value>) -> Self {
-        let mut hash = HashMap::<Value, Value>::with_capacity(h.len());
+        let mut hash = HashMap::<PHPValue, PHPValue>::with_capacity(h.len());
         h.iter().for_each(|(k, v)| {
-            hash.insert(Value::String(k.into()), v.clone().into());
+            hash.insert(PHPValue::String(k.into()), v.clone().into());
         });
-        Value::HashMap(hash)
+        PHPValue::HashMap(hash)
     }
 }
 
-impl From<Value> for aerospike_core::Value {
-    fn from(other: Value) -> Self {
+impl From<PHPValue> for aerospike_core::Value {
+    fn from(other: PHPValue) -> Self {
         match other {
-            Value::Nil => aerospike_core::Value::Nil,
-            Value::Bool(b) => aerospike_core::Value::Bool(b),
-            Value::Int(i) => aerospike_core::Value::Int(i),
-            Value::UInt(ui) => aerospike_core::Value::UInt(ui),
-            Value::Float(f) => aerospike_core::Value::Float(f64::from(f).into()),
-            Value::String(s) => aerospike_core::Value::String(s),
-            Value::Blob(b) => aerospike_core::Value::Blob(b),
-            Value::List(l) => {
+            PHPValue::Nil => aerospike_core::Value::Nil,
+            PHPValue::Bool(b) => aerospike_core::Value::Bool(b),
+            PHPValue::Int(i) => aerospike_core::Value::Int(i),
+            PHPValue::UInt(ui) => aerospike_core::Value::UInt(ui),
+            PHPValue::Float(f) => aerospike_core::Value::Float(f64::from(f).into()),
+            PHPValue::String(s) => aerospike_core::Value::String(s),
+            PHPValue::Blob(b) => aerospike_core::Value::Blob(b),
+            PHPValue::List(l) => {
                 let mut nl = Vec::<aerospike_core::Value>::with_capacity(l.len());
                 l.iter().for_each(|v| nl.push(v.clone().into()));
                 aerospike_core::Value::List(nl)
             }
-            Value::HashMap(h) => {
+            PHPValue::HashMap(h) => {
                 let mut arr = HashMap::with_capacity(h.len());
                 h.iter().for_each(|(k, v)| {
                     arr.insert(k.clone().into(), v.clone().into());
                 });
                 aerospike_core::Value::HashMap(arr)
             }
-            Value::GeoJSON(gj) => aerospike_core::Value::GeoJSON(gj),
-            Value::HLL(b) => aerospike_core::Value::HLL(b),
+            PHPValue::GeoJSON(gj) => aerospike_core::Value::GeoJSON(gj),
+            PHPValue::HLL(b) => aerospike_core::Value::HLL(b),
         }
     }
 }
 
-impl From<aerospike_core::Value> for Value {
+impl From<aerospike_core::Value> for PHPValue {
     fn from(other: aerospike_core::Value) -> Self {
         match other {
-            aerospike_core::Value::Nil => Value::Nil,
-            aerospike_core::Value::Bool(b) => Value::Bool(b),
-            aerospike_core::Value::Int(i) => Value::Int(i),
-            aerospike_core::Value::UInt(ui) => Value::UInt(ui),
+            aerospike_core::Value::Nil => PHPValue::Nil,
+            aerospike_core::Value::Bool(b) => PHPValue::Bool(b),
+            aerospike_core::Value::Int(i) => PHPValue::Int(i),
+            aerospike_core::Value::UInt(ui) => PHPValue::UInt(ui),
             aerospike_core::Value::Float(fv) => {
-                Value::Float(ordered_float::OrderedFloat(fv.into()))
+                PHPValue::Float(ordered_float::OrderedFloat(fv.into()))
             }
-            aerospike_core::Value::String(s) => Value::String(s),
-            aerospike_core::Value::Blob(b) => Value::Blob(b),
+            aerospike_core::Value::String(s) => PHPValue::String(s),
+            aerospike_core::Value::Blob(b) => PHPValue::Blob(b),
             aerospike_core::Value::List(l) => {
-                let mut nl = Vec::<Value>::with_capacity(l.len());
+                let mut nl = Vec::<PHPValue>::with_capacity(l.len());
                 l.iter().for_each(|v| nl.push(v.clone().into()));
-                Value::List(nl)
+                PHPValue::List(nl)
             }
             aerospike_core::Value::HashMap(h) => {
                 let mut arr = HashMap::with_capacity(h.len());
                 h.iter().for_each(|(k, v)| {
                     arr.insert(k.clone().into(), v.clone().into());
                 });
-                Value::HashMap(arr)
+                PHPValue::HashMap(arr)
             }
-            aerospike_core::Value::GeoJSON(gj) => Value::GeoJSON(gj),
-            aerospike_core::Value::HLL(b) => Value::HLL(b),
+            aerospike_core::Value::GeoJSON(gj) => PHPValue::GeoJSON(gj),
+            aerospike_core::Value::HLL(b) => PHPValue::HLL(b),
             _ => unreachable!(),
         }
     }
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3136,40 +3242,38 @@ impl From<aerospike_core::Value> for Value {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 #[php_class]
-pub struct ValueType;
+pub struct Value;
 
 #[php_impl]
 #[derive(ZvalConvert)]
-impl ValueType{
-    
-    pub fn nil() -> Value {
-        Value::Nil
+impl Value {
+    pub fn nil() -> PHPValue {
+        PHPValue::Nil
     }
 
-    pub fn int(val: i64) -> Value { 
-        Value::Int(val)
+    pub fn int(val: i64) -> PHPValue {
+        PHPValue::Int(val)
     }
 
-    pub fn uint(val: u64) -> Value { 
-        Value::UInt(val)
+    pub fn uint(val: u64) -> PHPValue {
+        PHPValue::UInt(val)
     }
 
-    pub fn string(val: String) -> Value { 
-        Value::String(val)
+    pub fn string(val: String) -> PHPValue {
+        PHPValue::String(val)
     }
 
-    pub fn blob(val: Vec<u8>) -> Value { 
-        Value::Blob(val)
+    pub fn blob(val: Vec<u8>) -> PHPValue {
+        PHPValue::Blob(val)
     }
 
-    pub fn geo_json(val: String) -> Value { 
-        Value::GeoJSON(val)
+    pub fn geo_json(val: String) -> GeoJSON {
+        GeoJSON { v: val }
     }
 
-    pub fn hll(val: Vec<u8>) -> Value { 
-        Value::HLL(val)
+    pub fn hll(val: Vec<u8>) -> HLL {
+        HLL { v: val }
     }
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -3238,7 +3342,6 @@ impl From<Arc<aerospike_core::Recordset>> for Recordset {
 //     }
 // }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  utility methods
@@ -3262,7 +3365,6 @@ pub fn print_header(desc: &str, emph: u8) {
     println!("*{:^76}*", " ");
     println!("******************************************************************************");
 }
-
 
 fn bins_flag(bins: Option<Vec<String>>) -> aerospike_core::Bins {
     match bins {
