@@ -83,19 +83,54 @@ namespace {
      * - `as_regions_containing_point`
      */
     class Filter {
+
+        /* Create range filter for queries; supports integer values.       
+         *
+         * @param  string $bin_name
+         * @param  PhpValue $begin
+         * @param  PhpValue $end
+         * @return Filter
+         */
         public static function range(string $bin_name, mixed $begin, mixed $end): \Filter {}
 
+        /* Create contains number filter for queries on a collection index. */
         public static function contains(string $bin_name, mixed $value, ?\CollectionIndexType $cit): \Filter {}
 
+        /* Create contains range filter for queries on a collection index. */
         public static function containsRange(string $bin_name, mixed $begin, mixed $end, ?\CollectionIndexType $cit): \Filter {}
 
+        /*  Create geospatial "points within region" filter for queries. For queries on a collection index
+        the collection index type must be specified.
+        Usage :
+        $pointString = '{"type":"AeroCircle","coordinates":[[-89.0000,23.0000], 1000]}'
+        Filter::withinRegion("binName", $pointString)
+        */
         public static function withinRegion(string $bin_name, string $region, ?\CollectionIndexType $cit): \Filter {}
 
-        public static function withinRadius(string $bin_name, float $lat, float $lng, float $radius, ?\CollectionIndexType $cit): \Filter {}
+        /*  Create geospatial "points within radius" filter for queries. For queries on a collection index
+        the collection index type must be specified.
+        Usage :
 
+        Usage :
+        $lat = 43.0004;
+        $lng = -89.0005;
+        $radius = 1000;
+        $filter = Filter::withinRadius("binName", $lat, $lng, $radius);
+        */
+        public static function withinRadius(string $bin_name, float $lat, float $lng, float $radius, ?\CollectionIndexType $cit): \Filter {}
+        
+        /*  Create geospatial "regions containing point" filter for queries. For queries on a collection
+        index the collection index type must be specified.
+        Usage :
+        $pointString = '{"type":"AeroCircle","coordinates":[[-89.0000,23.0000], 1000]}'
+        Filter::regionsContainingPoint("binName", $pointString)
+        */
         public static function regionsContainingPoint(string $bin_name, string $point, ?\CollectionIndexType $cit): \Filter {}
     }
 
+    /* 
+    `QueryPolicy` encapsulates parameters for query operations.
+    */
     class QueryPolicy {
         public $fail_on_cluster_change;
 
@@ -248,6 +283,9 @@ namespace {
         public static function hll(array $val): \HLL {}
     }
 
+    /* 
+    `ScanPolicy` encapsulates optional parameters used in scan operations.
+    */
     class ScanPolicy {
         public $max_concurrent_nodes;
 
@@ -294,6 +332,7 @@ namespace {
         public function setFilterExpression(?mixed $filter_expression) {}
     }
 
+    /* Underlying data type of secondary index. */
     class IndexType {
         public static function numeric(): \IndexType {}
 
@@ -302,6 +341,7 @@ namespace {
         public static function geo2DSphere(): \IndexType {}
     }
 
+    /* creates a value of type GeoJson */
     class GeoJSON {
         public $value;
 
@@ -315,6 +355,7 @@ namespace {
         public function asString(): string {}
     }
 
+    /* creates a value of type HLL */
     class HLL {
         public $value;
 
@@ -391,11 +432,13 @@ namespace {
          * generation. Otherwise, fail. This is useful for restore after backup.
          */
         public static function expectGenGreater(): \GenerationPolicy {}
-    }
+    }   
 
+    /* Key and bin names used in batch read commands where variable bins are needed for each key. */
     class BatchRead {
         public function __construct(mixed $key, ?array $bins) {}
-
+        
+        /* Will contain the record after the batch read operation. */
         public function record(): ?\Record {}
     }
 
@@ -428,13 +471,19 @@ namespace {
         public function next(): ?\Record {}
     }
 
+    /* Secondary index collection type. */
     class CollectionIndexType {
+
+        /* Normal, scalar index. */
         public static function default(): \CollectionIndexType {}
 
+        /* Index list elements. */
         public static function list(): \CollectionIndexType {}
 
+        /* Index map keys. */
         public static function mapKeys(): \CollectionIndexType {}
 
+        /* Index map values. */
         public static function mapValues(): \CollectionIndexType {}
     }
 
@@ -984,6 +1033,7 @@ namespace {
         public function setFilterExpression(?mixed $filter_expression) {}
     }
 
+    /* `WritePolicy` encapsulates parameters for all write operations. */
     class WritePolicy {
         public $generation_policy;
 
@@ -1102,6 +1152,10 @@ namespace {
         public static function createOnly(): \RecordExistsAction {}
     }
 
+    /* 
+    `ReadPolicy` excapsulates parameters for transaction policy attributes
+    used in all database operation calls. 
+    */
     class ReadPolicy {
         public $max_retries;
 
@@ -1130,6 +1184,11 @@ namespace {
         public function setFilterExpression(?mixed $filter_expression) {}
     }
 
+    /**
+        * Unique record identifier. Records can be identified using a specified namespace, an optional
+        * set name and a user defined key which must be uique within a set. Records can also be
+        * identified by namespace/digest, which is the combination used on the server.
+     */
     class Key {
         public $namespace;
 
@@ -1139,6 +1198,12 @@ namespace {
 
         public $setname;
 
+        /**
+            *Construct a new key given a namespace, a set name and a user key value.
+            *# Panics
+            *Only integers, strings and blobs (`Vec<u8>`) can be used as user keys. The constructor will
+            *panic if any other value type is passed.
+        */
         public function __construct(string $namespace, string $set, mixed $key) {}
 
         public function getNamespace(): string {}
