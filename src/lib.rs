@@ -1703,7 +1703,7 @@ impl WritePolicy {
     #[getter]
     pub fn get_record_exists_action(&self) -> RecordExistsAction {
         RecordExistsAction {
-            _as: self._as.record_exists_action.clone(), // Assuming _as.record_exists_action is the corresponding field in aerospike_core
+            _as: self._as.record_exists_action.clone(), 
             v: match &self._as.record_exists_action {
                 aerospike_core::RecordExistsAction::Update => _RecordExistsAction::Update,
                 aerospike_core::RecordExistsAction::UpdateOnly => _RecordExistsAction::UpdateOnly,
@@ -1722,7 +1722,7 @@ impl WritePolicy {
     #[getter]
     pub fn get_generation_policy(&self) -> GenerationPolicy {
         GenerationPolicy {
-            _as: self._as.generation_policy.clone(), // Assuming _as.generation_policy is the corresponding field in aerospike_core
+            _as: self._as.generation_policy.clone(), 
             v: match &self._as.generation_policy {
                 aerospike_core::GenerationPolicy::None => _GenerationPolicy::None,
                 aerospike_core::GenerationPolicy::ExpectGenEqual => {
@@ -1743,7 +1743,7 @@ impl WritePolicy {
     #[getter]
     pub fn get_commit_level(&self) -> CommitLevel {
         CommitLevel {
-            _as: self._as.commit_level.clone(), // Assuming _as.commit_level is the corresponding field in aerospike_core
+            _as: self._as.commit_level.clone(), 
             v: match &self._as.commit_level {
                 aerospike_core::CommitLevel::CommitAll => _CommitLevel::CommitAll,
                 aerospike_core::CommitLevel::CommitMaster => _CommitLevel::CommitMaster,
@@ -1769,7 +1769,7 @@ impl WritePolicy {
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         Expiration {
-            _as: self._as.expiration, // Assuming _as.expiration is the corresponding field in aerospike_core
+            _as: self._as.expiration, 
             v: match &self._as.expiration {
                 aerospike_core::Expiration::Seconds(secs) => _Expiration::Seconds(*secs),
                 aerospike_core::Expiration::NamespaceDefault => _Expiration::NamespaceDefault,
@@ -2202,6 +2202,10 @@ impl Filter {
         }
     }
 
+
+    // Example code :
+    // $pointString = '{"type":"AeroCircle","coordinates":[[-89.0000,23.0000], 1000]}'
+    // Filter::regionsContainingPoint("binName", $pointString)
     pub fn within_region(bin_name: &str, region: &str, cit: Option<&CollectionIndexType>) -> Self {
         let default = CollectionIndexType::Default();
         let cit = cit.unwrap_or(&default);
@@ -2214,6 +2218,11 @@ impl Filter {
         }
     }
 
+    // Example code :
+    // $lat = 43.0004;
+    // $lng = -89.0005;
+    // $radius = 1000;
+    // $filter = Filter::regionsContainingPoint("binName", $lat, $lng, $radius);
     pub fn within_radius(
         bin_name: &str,
         lat: f64,
@@ -2435,7 +2444,16 @@ impl ClientPolicy {
     // /// need only one connection pool per node. Machines with larger number of CPU cores may have
     // /// their performance limited by contention for pooled connections. Contention for pooled
     // /// connections can be reduced by creating multiple mini connection pools per node.
-    // pub conn_pools_per_node: usize,
+
+    #[getter]
+    pub fn get_conn_pools_per_node(&self) -> usize {
+        self._as.conn_pools_per_node
+    }
+
+    #[setter]
+    pub fn set_conn_pools_per_node(&mut self, sz: usize) {
+        self._as.conn_pools_per_node = sz;
+    }
 
     // /// Throw exception if host connection fails during addHost().
     // pub fail_if_not_connected: bool,
@@ -2480,47 +2498,6 @@ impl ClientPolicy {
     // pub cluster_name: Option<String>,
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  Host
-//
-////////////////////////////////////////////////////////////////////////////////////////////
-
-/// Host name/port of database server.
-#[php_class]
-pub struct Host {
-    _as: aerospike_core::Host,
-}
-
-#[php_impl]
-#[derive(ZvalConvert)]
-impl Host {
-    pub fn __construct(name: &str, port: u16) -> Self {
-        Host {
-            _as: aerospike_core::Host::new(name, port),
-        }
-    }
-
-    #[getter]
-    pub fn get_name(&self) -> String {
-        self._as.name.clone()
-    }
-
-    #[setter]
-    pub fn set_name(&mut self, name: String) {
-        self._as.name = name;
-    }
-
-    #[getter]
-    pub fn get_port(&self) -> u16 {
-        self._as.port
-    }
-
-    #[setter]
-    pub fn set_port(&mut self, port: u16) {
-        self._as.port = port;
-    }
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //

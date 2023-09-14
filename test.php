@@ -264,9 +264,15 @@ echo "Query results count: $count\n";
 echo "Query results sum: $sum\n";
 
 
-print_header("Tests were all run successfully", 1);
+////////////////////////////////////////////////////////////////////////////////
+//
+// create a value of certain Value type
+//
+////////////////////////////////////////////////////////////////////////////////
 
-$geoVal = ValueType::geoJson("{\"type\":\"Point\",\"coordinates\":[-80.590003, 28.60009]}");
+$geoVal = Value::geoJson("{\"type\":\"Point\",\"coordinates\":[-80.590003, 28.60009]}");
 $geoBin = new Bin("Geo_Location", $geoVal); 
 
+
+print_header("Tests were all run successfully", 1);
 $client->close();
