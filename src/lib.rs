@@ -2355,9 +2355,21 @@ pub struct ClientPolicy {
 #[derive(ZvalConvert)]
 impl ClientPolicy {
     pub fn __construct() -> Self {
-        ClientPolicy {
+        let mut res = ClientPolicy {
             _as: aerospike_core::ClientPolicy::default(),
-        }
+        };
+
+        // By default, only allow two connections per node.
+        // PHP is single threaded, so usually one connection should be enough per node.
+        // TRhe second connection may come handy sometimes for tending.
+        res._as.max_conns_per_node = 2;
+
+        // timeout should be shorter than the 30s default due to the nature of internet.
+        res._as.timeout = Some(Duration::new(5, 0));
+
+        // idle_timeout should be longer than the 5s default due to the nature of internet.
+        res._as.idle_timeout = Some(Duration::new(30, 0));
+        res
     }
 
     #[getter]
