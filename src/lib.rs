@@ -1418,9 +1418,9 @@ impl BasePolicyWrapper {
     }
 
     #[setter]
-    pub fn set_timeout(&mut self, timeout_in_millis: u64) {
+    pub fn set_timeout(&mut self, timeout_millis: u64) {
         println!("\n set timeout called");
-        let timeout = Duration::from_millis(timeout_in_millis);
+        let timeout = Duration::from_millis(timeout_millis);
         self._as.timeout = Some(timeout);
     }
 
@@ -1644,9 +1644,9 @@ impl ReadPolicy {
     }
 
     #[setter]
-    pub fn set_timeout(&mut self, timeout_in_millis: u64) {
+    pub fn set_timeout(&mut self, timeout_millis: u64) {
         println!("\n set timeout called");
-        let timeout = Duration::from_millis(timeout_in_millis);
+        let timeout = Duration::from_millis(timeout_millis);
         self._as.timeout = Some(timeout);
     }
 
@@ -1703,7 +1703,7 @@ impl WritePolicy {
     #[getter]
     pub fn get_record_exists_action(&self) -> RecordExistsAction {
         RecordExistsAction {
-            _as: self._as.record_exists_action.clone(), 
+            _as: self._as.record_exists_action.clone(),
             v: match &self._as.record_exists_action {
                 aerospike_core::RecordExistsAction::Update => _RecordExistsAction::Update,
                 aerospike_core::RecordExistsAction::UpdateOnly => _RecordExistsAction::UpdateOnly,
@@ -1722,7 +1722,7 @@ impl WritePolicy {
     #[getter]
     pub fn get_generation_policy(&self) -> GenerationPolicy {
         GenerationPolicy {
-            _as: self._as.generation_policy.clone(), 
+            _as: self._as.generation_policy.clone(),
             v: match &self._as.generation_policy {
                 aerospike_core::GenerationPolicy::None => _GenerationPolicy::None,
                 aerospike_core::GenerationPolicy::ExpectGenEqual => {
@@ -1743,7 +1743,7 @@ impl WritePolicy {
     #[getter]
     pub fn get_commit_level(&self) -> CommitLevel {
         CommitLevel {
-            _as: self._as.commit_level.clone(), 
+            _as: self._as.commit_level.clone(),
             v: match &self._as.commit_level {
                 aerospike_core::CommitLevel::CommitAll => _CommitLevel::CommitAll,
                 aerospike_core::CommitLevel::CommitMaster => _CommitLevel::CommitMaster,
@@ -1769,7 +1769,7 @@ impl WritePolicy {
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         Expiration {
-            _as: self._as.expiration, 
+            _as: self._as.expiration,
             v: match &self._as.expiration {
                 aerospike_core::Expiration::Seconds(secs) => _Expiration::Seconds(*secs),
                 aerospike_core::Expiration::NamespaceDefault => _Expiration::NamespaceDefault,
@@ -2202,7 +2202,6 @@ impl Filter {
         }
     }
 
-
     // Example code :
     // $pointString = '{"type":"AeroCircle","coordinates":[[-89.0000,23.0000], 1000]}'
     // Filter::regionsContainingPoint("binName", $pointString)
@@ -2278,9 +2277,9 @@ pub struct Statement {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Statement {
-    pub fn __construct(namespace: &str, setname: &str, bins: Option<Vec<String>>) -> Self {
+    pub fn __construct(namespace: &str, set_name: &str, bins: Option<Vec<String>>) -> Self {
         Statement {
-            _as: aerospike_core::Statement::new(namespace, setname, bins_flag(bins)),
+            _as: aerospike_core::Statement::new(namespace, set_name, bins_flag(bins)),
         }
     }
 
@@ -2406,9 +2405,9 @@ impl ClientPolicy {
     }
 
     #[setter]
-    pub fn set_timeout(&mut self, timeout_in_millis: u64) {
+    pub fn set_timeout(&mut self, timeout_millis: u64) {
         println!("\n set timeout called");
-        let timeout = Duration::from_millis(timeout_in_millis);
+        let timeout = Duration::from_millis(timeout_millis);
         self._as.timeout = Some(timeout);
     }
 
@@ -2424,9 +2423,9 @@ impl ClientPolicy {
     }
 
     #[setter]
-    pub fn set_idle_timeout(&mut self, timeout_in_millis: u64) {
+    pub fn set_idle_timeout(&mut self, timeout_millis: u64) {
         println!("\n set timeout called");
-        let timeout = Duration::from_millis(timeout_in_millis);
+        let timeout = Duration::from_millis(timeout_millis);
         self._as.idle_timeout = Some(timeout);
     }
 
@@ -2497,7 +2496,6 @@ impl ClientPolicy {
     // /// that support the "cluster-name" info command.
     // pub cluster_name: Option<String>,
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2744,12 +2742,12 @@ impl Client {
         &self,
         policy: &ScanPolicy,
         namespace: &str,
-        setname: &str,
+        set_name: &str,
         bins: Option<Vec<String>>,
     ) -> PhpResult<Recordset> {
         let res = self
             ._as
-            .scan(&policy._as, namespace, setname, bins_flag(bins))
+            .scan(&policy._as, namespace, set_name, bins_flag(bins))
             .map_err(|e| e.to_string())?;
         Ok(res.into())
     }
@@ -2843,7 +2841,7 @@ impl Key {
     }
 
     #[getter]
-    pub fn get_setname(&self) -> String {
+    pub fn get_set_name(&self) -> String {
         self._as.set_name.clone()
     }
 
@@ -3331,6 +3329,7 @@ impl From<Arc<aerospike_core::Recordset>> for Recordset {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+#[cfg(debug_assertions)]
 #[php_function(defaults(emph = 0))]
 pub fn print_header(desc: &str, emph: u8) {
     let desc = if emph == 1 {
