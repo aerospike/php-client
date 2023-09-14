@@ -1352,17 +1352,17 @@ impl From<&Concurrency> for aerospike_core::Concurrency {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 #[php_class]
-pub struct BasePolicyWrapper {
+pub struct BasePolicy {
     _as: aerospike_core::policy::BasePolicy,
 }
 
-impl FromZval<'_> for BasePolicyWrapper {
+impl FromZval<'_> for BasePolicy {
     const TYPE: DataType = DataType::Mixed;
 
     fn from_zval(zval: &Zval) -> Option<Self> {
-        let f: &BasePolicyWrapper = zval.extract()?;
+        let f: &BasePolicy = zval.extract()?;
 
-        Some(BasePolicyWrapper { _as: f._as.clone() })
+        Some(BasePolicy { _as: f._as.clone() })
     }
 }
 
@@ -1370,7 +1370,7 @@ impl FromZval<'_> for BasePolicyWrapper {
 /// an instance of `BasePolicy`.
 #[php_impl]
 #[derive(ZvalConvert)]
-impl BasePolicyWrapper {
+impl BasePolicy {
     #[getter]
     pub fn get_priority(&self) -> Priority {
         Priority {
@@ -1487,14 +1487,14 @@ impl BatchPolicy {
     }
 
     #[getter]
-    pub fn get_base_policy(&self) -> BasePolicyWrapper {
-        BasePolicyWrapper {
+    pub fn get_base_policy(&self) -> BasePolicy {
+        BasePolicy {
             _as: self._as.base_policy.clone(),
         }
     }
 
     #[setter]
-    pub fn set_base_policy(&mut self, base_policy: BasePolicyWrapper) {
+    pub fn set_base_policy(&mut self, base_policy: BasePolicy) {
         self._as.base_policy = base_policy._as;
     }
 
@@ -1689,14 +1689,14 @@ impl WritePolicy {
     }
 
     #[getter]
-    pub fn get_base_policy(&self) -> BasePolicyWrapper {
-        BasePolicyWrapper {
+    pub fn get_base_policy(&self) -> BasePolicy {
+        BasePolicy {
             _as: self._as.base_policy.clone(),
         }
     }
 
     #[setter]
-    pub fn set_base_policy(&mut self, base_policy: BasePolicyWrapper) {
+    pub fn set_base_policy(&mut self, base_policy: BasePolicy) {
         self._as.base_policy = base_policy._as;
     }
 
@@ -1853,14 +1853,14 @@ impl QueryPolicy {
     }
 
     #[getter]
-    pub fn get_base_policy(&self) -> BasePolicyWrapper {
-        BasePolicyWrapper {
+    pub fn get_base_policy(&self) -> BasePolicy {
+        BasePolicy {
             _as: self._as.base_policy.clone(),
         }
     }
 
     #[setter]
-    pub fn set_base_policy(&mut self, base_policy: BasePolicyWrapper) {
+    pub fn set_base_policy(&mut self, base_policy: BasePolicy) {
         self._as.base_policy = base_policy._as;
     }
     #[getter]
@@ -1932,14 +1932,14 @@ impl ScanPolicy {
     }
 
     #[getter]
-    pub fn get_base_policy(&self) -> BasePolicyWrapper {
-        BasePolicyWrapper {
+    pub fn get_base_policy(&self) -> BasePolicy {
+        BasePolicy {
             _as: self._as.base_policy.clone(),
         }
     }
 
     #[setter]
-    pub fn set_base_policy(&mut self, base_policy: BasePolicyWrapper) {
+    pub fn set_base_policy(&mut self, base_policy: BasePolicy) {
         self._as.base_policy = base_policy._as;
     }
 
@@ -3329,7 +3329,6 @@ impl From<Arc<aerospike_core::Recordset>> for Recordset {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[cfg(debug_assertions)]
 #[php_function(defaults(emph = 0))]
 pub fn print_header(desc: &str, emph: u8) {
     let desc = if emph == 1 {
