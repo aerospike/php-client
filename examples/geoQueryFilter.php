@@ -12,32 +12,18 @@ function createClient() {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-print_header("Example GEO2SPHERE FILTER");
 
 function insertData($client) {
     echo "Inserting test data ... \n";
     $circleFormat = '{"type":"AeroCircle","coordinates":[[%f,%f], %f]}';
     $target_string = sprintf($circleFormat, -80.590000, 28.60000, 1000);
-    $geoLoc = new Bin("bottom_targets", ValueType::geoJson($target_string));
+    $geoLoc = new Bin("bottom_targets", Value::geoJson($target_string));
     $key = new Key("test", "testGeo", "geoKey");
     $wp = new WritePolicy();
     $client->put($wp, $key, [$geoLoc]);
 
 }
 
-function createTestGeoLoc($client) {
-    echo "Creating test data ... \n";
-    $client->createIndex("test", "deliverySet", "area", "deliveryArea", IndexType::Geo2DSphere());
-
-    $circleFormat = '{"type":"AeroCircle","coordinates":[[%f,%f], %f]}';
-    $target_string = sprintf($circleFormat, -80.590000, 28.60000, 1000);
-    // $target = create_geo_json($target_string);
-    $geoLoc = new Bin("area", $target_string);
-    $key = new Key("test", "deliverySet", "deliveryKey");
-    $wp = new WritePolicy();
-    $client->put($wp, $key, [$geoLoc]);
-
-}
 
 function getBins($client) {
     echo "Getting Test data ... \n";
@@ -52,7 +38,6 @@ function geoFilter($client) {
     $lng = -80.590003;
     $lat = 28.60009;
 
-    // $pointFormat = '{"type":"Point","coordinates":[%f,%.5f]}';
     $point_string = '{"type":"Point","coordinates":[-80.590003, 28.60009]}';
     $statement = new Statement("test", "deliverySet");
     $statement->filters = [Filter::regionsContainingPoint("area", $point_string)];
@@ -72,8 +57,7 @@ function geoFilter($client) {
 
 $client = createClient();
 // insertData($client);
-// createTestGeoLoc($client);
-getBins($client);
+// getBins($client);
 // geoFilter($client);
 
 $client->close();

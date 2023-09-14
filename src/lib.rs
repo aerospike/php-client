@@ -1419,7 +1419,6 @@ impl BasePolicy {
 
     #[setter]
     pub fn set_timeout(&mut self, timeout_millis: u64) {
-        println!("\n set timeout called");
         let timeout = Duration::from_millis(timeout_millis);
         self._as.timeout = Some(timeout);
     }
@@ -1645,7 +1644,6 @@ impl ReadPolicy {
 
     #[setter]
     pub fn set_timeout(&mut self, timeout_millis: u64) {
-        println!("\n set timeout called");
         let timeout = Duration::from_millis(timeout_millis);
         self._as.timeout = Some(timeout);
     }
@@ -2418,7 +2416,6 @@ impl ClientPolicy {
 
     #[setter]
     pub fn set_timeout(&mut self, timeout_millis: u64) {
-        println!("\n set timeout called");
         let timeout = Duration::from_millis(timeout_millis);
         self._as.timeout = Some(timeout);
     }
@@ -2436,7 +2433,6 @@ impl ClientPolicy {
 
     #[setter]
     pub fn set_idle_timeout(&mut self, timeout_millis: u64) {
-        println!("\n set timeout called");
         let timeout = Duration::from_millis(timeout_millis);
         self._as.idle_timeout = Some(timeout);
     }
@@ -3341,23 +3337,6 @@ impl From<Arc<aerospike_core::Recordset>> for Recordset {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_function(defaults(emph = 0))]
-pub fn print_header(desc: &str, emph: u8) {
-    let desc = if emph == 1 {
-        desc.bold().red()
-    } else {
-        desc.normal()
-    };
-
-    println!("\n");
-    println!("******************************************************************************");
-    println!("*{:^76}*", " ");
-    println!("*{:^76}*", " ");
-    println!("*{:^76}*", desc);
-    println!("*{:^76}*", " ");
-    println!("*{:^76}*", " ");
-    println!("******************************************************************************");
-}
 
 fn bins_flag(bins: Option<Vec<String>>) -> aerospike_core::Bins {
     match bins {
@@ -3395,24 +3374,5 @@ fn get_persisted_client(key: &str) -> Option<Zval> {
 
 #[php_module]
 pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
-    let target = Box::new(File::create("./log/client_php.log").expect("Can't create file"));
-
-    env_logger::Builder::new()
-        .target(env_logger::Target::Pipe(target))
-        .filter(None, LevelFilter::Info)
-        .format(|buf, record| {
-            writeln!(
-                buf,
-                "[{} {} {}:{}] {}",
-                Local::now().format("%Y-%m-%d %H:%M:%S%.3f"),
-                record.level(),
-                record.file().unwrap_or("unknown"),
-                record.line().unwrap_or(0),
-                record.args()
-            )
-        })
-        .init();
-
-    info!("Module Aerospike loaded");
     module
 }
