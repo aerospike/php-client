@@ -17,8 +17,8 @@ How to setup:
 * Use Aerospike Server v5.7 for testing; The Rust client does not support the newer servers entirely.
 
 ## Documentation
-* Php stubs and documentation can be found [here](https://github.com/aerospike/php-client/php-rs/php_code_stubs/php_stubs.php)
-* GeoFilter examples can be found [here](https://github.com/aerospike/php-client/php-rs/examples/geoQueryFilter.php)
+* Php stubs and documentation can be found [here](https://github.com/aerospike/php-client/blob/php-rs/php_code_stubs/php_stubs.php)
+* GeoFilter examples can be found [here](https://github.com/aerospike/php-client/php-rs/blob/examples/geoQueryFilter.php)
 
 ## Usage
 The following is a very simple example of CRUD operations in an Aerospike database.
