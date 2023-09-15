@@ -15,8 +15,17 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP@8.1.
 
 How to setup:
 * Follow [this guide](https://davidcole1340.github.io/ext-php-rs/getting-started/installation.html) and install PHP 8.1 *from source*.
+# To test rust code locally
 * Build and run the code via: `cargo build && php -d extension=./target/debug/libaerospike.so test.php` for linux or `cargo build && php -d extension=./target/debug/libaerospike.dylib test.php` for darwin
 * Use Aerospike Server v5.7 for testing; The Rust client does not support the newer servers entirely.
+
+## Installation
+
+* Add the following in the 'require' section of composer.json
+    ``` "aerospike/aerospike-php": "v0.1.0-alpha1" ```
+* Run ```composer upgrade```
+* ```cd vendor/aerospike/aerospike-php && sudo composer install```
+
 
 ## Documentation
 * Php stubs and documentation can be found [here](https://github.com/aerospike/php-client/blob/php-rs/php_code_stubs/php_stubs.php)
