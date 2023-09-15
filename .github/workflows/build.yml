@@ -1,0 +1,51 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - php-rs
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source $HOME/.cargo/env
+
+      - name: Install PHP Build Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf2.13 bison2.7 libbison-dev libcurl4-openssl-dev libssl-dev libxml2-dev libjpeg-dev libpng-dev libicu-dev libmcrypt-dev libreadline-dev libfreetype6-dev libzip-dev
+
+      - name: Clone the php-src repository
+        run: |
+          git clone https://github.com/php/php-src.git
+          cd php-src
+          git checkout PHP-8.1
+
+      - name: Build and Install PHP
+        run: |
+          cd php-src
+          ./buildconf
+          PREFIX="${HOME}/build/php"
+          ./configure --prefix="${PREFIX}" \
+              --enable-debug \
+              --disable-all --disable-cgi
+          make -j "$(nproc)"
+          make install
+          echo "${PREFIX}/bin" >> $GITHUB_PATH
+
+      - name: Verify Installed PHP Version
+        run: |
+          ${HOME}/build/php/bin/php -v
+        
+
+      - name: Run 'make' command
+        run: |
+          make
