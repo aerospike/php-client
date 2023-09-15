@@ -11,7 +11,7 @@ fi
 
 # Download PHP Client Code
 github_repo="https://github.com/aerospike/php-client"
-branch="CLIENT-2422-Code-completion"
+branch="main"
 
 git clone -b $branch $github_repo
 cd php-client
