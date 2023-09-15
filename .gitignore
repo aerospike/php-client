@@ -4,3 +4,5 @@
 aerospike-rust-client.sublime-project
 aerospike-rust-client.sublime-workspace
 /log
+.idea/
+.DS_Store
