@@ -1,3 +1,5 @@
+## This project is pre-alpha, and should not be used in production. If you're an enterprise customer feel free to reach out to our support with feedback and feature requests. We appreciate feedback from the Aerospike community on issues related to the new PHP client.
+
 # Aerospike PHP@8.1 Client
 
 An [Aerospike](https://www.aerospike.com/) client library for PHP@8.1.
