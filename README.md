@@ -11,16 +11,33 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP@8.1.
 * cargo
 * Aerospike server v5.7+ 
 
+* NOTE: Does not support Scan/Query API features for Aerospike server 6.4.
+* NOTE: Currently does not support Windows platform. [Will be adding support in future release.]
+
 ## Setup
 
-How to setup:
+### Installation via Composer
+
+* Add the following in the 'require' section of composer.json
+    ``` "aerospike/aerospike-php": "v0.1.0-alpha1" ```
+* Run ```composer upgrade```
+* ```cd vendor/aerospike/aerospike-php && sudo composer install```
+
+### Manual Installation:
 * Follow [this guide](https://davidcole1340.github.io/ext-php-rs/getting-started/installation.html) and install PHP 8.1 *from source*.
-* Build and run the code via: `cargo build && php -d extension=./target/debug/libaerospike.so test.php` for linux or `cargo build && php -d extension=./target/debug/libaerospike.dylib test.php` for darwin
-* Use Aerospike Server v5.7 for testing; The Rust client does not support the newer servers entirely.
+* Clone the repository ```git clone https://github.com/aerospike/php-client.git```
+* ```cd php-client```
+* Build and run the test code via: `cargo build && php -d extension=./target/debug/libaerospike.so test.php` for linux or `cargo build && php -d extension=./target/debug/libaerospike.dylib test.php` for darwin
+* Add the extension file[.dylib or .so] to the php.ini file and move the extension file to your local php extesnion dir [ex: /usr/lib/php/20210902]
+* To clean your repository you can run ```cargo clean```
+### NOTE: Use Aerospike Server v5.7 for testing; The Rust client does not support the newer servers entirely.
+
+
 
 ## Documentation
-* Php stubs and documentation can be found [here](https://github.com/aerospike/php-client/blob/php-rs/php_code_stubs/php_stubs.php)
+* Php stubs and API documentation can be found [here](https://github.com/aerospike/php-client/blob/php-rs/php_code_stubs/php_stubs.php)
 * GeoFilter examples can be found [here](https://github.com/aerospike/php-client/php-rs/blob/examples/geoQueryFilter.php)
+
 
 ## Usage
 The following is a very simple example of CRUD operations in an Aerospike database.
