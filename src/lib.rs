@@ -2657,6 +2657,11 @@ impl Client {
         Ok(())
     }
 
+    pub fn is_connected(&self) -> PhpResult<bool> {
+        let res = self._as.is_connected();
+        Ok(res.into())
+    }
+
     /// Write record bin(s). The policy specifies the transaction timeout, record expiration and
     /// how the transaction is handled when the record already exists.
     pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {

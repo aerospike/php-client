@@ -11,7 +11,9 @@ $cp = new ClientPolicy();
 $client = Aerospike($cp, "127.0.0.1:3000");
 // $client = Aerospike($cp, "172.17.0.2:3000");
 // $client = Aerospike($cp, "172.17.0.2:3000");
+$connected = $client->isConnected();
 
+var_dump($connected);
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Key object
