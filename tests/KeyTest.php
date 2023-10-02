@@ -1,5 +1,6 @@
 <?php 
 
+namespace Aerospike;
 use PHPUnit\Framework\TestCase;
 
 final class KeyTest extends TestCase

@@ -6,7 +6,7 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP@8.1.
 
 ## Requirements
 
-* PHP 8.1
+* PHP 8.1+
 * Composer
 * cargo
 * Aerospike server v5.7+ 

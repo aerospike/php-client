@@ -1,5 +1,6 @@
 <?php 
 
+namespace Aerospike;
 use PHPUnit\Framework\TestCase;
 
 final class ClientTest extends TestCase
@@ -27,6 +28,12 @@ final class ClientTest extends TestCase
     public function testAerospikeConnection()
     {
         $this->assertTrue(self::$client->isConnected());
+    }
+
+    public function testBinNameTooLong(){
+        $binString = new Bin("thisIsTooLongForTheBinName", "StringData");
+        
+        $this->expectExceptionMessage("bin name too long");
     }
 
     public function testPutGetString(){
