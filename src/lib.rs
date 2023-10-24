@@ -2736,7 +2736,7 @@ impl Client {
     }
 
     /// Determine if a record key exists. The policy can be used to specify timeouts.
-    pub fn exists(&self, policy: &WritePolicy, key: &Key) -> PhpResult<bool> {
+    pub fn exists(&self, policy: &ReadPolicy, key: &Key) -> PhpResult<bool> {
         let res = self
             ._as
             .exists(&policy._as, &key._as)
