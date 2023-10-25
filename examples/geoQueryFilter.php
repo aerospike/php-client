@@ -1,5 +1,7 @@
 <?php
 
+namespace Aerospike;
+
 function createClient() {
     $cp = new ClientPolicy();
     $client = Aerospike($cp, "127.0.0.1:3000");
