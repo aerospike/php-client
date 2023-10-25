@@ -75,7 +75,7 @@ pub enum _ExpType {
     HLL,
 }
 
-#[php_class]
+#[php_class(name = "Aerospike\\ExpType")]
 pub struct ExpType {
     _as: aerospike_core::expressions::ExpType,
     v: _ExpType,
@@ -193,7 +193,7 @@ impl From<&ExpType> for aerospike_core::expressions::ExpType {
 
 /// Filter expression, which can be applied to most commands, to control which records are
 /// affected by the command.
-#[php_class]
+#[php_class(name = "Aerospike\\FilterExpression")]
 pub struct FilterExpression {
     _as: aerospike_core::expressions::FilterExpression,
 }
@@ -815,7 +815,7 @@ pub enum _Priority {
     High,
 }
 
-#[php_class]
+#[php_class(name = "Aerospike\\Priority")]
 pub struct Priority {
     _as: aerospike_core::Priority,
     v: _Priority,
@@ -897,7 +897,7 @@ pub enum _RecordExistsAction {
     CreateOnly,
 }
 
-#[php_class]
+#[php_class(name = "Aerospike\\RecordExistsAction")]
 pub struct RecordExistsAction {
     _as: aerospike_core::RecordExistsAction,
     v: _RecordExistsAction,
@@ -992,7 +992,7 @@ pub enum _CommitLevel {
     CommitMaster,
 }
 
-#[php_class]
+#[php_class(name = "Aerospike\\CommitLevel")]
 pub struct CommitLevel {
     _as: aerospike_core::CommitLevel,
     v: _CommitLevel,
@@ -1054,7 +1054,7 @@ pub enum _ConsistencyLevel {
 
 /// `ConsistencyLevel` indicates how replicas should be consulted in a read
 /// operation to provide the desired consistency guarantee.
-#[php_class]
+#[php_class(name = "Aerospike\\ConsistencyLevel")]
 pub struct ConsistencyLevel {
     _as: aerospike_core::ConsistencyLevel,
     v: _ConsistencyLevel,
@@ -1118,7 +1118,7 @@ pub enum _GenerationPolicy {
 }
 
 /// `GenerationPolicy` determines how to handle record writes based on record generation.
-#[php_class]
+#[php_class(name = "Aerospike\\GenerationPolicy")]
 pub struct GenerationPolicy {
     _as: aerospike_core::GenerationPolicy,
     v: _GenerationPolicy,
@@ -1198,7 +1198,7 @@ pub enum _Expiration {
 }
 
 /// Record expiration, also known as time-to-live (TTL).
-#[php_class]
+#[php_class(name = "Aerospike\\Expiration")]
 pub struct Expiration {
     _as: aerospike_core::Expiration,
     v: _Expiration,
@@ -1293,7 +1293,7 @@ pub enum _Concurrency {
 /// Specifies whether a command, that needs to be executed on multiple cluster nodes, should be
 /// executed sequentially, one node at a time, or in parallel on multiple nodes using the client's
 /// thread pool.
-#[php_class]
+#[php_class(name = "Aerospike\\Concurrency")]
 pub struct Concurrency {
     _as: aerospike_core::Concurrency,
     v: _Concurrency,
@@ -1368,7 +1368,7 @@ impl From<&Concurrency> for aerospike_core::Concurrency {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\BasePolicy")]
 pub struct BasePolicy {
     _as: aerospike_core::policy::BasePolicy,
 }
@@ -1487,7 +1487,7 @@ impl BasePolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\BatchPolicy")]
 pub struct BatchPolicy {
     _as: aerospike_core::BatchPolicy,
 }
@@ -1576,7 +1576,7 @@ impl BatchPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\BatchRead")]
 pub struct BatchRead {
     _as: aerospike_core::BatchRead,
 }
@@ -1607,7 +1607,7 @@ impl From<aerospike_core::BatchRead> for BatchRead {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\ReadPolicy")]
 pub struct ReadPolicy {
     _as: aerospike_core::ReadPolicy,
 }
@@ -1688,7 +1688,7 @@ impl ReadPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\WritePolicy")]
 pub struct WritePolicy {
     _as: aerospike_core::WritePolicy,
 }
@@ -1852,7 +1852,7 @@ impl WritePolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\QueryPolicy")]
 pub struct QueryPolicy {
     _as: aerospike_core::QueryPolicy,
 }
@@ -1931,7 +1931,7 @@ impl QueryPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\ScanPolicy")]
 pub struct ScanPolicy {
     _as: aerospike_core::ScanPolicy,
 }
@@ -2039,7 +2039,7 @@ enum _CollectionIndexType {
     MapValues,
 }
 
-#[php_class]
+#[php_class(name = "Aerospike\\CollectionIndexType")]
 pub struct CollectionIndexType {
     _as: aerospike_core::query::CollectionIndexType,
     v: _CollectionIndexType,
@@ -2100,7 +2100,7 @@ enum _IndexType {
     Geo2DSphere,
 }
 
-#[php_class]
+#[php_class(name = "Aerospike\\IndexType")]
 pub struct IndexType {
     _as: aerospike_core::query::IndexType,
     v: _IndexType,
@@ -2159,7 +2159,8 @@ impl From<&IndexType> for aerospike_core::query::IndexType {
 /// - `as_within_region`
 /// - `as_within_radius`
 /// - `as_regions_containing_point`
-#[php_class]
+
+#[php_class(name = "Aerospike\\Filter")]
 pub struct Filter {
     _as: aerospike_core::query::Filter,
 }
@@ -2284,7 +2285,7 @@ impl Filter {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Query statement parameters.
-#[php_class]
+#[php_class(name = "Aerospike\\Statement")]
 pub struct Statement {
     _as: aerospike_core::Statement,
 }
@@ -2328,7 +2329,7 @@ impl Statement {
 /// multiple threads will retrieve records from the server nodes and put these records on an
 /// internal queue managed by the recordset. The single user thread consumes these records from the
 /// queue.
-#[php_class]
+#[php_class(name = "Aerospike\\Recordset")]
 pub struct Recordset {
     _as: Arc<aerospike_core::Recordset>,
 }
@@ -2361,7 +2362,7 @@ impl Recordset {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 /// `ClientPolicy` encapsulates parameters for client policy command.
-#[php_class]
+#[php_class(name = "Aerospike\\ClientPolicy")]
 pub struct ClientPolicy {
     _as: aerospike_core::ClientPolicy,
 }
@@ -2529,7 +2530,7 @@ impl ClientPolicy {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Container object for a record bin, comprising a name and a value.
-#[php_class]
+#[php_class(name = "Aerospike\\Bin")]
 pub struct Bin {
     _as: aerospike_core::Bin,
 }
@@ -2550,7 +2551,7 @@ impl Bin {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Container object for a database record.
-#[php_class]
+#[php_class(name = "Aerospike\\Record")]
 pub struct Record {
     _as: aerospike_core::Record,
 }
@@ -2629,7 +2630,7 @@ pub fn Aerospike(policy: &ClientPolicy, hosts: &str) -> PhpResult<Zval> {
     }
 }
 
-#[php_class]
+#[php_class(name = "Aerospike\\Client")]
 pub struct Client {
     _as: Arc<aerospike_sync::Client>,
     hosts: String,
@@ -2657,13 +2658,18 @@ impl Client {
         Ok(())
     }
 
+    pub fn is_connected(&self) -> PhpResult<bool> {
+        let res = self._as.is_connected();
+        Ok(res.into())
+    }
+
     /// Write record bin(s). The policy specifies the transaction timeout, record expiration and
     /// how the transaction is handled when the record already exists.
     pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
         self._as
             .put(&policy._as, &key._as, &bins)
-            .map_err(|e| e.to_string())?;
+            .map_err(|e| AerospikeException::new(&e.to_string()))?;
         Ok(())
     }
 
@@ -2843,11 +2849,39 @@ impl Client {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+//  Aerospike Excetpion
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[derive(Debug)]
+#[php_class(name = "Aerospike\\AerospikeException")]
+pub struct AerospikeException {
+    pub message: String,
+}
+
+impl AerospikeException {
+    pub fn new(message: &str) -> Self {
+        AerospikeException {
+            message: message.to_string(),
+        }
+    }
+}
+
+impl From<AerospikeException> for PhpException {
+    fn from(error: AerospikeException) -> PhpException {
+        PhpException::default(error.message)
+    }
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 //  Key
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\Key")]
 pub struct Key {
     _as: aerospike_core::Key,
 }
@@ -2897,7 +2931,7 @@ impl FromZval<'_> for Key {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\GeoJSON")]
 pub struct GeoJSON {
     v: String,
 }
@@ -2943,7 +2977,7 @@ impl fmt::Display for GeoJSON {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class]
+#[php_class(name = "Aerospike\\HLL")]
 pub struct HLL {
     v: Vec<u8>,
 }
@@ -3247,7 +3281,8 @@ impl From<aerospike_core::Value> for PHPValue {
 //  Value
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
-#[php_class]
+
+#[php_class(name = "Aerospike\\Value")]
 pub struct Value;
 
 #[php_impl]
