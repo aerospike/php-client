@@ -6,17 +6,21 @@ use PHPUnit\Framework\TestCase;
 final class FilterExpTest extends TestCase
 {   
 
+    protected static $namespace = "test";
+    protected static $set = "test";
+    protected static $host = "127.0.0.1:3000";
+
     public static function setUpBeforeClass(): void
     {
         $cp = new ClientPolicy();
 
         try {
             $client = Aerospike($cp, "127.0.0.1:3000");
-            $client->truncate("test", "test");
+            $client->truncate($namespace, $set);
             $wp = new WritePolicy();
             
             for ($i = 0; $i < 100; $i++) {
-                $key = new Key("test", "test", $i);
+                $key = new Key($namespace, $set, $i);
                 $iBin = new Bin("ibin", $i);
                 $sbin = new Bin("sbin", strval($i));
                 $client->put($wp, $key, [$iBin, $sbin]);
@@ -133,12 +137,10 @@ final class FilterExpTest extends TestCase
 
     private function testFilter($client, $filter)
     {
-        $namespace = "test"; 
-        $setName = "test";
         $qpolicy = new QueryPolicy();
         $qpolicy->filterExpression = $filter;
 
-        $statement = new Statement($namespace, $setName);
+        $statement = new Statement($namespace, $set);
         $recordset = $client->query($qpolicy, $statement);
 
         return $recordset;
