@@ -1,7 +1,6 @@
 {
     "name": "aerospike/aerospike-php",
     "type": "library",
-    "version": "v0.2.0",
     "description": "Aerospike PHP Extension Pre-Alpha",
     "keywords": ["php", "extension"],
     "license": "Apache-2.0",
