@@ -40,7 +40,6 @@ use ext_php_rs::types::ZendHashTable;
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
 
-use aerospike_core::as_geo;
 use aerospike_core::as_val;
 
 use chrono::Local;
@@ -2394,16 +2393,15 @@ impl ClientPolicy {
     }
 
     #[setter]
-    pub fn set_user(&mut self, user: Option<String>) {
+    pub fn set_user(&mut self, user: Option<String>){
         match (user, &self._as.user_password) {
-            (Some(user), Some((_, password))) => {
-                self._as.user_password = Some((user, password.into()))
-            }
-            (Some(user), None) => self._as.user_password = Some((user, "".into())),
-            (None, Some((_, password))) => {
-                self._as.user_password = Some(("".into(), password.into()))
-            }
-            (None, None) => {}
+            (Some(user), Some((_, password))) => 
+                self._as.set_user_password(user, password.clone()).map_err(|e| e.to_string()).unwrap(),
+            (Some(user), None) => 
+                self._as.set_user_password(user, "".into()).map_err(|e| e.to_string()).unwrap(),
+            (None, Some((_, password))) => 
+                self._as.set_user_password("".into(), password.clone()).map_err(|e| e.to_string()).unwrap(),
+            (None, None) => {},
         }
     }
 
@@ -2415,12 +2413,13 @@ impl ClientPolicy {
     #[setter]
     pub fn set_password(&mut self, password: Option<String>) {
         match (password, &self._as.user_password) {
-            (Some(password), Some((user, _))) => {
-                self._as.user_password = Some((user.into(), password))
-            }
-            (Some(password), None) => self._as.user_password = Some(("".into(), password)),
-            (None, Some((user, _))) => self._as.user_password = Some((user.into(), "".into())),
-            (None, None) => {}
+            (Some(password), Some((user, _))) => 
+                self._as.set_user_password(user.into(), password.clone()).map_err(|e| e.to_string()).unwrap(),
+            (Some(password), None) => 
+                self._as.set_user_password("".into(), password.clone()).map_err(|e| e.to_string()).unwrap(),
+            (None, Some((user, _))) =>
+                self._as.set_user_password(user.into(), "".into()).map_err(|e| e.to_string()).unwrap(),
+            (None, None) => {},
         }
     }
 
@@ -2481,14 +2480,45 @@ impl ClientPolicy {
     }
 
     // /// Throw exception if host connection fails during addHost().
-    // pub fail_if_not_connected: bool,
+    #[getter]
+    pub fn get_fail_if_not_connected(&self) -> bool {
+        self._as.fail_if_not_connected
+    }
+
+    #[setter]
+    pub fn set_fail_if_not_connected(&mut self, fail_if_not_connected: bool) {
+        self._as.fail_if_not_connected = fail_if_not_connected;
+    }
+
 
     // /// Threshold at which the buffer attached to the connection will be shrunk by deallocating
     // /// memory instead of just resetting the size of the underlying vec.
     // /// Should be set to a value that covers as large a percentile of payload sizes as possible,
     // /// while also being small enough not to occupy a significant amount of memory for the life
     // /// of the connection pool.
-    // pub buffer_reclaim_threshold: usize,
+
+    #[getter]
+    pub fn get_buffer_reclaim_threshold(&self) -> usize {
+        self._as.buffer_reclaim_threshold
+    }
+
+    #[setter]
+    pub fn set_buffer_reclaim_threshold(&mut self, buffer_reclaim_threshold: usize) {
+        self._as.buffer_reclaim_threshold = buffer_reclaim_threshold;
+    }
+
+    // /// Expected cluster name. It not `None`, server nodes must return this cluster name in order
+    // /// to join the client's view of the cluster. Should only be set when connecting to servers
+    // /// that support the "cluster-name" info command.
+    #[getter]
+    pub fn get_cluster_name(&self) -> Option<String> {
+        self._as.cluster_name.clone()
+    }
+
+    #[setter]
+    pub fn set_cluster_name(&mut self, cluster_name: Option<String>) {
+        self._as.cluster_name = cluster_name;
+    }
 
     // /// TendInterval determines interval for checking for cluster state changes.
     // /// Minimum possible interval is 10 Milliseconds.
@@ -2511,16 +2541,30 @@ impl ClientPolicy {
     // ///
     // /// "services-alternate" is available with Aerospike Server versions >= 3.7.1.
     // pub use_services_alternate: bool,
+    #[getter]
+    pub fn get_use_services_alternate(&self) -> bool {
+        self._as.use_services_alternate
+    }
+
+    #[setter]
+    pub fn set_use_services_alternate(&mut self, use_services_alternate: bool) {
+        self._as.use_services_alternate = use_services_alternate;
+    }
 
     // /// Size of the thread pool used in scan and query commands. These commands are often sent to
     // /// multiple server nodes in parallel threads. A thread pool improves performance because
     // /// threads do not have to be created/destroyed for each command.
-    // pub thread_pool_size: usize,
+    #[getter]
+    pub fn get_thread_pool_size(&self) -> usize {
+        self._as.thread_pool_size
+    }
 
-    // /// Expected cluster name. It not `None`, server nodes must return this cluster name in order
-    // /// to join the client's view of the cluster. Should only be set when connecting to servers
-    // /// that support the "cluster-name" info command.
-    // pub cluster_name: Option<String>,
+    #[setter]
+    pub fn set_thread_pool_size(&mut self, thread_pool_size: usize) {
+        self._as.thread_pool_size = thread_pool_size;
+    }
+
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
