@@ -192,7 +192,7 @@ echo "Scan results sum: $sum\n";
 
 
 $client = Aerospike($cp, "localhost:3000");
-$exists = $client->exists($wp, $key);
+$exists = $client->exists($rp, $key);
 var_dump($exists);
 
 
@@ -207,7 +207,7 @@ $deleted = $client->delete($wp, $key);
 var_dump($deleted);
 
 $client = Aerospike($cp, "localhost:3000");
-$exists = $client->exists($wp, $key);
+$exists = $client->exists($rp, $key);
 var_dump($exists);
 
 ////////////////////////////////////////////////////////////////////////////////

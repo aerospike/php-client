@@ -18,8 +18,8 @@ final class ClientTest extends TestCase
         self::$cp = new ClientPolicy();
 
         try {
-            self::$client = Aerospike(self::$cp, $host);
-            self::$key = new Key($namespace, $set, 1);
+            self::$client = Aerospike(self::$cp, self::$host);
+            self::$key = new Key(self::$namespace, self::$set, 1);
         } catch (Exception $e) {
             throw $e;
         }
@@ -247,6 +247,7 @@ final class ClientTest extends TestCase
             $this->fail("An exception was thrown during truncate: " . $e->getMessage());
         }
     }
+
 
 
 }
