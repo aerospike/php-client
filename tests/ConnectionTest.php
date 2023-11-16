@@ -3,6 +3,11 @@
 namespace Aerospike;
 use PHPUnit\Framework\TestCase;
 
+/* This test needs to have security enbaled in aerospike.conf.
+For more info please visit  - "https://docs.aerospike.com/server/operations/configure/security/access-control"
+*/
+
+
 final class ConnectionTest extends TestCase
 {
 
