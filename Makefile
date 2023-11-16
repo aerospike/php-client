@@ -28,8 +28,8 @@ ifeq ($(shell awk 'BEGIN{ print ("$(PHP_VERSION)" >= "8.0") }'), 0)
     $(error PHP version must be greater than or equal to 8.0)
 endif
 
-.PHONY: build test install clean 
-all: lint build test install clean
+.PHONY: build install test clean 
+all: lint build install test clean
 
 lint:
 	cargo clippy
@@ -37,13 +37,13 @@ lint:
 build:
 	cargo build --release
 
-test: build
-	php -d extension=./target/release/libaerospike$(EXTENSION) test.php
-
 install: build
 	sudo cp -f target/release/libaerospike$(EXTENSION) $(EXT_DIR_PATH)
 	echo "extension=libaerospike$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
 	$(RESTART_COMMAND)
+
+test: build
+	phpunit tests/
 
 clean:
 	cargo clean

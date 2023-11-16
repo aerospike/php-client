@@ -9,7 +9,7 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP@8.1.
 * PHP 8.1+
 * Composer
 * cargo
-* Aerospike server v5.7+ 
+* Aerospike server v6.3 
 
 * NOTE: Does not support Scan/Query API features for Aerospike server 6.4.
 * NOTE: Currently does not support Windows platform. [Will be adding support in future release.]
