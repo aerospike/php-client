@@ -19,7 +19,7 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP@8.1.
 ### Installation via Composer
 
 * Add the following in the 'require' section of composer.json
-    ``` "aerospike/aerospike-php": "v0.1.0-alpha1" ```
+    ``` "aerospike/aerospike-php": "v0.3.0-alpha" ```
 * Run ```composer upgrade```
 * ```cd vendor/aerospike/aerospike-php && sudo composer install```
 
