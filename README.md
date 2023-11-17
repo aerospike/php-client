@@ -43,7 +43,7 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP@8+.
 The following is a very simple example of CRUD operations in an Aerospike database.
 
 ## Issues
-If there are any isses please create an issue on our github repository page - ```https://github.com/aerospike/php-client.git```
+If there are any isses please create an issue on our github repository page - [github-issues](https://github.com/aerospike/php-client/issues)
 
 ```php
 
