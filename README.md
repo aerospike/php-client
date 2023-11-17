@@ -1,8 +1,8 @@
 ## This project is pre-alpha, and should not be used in production. If you're an enterprise customer feel free to reach out to our support with feedback and feature requests. We appreciate feedback from the Aerospike community on issues related to the new PHP client.
 
-# Aerospike PHP@8.1 Client
+# Aerospike PHP@8+ Client
 
-An [Aerospike](https://www.aerospike.com/) client library for PHP@8.1.
+An [Aerospike](https://www.aerospike.com/) client library for PHP@8+.
 
 ## Requirements
 
@@ -24,13 +24,13 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP@8.1.
 * ```cd vendor/aerospike/aerospike-php && sudo composer install```
 
 ### Manual Installation:
-* Follow [this guide](https://davidcole1340.github.io/ext-php-rs/getting-started/installation.html) and install PHP 8.1 *from source*.
+
 * Clone the repository ```git clone https://github.com/aerospike/php-client.git```
 * ```cd php-client```
-* Build and run the test code via: `cargo build && php -d extension=./target/debug/libaerospike.so test.php` for linux or `cargo build && php -d extension=./target/debug/libaerospike.dylib test.php` for darwin
-* Add the extension file[.dylib or .so] to the php.ini file and move the extension file to your local php extesnion dir [ex: /usr/lib/php/20210902]
-* To clean your repository you can run ```cargo clean```
-### NOTE: Use Aerospike Server v5.7 for testing; The Rust client does not support the newer servers entirely.
+* Build and run the test code via: ```make```
+* Once this is done, it will install the extension in your php extension directory
+* Supported platforms - Linux, Darwin
+### NOTE: Use Aerospike Server v6.3 for testing; The Rust client does not support the newer servers entirely.
 
 
 
@@ -41,6 +41,9 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP@8.1.
 
 ## Usage
 The following is a very simple example of CRUD operations in an Aerospike database.
+
+## Issues
+If there are any isses please create an issue on our github repository page - ```https://github.com/aerospike/php-client.git```
 
 ```php
 
