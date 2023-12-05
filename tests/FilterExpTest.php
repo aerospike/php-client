@@ -15,12 +15,12 @@ final class FilterExpTest extends TestCase
         $cp = new ClientPolicy();
 
         try {
-            $client = Aerospike($cp, "127.0.0.1:3000");
-            $client->truncate($namespace, $set);
+            $client = Aerospike($cp, self::$host);
+            $client->truncate(self::$namespace, self::$set);
             $wp = new WritePolicy();
             
             for ($i = 0; $i < 100; $i++) {
-                $key = new Key($namespace, $set, $i);
+                $key = new Key(self::$namespace, self::$set, $i);
                 $iBin = new Bin("ibin", $i);
                 $sbin = new Bin("sbin", strval($i));
                 $client->put($wp, $key, [$iBin, $sbin]);
@@ -35,7 +35,7 @@ final class FilterExpTest extends TestCase
         echo "TEST EQ FILTER \n";
         $filter = FilterExpression::eq(FilterExpression::intBin("ibin"), FilterExpression::intVal(1));
         $cp = new ClientPolicy();
-        $client = Aerospike($cp, "127.0.0.1:3000");
+        $client = Aerospike($cp, self::$host);
         $recordset = $this->testFilter($client, $filter);
         $result = $this->countResult($recordset);
         $this->assertEquals(1, $result);
@@ -46,7 +46,7 @@ final class FilterExpTest extends TestCase
         echo "TEST NE FILTER \n";
         $filter = FilterExpression::ne(FilterExpression::intBin("ibin"), FilterExpression::intVal(1));
         $cp = new ClientPolicy();
-        $client = Aerospike($cp, "127.0.0.1:3000");
+        $client = Aerospike($cp, self::$host);
         $recordset = $this->testFilter($client, $filter);
         $result = $this->countResult($recordset);
         $this->assertEquals(99, $result);
@@ -57,7 +57,7 @@ final class FilterExpTest extends TestCase
         echo "TEST LT FILTER \n";
         $filter = FilterExpression::lt(FilterExpression::intBin("ibin"), FilterExpression::intVal(10));
         $cp = new ClientPolicy();
-        $client = Aerospike($cp, "127.0.0.1:3000");
+        $client = Aerospike($cp, self::$host);
         $recordset = $this->testFilter($client, $filter);
         $result = $this->countResult($recordset);
         $this->assertEquals(10, $result);
@@ -68,7 +68,7 @@ final class FilterExpTest extends TestCase
         echo "TEST GT FILTER \n";
         $filter = FilterExpression::gt(FilterExpression::intBin("ibin"), FilterExpression::intVal(1));
         $cp = new ClientPolicy();
-        $client = Aerospike($cp, "127.0.0.1:3000");
+        $client = Aerospike($cp, self::$host);
         $recordset = $this->testFilter($client, $filter);
         $result = $this->countResult($recordset);
         $this->assertEquals(98, $result);
@@ -79,7 +79,7 @@ final class FilterExpTest extends TestCase
         echo "TEST LE FILTER \n";
         $filter = FilterExpression::le(FilterExpression::intBin("ibin"), FilterExpression::intVal(10));
         $cp = new ClientPolicy();
-        $client = Aerospike($cp, "127.0.0.1:3000");
+        $client = Aerospike($cp, self::$host);
         $recordset = $this->testFilter($client, $filter);
         $result = $this->countResult($recordset);
         $this->assertEquals(11, $result);
@@ -90,7 +90,7 @@ final class FilterExpTest extends TestCase
         echo "TEST GE FILTER \n";
         $filter = FilterExpression::le(FilterExpression::intBin("ibin"), FilterExpression::intVal(1));
         $cp = new ClientPolicy();
-        $client = Aerospike($cp, "127.0.0.1:3000");
+        $client = Aerospike($cp, self::$host);
         $recordset = $this->testFilter($client, $filter);
         $result = $this->countResult($recordset);
         $this->assertEquals(99, $result);
@@ -104,7 +104,7 @@ final class FilterExpTest extends TestCase
         $filter = FilterExpression::and([FilterExpression::eq(FilterExpression::intBin("ibin"), FilterExpression::intVal(1)), 
                                         FilterExpression::eq(FilterExpression::stringBin("sbin"), FilterExpression::stringVal("1"))]);
         $cp = new ClientPolicy();
-        $client = Aerospike($cp, "127.0.0.1:3000");
+        $client = Aerospike($cp, self::$host);
         $recordset = $this->testFilter($client, $filter);
         $result = $this->countResult($recordset);
         $this->assertEquals(1, $result);
@@ -117,7 +117,7 @@ final class FilterExpTest extends TestCase
         $filter = FilterExpression::or([FilterExpression::eq(FilterExpression::intBin("ibin"), FilterExpression::intVal(1)), 
                                         FilterExpression::eq(FilterExpression::intBin("ibin"), FilterExpression::intVal(3))]);
         $cp = new ClientPolicy();
-        $client = Aerospike($cp, "127.0.0.1:3000");
+        $client = Aerospike($cp, self::$host);
         $recordset = $this->testFilter($client, $filter);
         $result = $this->countResult($recordset);
         $this->assertEquals(99, $result);
@@ -128,7 +128,7 @@ final class FilterExpTest extends TestCase
         echo "TEST NOT FILTER \n";
         $filter = FilterExpression::not(FilterExpression::eq(FilterExpression::intBin("ibin"), FilterExpression::intVal(1)));
         $cp = new ClientPolicy();
-        $client = Aerospike($cp, "127.0.0.1:3000");
+        $client = Aerospike($cp, self::$host);
         $recordset = $this->testFilter($client, $filter);
         $result = $this->countResult($recordset);
         $this->assertEquals(99, $result);
@@ -140,7 +140,7 @@ final class FilterExpTest extends TestCase
         $qpolicy = new QueryPolicy();
         $qpolicy->filterExpression = $filter;
 
-        $statement = new Statement($namespace, $set);
+        $statement = new Statement(self::$namespace, self::$set);
         $recordset = $client->query($qpolicy, $statement);
 
         return $recordset;

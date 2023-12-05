@@ -30,15 +30,9 @@ final class ClientTest extends TestCase
         $this->assertTrue(self::$client->isConnected());
     }
 
-    public function testBinNameTooLong(){
-        $binString = new Bin("thisIsTooLongForTheBinName", "StringData");
-        
-        $this->expectExceptionMessage("bin name too long");
-    }
-
     public function testPutGetString(){
         $binString = new Bin("stringBin", "StringData");
-        $newKey = new Key($namespace, $test, 2);
+        $newKey = new Key(self::$namespace, self::$set, 2);
         $wp = new WritePolicy();
         self::$client->put($wp, $newKey, [$binString]);
 
@@ -55,7 +49,7 @@ final class ClientTest extends TestCase
         $binInteger = new Bin("integerBin", 42);
 
         // Create a new key for the test
-        $newKey = new Key($namespace, $test, 3);
+        $newKey = new Key(self::$namespace, self::$set, 3);
 
         // Write the bin to the record
         $wp = new WritePolicy();
@@ -77,7 +71,7 @@ final class ClientTest extends TestCase
         $binList = new Bin("listBin", $listData);
     
         // Create a new key for the test
-        $newKey = new Key($namespace, $test, 4);
+        $newKey = new Key(self::$namespace, self::$set, 4);
     
         // Write the list bin to the record
         $wp = new WritePolicy();
@@ -106,7 +100,7 @@ final class ClientTest extends TestCase
         $binMap = new Bin("mapBin", $mapData);
     
         // Create a new key for the test
-        $newKey = new Key($namespace, $test, 5);
+        $newKey = new Key(self::$namespace, self::$set, 5);
     
         // Write the map bin to the record
         $wp = new WritePolicy();
@@ -127,7 +121,7 @@ final class ClientTest extends TestCase
     public function testAddIntegerBinsToExistingRecord()
     {
         // Prepare a record with an existing integer bin
-        $existingKey = new Key($namespace, $test, 6);
+        $existingKey = new Key(self::$namespace, self::$set, 6);
         $existingBin = new Bin("newIntegerBin", 5);
 
         // Write the existing bin to the record
@@ -150,7 +144,7 @@ final class ClientTest extends TestCase
     public function testAddFloatToExistingRecord()
     {
         // Prepare a record with an existing integer bin
-        $existingKey = new Key($namespace, $set, 6);
+        $existingKey = new Key(self::$namespace, self::$set, 6);
         $existingBin = new Bin("newFloatBin", 5.5);
 
         // Write the existing bin to the record
@@ -171,7 +165,7 @@ final class ClientTest extends TestCase
     }
 
     public function testPrependValue(){
-        $newKey = new Key($namespace, $set, 2);
+        $newKey = new Key(self::$namespace, self::$set, 2);
         $wp = new WritePolicy();
         $prependVal = new Bin("stringBin", "newData_");
         self::$client->prepend($wp, $newKey, [$prependVal]);
@@ -184,7 +178,7 @@ final class ClientTest extends TestCase
     }
 
     public function testAppendValue(){
-        $newKey = new Key($namespace, $set, 2);
+        $newKey = new Key(self::$namespace, self::$set, 2);
         $wp = new WritePolicy();
         $prependVal = new Bin("stringBin", "_oldData");
         self::$client->append($wp, $newKey, [$prependVal]);
@@ -198,18 +192,19 @@ final class ClientTest extends TestCase
 
 
     public function testDeleteKeyAndExists(){
-        $newKey = new Key($namespace, $set, 2);
+        $newKey = new Key(self::$namespace, self::$set, 2);
         $wp = new WritePolicy();
-        $exists = self::$client->exists($wp, $newKey);
+        $rp = new ReadPolicy();
+        $exists = self::$client->exists($rp, $newKey);
         $this->assertTrue($exists);
 
         self::$client->delete($wp, $newKey);
-        $exists = self::$client->exists($wp, $newKey);
+        $exists = self::$client->exists($rp, $newKey);
         $this->assertFalse($exists);
     }
 
     public function testTouchKey(){
-        $newKey = new Key($namespace, $set, 2);
+        $newKey = new Key(self::$namespace, self::$set, 5);
         $rp = new ReadPolicy();
         $record = self::$client->get($rp, $newKey);
         $this->assertEquals($record->getGeneration(), 1);

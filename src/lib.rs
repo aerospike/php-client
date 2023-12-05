@@ -2393,33 +2393,26 @@ impl ClientPolicy {
     }
 
     #[setter]
-    pub fn set_user(&mut self, user: Option<String>){
+    pub fn set_user(&mut self, user: Option<String>) {
         match (user, &self._as.user_password) {
-            (Some(user), Some((_, password))) => 
-                self._as.set_user_password(user, password.clone()).map_err(|e| e.to_string()).unwrap(),
-            (Some(user), None) => 
-                self._as.set_user_password(user, "".into()).map_err(|e| e.to_string()).unwrap(),
-            (None, Some((_, password))) => 
-                self._as.set_user_password("".into(), password.clone()).map_err(|e| e.to_string()).unwrap(),
-            (None, None) => {},
+            (Some(user), Some((_, pass))) => {
+                self._as.user_password = Some((user.clone(), pass.clone()))
+            }
+            (Some(user), None) => self._as.user_password = Some((user.clone(), "".into())),
+            (None, Some((_, pass))) => self._as.user_password = Some(("".into(), pass.clone())),
+            (None, None) => {}
         }
     }
 
-    #[getter]
-    pub fn get_password(&self) -> Option<String> {
-        self._as.user_password.clone().map(|(_, password)| password)
-    }
-
     #[setter]
-    pub fn set_password(&mut self, password: Option<String>) {
-        match (password, &self._as.user_password) {
-            (Some(password), Some((user, _))) => 
-                self._as.set_user_password(user.into(), password.clone()).map_err(|e| e.to_string()).unwrap(),
-            (Some(password), None) => 
-                self._as.set_user_password("".into(), password.clone()).map_err(|e| e.to_string()).unwrap(),
-            (None, Some((user, _))) =>
-                self._as.set_user_password(user.into(), "".into()).map_err(|e| e.to_string()).unwrap(),
-            (None, None) => {},
+    pub fn set_password(&mut self, pass: Option<String>) {
+        match (pass, &self._as.user_password) {
+            (Some(pass), Some((user, _))) => {
+                self._as.user_password = Some((user.clone(), pass.clone()))
+            }
+            (Some(pass), None) => self._as.user_password = Some(("".into(), pass.clone())),
+            (None, Some((user, _))) => self._as.user_password = Some((user.clone(), "".into())),
+            (None, None) => {}
         }
     }
 
@@ -2489,7 +2482,6 @@ impl ClientPolicy {
     pub fn set_fail_if_not_connected(&mut self, fail_if_not_connected: bool) {
         self._as.fail_if_not_connected = fail_if_not_connected;
     }
-
 
     // /// Threshold at which the buffer attached to the connection will be shrunk by deallocating
     // /// memory instead of just resetting the size of the underlying vec.
@@ -2563,8 +2555,6 @@ impl ClientPolicy {
     pub fn set_thread_pool_size(&mut self, thread_pool_size: usize) {
         self._as.thread_pool_size = thread_pool_size;
     }
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -2644,15 +2634,26 @@ impl Record {
 /// "single-bin". In "multi-bin" mode, partial records may be written or read by specifying the
 /// relevant subset of bins.
 pub fn new_aerospike_client(
-    policy: &ClientPolicy,
+    policy: &mut ClientPolicy,
     hosts: &str,
 ) -> PhpResult<aerospike_sync::Client> {
+    // hashing is expensive. Do not hash until the last moment when actual connections are needed.
+    // Otherwise, we'll have to hash the password every time on ClientPolicy creation.
+    if policy._as.user_password.is_some() {
+        let (u, p) = policy._as.user_password.clone().unwrap();
+        // hash happens here
+        policy
+            ._as
+            .set_user_password(u, p)
+            .map_err(|e| e.to_string())?;
+    }
+
     let res = aerospike_sync::Client::new(&policy._as, &hosts).map_err(|e| e.to_string())?;
     Ok(res)
 }
 
 #[php_function]
-pub fn Aerospike(policy: &ClientPolicy, hosts: &str) -> PhpResult<Zval> {
+pub fn Aerospike(policy: &mut ClientPolicy, hosts: &str) -> PhpResult<Zval> {
     match get_persisted_client(hosts) {
         Some(c) => {
             trace!("Found Aerospike Client object for {}", hosts);
@@ -2663,7 +2664,7 @@ pub fn Aerospike(policy: &ClientPolicy, hosts: &str) -> PhpResult<Zval> {
 
     trace!("Creating a new Aerospike Client object for {}", hosts);
 
-    let c = Arc::new(new_aerospike_client(&policy, &hosts)?);
+    let c = Arc::new(new_aerospike_client(policy, &hosts)?);
     persist_client(hosts, c)?;
 
     match get_persisted_client(hosts) {
@@ -2916,8 +2917,6 @@ impl From<AerospikeException> for PhpException {
         PhpException::default(error.message)
     }
 }
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3432,7 +3431,6 @@ impl From<Arc<aerospike_core::Recordset>> for Recordset {
 //  utility methods
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
-
 
 fn bins_flag(bins: Option<Vec<String>>) -> aerospike_core::Bins {
     match bins {

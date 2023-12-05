@@ -15,12 +15,12 @@ final class FilterTest extends TestCase
         $cp = new ClientPolicy();
 
         try {
-            $client = Aerospike($cp, $host);
+            $client = Aerospike($cp, self::$host);
             $client->truncate("test", "test");
             $wp = new WritePolicy();
             
             for ($i = 1; $i <= 10; $i++) {
-                $key = new Key($namespace, $set, $i);
+                $key = new Key(self::$namespace, self::$set, $i);
                 $ibin = new Bin("ibin", $i);
                 $client->put($wp, $key, [$ibin]);
             }
@@ -28,7 +28,7 @@ final class FilterTest extends TestCase
             $circleFormat = '{"type":"AeroCircle","coordinates":[[%f,%f], %f]}';
             $targetString = sprintf($circleFormat, -80.590000, 28.60000, 1000);
             $geoLoc = new Bin("geoLoc", Value::geoJson($targetString));
-            $geoKey = new Key($namespace, $set, "geoKey");
+            $geoKey = new Key(self::$namespace, self::$set, "geoKey");
             $client->put($wp, $geoKey, [$geoLoc]);
 
         } catch (Exception $e) {
@@ -39,7 +39,7 @@ final class FilterTest extends TestCase
     public function testRangeFilter(){
         $cp = new ClientPolicy();
         $qp = new QueryPolicy();
-        $client = Aerospike($cp, $host);
+        $client = Aerospike($cp, self::$host);
 
         $client->createIndex("test", "test", "ibin", "test.test.ibin", IndexType::Numeric());
         $statement = new Statement("test", "test", ["ibin"]);
@@ -56,10 +56,10 @@ final class FilterTest extends TestCase
     public function testRangeFilterNeg(){
         $cp = new ClientPolicy();
         $qp = new QueryPolicy();
-        $client = Aerospike($cp, $host);
+        $client = Aerospike($cp, self::$host);
 
-        $client->createIndex($namespace, $set, "ibin", "test.test.ibin", IndexType::Numeric());
-        $statement = new Statement($namespace, $set, ["ibin"]);
+        $client->createIndex(self::$namespace, self::$set, "ibin", "test.test.ibin", IndexType::Numeric());
+        $statement = new Statement(self::$namespace, self::$set, ["ibin"]);
         $statement->filters = [Filter::range("ibin", 11, 21)];
         
         $recordset = $client->query($qp, $statement);
@@ -73,10 +73,10 @@ final class FilterTest extends TestCase
     public function testContainsFilter(){
         $cp = new ClientPolicy();
         $qp = new QueryPolicy();
-        $client = Aerospike($cp, $host);
+        $client = Aerospike($cp, self::$host);
 
-        $client->createIndex($namespace, $set, "ibin", "test.test.ibin", IndexType::Numeric());
-        $statement = new Statement($namespace, $set, ["ibin"]);
+        $client->createIndex(self::$namespace, self::$set, "ibin", "test.test.ibin", IndexType::Numeric());
+        $statement = new Statement(self::$namespace, self::$set, ["ibin"]);
         $statement->filters = [Filter::contains("ibin", 5)];
         
         $recordset = $client->query($qp, $statement);
@@ -90,10 +90,10 @@ final class FilterTest extends TestCase
     public function testContainsFilterNeg(){
         $cp = new ClientPolicy();
         $qp = new QueryPolicy();
-        $client = Aerospike($cp, $host);
+        $client = Aerospike($cp, self::$host);
 
-        $client->createIndex($namespace, $set, "ibin", "test.test.ibin", IndexType::Numeric());
-        $statement = new Statement($namespace, $set, ["ibin"]);
+        $client->createIndex(self::$namespace, self::$set, "ibin", "test.test.ibin", IndexType::Numeric());
+        $statement = new Statement(self::$namespace, self::$set, ["ibin"]);
         $statement->filters = [Filter::contains("ibin", 15)];
         
         $recordset = $client->query($qp, $statement);
@@ -107,11 +107,11 @@ final class FilterTest extends TestCase
     public function testContainsRangeFilter(){
         $cp = new ClientPolicy();
         $qp = new QueryPolicy();
-        $client = Aerospike($cp, $host);
+        $client = Aerospike($cp, self::$host);
 
-        $client->createIndex($namespace, $set, "ibin", "test.test.ibin", IndexType::Numeric());
-        $statement = new Statement($namespace, $set, ["ibin"]);
-        $statement->filters = [Filter::contains("ibin", 1, 5)];
+        $client->createIndex(self::$namespace, self::$set, "ibin", "test.test.ibin", IndexType::Numeric());
+        $statement = new Statement(self::$namespace, self::$set, ["ibin"]);
+        $statement->filters = [Filter::containsRange("ibin", 1, 5)];
         
         $recordset = $client->query($qp, $statement);
         $count = 0;
@@ -124,11 +124,11 @@ final class FilterTest extends TestCase
     public function testContainsRangeFilterNeg(){
         $cp = new ClientPolicy();
         $qp = new QueryPolicy();
-        $client = Aerospike($cp, $host);
+        $client = Aerospike($cp, self::$host);
 
-        $client->createIndex($namespace, $set, "ibin", "test.test.ibin", IndexType::Numeric());
-        $statement = new Statement($namespace, $set, ["ibin"]);
-        $statement->filters = [Filter::contains("ibin", 11, 25)];
+        $client->createIndex(self::$namespace, self::$set, "ibin", "test.test.ibin", IndexType::Numeric());
+        $statement = new Statement(self::$namespace, self::$set, ["ibin"]);
+        $statement->filters = [Filter::containsRange("ibin", 11, 25)];
         
         $recordset = $client->query($qp, $statement);
         $count = 0;
@@ -141,11 +141,11 @@ final class FilterTest extends TestCase
     public function testGeoRegionsContainingPointFilter(){
         $cp = new ClientPolicy();
         $qp = new QueryPolicy();
-        $client = Aerospike($cp, $host);
+        $client = Aerospike($cp, self::$host);
 
-        $client->createIndex($namespace, $set, "geoLoc", "test.test.geobin", IndexType::Geo2DSphere());
+        $client->createIndex(self::$namespace, self::$set, "geoLoc", "test.test.geobin", IndexType::Geo2DSphere());
         $pointString = '{"type":"Point","coordinates":[-80.590003, 28.60009]}';
-        $statement = new Statement($namespace, $set, ["geoLoc"]);
+        $statement = new Statement(self::$namespace, self::$set, ["geoLoc"]);
         $statement->filters = [Filter::regionsContainingPoint("geoLoc", $pointString)];
         
         $recordset = $client->query($qp, $statement);
@@ -160,10 +160,10 @@ final class FilterTest extends TestCase
     public function testGeoWithinRadiusFilter(){
         $cp = new ClientPolicy();
         $qp = new QueryPolicy();
-        $client = Aerospike($cp, $host);
+        $client = Aerospike($cp, self::$host);
 
-        $client->createIndex($namespace, $set, "geoLoc", "test.test.geobin", IndexType::Geo2DSphere());
-        $statement = new Statement($namespace, $set, ["geoLoc"]);
+        $client->createIndex(self::$namespace, self::$set, "geoLoc", "test.test.geobin", IndexType::Geo2DSphere());
+        $statement = new Statement(self::$namespace, self::$set, ["geoLoc"]);
         $statement->filters = [Filter::withinRadius("geoLoc", -80.590003,28.60009, 20)];
         
         $recordset = $client->query($qp, $statement);
