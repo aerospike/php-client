@@ -17,6 +17,8 @@
 
 #![cfg_attr(windows, feature(abi_vectorcall))]
 
+use ext_php_rs::ffi::zend_object;
+use ext_php_rs::ffi::zend_object_iterator;
 use ext_php_rs::prelude::*;
 
 use std::collections::BTreeMap;
@@ -29,6 +31,7 @@ use std::io::Write;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::Duration;
+use std::iter::FromIterator;
 
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::convert::IntoZendObject;
@@ -36,9 +39,13 @@ use ext_php_rs::convert::{FromZval, IntoZval};
 use ext_php_rs::error::Result;
 use ext_php_rs::flags::DataType;
 use ext_php_rs::php_class;
-use ext_php_rs::types::ZendHashTable;
+use ext_php_rs::types::{ZendHashTable, ArrayKey};
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
+use ext_php_rs::exception::throw_object;
+use ext_php_rs::zend::{ce, ClassEntry};
+use ext_php_rs::class::RegisteredClass;
+use ext_php_rs::exception::throw_with_code;
 
 use aerospike_core::as_val;
 
@@ -48,10 +55,13 @@ use lazy_static::lazy_static;
 use log::LevelFilter;
 use log::{debug, info, trace, warn};
 
+
 lazy_static! {
     static ref CLIENTS: Mutex<HashMap<String, Arc<aerospike_sync::Client>>> =
         Mutex::new(HashMap::new());
 }
+
+pub type AsResult<T = ()> = std::result::Result<T, AsException>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2328,6 +2338,9 @@ impl Statement {
 /// multiple threads will retrieve records from the server nodes and put these records on an
 /// internal queue managed by the recordset. The single user thread consumes these records from the
 /// queue.
+/// 
+pub type RecordSet = zend_object_iterator;
+
 #[php_class(name = "Aerospike\\Recordset")]
 pub struct Recordset {
     _as: Arc<aerospike_core::Recordset>,
@@ -2344,6 +2357,10 @@ impl Recordset {
     pub fn get_active(&self) -> bool {
         self._as.is_active()
     }
+    
+    // pub fn iter(&self) -> Option<Iter> { 
+    //     Some(Iter { rs: self._as.clone() })
+    // }
 
     pub fn next(&self) -> Option<Result<Record>> {
         match self._as.next_record() {
@@ -2352,8 +2369,35 @@ impl Recordset {
             Some(Ok(rec)) => Some(Ok(rec.into())),
         }
     }
+
+    pub fn valid(&self) -> bool {
+        self._as.is_active()
+    }
+
+    pub fn current(&self) -> Option<Result<Record>> {
+        match self._as.next_record() {
+            None => None,
+            Some(Err(e)) => panic!("{}", e),
+            Some(Ok(rec)) => Some(Ok(rec.into())),
+        }
+    }
 }
 
+// pub struct Iter {
+//     rs: Arc<aerospike_core::Recordset>,
+// }
+
+// impl<'a> Iterator for Iter<'a> {
+//     type Item = Result<Record>;
+    
+//     fn next(&mut self) -> Option<Self::Item> {
+//         match self.rs.next() {
+//             None => None,
+//             Some(Err(e)) => panic!("{}", e),
+//             Some(Ok(rec)) => Some(Ok(rec.into())),
+//         }
+//     }
+// }
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  ClientPolicy
@@ -2653,7 +2697,7 @@ pub fn new_aerospike_client(
 }
 
 #[php_function]
-pub fn Aerospike(policy: &mut ClientPolicy, hosts: &str) -> PhpResult<Zval> {
+pub fn aerospike(policy: &mut ClientPolicy, hosts: &str) -> PhpResult<Zval> {
     match get_persisted_client(hosts) {
         Some(c) => {
             trace!("Found Aerospike Client object for {}", hosts);
@@ -2710,12 +2754,17 @@ impl Client {
 
     /// Write record bin(s). The policy specifies the transaction timeout, record expiration and
     /// how the transaction is handled when the record already exists.
-    pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
+    pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> AsResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
-        self._as
-            .put(&policy._as, &key._as, &bins)
-            .map_err(|e| AerospikeException::new(&e.to_string()))?;
-        Ok(())
+        match self._as.put(&policy._as, &key._as, &bins) {
+            Ok(_) => Ok(()),
+            Err(e) => {
+                // Create and throw AsException
+                println!("error!!");
+                let as_exception = AsException::default(e.to_string());
+                Err(as_exception.into())
+            }
+        }
     }
 
     /// Read record for the specified key. Depending on the bins value provided, all record bins,
@@ -2889,32 +2938,6 @@ impl Client {
         let res: Vec<BatchRead> = res.into_iter().map(|br| br.into()).collect();
         Ok(res)
         // Ok(vec![])
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  Aerospike Excetpion
-//
-////////////////////////////////////////////////////////////////////////////////////////////
-
-#[derive(Debug)]
-#[php_class(name = "Aerospike\\AerospikeException")]
-pub struct AerospikeException {
-    pub message: String,
-}
-
-impl AerospikeException {
-    pub fn new(message: &str) -> Self {
-        AerospikeException {
-            message: message.to_string(),
-        }
-    }
-}
-
-impl From<AerospikeException> for PhpException {
-    fn from(error: AerospikeException) -> PhpException {
-        PhpException::default(error.message)
     }
 }
 
@@ -3208,23 +3231,36 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
                 if arr.has_sequential_keys() {
                     // it's an array
                     let val_arr: Vec<PHPValue> =
-                        arr.iter().map(|(_, _, v)| from_zval(v).unwrap()).collect();
+                        arr.iter().map(|( _, v)| from_zval(v).unwrap()).collect();
                     PHPValue::List(val_arr)
                 } else if arr.has_numerical_keys() {
                     // it's a hashmap with numerical keys
                     let mut h = HashMap::<PHPValue, PHPValue>::with_capacity(arr.len());
-                    arr.iter().for_each(|(i, _, v)| {
-                        h.insert(PHPValue::UInt(i), from_zval(v).unwrap());
+                    arr.iter().for_each(|(i, v)| {
+                        match i {
+                            ArrayKey::Long(index) => {
+                                h.insert(PHPValue::UInt(index as u64), from_zval(v).unwrap());
+                            }
+                            ArrayKey::String(_) => {
+                
+                            }
+                        }
                     });
                     PHPValue::HashMap(h)
                 } else {
                     // it's a hashmap with string keys
                     let mut h = HashMap::with_capacity(arr.len());
-                    arr.iter().for_each(|(_, k, v)| {
-                        h.insert(
-                            PHPValue::String(k.expect("Invalid key in hashmap".into())),
-                            from_zval(v).expect("Invalid value in hashmap".into()),
-                        );
+                    arr.iter().for_each(|(k, v)| {
+                        match k {
+                            ArrayKey::Long(_) => {
+                            }
+                            ArrayKey::String(index) => {
+                                h.insert(
+                                    PHPValue::String(index),
+                                    from_zval(v).expect("Invalid value in hashmap".into()),
+                                );
+                            }
+                        }
                     });
                     PHPValue::HashMap(h)
                 }
@@ -3425,6 +3461,71 @@ impl From<Arc<aerospike_core::Recordset>> for Recordset {
 //         Self(e.to_string())
 //     }
 // }
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Aerospike Exception
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\AsException")]
+#[extends(ext_php_rs::zend::ce::exception())]
+pub struct AsException {
+     message: String,
+     code: i32,
+     ex: &'static ClassEntry,
+}
+
+impl AsException {
+    pub fn new(message: impl Into<String>, code: i32, ex: &'static ClassEntry) -> Self {
+        Self {
+            message: message.into(),
+            code,
+            ex,
+        }
+    }
+
+    pub fn default(message: String) -> Self {
+        Self::new(message, 0, ce::exception())
+    }
+
+    /// Creates an instance of `AsException` from a PHP class type and a message.
+    pub fn from_class<T: RegisteredClass>(message: String) -> Self {
+        Self::new(message, 0, T::get_metadata().ce())
+    }
+
+}
+
+impl From<String> for AsException {
+    fn from(str: String) -> Self {
+        Self::default(str)
+    }
+}
+
+impl From<&str> for AsException {
+    fn from(str: &str) -> Self {
+        Self::default(str.into())
+    }
+}
+
+// Implement Into<PhpException> for AsException to use it seamlessly.
+impl Into<PhpException> for AsException {
+    fn into(self) -> PhpException {
+        PhpException::new(
+            self.message,
+            self.code,
+            self.ex,
+        )
+    }
+}
+
+#[cfg(feature = "anyhow")]
+impl From<anyhow::Error> for AsException {
+    fn from(err: anyhow::Error) -> Self {
+        Self::new(format!("{:#}", err), 0, crate::zend::ce::exception())
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
