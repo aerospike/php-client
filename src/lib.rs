@@ -28,24 +28,24 @@ use std::fs::File;
 use std::hash::{Hash, Hasher};
 use std::io::Read;
 use std::io::Write;
+use std::iter::FromIterator;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::time::Duration;
-use std::iter::FromIterator;
 
 use ext_php_rs::boxed::ZBox;
+use ext_php_rs::class::RegisteredClass;
 use ext_php_rs::convert::IntoZendObject;
 use ext_php_rs::convert::{FromZval, IntoZval};
 use ext_php_rs::error::Result;
+use ext_php_rs::exception::throw_object;
+use ext_php_rs::exception::throw_with_code;
 use ext_php_rs::flags::DataType;
 use ext_php_rs::php_class;
-use ext_php_rs::types::{ZendHashTable, ArrayKey};
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
-use ext_php_rs::exception::throw_object;
+use ext_php_rs::types::{ArrayKey, ZendHashTable};
 use ext_php_rs::zend::{ce, ClassEntry};
-use ext_php_rs::class::RegisteredClass;
-use ext_php_rs::exception::throw_with_code;
 
 use aerospike_core::as_val;
 
@@ -55,13 +55,12 @@ use lazy_static::lazy_static;
 use log::LevelFilter;
 use log::{debug, info, trace, warn};
 
-
 lazy_static! {
     static ref CLIENTS: Mutex<HashMap<String, Arc<aerospike_sync::Client>>> =
         Mutex::new(HashMap::new());
 }
 
-pub type AsResult<T = ()> = std::result::Result<T, AsException>;
+pub type AspResult<T = ()> = std::result::Result<T, AspException>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2338,7 +2337,7 @@ impl Statement {
 /// multiple threads will retrieve records from the server nodes and put these records on an
 /// internal queue managed by the recordset. The single user thread consumes these records from the
 /// queue.
-/// 
+///
 pub type RecordSet = zend_object_iterator;
 
 #[php_class(name = "Aerospike\\Recordset")]
@@ -2357,8 +2356,8 @@ impl Recordset {
     pub fn get_active(&self) -> bool {
         self._as.is_active()
     }
-    
-    // pub fn iter(&self) -> Option<Iter> { 
+
+    // pub fn iter(&self) -> Option<Iter> {
     //     Some(Iter { rs: self._as.clone() })
     // }
 
@@ -2371,7 +2370,7 @@ impl Recordset {
     }
 
     pub fn valid(&self) -> bool {
-        self._as.is_active()
+        false
     }
 
     pub fn current(&self) -> Option<Result<Record>> {
@@ -2389,7 +2388,7 @@ impl Recordset {
 
 // impl<'a> Iterator for Iter<'a> {
 //     type Item = Result<Record>;
-    
+
 //     fn next(&mut self) -> Option<Self::Item> {
 //         match self.rs.next() {
 //             None => None,
@@ -2398,6 +2397,9 @@ impl Recordset {
 //         }
 //     }
 // }
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  ClientPolicy
@@ -2739,32 +2741,26 @@ impl Client {
         &self.hosts
     }
 
-    pub fn close(&self) -> PhpResult<()> {
+    pub fn close(&self) -> AspResult<()> {
         trace!("Closing the client pointer: {:p}", &self);
-        self._as.close().map_err(|e| e.to_string())?;
+        self._as.close()?;
         let mut clients = CLIENTS.lock().unwrap();
         clients.remove(&self.hosts);
         Ok(())
     }
 
-    pub fn is_connected(&self) -> PhpResult<bool> {
+    pub fn is_connected(&self) -> AspResult<bool> {
         let res = self._as.is_connected();
         Ok(res.into())
     }
 
     /// Write record bin(s). The policy specifies the transaction timeout, record expiration and
     /// how the transaction is handled when the record already exists.
-    pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> AsResult<()> {
+    pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> AspResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
-        match self._as.put(&policy._as, &key._as, &bins) {
-            Ok(_) => Ok(()),
-            Err(e) => {
-                // Create and throw AsException
-                println!("error!!");
-                let as_exception = AsException::default(e.to_string());
-                Err(as_exception.into())
-            }
-        }
+        self._as
+            .put(&policy._as, &key._as, &bins)?;
+        Ok(())
     }
 
     /// Read record for the specified key. Depending on the bins value provided, all record bins,
@@ -2775,72 +2771,66 @@ impl Client {
         policy: &ReadPolicy,
         key: &Key,
         bins: Option<Vec<String>>,
-    ) -> PhpResult<Record> {
+    ) -> AspResult<Record> {
         let res = self
             ._as
-            .get(&policy._as, &key._as, bins_flag(bins))
-            .map_err(|e| e.to_string())?;
+            .get(&policy._as, &key._as, bins_flag(bins))?;
         Ok(res.into())
     }
+
 
     /// Add integer bin values to existing record bin values. The policy specifies the transaction
     /// timeout, record expiration and how the transaction is handled when the record already
     /// exists. This call only works for integer values.
-    pub fn add(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
+    pub fn add(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> AspResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
         self._as
-            .add(&policy._as, &key._as, &bins)
-            .map_err(|e| e.to_string())?;
+            .add(&policy._as, &key._as, &bins)?;
         Ok(())
     }
 
     /// Append bin string values to existing record bin values. The policy specifies the
     /// transaction timeout, record expiration and how the transaction is handled when the record
     /// already exists. This call only works for string values.
-    pub fn append(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
+    pub fn append(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> AspResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
         self._as
-            .append(&policy._as, &key._as, &bins)
-            .map_err(|e| e.to_string())?;
+            .append(&policy._as, &key._as, &bins)?;
         Ok(())
     }
 
     /// Prepend bin string values to existing record bin values. The policy specifies the
     /// transaction timeout, record expiration and how the transaction is handled when the record
     /// already exists. This call only works for string values.
-    pub fn prepend(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
+    pub fn prepend(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> AspResult<()> {
         let bins: Vec<aerospike_core::Bin> = bins.into_iter().map(|bin| bin._as.clone()).collect();
         self._as
-            .prepend(&policy._as, &key._as, &bins)
-            .map_err(|e| e.to_string())?;
+            .prepend(&policy._as, &key._as, &bins)?;
         Ok(())
     }
 
     /// Delete record for specified key. The policy specifies the transaction timeout.
     /// The call returns `true` if the record existed on the server before deletion.
-    pub fn delete(&self, policy: &WritePolicy, key: &Key) -> PhpResult<bool> {
+    pub fn delete(&self, policy: &WritePolicy, key: &Key) -> AspResult<bool> {
         let res = self
             ._as
-            .delete(&policy._as, &key._as)
-            .map_err(|e| e.to_string())?;
+            .delete(&policy._as, &key._as)?;
         Ok(res)
     }
 
     /// Reset record's time to expiration using the policy's expiration. Fail if the record does
     /// not exist.
-    pub fn touch(&self, policy: &WritePolicy, key: &Key) -> PhpResult<()> {
+    pub fn touch(&self, policy: &WritePolicy, key: &Key) -> AspResult<()> {
         self._as
-            .touch(&policy._as, &key._as)
-            .map_err(|e| e.to_string())?;
+            .touch(&policy._as, &key._as)?;
         Ok(())
     }
 
     /// Determine if a record key exists. The policy can be used to specify timeouts.
-    pub fn exists(&self, policy: &ReadPolicy, key: &Key) -> PhpResult<bool> {
+    pub fn exists(&self, policy: &ReadPolicy, key: &Key) -> AspResult<bool> {
         let res = self
             ._as
-            .exists(&policy._as, &key._as)
-            .map_err(|e| e.to_string())?;
+            .exists(&policy._as, &key._as)?;
         Ok(res)
     }
 
@@ -2850,11 +2840,10 @@ impl Client {
         namespace: &str,
         set_name: &str,
         before_nanos: Option<i64>,
-    ) -> PhpResult<()> {
+    ) -> AspResult<()> {
         let before_nanos = before_nanos.unwrap_or_default();
         self._as
-            .truncate(namespace, set_name, before_nanos)
-            .map_err(|e| e.to_string())?;
+            .truncate(namespace, set_name, before_nanos)?;
         Ok(())
     }
 
@@ -2869,24 +2858,21 @@ impl Client {
         namespace: &str,
         set_name: &str,
         bins: Option<Vec<String>>,
-    ) -> PhpResult<Recordset> {
+    ) -> AspResult<Recordset> {
         let res = self
             ._as
-            .scan(&policy._as, namespace, set_name, bins_flag(bins))
-            .map_err(|e| e.to_string())?;
+            .scan(&policy._as, namespace, set_name, bins_flag(bins))?;
         Ok(res.into())
     }
 
     /// Execute a query on all server nodes and return a record iterator. The query executor puts
     /// records on a queue in separate threads. The calling thread concurrently pops records off
     /// the queue through the record iterator.
-    pub fn query(&self, policy: &QueryPolicy, statement: &Statement) -> PhpResult<Recordset> {
+    pub fn query(&self, policy: &QueryPolicy, statement: &Statement) -> AspResult<Recordset> {
         let stmt = statement._as.clone();
         let res = self
             ._as
-            .query(&policy._as, stmt)
-            .map_err(|e| e.to_string())
-            .map_err(|e| e.to_string())?;
+            .query(&policy._as, stmt)?;
         Ok(res.into())
     }
 
@@ -2900,7 +2886,7 @@ impl Client {
         index_name: &str,
         index_type: &IndexType,
         cit: Option<&CollectionIndexType>,
-    ) -> PhpResult<()> {
+    ) -> AspResult<()> {
         let default = CollectionIndexType::Default();
         let cit = cit.unwrap_or(&default);
         self._as
@@ -2911,15 +2897,13 @@ impl Client {
                 index_name,
                 index_type.into(),
                 cit.into(),
-            )
-            .map_err(|e| e.to_string())?;
+            )?;
         Ok(())
     }
 
-    pub fn drop_index(&self, namespace: &str, set_name: &str, index_name: &str) -> PhpResult<()> {
+    pub fn drop_index(&self, namespace: &str, set_name: &str, index_name: &str) -> AspResult<()> {
         self._as
-            .drop_index(namespace, set_name, index_name)
-            .map_err(|e| e.to_string())?;
+            .drop_index(namespace, set_name, index_name)?;
         Ok(())
     }
 
@@ -2927,17 +2911,46 @@ impl Client {
         &self,
         policy: &BatchPolicy,
         batch_reads: Vec<&BatchRead>,
-    ) -> PhpResult<Vec<BatchRead>> {
+    ) -> AspResult<Vec<BatchRead>> {
         let batch_reads: Vec<aerospike_core::BatchRead> =
             batch_reads.into_iter().map(|br| br._as.clone()).collect();
         let res = self
             ._as
-            .batch_get(&policy._as, batch_reads)
-            .map_err(|e| e.to_string())?;
+            .batch_get(&policy._as, batch_reads)?;
 
         let res: Vec<BatchRead> = res.into_iter().map(|br| br.into()).collect();
         Ok(res)
-        // Ok(vec![])
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  AspException
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\AspException")]
+#[extends(ext_php_rs::zend::ce::exception())]
+pub struct AspException {
+    #[prop(flags = ext_php_rs::flags::PropertyFlags::Public)]
+    message: String,
+    #[prop(flags = ext_php_rs::flags::PropertyFlags::Public)]
+    code: i32,
+}
+impl From<aerospike_core::Error> for AspException {
+    fn from(error: aerospike_core::Error) -> Self {
+        AspException {
+            message: error.to_string(),
+            code: 101,
+        } 
+    }
+}
+
+impl Into<PhpException> for AspException {
+    fn into(self) -> PhpException {
+        let error = AspException { message: self.message.clone(), code: self.code };
+        let _ = throw_object(error.into_zval(true).unwrap());
+        PhpException::new(self.message, self.code, ce::exception())
     }
 }
 
@@ -3231,35 +3244,28 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
                 if arr.has_sequential_keys() {
                     // it's an array
                     let val_arr: Vec<PHPValue> =
-                        arr.iter().map(|( _, v)| from_zval(v).unwrap()).collect();
+                        arr.iter().map(|(_, v)| from_zval(v).unwrap()).collect();
                     PHPValue::List(val_arr)
                 } else if arr.has_numerical_keys() {
                     // it's a hashmap with numerical keys
                     let mut h = HashMap::<PHPValue, PHPValue>::with_capacity(arr.len());
-                    arr.iter().for_each(|(i, v)| {
-                        match i {
-                            ArrayKey::Long(index) => {
-                                h.insert(PHPValue::UInt(index as u64), from_zval(v).unwrap());
-                            }
-                            ArrayKey::String(_) => {
-                
-                            }
+                    arr.iter().for_each(|(i, v)| match i {
+                        ArrayKey::Long(index) => {
+                            h.insert(PHPValue::UInt(index as u64), from_zval(v).unwrap());
                         }
+                        ArrayKey::String(_) => {}
                     });
                     PHPValue::HashMap(h)
                 } else {
                     // it's a hashmap with string keys
                     let mut h = HashMap::with_capacity(arr.len());
-                    arr.iter().for_each(|(k, v)| {
-                        match k {
-                            ArrayKey::Long(_) => {
-                            }
-                            ArrayKey::String(index) => {
-                                h.insert(
-                                    PHPValue::String(index),
-                                    from_zval(v).expect("Invalid value in hashmap".into()),
-                                );
-                            }
+                    arr.iter().for_each(|(k, v)| match k {
+                        ArrayKey::Long(_) => {}
+                        ArrayKey::String(index) => {
+                            h.insert(
+                                PHPValue::String(index),
+                                from_zval(v).expect("Invalid value in hashmap".into()),
+                            );
                         }
                     });
                     PHPValue::HashMap(h)
@@ -3461,70 +3467,6 @@ impl From<Arc<aerospike_core::Recordset>> for Recordset {
 //         Self(e.to_string())
 //     }
 // }
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  Aerospike Exception
-//
-////////////////////////////////////////////////////////////////////////////////////////////
-
-#[php_class(name = "Aerospike\\AsException")]
-#[extends(ext_php_rs::zend::ce::exception())]
-pub struct AsException {
-     message: String,
-     code: i32,
-     ex: &'static ClassEntry,
-}
-
-impl AsException {
-    pub fn new(message: impl Into<String>, code: i32, ex: &'static ClassEntry) -> Self {
-        Self {
-            message: message.into(),
-            code,
-            ex,
-        }
-    }
-
-    pub fn default(message: String) -> Self {
-        Self::new(message, 0, ce::exception())
-    }
-
-    /// Creates an instance of `AsException` from a PHP class type and a message.
-    pub fn from_class<T: RegisteredClass>(message: String) -> Self {
-        Self::new(message, 0, T::get_metadata().ce())
-    }
-
-}
-
-impl From<String> for AsException {
-    fn from(str: String) -> Self {
-        Self::default(str)
-    }
-}
-
-impl From<&str> for AsException {
-    fn from(str: &str) -> Self {
-        Self::default(str.into())
-    }
-}
-
-// Implement Into<PhpException> for AsException to use it seamlessly.
-impl Into<PhpException> for AsException {
-    fn into(self) -> PhpException {
-        PhpException::new(
-            self.message,
-            self.code,
-            self.ex,
-        )
-    }
-}
-
-#[cfg(feature = "anyhow")]
-impl From<anyhow::Error> for AsException {
-    fn from(err: anyhow::Error) -> Self {
-        Self::new(format!("{:#}", err), 0, crate::zend::ce::exception())
-    }
-}
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////

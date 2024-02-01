@@ -243,6 +243,15 @@ final class ClientTest extends TestCase
         }
     }
 
-
+    
+    public function testGetException()
+    {
+        $this->expectException(\Exception::class);
+        // Perform get on a key that is not present 
+        $rp = new ReadPolicy();
+        $noKey = new Key(self::$namespace, self::$set, "thisKeyDoesNotExist");
+        self::$client->get($rp, $noKey, ['bin1']);    
+        
+    }
 
 }
