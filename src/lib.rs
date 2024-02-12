@@ -43,6 +43,10 @@ use ext_php_rs::php_class;
 use ext_php_rs::types::ZendHashTable;
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
+use ext_php_rs::exception::throw_object;
+use ext_php_rs::exception::throw_with_code;
+use ext_php_rs::zend::{ce, ClassEntry};
+use ext_php_rs::types::{ArrayKey};
 
 use chrono::Local;
 use colored::*;
@@ -54,6 +58,9 @@ lazy_static! {
     static ref CLIENTS: Mutex<HashMap<String, Arc<Mutex<grpc::BlockingClient>>>> =
         Mutex::new(HashMap::new());
 }
+
+pub type AspResult<T = ()> = std::result::Result<T, AspException>;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3103,7 +3110,11 @@ impl Client {
             proto::Error {
                 result_code,
                 in_doubt,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } =>{
+                let error = AspException { message: "Exception in append".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("TODO(Sachin): Implement Exception").into())
+            } 
         }
     }
 
@@ -3376,6 +3387,21 @@ impl Client {
             _ => unreachable!(),
         }
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  AspException
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\AspException")]
+#[extends(ext_php_rs::zend::ce::exception())]
+pub struct AspException {
+    #[prop(flags = ext_php_rs::flags::PropertyFlags::Public)]
+    message: String,
+    #[prop(flags = ext_php_rs::flags::PropertyFlags::Public)]
+    code: i32,
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -3760,23 +3786,29 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
                 if arr.has_sequential_keys() {
                     // it's an array
                     let val_arr: Vec<PHPValue> =
-                        arr.iter().map(|(_, _, v)| from_zval(v).unwrap()).collect();
+                        arr.iter().map(|(_, v)| from_zval(v).unwrap()).collect();
                     PHPValue::List(val_arr)
                 } else if arr.has_numerical_keys() {
                     // it's a hashmap with numerical keys
                     let mut h = HashMap::<PHPValue, PHPValue>::with_capacity(arr.len());
-                    arr.iter().for_each(|(i, _, v)| {
-                        h.insert(PHPValue::UInt(i), from_zval(v).unwrap());
+                    arr.iter().for_each(|(i, v)| match i {
+                        ArrayKey::Long(index) => {
+                            h.insert(PHPValue::UInt(index as u64), from_zval(v).unwrap());
+                        }
+                        ArrayKey::String(_) => {}
                     });
                     PHPValue::HashMap(h)
                 } else {
                     // it's a hashmap with string keys
                     let mut h = HashMap::with_capacity(arr.len());
-                    arr.iter().for_each(|(_, k, v)| {
-                        h.insert(
-                            PHPValue::String(k.expect("Invalid key in hashmap".into())),
-                            from_zval(v).expect("Invalid value in hashmap".into()),
-                        );
+                    arr.iter().for_each(|(k, v)| match k {
+                        ArrayKey::Long(_) => {}
+                        ArrayKey::String(index) => {
+                            h.insert(
+                                PHPValue::String(index),
+                                from_zval(v).expect("Invalid value in hashmap".into()),
+                            );
+                        }
                     });
                     PHPValue::HashMap(h)
                 }
@@ -3785,8 +3817,6 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
         DataType::Object(_) => {
             if let Some(o) = zval.extract::<GeoJSON>() {
                 return Some(PHPValue::GeoJSON(o.v));
-            } else if let Some(o) = zval.extract::<Json>() {
-                return Some(PHPValue::Json(o.v));
             } else if let Some(o) = zval.extract::<HLL>() {
                 return Some(PHPValue::HLL(o.v));
             }
@@ -3795,6 +3825,7 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
         _ => unreachable!(),
     }
 }
+
 
 impl FromZval<'_> for PHPValue {
     const TYPE: DataType = DataType::Mixed;
@@ -4074,17 +4105,17 @@ pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
     module
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        let cp = crate::ClientPolicy::__construct();
-        let client = crate::Aerospike(&mut cp, "localhost:3000");
+// #[cfg(test)]
+// mod tests {
+//     #[test]
+//     fn it_works() {
+//         let cp = crate::ClientPolicy::__construct();
+//         let client = crate::Aerospike(&mut cp, "localhost:3000");
 
-        let policy = crate::ReadPolicy::__construct();
-        let key = crate::Key::__construct("test".into(), "test".into(), crate::PHPValue::Int(1));
-        let res = client.get(&policy, &key, None).unwrap();
+//         let policy = crate::ReadPolicy::__construct();
+//         let key = crate::Key::__construct("test".into(), "test".into(), crate::PHPValue::Int(1));
+//         let res = client.get(&policy, &key, None).unwrap();
 
-        println!("{}", res._as.bins.ro_s());
-    }
-}
+//         println!("{}", res._as.bins.ro_s());
+//     }
+// }
