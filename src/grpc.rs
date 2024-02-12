@@ -128,6 +128,14 @@ impl BlockingClient {
         // return the task ID and handle the task
         self.rt.block_on(self.client.drop_index(request))
     }
+
+    pub fn truncate(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeTruncateRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeTruncateResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.truncate(request))
+    }
 }
 
 // fn main() -> Result<()> {

@@ -64,6 +64,297 @@ pub type AspResult<T = ()> = std::result::Result<T, AspException>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+// ResultCode
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+enum ResultCode {
+    // GRPC_ERROR is wrapped and directly returned from the grpc library
+    GrpcError = -21,
+
+    // BATCH_FAILED means one or more keys failed in a batch.
+    BatchFailed = -20,
+
+    // NO_RESPONSE means no response was received from the server.
+    NoResponse = -19,
+
+    // NETWORK_ERROR defines a network error. Checked the wrapped error for detail.
+    NetworkError = -18,
+
+    // COMMON_ERROR defines a common, none-aerospike error. Checked the wrapped error for detail.
+    CommonError = -17,
+
+    // MAX_RETRIES_EXCEEDED defines max retries limit reached.
+    MaxRetriesExceeded = -16,
+
+    // MAX_ERROR_RATE defines max errors limit reached.
+    MaxErrorRate = -15,
+
+    // RACK_NOT_DEFINED defines requested Rack for node/namespace was not defined in the cluster.
+    RackNotDefined = -13,
+
+    // INVALID_CLUSTER_PARTITION_MAP defines cluster has an invalid partition map, usually due to bad configuration.
+    InvalidClusterPartitionMap = -12,
+
+    // SERVER_NOT_AVAILABLE defines server is not accepting requests.
+    ServerNotAvailable = -11,
+
+    // CLUSTER_NAME_MISMATCH_ERROR defines cluster Name does not match the ClientPolicy.ClusterName value.
+    ClusterNameMismatchError = -10,
+
+    // RECORDSET_CLOSED defines recordset has already been closed or cancelled
+    RecordsetClosed = -9,
+
+    // NO_AVAILABLE_CONNECTIONS_TO_NODE defines there were no connections available to the node in the pool, and the pool was limited
+    NoAvailableConnectionsToNode = -8,
+
+    // TYPE_NOT_SUPPORTED defines data type is not supported by aerospike server.
+    TypeNotSupported = -7,
+
+    // COMMAND_REJECTED defines info Command was rejected by the server.
+    CommandRejected = -6,
+
+    // QUERY_TERMINATED defines query was terminated by user.
+    QueryTerminated = -5,
+
+    // SCAN_TERMINATED defines scan was terminated by user.
+    ScanTerminated = -4,
+
+    // INVALID_NODE_ERROR defines chosen node is not currently active.
+    InvalidNodeError = -3,
+
+    // PARSE_ERROR defines client parse error.
+    ParseError = -2,
+
+    // SERIALIZE_ERROR defines client serialization error.
+    SerializeError = -1,
+
+    // OK defines operation was successful.
+    OK = 0,
+
+    // SERVER_ERROR defines unknown server failure.
+    ServerError = 1,
+
+    // KEY_NOT_FOUND_ERROR defines on retrieving, touching or replacing a record that doesn't exist.
+    KeyNotFoundError = 2,
+
+    // GENERATION_ERROR defines on modifying a record with unexpected generation.
+    GenerationError = 3,
+
+    // PARAMETER_ERROR defines bad parameter(s) were passed in database operation call.
+    ParameterError = 4,
+
+    // KEY_EXISTS_ERROR defines on create-only (write unique) operations on a record that already
+    // exists.
+    KeyExistsError = 5,
+
+    // BIN_EXISTS_ERROR defines bin already exists on a create-only operation.
+    BinExistsError = 6,
+
+    // CLUSTER_KEY_MISMATCH defines expected cluster ID was not received.
+    ClusterKeyMismatch = 7,
+
+    // SERVER_MEM_ERROR defines server has run out of memory.
+    ServerMemError = 8,
+
+    // TIMEOUT defines client or server has timed out.
+    TIMEOUT = 9,
+
+    // ALWAYS_FORBIDDEN defines operation not allowed in current configuration.
+    AlwaysForbidden = 10,
+
+    // PARTITION_UNAVAILABLE defines partition is unavailable.
+    PartitionUnavailable = 11,
+
+    // BIN_TYPE_ERROR defines operation is not supported with configured bin type (single-bin or
+    // multi-bin).
+    BinTypeError = 12,
+
+    // RECORD_TOO_BIG defines record size exceeds limit.
+    RecordTooBig = 13,
+
+    // KEY_BUSY defines too many concurrent operations on the same record.
+    KeyBusy = 14,
+
+    // SCAN_ABORT defines scan aborted by server.
+    ScanAbort = 15,
+
+    // UNSUPPORTED_FEATURE defines unsupported Server Feature (e.g. Scan + UDF)
+    UnsupportedFeature = 16,
+
+    // BIN_NOT_FOUND defines bin not found on update-only operation.
+    BinNotFound = 17,
+
+    // DEVICE_OVERLOAD defines device not keeping up with writes.
+    DeviceOverload = 18,
+
+    // KEY_MISMATCH defines key type mismatch.
+    KeyMismatch = 19,
+
+    // INVALID_NAMESPACE defines invalid namespace.
+    InvalidNamespace = 20,
+
+    // BIN_NAME_TOO_LONG defines bin name length greater than 14 characters,
+    // or maximum number of unique bin names are exceeded.
+    BinNameTooLong = 21,
+
+    // FAIL_FORBIDDEN defines operation not allowed at this time.
+    FailForbidden = 22,
+
+    // FAIL_ELEMENT_NOT_FOUND defines element Not Found in CDT
+    FailElementNotFound = 23,
+
+    // FAIL_ELEMENT_EXISTS defines element Already Exists in CDT
+    FailElementExists = 24,
+
+    // ENTERPRISE_ONLY defines attempt to use an Enterprise feature on a Community server or a server
+    // without the applicable feature key.
+    EnterpriseOnly = 25,
+
+    // OP_NOT_APPLICABLE defines the operation cannot be applied to the current bin value on the server.
+    OpNotApplicable = 26,
+
+    // FILTERED_OUT defines the transaction was not performed because the filter was false.
+    FilteredOut = 27,
+
+    // LOST_CONFLICT defines write command loses conflict to XDR.
+    LostConflict = 28,
+
+    // QUERY_END defines there are no more records left for query.
+    QueryEnd = 50,
+
+    // SECURITY_NOT_SUPPORTED defines security type not supported by connected server.
+    SecurityNotSupported = 51,
+
+    // SECURITY_NOT_ENABLED defines administration command is invalid.
+    SecurityNotEnabled = 52,
+
+    // SECURITY_SCHEME_NOT_SUPPORTED defines administration field is invalid.
+    SecuritySchemeNotSupported = 53,
+
+    // INVALID_COMMAND defines administration command is invalid.
+    InvalidCommand = 54,
+
+    // INVALID_FIELD defines administration field is invalid.
+    InvalidField = 55,
+
+    // ILLEGAL_STATE defines security protocol not followed.
+    IllegalState = 56,
+
+    // INVALID_USER defines user name is invalid.
+    InvalidUser = 60,
+
+    // USER_ALREADY_EXISTS defines user was previously created.
+    UserAlreadyExists = 61,
+
+    // INVALID_PASSWORD defines password is invalid.
+    InvalidPassword = 62,
+
+    // EXPIRED_PASSWORD defines security credential is invalid.
+    ExpiredPassword = 63,
+
+    // FORBIDDEN_PASSWORD defines forbidden password (e.g. recently used)
+    ForbiddenPassword = 64,
+
+    // INVALID_CREDENTIAL defines security credential is invalid.
+    InvalidCredential = 65,
+
+    // EXPIRED_SESSION defines login session expired.
+    ExpiredSession = 66,
+
+    // INVALID_ROLE defines role name is invalid.
+    InvalidRole = 70,
+
+    // ROLE_ALREADY_EXISTS defines role already exists.
+    RoleAlreadyExists = 71,
+
+    // INVALID_PRIVILEGE defines privilege is invalid.
+    InvalidPrivilege = 72,
+
+    // INVALID_WHITELIST defines invalid IP address whiltelist
+    InvalidWhitelist = 73,
+
+    // QUOTAS_NOT_ENABLED defines Quotas not enabled on server.
+    QuotasNotEnabled = 74,
+
+    // INVALID_QUOTA defines invalid quota value.
+    INVALID_QUOTA = 75,
+
+    // NOT_AUTHENTICATED defines user must be authentication before performing database operations.
+    NotAuthenticated = 80,
+
+    // ROLE_VIOLATION defines user does not posses the required role to perform the database operation.
+    RoleViolation = 81,
+
+    // NOT_WHITELISTED defines command not allowed because sender IP address not whitelisted.
+    NotWhitelisted = 82,
+
+    // QUOTA_EXCEEDED defines Quota exceeded.
+    QuotaExceeded = 83,
+
+    // UDF_BAD_RESPONSE defines a user defined function returned an error code.
+    UdfBadResponse = 100,
+
+    // BATCH_DISABLED defines batch functionality has been disabled.
+    BatchDisabled = 150,
+
+    // BATCH_MAX_REQUESTS_EXCEEDED defines batch max requests have been exceeded.
+    BatchMaxRequestsExceeded = 151,
+
+    // BATCH_QUEUES_FULL defines all batch queues are full.
+    BatchQueuesFull = 152,
+
+    // GEO_INVALID_GEOJSON defines invalid GeoJSON on insert/update
+    GeoInvalidGeojson = 160,
+
+    // INDEX_FOUND defines secondary index already exists.
+    IndexFound = 200,
+
+    // INDEX_NOTFOUND defines requested secondary index does not exist.
+    IndexNotfound = 201,
+
+    // INDEX_OOM defines secondary index memory space exceeded.
+    IndexOom = 202,
+
+    // INDEX_NOTREADABLE defines secondary index not available.
+    IndexNotreadable = 203,
+
+    // INDEX_GENERIC defines generic secondary index error.
+    IndexGeneric = 204,
+
+    // INDEX_NAME_MAXLEN defines index name maximum length exceeded.
+    IndexNameMaxlen = 205,
+
+    // INDEX_MAXCOUNT defines maximum number of indexes exceeded.
+    IndexMaxcount = 206,
+
+    // QUERY_ABORTED defines secondary index query aborted.
+    QueryAborted = 210,
+
+    // QUERY_QUEUEFULL defines secondary index queue full.
+    QueryQueuefull = 211,
+
+    // QUERY_TIMEOUT defines secondary index query timed out on server.
+    QueryTimeout = 212,
+
+    // QUERY_GENERIC defines generic query error.
+    QueryGeneric = 213,
+
+    // QUERY_NETIO_ERR defines query NetIO error on server
+    QueryNetioErr = 214,
+
+    // QUERY_DUPLICATE defines duplicate TaskId sent for the statement
+    QueryDuplicate = 215,
+
+    // AEROSPIKE_ERR_UDF_NOT_FOUND defines UDF does not exist.
+    AerospikeErrUdfNotFound = 1301,
+
+    // AEROSPIKE_ERR_LUA_FILE_NOT_FOUND defines LUA file does not exist.
+    AerospikeErrLuaFileNotFound = 1302,
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 //  ExpressionType (ExpType)
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1739,6 +2030,28 @@ impl ReadPolicy {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+//  InfoPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\InfoPolicy")]
+pub struct InfoPolicy {
+    _as: proto::InfoPolicy,
+}
+
+/// `InfoPolicy` encapsulates parameters for all info operations.
+#[php_impl]
+#[derive(ZvalConvert)]
+impl InfoPolicy {
+    pub fn __construct() -> Self {
+        InfoPolicy {
+            _as: proto::InfoPolicy::default(),
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 //  WritePolicy
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -2953,33 +3266,33 @@ impl BatchUdf {
 /// Each record may have multiple bins, unless the Aerospike server nodes are configured as
 /// "single-bin". In "multi-bin" mode, partial records may be written or read by specifying the
 /// relevant subset of bins.
-pub fn new_aerospike_client(socket: &str) -> PhpResult<grpc::BlockingClient> {
+fn new_aerospike_client(socket: &str) -> PhpResult<grpc::BlockingClient> {
     let client = grpc::BlockingClient::connect(socket.into()).map_err(|e| e.to_string())?;
     Ok(client)
 }
 
-#[php_function]
-pub fn Aerospike(hosts: &str) -> PhpResult<Zval> {
-    match get_persisted_client(hosts) {
-        Some(c) => {
-            trace!("Found Aerospike Client object for {}", hosts);
-            return Ok(c);
-        }
-        None => (),
-    }
+// #[php_function]
+// pub fn Aerospike(hosts: &str) -> PhpResult<Zval> {
+//     match get_persisted_client(hosts) {
+//         Some(c) => {
+//             trace!("Found Aerospike Client object for {}", hosts);
+//             return Ok(c);
+//         }
+//         None => (),
+//     }
 
-    trace!("Creating a new Aerospike Client object for {}", hosts);
+//     trace!("Creating a new Aerospike Client object for {}", hosts);
 
-    let c = Arc::new(Mutex::new(new_aerospike_client(&hosts)?));
-    persist_client(hosts, c)?;
+//     let c = Arc::new(Mutex::new(new_aerospike_client(&hosts)?));
+//     persist_client(hosts, c)?;
 
-    match get_persisted_client(hosts) {
-        Some(c) => {
-            return Ok(c);
-        }
-        None => Err("Error connecting to the database".into()),
-    }
-}
+//     match get_persisted_client(hosts) {
+//         Some(c) => {
+//             return Ok(c);
+//         }
+//         None => Err("Error connecting to the database".into()),
+//     }
+// }
 
 #[php_class(name = "Aerospike\\Client")]
 pub struct Client {
@@ -2997,8 +3310,31 @@ impl Drop for Client {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Client {
-    pub fn hosts(&self) -> &str {
-        &self.hosts
+    pub fn connect(hosts: &str) -> PhpResult<Zval> {
+        match get_persisted_client(hosts) {
+            Some(c) => {
+                trace!("Found Aerospike Client object for {}", hosts);
+                return Ok(c);
+            }
+            None => (),
+        }
+
+        trace!("Creating a new Aerospike Client object for {}", hosts);
+
+        let c = Arc::new(Mutex::new(new_aerospike_client(&hosts)?));
+        persist_client(hosts, c)?;
+
+        match get_persisted_client(hosts) {
+            Some(c) => {
+                return Ok(c);
+            }
+            None => Err("Error connecting to the database".into()),
+        }
+    }
+
+    #[getter]
+    pub fn hosts(&self) -> String {
+        self.hosts.clone()
     }
 
     /// Write record bin(s). The policy specifies the transaction timeout, record expiration and
@@ -3034,7 +3370,7 @@ impl Client {
         policy: &ReadPolicy,
         key: &Key,
         bins: Option<Vec<String>>,
-    ) -> PhpResult<Record> {
+    ) -> PhpResult<Option<Record>> {
         let mut request = tonic::Request::new(proto::AerospikeGetRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
@@ -3047,9 +3383,18 @@ impl Client {
             proto::AerospikeSingleResponse {
                 error: None,
                 record: Some(rec),
-            } => Ok(Record {
+            } => Ok(Some(Record {
                 _as: (*rec).clone(),
-            }),
+            })),
+            // Not found: Do not throw an exception
+            proto::AerospikeSingleResponse {
+                error:
+                    Some(proto::Error {
+                        result_code: 0, //ResultCode::KeyNotFoundError,
+                        in_doubt: false,
+                    }),
+                record: None,
+            } => Ok(None),
             proto::AerospikeSingleResponse {
                 error:
                     Some(proto::Error {
@@ -3274,19 +3619,37 @@ impl Client {
         }
     }
 
-    // /// Removes all records in the specified namespace/set efficiently.
-    // pub fn truncate(
-    //     &self,
-    //     namespace: &str,
-    //     set_name: &str,
-    //     before_nanos: Option<i64>,
-    // ) -> PhpResult<()> {
-    //     let before_nanos = before_nanos.unwrap_or_default();
-    //     self._as
-    //         .truncate(namespace, set_name, before_nanos)
-    //         .map_err(|e| e.to_string())?;
-    //     Ok(())
-    // }
+    /// Removes all records in the specified namespace/set efficiently.
+    pub fn truncate(
+        &self,
+        policy: &InfoPolicy,
+        namespace: &str,
+        set_name: &str,
+        before_nanos: Option<i64>,
+    ) -> PhpResult<()> {
+        // let before_nanos = before_nanos.unwrap_or_default();
+
+        let mut request = tonic::Request::new(proto::AerospikeTruncateRequest {
+            policy: Some(policy._as.clone()),
+            namespace: namespace.into(),
+            set_name: set_name.into(),
+            before_nanos: before_nanos,
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.truncate(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeTruncateResponse { error: None } => Ok(()),
+            proto::AerospikeTruncateResponse {
+                error:
+                    Some(proto::Error {
+                        result_code,
+                        in_doubt,
+                    }),
+            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            _ => unreachable!(),
+        }
+    }
 
     // /// Read all records in the specified namespace and set and return a record iterator. The scan
     // /// executor puts records on a queue in separate threads. The calling thread concurrently pops

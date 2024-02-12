@@ -296,6 +296,11 @@ message WritePolicy {
   ReadModeSC readModeSC = 3;
 }
 
+// InfoPolicy contains attributes used for info commands.
+message InfoPolicy {
+	// Info command socket timeout.
+	uint32 timeout = 1;
+}
 
 // BatchReadPolicy attributes used in batch read commands.
 message BatchReadPolicy {
@@ -803,6 +808,17 @@ message AerospikeDropIndexResponse {
   optional Error error = 1;
 }
 
+message AerospikeTruncateRequest {
+	InfoPolicy policy = 1;
+	string namespace = 2;
+	string setName = 3;
+	optional int64 before_nanos = 4;
+}
+
+message AerospikeTruncateResponse {
+  optional Error error = 1;
+}
+
 // Aerospike KVS operations service
 service KVS {
   // Put a single record
@@ -853,10 +869,13 @@ service KVS {
   rpc DropIndex (AerospikeDropIndexRequest) returns
       (AerospikeDropIndexResponse) {}
 
-	  //   // Execute single key user defined function on server and return results.
-//   rpc Execute (AerospikeRequestPayload) returns
-//       (AerospikeResponsePayload) {}
-//
+  // Truncate removes records in specified namespace/set efficiently.
+  rpc Truncate (AerospikeTruncateRequest) returns
+      (AerospikeTruncateResponse) {}
+
+// // ExecuteUDF single key user defined function on server and return results.
+//   rpc ExecuteUDF (AerospikeExecuteUDFRequest) returns
+//       (AerospikeRExecuteUDFesponse) {}
 }
 
 enum OperationType {

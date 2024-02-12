@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"reflect"
+	"time"
 
 	aero "github.com/aerospike/aerospike-client-go/v7"
 
@@ -230,6 +231,29 @@ func (s *server) DropIndex(ctx context.Context, in *pb.AerospikeDropIndexRequest
 	return &pb.AerospikeDropIndexResponse{Error: nil}, nil
 }
 
+func (s *server) Truncate(ctx context.Context, in *pb.AerospikeTruncateRequest) (*pb.AerospikeTruncateResponse, error) {
+	err := client.Truncate(toInfoPolicy(in.Policy), in.Namespace, in.SetName, toTime(in.BeforeNanos))
+	if err != nil {
+		inDoubt := err.IsInDoubt()
+		return &pb.AerospikeTruncateResponse{
+			Error: &pb.Error{
+				ResultCode: 0, // TODO: return result code
+				InDoubt:    inDoubt,
+			},
+		}, nil
+	}
+
+	return &pb.AerospikeTruncateResponse{Error: nil}, nil
+}
+
+func toTime(in *int64) *time.Time {
+	if in != nil {
+		t := time.Unix(0, *in)
+		return &t
+	}
+	return nil
+}
+
 func toIndexType(in pb.IndexType) aero.IndexType {
 	switch in {
 	case pb.IndexType_IndexTypeNumeric:
@@ -270,6 +294,13 @@ func toReadPolicy(in *pb.ReadPolicy) *aero.BasePolicy {
 func toWritePolicy(in *pb.WritePolicy) *aero.WritePolicy {
 	if in != nil {
 		return &aero.WritePolicy{}
+	}
+	return nil
+}
+
+func toInfoPolicy(in *pb.InfoPolicy) *aero.InfoPolicy {
+	if in != nil {
+		return &aero.InfoPolicy{Timeout: time.Duration(in.Timeout * uint32(time.Millisecond))}
 	}
 	return nil
 }

@@ -31,6 +31,7 @@ const (
 	KVS_BatchOperate_FullMethodName = "/com.aerospike.daemon.KVS/BatchOperate"
 	KVS_CreateIndex_FullMethodName  = "/com.aerospike.daemon.KVS/CreateIndex"
 	KVS_DropIndex_FullMethodName    = "/com.aerospike.daemon.KVS/DropIndex"
+	KVS_Truncate_FullMethodName     = "/com.aerospike.daemon.KVS/Truncate"
 )
 
 // KVSClient is the client API for KVS service.
@@ -61,6 +62,8 @@ type KVSClient interface {
 	CreateIndex(ctx context.Context, in *AerospikeCreateIndexRequest, opts ...grpc.CallOption) (*AerospikeCreateIndexResponse, error)
 	// Process batch requests.
 	DropIndex(ctx context.Context, in *AerospikeDropIndexRequest, opts ...grpc.CallOption) (*AerospikeDropIndexResponse, error)
+	// Truncate removes records in specified namespace/set efficiently.
+	Truncate(ctx context.Context, in *AerospikeTruncateRequest, opts ...grpc.CallOption) (*AerospikeTruncateResponse, error)
 }
 
 type kVSClient struct {
@@ -179,6 +182,15 @@ func (c *kVSClient) DropIndex(ctx context.Context, in *AerospikeDropIndexRequest
 	return out, nil
 }
 
+func (c *kVSClient) Truncate(ctx context.Context, in *AerospikeTruncateRequest, opts ...grpc.CallOption) (*AerospikeTruncateResponse, error) {
+	out := new(AerospikeTruncateResponse)
+	err := c.cc.Invoke(ctx, KVS_Truncate_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KVSServer is the server API for KVS service.
 // All implementations must embed UnimplementedKVSServer
 // for forward compatibility
@@ -207,6 +219,8 @@ type KVSServer interface {
 	CreateIndex(context.Context, *AerospikeCreateIndexRequest) (*AerospikeCreateIndexResponse, error)
 	// Process batch requests.
 	DropIndex(context.Context, *AerospikeDropIndexRequest) (*AerospikeDropIndexResponse, error)
+	// Truncate removes records in specified namespace/set efficiently.
+	Truncate(context.Context, *AerospikeTruncateRequest) (*AerospikeTruncateResponse, error)
 	mustEmbedUnimplementedKVSServer()
 }
 
@@ -249,6 +263,9 @@ func (UnimplementedKVSServer) CreateIndex(context.Context, *AerospikeCreateIndex
 }
 func (UnimplementedKVSServer) DropIndex(context.Context, *AerospikeDropIndexRequest) (*AerospikeDropIndexResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropIndex not implemented")
+}
+func (UnimplementedKVSServer) Truncate(context.Context, *AerospikeTruncateRequest) (*AerospikeTruncateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Truncate not implemented")
 }
 func (UnimplementedKVSServer) mustEmbedUnimplementedKVSServer() {}
 
@@ -479,6 +496,24 @@ func _KVS_DropIndex_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KVS_Truncate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeTruncateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).Truncate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_Truncate_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).Truncate(ctx, req.(*AerospikeTruncateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KVS_ServiceDesc is the grpc.ServiceDesc for KVS service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -533,6 +568,10 @@ var KVS_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DropIndex",
 			Handler:    _KVS_DropIndex_Handler,
+		},
+		{
+			MethodName: "Truncate",
+			Handler:    _KVS_Truncate_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
