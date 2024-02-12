@@ -59,8 +59,7 @@ lazy_static! {
         Mutex::new(HashMap::new());
 }
 
-pub type AspResult<T = ()> = std::result::Result<T, AspException>;
-
+pub type AsResult<T = ()> = std::result::Result<T, AerospikeException>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3018,11 +3017,19 @@ impl Client {
             proto::Error {
                 result_code: 0,
                 in_doubt: _,
-            } => Ok(()),
+            } => {
+                let error = AspException { message: "Exception put API".to_string() , code: 0 };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("Exception put API").into())
+            },
             proto::Error {
                 result_code,
                 in_doubt,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error = AspException { message: "Exception put API".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("Exception put API").into())
+            }, 
         }
     }
 
@@ -3057,7 +3064,11 @@ impl Client {
                         in_doubt,
                     }),
                 record: None,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                // let error = AspException { message: "Get API exception".to_string() , code: *result_code };
+                // let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: GET").into())
+            }
             _ => unreachable!(),
         }
     }
@@ -3084,7 +3095,11 @@ impl Client {
             proto::Error {
                 result_code,
                 in_doubt,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error = AspException { message: "AerospikeException: add".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: add").into())
+            }
         }
     }
 
@@ -3106,14 +3121,18 @@ impl Client {
             proto::Error {
                 result_code: 0,
                 in_doubt: _,
-            } => Ok(()),
+            } => {
+                let error = AspException { message: "AerospikeException: append".to_string() , code:0 };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: append").into())
+            },
             proto::Error {
                 result_code,
                 in_doubt,
             } =>{
-                let error = AspException { message: "Exception in append".to_string() , code: *result_code };
+                let error = AspException { message: "AerospikeException: append".to_string() , code: *result_code };
                 let _ = throw_object(error.into_zval(true).unwrap());
-                Err(AerospikeException::new("TODO(Sachin): Implement Exception").into())
+                Err(AerospikeException::new("AerospikeException: append").into())
             } 
         }
     }
@@ -3136,11 +3155,19 @@ impl Client {
             proto::Error {
                 result_code: 0,
                 in_doubt: _,
-            } => Ok(()),
+            } => {
+                let error = AspException { message: "AerospikeException: prepend".to_string() , code: 0 };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: prepend").into())
+            } 
             proto::Error {
                 result_code,
                 in_doubt,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error = AspException { message: "AerospikeException: prepend".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: prepend").into())
+            }
         }
     }
 
@@ -3166,7 +3193,11 @@ impl Client {
                         in_doubt,
                     }),
                 ..
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error = AspException { message: "AerospikeException: delete".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: delete").into())
+            } 
             _ => unreachable!(),
         }
     }
@@ -3185,11 +3216,19 @@ impl Client {
             proto::Error {
                 result_code: 0,
                 in_doubt: _,
-            } => Ok(()),
+            } => {
+                let error = AspException { message: "AerospikeException: touch".to_string() , code: 0 };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: touch").into())
+            } ,
             proto::Error {
                 result_code,
                 in_doubt,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error = AspException { message: "AerospikeException: touch".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: touch").into())
+            },
         }
     }
 
@@ -3214,7 +3253,11 @@ impl Client {
                         in_doubt,
                     }),
                 ..
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error = AspException { message: "AerospikeException: exists".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: exists").into())
+            }
             _ => unreachable!(),
         }
     }
@@ -3243,7 +3286,9 @@ impl Client {
                     ..proto::BatchOperate::default()
                 });
             } else {
-                panic!("TODO(Sachin): Implement Exception");
+                let error = AspException { message: "AerospikeException: batch operations".to_string() , code: 0 };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                panic!("AerospikeException");
             }
         });
 
@@ -3269,7 +3314,11 @@ impl Client {
                         in_doubt,
                     }),
                 ..
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error = AspException { message: "AerospikeException: batch operations".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: batch operations").into())
+            }
             _ => unreachable!(),
         }
     }
@@ -3354,7 +3403,11 @@ impl Client {
                         result_code,
                         in_doubt,
                     }),
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error = AspException { message: "AerospikeException: create index".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: create index").into())
+            }
             _ => unreachable!(),
         }
     }
@@ -3383,7 +3436,11 @@ impl Client {
                         result_code,
                         in_doubt,
                     }),
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } =>{
+                let error = AspException { message: "AerospikeException: drop index".to_string() , code: *result_code };
+                let _ = throw_object(error.into_zval(true).unwrap());
+                Err(AerospikeException::new("AerospikeException: drop index").into())
+            }
             _ => unreachable!(),
         }
     }
@@ -3421,6 +3478,18 @@ impl AerospikeException {
         AerospikeException {
             message: message.to_string(),
         }
+    }
+}
+
+impl From<String> for AerospikeException {
+    fn from(error_message: String) -> Self {
+        AerospikeException::new(&error_message)
+    }
+}
+
+impl<'a> From<&'a str> for AerospikeException {
+    fn from(error_message: &'a str) -> Self {
+        AerospikeException::new(error_message)
     }
 }
 
@@ -3817,6 +3886,8 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
         DataType::Object(_) => {
             if let Some(o) = zval.extract::<GeoJSON>() {
                 return Some(PHPValue::GeoJSON(o.v));
+            } else if let Some(o) = zval.extract::<Json>() {
+                return Some(PHPValue::Json(o.v));
             } else if let Some(o) = zval.extract::<HLL>() {
                 return Some(PHPValue::HLL(o.v));
             }
@@ -3825,7 +3896,6 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
         _ => unreachable!(),
     }
 }
-
 
 impl FromZval<'_> for PHPValue {
     const TYPE: DataType = DataType::Mixed;
