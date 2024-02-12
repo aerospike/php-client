@@ -4,15 +4,125 @@ package com.aerospike.daemon;
 
 option go_package = "proto/;proto";
 
+// Server particle types. Unsupported types are commented out.
+enum ParticleType {
+	ParticleTypeNull    = 0;
+	ParticleTypeInteger = 1;
+	ParticleTypeFloat   = 2;
+	ParticleTypeString  = 3;
+	ParticleTypeBlob    = 4;
+	ParticleTypeDigest  = 6;
+	ParticleTypeBool    = 17;
+	ParticleTypeHLL     = 18;
+	ParticleTypeMap     = 19;
+	ParticleTypeList    = 20;
+	ParticleTypeLDT     = 21;
+	ParticleTypeGeoJson = 23;
+}
+
+enum ExpType {
+    ExpTypeNil = 0;
+    ExpTypeBool = 1;
+    ExpTypeInt = 2;
+    ExpTypeString = 3;
+    ExpTypeList = 4;
+    ExpTypeMap = 5;
+    ExpTypeBlob = 6;
+    ExpTypeFloat = 7;
+    ExpTypeGeo = 8;
+    ExpTypeHll = 9;
+}
+
+enum ExpOp {
+	ExpOpUnknown  = 0;
+	ExpOpEq  = 1;
+	ExpOpNe  = 2;
+	ExpOpGt  = 3;
+	ExpOpGe  = 4;
+	ExpOpLt  = 5;
+	ExpOpLe  = 6;
+	ExpOpRegex  = 7;
+	ExpOpGeo  = 8;
+	ExpOpAnd = 16;
+	ExpOpOr = 17;
+	ExpOpNot = 18;
+	ExpOpExclusive = 19;
+	ExpOpAdd = 20;
+	ExpOpSub = 21;
+	ExpOpMul = 22;
+	ExpOpDiv = 23;
+	ExpOpPow = 24;
+	ExpOpLog = 25;
+	ExpOpMod = 26;
+	ExpOpAbs = 27;
+	ExpOpFloor = 28;
+	ExpOpCeil = 29;
+	ExpOpToInt = 30;
+	ExpOpToFloat = 31;
+	ExpOpIntAnd = 32;
+	ExpOpIntOr = 33;
+	ExpOpIntXor = 34;
+	ExpOpIntNot = 35;
+	ExpOpIntLShift = 36;
+	ExpOpIntRShift = 37;
+	ExpOpIntARShift = 38;
+	ExpOpIntCount = 39;
+	ExpOpIntLScan = 40;
+	ExpOpIntRScan = 41;
+	ExpOpMin = 50;
+	ExpOpMax = 51;
+	ExpOpDigestModulo = 64;
+	ExpOpDeviceSize = 65;
+	ExpOpLastUpdate = 66;
+	ExpOpSinceUpdate = 67;
+	ExpOpVoidTime = 68;
+	ExpOpTtl = 69;
+	ExpOpSetName = 70;
+	ExpOpKeyExists = 71;
+	ExpOpIsTombstone = 72;
+	ExpOpMemorySize = 73;
+	ExpOpRecordSize = 74;
+	ExpOpKey = 80;
+	ExpOpBin = 81;
+	ExpOpBinType = 82;
+	ExpOpCond = 123;
+	ExpOpVar  = 124;
+	ExpOpLet  = 125;
+	ExpOpQuoted = 126;
+	ExpOpCall = 127;
+}
+
+// Expression which can be applied to most commands, to control which records are
+// affected by the command.
+message Expression {
+	// The Operation code
+	optional ExpOp cmd = 1;
+
+	// The Primary Value of the Operation
+	optional Value val = 2;
+
+	// The Bin to use it on (REGEX for example)
+	optional Expression bin = 3;
+
+	// The additional flags for the Operation (REGEX or return_type of Module for example)
+	optional int64 flags = 4;
+
+	// The optional Module flag for Module operations or Bin Types
+	optional ExpType module = 5;
+
+	// Sub commands for the CmdExp operation
+	repeated Expression exps = 6;
+}
+
 // Read policy for AP (availability) namespaces.
 // How duplicates should be consulted in a read operation.
 // Only makes a difference during migrations and only applicable in AP mode.
 enum ReadModeAP {
   // Involve single node in the read operation.
-  ONE = 0;
+  ReadModeAPOne = 0;
 
   // Involve all duplicates in the read operation.
-  ALL = 1;
+  ReadModeAPAll = 1;
 }
 
 // Read policy for SC (strong consistency) namespaces.
@@ -20,19 +130,19 @@ enum ReadModeAP {
 enum ReadModeSC {
   // Ensures this client will only see an increasing sequence of record versions.
   // Server only reads from master.  This is the default.
-  SESSION = 0;
+  ReadModeSCSession = 0;
 
   // Ensures ALL clients will only see an increasing sequence of record versions.
   // Server only reads from master.
-  LINEARIZE = 1;
+  ReadModeSCLinearize = 1;
 
   // Server may read from master or any full (non-migrating) replica.
   // Increasing sequence of record versions is not guaranteed.
-  ALLOW_REPLICA = 2;
+  ReadModeSCAllowReplica = 2;
 
   // Server may read from master or any full (non-migrating) replica or from unavailable
   // partitions.  Increasing sequence of record versions is not guaranteed.
-  ALLOW_UNAVAILABLE = 3;
+  ReadModeSCAllowUnavailable = 3;
 }
 
 // Defines algorithm used to determine the target node for a command.
@@ -40,7 +150,7 @@ enum ReadModeSC {
 //
 // Note: The enum ordinals do not match the Aerospike Client ordinals because
 // the default has to be ordinal zero in protobuf.
-enum Replica {
+enum ReplicaPolicy {
   // Try node containing master partition first.
   // If connection fails, all commands try nodes containing replicated partitions.
   // If socketTimeout is reached, reads also try nodes containing replicated partitions,
@@ -68,13 +178,6 @@ enum Replica {
 enum ConsistencyLevel {
     ConsistencyOne = 0;
     ConsistencyAll = 1;
-}
-
-enum Priority {
-    DEFAULT = 0;
-    LOW = 1;
-    MEDIUM = 2;
-    HIGH = 3;
 }
 
 // IndexType the type of the secondary index.
@@ -126,174 +229,150 @@ enum AuthMode {
 	AuthModePKI = 2;
 }
 
-
-// ClientPolicy encapsulates parameters for client policy command.
-message ClientPolicy {
-	// AuthMode specifies authentication mode used when user/password is defined. It is set to AuthModeInternal by default.
-	AuthMode AuthMode = 1;
-
-	// User authentication to cluster. Leave empty for clusters running without restricted access.
-	optional string User = 2;
-
-	// Password authentication to cluster. The password will be stored by the client and sent to server
-	// in hashed format. Leave empty for clusters running without restricted access.
-	optional string Password = 3;
-
-	// ClusterName sets the expected cluster ID.  If not nil, server nodes must return this cluster ID in order to
-	// join the client's view of the cluster. Should only be set when connecting to servers that
-	// support the "cluster-name" info command. (v3.10+)
-	optional string ClusterName = 4;
-
-	// Initial host connection timeout duration.  The timeout when opening a connection
-	// to the server host for the first time.
-	optional uint32 Timeout = 5;
-
-	// Connection idle timeout. Every time a connection is used, its idle
-	// deadline will be extended by this duration. When this deadline is reached,
-	// the connection will be closed and discarded from the connection pool.
-	// The value is limited to 24 hours (86400s).
-	//
-	// It's important to set this value to a few seconds less than the server's proto-fd-idle-ms
-	// (default 60000 milliseconds or 1 minute), so the client does not attempt to use a socket
-	// that has already been reaped by the server.
-	//
-	// Connection pools are now implemented by a LIFO stack. Connections at the tail of the
-	// stack will always be the least used. These connections are checked for IdleTimeout
-	// on every tend (usually 1 second).
-	//
-	// Default: 0 seconds
-	optional uint32 IdleTimeout = 6;
-
-	// LoginTimeout specifies the timeout for login operation for external authentication such as LDAP.
-	optional uint32 LoginTimeout = 7;
-
-	// ConnectionQueueCache specifies the size of the Connection Queue cache PER NODE.
-	// Note: One connection per node is reserved for tend operations and is not used for transactions.
-	optional uint32 ConnectionPoolSize = 8;
-
-	// MinConnectionsPerNode specifies the minimum number of synchronous connections allowed per server node.
-	// Preallocate min connections on client node creation.
-	// The client will periodically allocate new connections if count falls below min connections.
-	//
-	// Server proto-fd-idle-ms may also need to be increased substantially if min connections are defined.
-	// The proto-fd-idle-ms default directs the server to close connections that are idle for 60 seconds
-	// which can defeat the purpose of keeping connections in reserve for a future burst of activity.
-	//
-	// If server proto-fd-idle-ms is changed, client ClientPolicy.IdleTimeout should also be
-	// changed to be a few seconds less than proto-fd-idle-ms.
-	//
-	// Default: 0
-	optional uint32 MinConnectionsPerNode = 9;
-
-	// MaxErrorRate defines the maximum number of errors allowed per node per ErrorRateWindow before
-	// the circuit-breaker algorithm returns MAX_ERROR_RATE on database commands to that node.
-	// If MaxErrorRate is zero, there is no error limit and
-	// the exception will never be thrown.
-	//
-	// The counted error types are any error that causes the connection to close (socket errors
-	// and client timeouts) and types.ResultCode.DEVICE_OVERLOAD.
-	//
-	// Default: 100
-	optional uint32 MaxErrorRate = 10;
-
-	// ErrorRateWindow defined the number of cluster tend iterations that defines the window for MaxErrorRate.
-	// One tend iteration is defined as TendInterval plus the time to tend all nodes.
-	// At the end of the window, the error count is reset to zero and backoff state is removed
-	// on all nodes.
-	//
-	// Default: 1
-	optional uint32 ErrorRateWindow = 11;
-
-	// If set to true, will not create a new connection
-	// to the node if there are already `ConnectionQueueSize` active connections.
-	// Note: One connection per node is reserved for tend operations and is not used for transactions.
-	optional uint32 LimitConnectionsToPoolSize = 12;
-
-	// Number of connections allowed to established at the same time.
-	// This value does not limit the number of connections. It just
-	// puts a threshold on the number of parallel opening connections.
-	// By default, there are no limits.
-	optional uint32 OpeningConnectionThreshold = 13;
-
-	// Throw exception if host connection fails during addHost().
-	bool FailIfNotConnected = 14;
-
-	// TendInterval determines interval for checking for cluster state changes.
-	// Minimum possible interval is 10 Milliseconds.
-	uint32 TendInterval = 15;
-
-	// A IP translation table is used in cases where different clients
-	// use different server IP addresses.  This may be necessary when
-	// using clients from both inside and outside a local area
-	// network. Default is no translation.
-	// The key is the IP address returned from friend info requests to other servers.
-	// The value is the real IP address used to connect to the server.
-	map<string,string> IpMap = 16;
-
-	// UseServicesAlternate determines if the client should use "services-alternate" instead of "services"
-	// in info request during cluster tending.
-	//"services-alternate" returns server configured external IP addresses that client
-	// uses to talk to nodes.  "services-alternate" can be used in place of providing a client "ipMap".
-	// This feature is recommended instead of using the client-side IpMap above.
-	//
-	// "services-alternate" is available with Aerospike Server versions >= 3.7.1.
-	bool UseServicesAlternate = 17;
-
-	// RackAware directs the client to update rack information on intervals.
-	// When this feature is enabled, the client will prefer to use nodes which reside
-	// on the same rack as the client for read transactions. The application should also set the RackId, and
-	// use the ReplicaPolicy.PREFER_RACK for reads.
-	// This feature is in particular useful if the cluster is in the cloud and the cloud provider
-	// is charging for network bandwidth out of the zone. Keep in mind that the node on the same rack
-	// may not be the Master, and as such the data may be stale. This setting is particularly usable
-	// for clusters that are read heavy.
-	bool RackAware = 18;
-
-	// RackIds defines the list of acceptable racks in order of preference. Nodes in RackIds[0] are chosen first.
-	// If a node is not found in rackIds[0], then nodes in rackIds[1] are searched, and so on.
-	// If rackIds is set, ClientPolicy.RackId is ignored.
-	//
-	// ClientPolicy.RackAware, ReplicaPolicy.PREFER_RACK and server rack
-	// configuration must also be set to enable this functionality.
-	repeated uint32 RackIds = 19;
-
-	// IgnoreOtherSubnetAliases helps to ignore aliases that are outside main subnet
-	bool IgnoreOtherSubnetAliases = 20;
-
-	// SeedOnlyCluster enforces the client to use only the seed addresses.
-	// Peers nodes for the cluster are not discovered and seed nodes are
-	// retained despite connection failures.
-	bool SeedOnlyCluster = 21;
-}
-
-// Read policy attributes used in read database commands that are not part of
-// the wire protocol.
+// ReadPolicy encapsulates parameters for transaction policy attributes
+// used in all database operation calls.
 message ReadPolicy {
-  // Read policy for AP (availability) namespaces.
-  Replica replica = 1;
+	// FilterExpression is the optional Filter Expression. Supported on Server v5.2+
+	optional Expression filterExpression = 1;
 
-  // Read policy for SC (strong consistency) namespaces.
-  ReadModeAP readModeAP = 2;
+	// ReadModeAP indicates read policy for AP (availability) namespaces.
+	ReadModeAP readModeAP = 2;
 
-  // Replica algorithm used to determine the target node
-  // for a single record command.
-  // Scan and query are not affected by replica algorithms.
-  ReadModeSC readModeSC = 3;
+	// ReadModeSC indicates read policy for SC (strong consistency) namespaces.
+	ReadModeSC readModeSC = 3;
+
+	// TotalTimeout specifies total transaction timeout.
+	//
+	// The TotalTimeout is tracked on the client and also sent to the server along
+	// with the transaction in the wire protocol. The client will most likely
+	// timeout first, but the server has the capability to Timeout the transaction.
+	//
+	// If TotalTimeout is not zero and TotalTimeout is reached before the transaction
+	// completes, the transaction will abort with TotalTimeout error.
+	//
+	// If TotalTimeout is zero, there will be no time limit and the transaction will retry
+	// on network timeouts/errors until MaxRetries is exceeded. If MaxRetries is exceeded, the
+	// transaction also aborts with Timeout error.
+	uint64 totalTimeout = 4;
+
+	// SocketTimeout determines network timeout for each attempt.
+	//
+	// If SocketTimeout is not zero and SocketTimeout is reached before an attempt completes,
+	// the Timeout above is checked. If Timeout is not exceeded, the transaction
+	// is retried. If both SocketTimeout and Timeout are non-zero, SocketTimeout must be less
+	// than or equal to Timeout, otherwise Timeout will also be used for SocketTimeout.
+	uint64 socketTimeout = 5;
+
+	// MaxRetries determines the maximum number of retries before aborting the current transaction.
+	// The initial attempt is not counted as a retry.
+	//
+	// If MaxRetries is exceeded, the transaction will abort with an error.
+	//
+	// WARNING: Database writes that are not idempotent (such as AddOp)
+	// should not be retried because the write operation may be performed
+	// multiple times if the client timed out previous transaction attempts.
+	// It's important to use a distinct WritePolicy for non-idempotent
+	// writes which sets maxRetries = 0;
+	uint32 maxRetries = 6;
+
+	// SleepBetweenRtries determines the duration to sleep between retries.  Enter zero to skip sleep.
+	// This field is ignored when maxRetries is zero.
+	// This field is also ignored in async mode.
+	//
+	// The sleep only occurs on connection errors and server timeouts
+	// which suggest a node is down and the cluster is reforming.
+	// The sleep does not occur when the client's socketTimeout expires.
+	//
+	// Reads do not have to sleep when a node goes down because the cluster
+	// does not shut out reads during cluster reformation.  The default for
+	// reads is zero.
+	//
+	// The default for writes is also zero because writes are not retried by default.
+	// Writes need to wait for the cluster to reform when a node goes down.
+	// Immediate write retries on node failure have been shown to consistently
+	// result in errors.  If maxRetries is greater than zero on a write, then
+	// sleepBetweenRetries should be set high enough to allow the cluster to
+	// reform (>= 500ms).
+	int64 sleepBetweenRetries = 7;
+
+	// SleepMultiplier specifies the multiplying factor to be used for exponential backoff during retries.
+	// Default to (1.0); Only values greater than 1 are valid.
+	double sleepMultiplier = 8;
+
+	// ExitFastOnExhaustedConnectionPool determines if a command that tries to get a
+	// connection from the connection pool will wait and retry in case the pool is
+	// exhausted until a connection becomes available (or the TotalTimeout is reached).
+	// If set to true, an error will be return immediately.
+	// If set to false, getting a connection will be retried.
+	// This only applies if LimitConnectionsToQueueSize is set to true and the number of open connections to a node has reached ConnectionQueueSize.
+	bool exitFastOnExhaustedConnectionPool = 9;
+
+	// SendKey determines to whether send user defined key in addition to hash digest on both reads and writes.
+	// If the key is sent on a write, the key will be stored with the record on
+	// the server.
+	bool sendKey = 10;
+
+	// UseCompression uses zlib compression on command buffers sent to the server and responses received
+	// from the server when the buffer size is greater than 128 bytes.
+	//
+	// This option will increase cpu and memory usage (for extra compressed buffers),but
+	// decrease the size of data sent over the network.
+	bool useCompression = 11;
+
+	// ReplicaPolicy specifies the algorithm used to determine the target node for a partition derived from a key
+	// or requested in a scan/query.
+	// Write commands are not affected by this setting, because all writes are directed
+	// to the node containing the key's master partition.
+	ReplicaPolicy replicaPolicy = 12;
 }
 
 // Write policy attributes used in write database commands that are not part of
 // the wire protocol.
 message WritePolicy {
-  // Read policy for AP (availability) namespaces.
-  Replica replica = 1;
+	ReadPolicy readPolicy = 1;
 
-  // Read policy for SC (strong consistency) namespaces.
-  ReadModeAP readModeAP = 2;
+	// RecordExistsAction qualifies how to handle writes where the record already exists.
+	RecordExistsAction recordExistsAction = 2;
 
-  // Replica algorithm used to determine the target node
-  // for a single record command.
-  // Scan and query are not affected by replica algorithms.
-  ReadModeSC readModeSC = 3;
+	// GenerationPolicy qualifies how to handle record writes based on record generation. The default (NONE)
+	// indicates that the generation is not used to restrict writes.
+	GenerationPolicy generationPolicy  = 3;
+
+	// Desired consistency guarantee when committing a transaction on the server. The default
+	// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
+	// be successful before returning success to the client.
+	CommitLevel commitLevel = 4;
+
+	// Generation determines expected generation.
+	// Generation is the number of times a record has been
+	// modified (including creation) on the server.
+	// If a write operation is creating a record, the expected generation would be 0.
+	uint32 generation = 5;
+
+	// Expiration determines record expiration in seconds. Also known as TTL (Time-To-Live).
+	// Seconds record will live before being removed by the server.
+	// Expiration values:
+	// TTLServerDefault (0): Default to namespace configuration variable "default-ttl" on the server.
+	// TTLDontExpire (MaxUint32): Never expire for Aerospike 2 server versions >= 2.7.2 and Aerospike 3+ server
+	// TTLDontUpdate (MaxUint32 - 1): Do not change ttl when record is written. Supported by Aerospike server versions >= 3.10.1
+	// > 0: Actual expiration in seconds.
+	uint32 expiration = 6;
+
+	// RespondPerEachOp defines for client.Operate() method, return a result for every operation.
+	// Some list operations do not return results by default (ListClearOp() for example).
+	// This can sometimes make it difficult to determine the desired result offset in the returned
+	// bin's result list.
+	//
+	// Setting RespondPerEachOp to true makes it easier to identify the desired result offset
+	// (result offset equals bin's operate sequence). This only makes sense when multiple list
+	// operations are used in one operate call and some of those operations do not return results
+	// by default.
+	bool respondPerEachOp = 7;
+
+	// DurableDelete leaves a tombstone for the record if the transaction results in a record deletion.
+	// This prevents deleted records from reappearing after node failures.
+	// Valid for Aerospike Server Enterprise Edition 3.10+ only.
+	bool durableDelete = 8;
 }
 
 // InfoPolicy contains attributes used for info commands.
@@ -306,9 +385,7 @@ message InfoPolicy {
 message BatchReadPolicy {
 	// FilterExpression is the optional expression filter. If FilterExpression exists and evaluates to false, the specific batch key
 	// request is not performed and BatchRecord.ResultCode is set to types.FILTERED_OUT.
-	//
-	// Default: nil
-	// optional FilterExpression expression = 1;
+	optional Expression filter_expression = 1;
 
 	// ReadModeAP indicates read policy for AP (availability) namespaces.
 	ReadModeAP readModeAP = 2;
@@ -321,12 +398,10 @@ message BatchReadPolicy {
 message BatchWritePolicy {
 	// FilterExpression is optional expression filter. If FilterExpression exists and evaluates to false, the specific batch key
 	// request is not performed and BatchRecord#resultCode is set to types.FILTERED_OUT.
-	//
-	// Default: nil
-	// optional FilterExpression expression = 1;
+	optional Expression filter_expression = 1;
 
 	// RecordExistsAction qualifies how to handle writes where the record already exists.
-	optional RecordExistsAction RecordExistsAction = 2;
+	RecordExistsAction RecordExistsAction = 2;
 
 	// Desired consistency guarantee when committing a transaction on the server. The default
 	// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
@@ -381,8 +456,7 @@ message BatchWritePolicy {
 message BatchDeletePolicy {
 	// FilterExpression is optional expression filter. If FilterExpression exists and evaluates to false, the specific batch key
 	// request is not performed and BatchRecord.ResultCode is set to type.FILTERED_OUT.
-	// Default: nil
-	// optional FilterExpression expression = 1;
+	optional Expression filter_expression = 1;
 
 	// Desired consistency guarantee when committing a transaction on the server. The default
 	// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
@@ -417,9 +491,7 @@ message BatchDeletePolicy {
 message BatchUDFPolicy {
 	// Optional expression filter. If FilterExpression exists and evaluates to false, the specific batch key
 	// request is not performed and BatchRecord.ResultCode is set to types.FILTERED_OUT.
-	//
-	// Default: nil
-	// optional FilterExpression expression = 1;
+	optional Expression filter_expression = 1;
 
 	// Desired consistency guarantee when committing a transaction on the server. The default
 	// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
@@ -552,6 +624,8 @@ message Value {
   repeated JsonEntry json = 9;
   optional string geo = 10;
   optional bytes hll = 11;
+  optional bool wildcard = 12;
+  optional bool infinity = 13;
 }
 
 message Key {
@@ -944,7 +1018,7 @@ enum CommitLevel {
 
 message BackgroundExecutePolicy {
   // Read policy for AP (availability) namespaces.
-  Replica replica = 1;
+  ReplicaPolicy replica = 1;
 
   // Read policy for SC (strong consistency) namespaces.
   ReadModeAP readModeAP = 2;

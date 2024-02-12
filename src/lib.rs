@@ -38,15 +38,15 @@ use ext_php_rs::boxed::ZBox;
 use ext_php_rs::convert::IntoZendObject;
 use ext_php_rs::convert::{FromZval, FromZvalMut, IntoZval};
 use ext_php_rs::error::Result;
+use ext_php_rs::exception::throw_object;
+use ext_php_rs::exception::throw_with_code;
 use ext_php_rs::flags::DataType;
 use ext_php_rs::php_class;
+use ext_php_rs::types::ArrayKey;
 use ext_php_rs::types::ZendHashTable;
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
-use ext_php_rs::exception::throw_object;
-use ext_php_rs::exception::throw_with_code;
 use ext_php_rs::zend::{ce, ClassEntry};
-use ext_php_rs::types::{ArrayKey};
 
 use chrono::Local;
 use colored::*;
@@ -60,7 +60,6 @@ lazy_static! {
 }
 
 pub type AspResult<T = ()> = std::result::Result<T, AspException>;
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -278,7 +277,7 @@ enum ResultCode {
     QuotasNotEnabled = 74,
 
     // INVALID_QUOTA defines invalid quota value.
-    INVALID_QUOTA = 75,
+    InvalidQuota = 75,
 
     // NOT_AUTHENTICATED defines user must be authentication before performing database operations.
     NotAuthenticated = 80,
@@ -359,84 +358,101 @@ enum ResultCode {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-/// Expression Data Types for usage in some `FilterExpressions`
-// #[derive(Debug, Clone, Copy)]
-// pub enum _ExpType {
-//     NIL,
-//     BOOL,
-//     INT,
-//     STRING,
-//     LIST,
-//     MAP,
-//     BLOB,
-//     FLOAT,
-//     GEO,
-//     HLL,
-// }
+#[php_class(name = "Aerospike\\ExpType")]
+pub struct ExpType {
+    _as: proto::ExpType,
+}
 
-// #[php_class(name = "Aerospike\\ExpType")]
-// pub struct ExpType {
-//     v: _ExpType,
-// }
+impl FromZval<'_> for ExpType {
+    const TYPE: DataType = DataType::Mixed;
 
-// impl FromZval<'_> for ExpType {
-//     const TYPE: DataType = DataType::Mixed;
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &ExpType = zval.extract()?;
 
-//     fn from_zval(zval: &Zval) -> Option<Self> {
-//         let f: &ExpType = zval.extract()?;
+        Some(ExpType { _as: f._as.clone() })
+    }
+}
 
-//         Some(ExpType {
-//             _as: f._as.clone(),
-//             v: f.v.clone(),
-//         })
-//     }
-// }
+#[php_impl]
+#[derive(ZvalConvert)]
+impl ExpType {
+    pub fn nil() -> Self {
+        ExpType {
+            _as: proto::ExpType::Nil,
+        }
+    }
 
-// #[php_impl]
-// #[derive(ZvalConvert)]
-// impl ExpType {
-//     pub fn nil() -> Self {
-//         ExpType { v: _ExpType::NIL }
-//     }
+    pub fn bool() -> Self {
+        ExpType {
+            _as: proto::ExpType::Bool,
+        }
+    }
 
-//     pub fn bool() -> Self {
-//         ExpType { v: _ExpType::BOOL }
-//     }
+    pub fn int() -> Self {
+        ExpType {
+            _as: proto::ExpType::Int,
+        }
+    }
 
-//     pub fn int() -> Self {
-//         ExpType { v: _ExpType::INT }
-//     }
+    pub fn string() -> Self {
+        ExpType {
+            _as: proto::ExpType::String,
+        }
+    }
 
-//     pub fn string() -> Self {
-//         ExpType {
-//             v: _ExpType::STRING,
-//         }
-//     }
+    pub fn list() -> Self {
+        ExpType {
+            _as: proto::ExpType::List,
+        }
+    }
 
-//     pub fn list() -> Self {
-//         ExpType { v: _ExpType::LIST }
-//     }
+    pub fn map() -> Self {
+        ExpType {
+            _as: proto::ExpType::Map,
+        }
+    }
 
-//     pub fn map() -> Self {
-//         ExpType { v: _ExpType::MAP }
-//     }
+    pub fn blob() -> Self {
+        ExpType {
+            _as: proto::ExpType::Blob,
+        }
+    }
 
-//     pub fn blob() -> Self {
-//         ExpType { v: _ExpType::BLOB }
-//     }
+    pub fn float() -> Self {
+        ExpType {
+            _as: proto::ExpType::Float,
+        }
+    }
 
-//     pub fn float() -> Self {
-//         ExpType { v: _ExpType::FLOAT }
-//     }
+    pub fn geo() -> Self {
+        ExpType {
+            _as: proto::ExpType::Geo,
+        }
+    }
 
-//     pub fn geo() -> Self {
-//         ExpType { v: _ExpType::GEO }
-//     }
+    pub fn hll() -> Self {
+        ExpType {
+            _as: proto::ExpType::Hll,
+        }
+    }
+}
 
-//     pub fn hll() -> Self {
-//         ExpType { v: _ExpType::HLL }
-//     }
-// }
+impl From<ExpType> for i32 {
+    fn from(input: ExpType) -> Self {
+        match &input._as {
+            proto::ExpType::Nil => 0,
+            proto::ExpType::Bool => 1,
+            proto::ExpType::Int => 2,
+            proto::ExpType::String => 3,
+            proto::ExpType::List => 4,
+            proto::ExpType::Map => 5,
+            proto::ExpType::Blob => 6,
+            proto::ExpType::Float => 7,
+            proto::ExpType::Geo => 8,
+            proto::ExpType::Hll => 9,
+        }
+    }
+}
 
 // impl From<&ExpType> for aerospike_core::expressions::ExpType {
 //     fn from(input: &ExpType) -> Self {
@@ -463,679 +479,1088 @@ enum ResultCode {
 
 /// Filter expression, which can be applied to most commands, to control which records are
 /// affected by the command.
-// #[php_class(name = "Aerospike\\FilterExpression")]
-// pub struct FilterExpression {
-//     _as: aerospike_core::expressions::FilterExpression,
-// }
-
-// impl FromZval<'_> for FilterExpression {
-//     const TYPE: DataType = DataType::Mixed;
-
-//     fn from_zval(zval: &Zval) -> Option<Self> {
-//         let f: &FilterExpression = zval.extract()?;
-
-//         Some(FilterExpression { _as: f._as.clone() })
-//     }
-// }
-
-// #[php_impl]
-// #[derive(ZvalConvert)]
-// impl FilterExpression {
-//     /// Create a record key expression of specified type.
-//     pub fn key(exp_type: ExpType) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::key(exp_type._as),
-//         }
-//     }
-
-//     /// Create function that returns if the primary key is stored in the record meta data
-//     /// as a boolean expression. This would occur when `send_key` is true on record write.
-//     pub fn key_exists() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::key_exists(),
-//         }
-//     }
-
-//     /// Create 64 bit int bin expression.
-//     pub fn int_bin(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_bin(name),
-//         }
-//     }
-
-//     /// Create string bin expression.
-//     pub fn string_bin(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::string_bin(name),
-//         }
-//     }
-
-//     /// Create blob bin expression.
-//     pub fn blob_bin(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::blob_bin(name),
-//         }
-//     }
-
-//     /// Create 64 bit float bin expression.
-//     pub fn float_bin(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::float_bin(name),
-//         }
-//     }
-
-//     /// Create geo bin expression.
-//     pub fn geo_bin(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::geo_bin(name),
-//         }
-//     }
-
-//     /// Create list bin expression.
-//     pub fn list_bin(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::list_bin(name),
-//         }
-//     }
-
-//     /// Create map bin expression.
-//     pub fn map_bin(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::map_bin(name),
-//         }
-//     }
-
-//     /// Create a HLL bin expression
-//     pub fn hll_bin(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::hll_bin(name),
-//         }
-//     }
-
-//     /// Create function that returns if bin of specified name exists.
-//     pub fn bin_exists(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::ne(
-//                 aerospike_core::expressions::bin_type(name),
-//                 aerospike_core::expressions::int_val(0 as i64),
-//             ),
-//         }
-//     }
-
-//     /// Create function that returns bin's integer particle type.
-//     pub fn bin_type(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::bin_type(name),
-//         }
-//     }
-
-//     /// Create function that returns record set name string.
-//     pub fn set_name() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::set_name(),
-//         }
-//     }
-
-//     /// Create function that returns record size on disk.
-//     /// If server storage-engine is memory, then zero is returned.
-//     pub fn device_size() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::device_size(),
-//         }
-//     }
-
-//     /// Create function that returns record last update time expressed as 64 bit integer
-//     /// nanoseconds since 1970-01-01 epoch.
-//     pub fn last_update() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::last_update(),
-//         }
-//     }
-
-//     /// Create expression that returns milliseconds since the record was last updated.
-//     /// This expression usually evaluates quickly because record meta data is cached in memory.
-//     pub fn since_update() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::since_update(),
-//         }
-//     }
-
-//     /// Create function that returns record expiration time expressed as 64 bit integer
-//     /// nanoseconds since 1970-01-01 epoch.
-//     pub fn void_time() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::void_time(),
-//         }
-//     }
-
-//     /// Create function that returns record expiration time (time to live) in integer seconds.
-//     pub fn ttl() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::ttl(),
-//         }
-//     }
-
-//     /// Create expression that returns if record has been deleted and is still in tombstone state.
-//     /// This expression usually evaluates quickly because record meta data is cached in memory.
-//     pub fn is_tombstone() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::is_tombstone(),
-//         }
-//     }
-
-//     /// Create function that returns record digest modulo as integer.
-//     pub fn digest_modulo(modulo: i64) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::digest_modulo(modulo),
-//         }
-//     }
-
-//     /// Create function like regular expression string operation.
-//     pub fn regex_compare(regex: String, flags: i64, bin: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::regex_compare(regex, flags, bin._as),
-//         }
-//     }
-
-//     /// Create compare geospatial operation.
-//     pub fn geo_compare(left: FilterExpression, right: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::geo_compare(left._as, right._as),
-//         }
-//     }
-
-//     /// Creates 64 bit integer value
-//     pub fn int_val(val: i64) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_val(val),
-//         }
-//     }
-
-//     /// Creates a Boolean value
-//     pub fn bool_val(val: bool) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::bool_val(val),
-//         }
-//     }
-
-//     /// Creates String bin value
-//     pub fn string_val(val: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::string_val(val),
-//         }
-//     }
-
-//     /// Creates 64 bit float bin value
-//     pub fn float_val(val: f64) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::float_val(val),
-//         }
-//     }
-
-//     /// Creates Blob bin value
-//     pub fn blob_val(val: Vec<u8>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::blob_val(val),
-//         }
-//     }
-
-//     /// Create List bin PHPValue
-//     /// Not Supported in pre-alpha release
-//     // pub fn list_val(val: Vec<PHPValue>) -> Self {
-//     //     FilterExpression {
-//     //         _as: aerospike_core::expressions::list_val(val)
-//     //     }
-//     // }
-
-//     /// Create Map bin PHPValue
-//     /// Not Supported in pre-alpha release
-//     // pub fn map_val(val: HashMap<PHPValue, PHPValue>) -> Self {
-//     //     FilterExpression {
-//     //         _as: aerospike_core::expressions::map_val(val)
-//     //     }
-//     // }
-
-//     /// Create geospatial json string value.
-//     pub fn geo_val(val: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::geo_val(val),
-//         }
-//     }
-
-//     /// Create a Nil PHPValue
-//     pub fn nil() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::nil(),
-//         }
-//     }
-
-//     /// Create "not" operator expression.
-//     pub fn not(exp: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::not(exp._as),
-//         }
-//     }
-
-//     /// Create "and" (&&) operator that applies to a variable number of expressions.
-//     /// // (a > 5 || a == 0) && b < 3
-//     pub fn and(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::and(exps.into_iter().map(|exp| exp._as).collect()),
-//         }
-//     }
-
-//     /// Create "or" (||) operator that applies to a variable number of expressions.
-//     pub fn or(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::or(exps.into_iter().map(|exp| exp._as).collect()),
-//         }
-//     }
-
-//     /// Create "xor" (^) operator that applies to a variable number of expressions.
-//     pub fn xor(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::xor(exps.into_iter().map(|exp| exp._as).collect()),
-//         }
-//     }
-
-//     /// Create equal (==) expression.
-//     pub fn eq(left: FilterExpression, right: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::eq(left._as, right._as),
-//         }
-//     }
-
-//     /// Create not equal (!=) expression
-//     pub fn ne(left: FilterExpression, right: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::ne(left._as, right._as),
-//         }
-//     }
-
-//     /// Create greater than (>) operation.
-//     pub fn gt(left: FilterExpression, right: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::gt(left._as, right._as),
-//         }
-//     }
-
-//     /// Create greater than or equal (>=) operation.
-//     pub fn ge(left: FilterExpression, right: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::ge(left._as, right._as),
-//         }
-//     }
-
-//     /// Create less than (<) operation.
-//     pub fn lt(left: FilterExpression, right: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::lt(left._as, right._as),
-//         }
-//     }
-
-//     /// Create less than or equals (<=) operation.
-//     pub fn le(left: FilterExpression, right: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::le(left._as, right._as),
-//         }
-//     }
-
-//     /// Create "add" (+) operator that applies to a variable number of expressions.
-//     /// Return sum of all `FilterExpressions` given. All arguments must resolve to the same type (integer or float).
-//     /// Requires server version 5.6.0+.
-//     pub fn num_add(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_add(
-//                 exps.into_iter().map(|exp| exp._as).collect(),
-//             ),
-//         }
-//     }
-
-//     /// Create "subtract" (-) operator that applies to a variable number of expressions.
-//     /// If only one `FilterExpressions` is provided, return the negation of that argument.
-//     /// Otherwise, return the sum of the 2nd to Nth `FilterExpressions` subtracted from the 1st
-//     /// `FilterExpressions`. All `FilterExpressions` must resolve to the same type (integer or float).
-//     /// Requires server version 5.6.0+.
-//     pub fn num_sub(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_sub(
-//                 exps.into_iter().map(|exp| exp._as).collect(),
-//             ),
-//         }
-//     }
-
-//     /// Create "multiply" (*) operator that applies to a variable number of expressions.
-//     /// Return the product of all `FilterExpressions`. If only one `FilterExpressions` is supplied, return
-//     /// that `FilterExpressions`. All `FilterExpressions` must resolve to the same type (integer or float).
-//     /// Requires server version 5.6.0+.
-//     pub fn num_mul(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_mul(
-//                 exps.into_iter().map(|exp| exp._as).collect(),
-//             ),
-//         }
-//     }
-
-//     /// Create "divide" (/) operator that applies to a variable number of expressions.
-//     /// If there is only one `FilterExpressions`, returns the reciprocal for that `FilterExpressions`.
-//     /// Otherwise, return the first `FilterExpressions` divided by the product of the rest.
-//     /// All `FilterExpressions` must resolve to the same type (integer or float).
-//     /// Requires server version 5.6.0+.
-//     pub fn num_div(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_div(
-//                 exps.into_iter().map(|exp| exp._as).collect(),
-//             ),
-//         }
-//     }
-
-//     /// Create "power" operator that raises a "base" to the "exponent" power.
-//     /// All arguments must resolve to floats.
-//     /// Requires server version 5.6.0+.
-//     pub fn num_pow(base: FilterExpression, exponent: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_pow(base._as, exponent._as),
-//         }
-//     }
-
-//     /// Create "log" operator for logarithm of "num" with base "base".
-//     /// All arguments must resolve to floats.
-//     /// Requires server version 5.6.0+.
-//     pub fn num_log(num: FilterExpression, base: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_log(num._as, base._as),
-//         }
-//     }
-
-//     /// Create "modulo" (%) operator that determines the remainder of "numerator"
-//     /// divided by "denominator". All arguments must resolve to integers.
-//     /// Requires server version 5.6.0+.
-//     pub fn num_mod(numerator: FilterExpression, denominator: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_mod(numerator._as, denominator._as),
-//         }
-//     }
-
-//     /// Create operator that returns absolute value of a number.
-//     /// All arguments must resolve to integer or float.
-//     /// Requires server version 5.6.0+.
-//     pub fn num_abs(value: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_abs(value._as),
-//         }
-//     }
-
-//     /// Create expression that rounds a floating point number down to the closest integer value.
-//     /// The return type is float.
-//     // Requires server version 5.6.0+.
-//     pub fn num_floor(num: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_floor(num._as),
-//         }
-//     }
-
-//     /// Create expression that rounds a floating point number up to the closest integer value.
-//     /// The return type is float.
-//     /// Requires server version 5.6.0+.
-//     pub fn num_ceil(num: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::num_ceil(num._as),
-//         }
-//     }
-
-//     /// Create expression that converts an integer to a float.
-//     /// Requires server version 5.6.0+.
-//     pub fn to_int(num: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::to_int(num._as),
-//         }
-//     }
-
-//     /// Create expression that converts a float to an integer.
-//     /// Requires server version 5.6.0+.
-//     pub fn to_float(num: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::to_float(num._as),
-//         }
-//     }
-
-//     /// Create integer "and" (&) operator that is applied to two or more integers.
-//     /// All arguments must resolve to integers.
-//     /// Requires server version 5.6.0+.
-//     pub fn int_and(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_and(
-//                 exps.into_iter().map(|exp| exp._as).collect(),
-//             ),
-//         }
-//     }
-
-//     /// Create integer "or" (|) operator that is applied to two or more integers.
-//     /// All arguments must resolve to integers.
-//     /// Requires server version 5.6.0+.
-//     pub fn int_or(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_or(exps.into_iter().map(|exp| exp._as).collect()),
-//         }
-//     }
-
-//     /// Create integer "xor" (^) operator that is applied to two or more integers.
-//     /// All arguments must resolve to integers.
-//     /// Requires server version 5.6.0+.
-//     pub fn int_xor(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_xor(
-//                 exps.into_iter().map(|exp| exp._as).collect(),
-//             ),
-//         }
-//     }
-
-//     /// Create integer "not" (~) operator.
-//     /// Requires server version 5.6.0+.
-//     pub fn int_not(exp: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_not(exp._as),
-//         }
-//     }
-
-//     /// Create integer "left shift" (<<) operator.
-//     /// Requires server version 5.6.0+.
-//     pub fn int_lshift(value: FilterExpression, shift: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_lshift(value._as, shift._as),
-//         }
-//     }
-
-//     /// Create integer "logical right shift" (>>>) operator.
-//     /// Requires server version 5.6.0+.
-//     pub fn int_rshift(value: FilterExpression, shift: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_rshift(value._as, shift._as),
-//         }
-//     }
-
-//     /// Create integer "arithmetic right shift" (>>) operator.
-//     /// The sign bit is preserved and not shifted.
-//     /// Requires server version 5.6.0+.
-//     pub fn int_arshift(value: FilterExpression, shift: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_arshift(value._as, shift._as),
-//         }
-//     }
-
-//     /// Create expression that returns count of integer bits that are set to 1.
-//     /// Requires server version 5.6.0+
-//     pub fn int_count(exp: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_count(exp._as),
-//         }
-//     }
-
-//     /// Create expression that scans integer bits from left (most significant bit) to
-//     /// right (least significant bit), looking for a search bit value. When the
-//     /// search value is found, the index of that bit (where the most significant bit is
-//     /// index 0) is returned. If "search" is true, the scan will search for the bit
-//     /// value 1. If "search" is false it will search for bit value 0.
-//     /// Requires server version 5.6.0+.
-//     pub fn int_lscan(value: FilterExpression, search: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_lscan(value._as, search._as),
-//         }
-//     }
-
-//     /// Create expression that scans integer bits from right (least significant bit) to
-//     /// left (most significant bit), looking for a search bit value. When the
-//     /// search value is found, the index of that bit (where the most significant bit is
-//     /// index 0) is returned. If "search" is true, the scan will search for the bit
-//     /// value 1. If "search" is false it will search for bit value 0.
-//     /// Requires server version 5.6.0+.
-//     pub fn int_rscan(value: FilterExpression, search: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::int_rscan(value._as, search._as),
-//         }
-//     }
-
-//     /// Create expression that returns the minimum value in a variable number of expressions.
-//     /// All arguments must be the same type (integer or float).
-//     /// Requires server version 5.6.0+.
-//     pub fn min(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::min(exps.into_iter().map(|exp| exp._as).collect()),
-//         }
-//     }
-
-//     /// Create expression that returns the maximum value in a variable number of expressions.
-//     /// All arguments must be the same type (integer or float).
-//     /// Requires server version 5.6.0+.
-//     pub fn max(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::max(exps.into_iter().map(|exp| exp._as).collect()),
-//         }
-//     }
-
-//     //--------------------------------------------------
-//     // Variables
-//     //--------------------------------------------------
-
-//     /// Conditionally select an expression from a variable number of expression pairs
-//     /// followed by default expression action.
-//     /// Requires server version 5.6.0+.
-//     /// ```
-//     /// // Args Format: bool exp1, action exp1, bool exp2, action exp2, ..., action-default
-//     /// // Apply operator based on type.
-//     pub fn cond(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::cond(exps.into_iter().map(|exp| exp._as).collect()),
-//         }
-//     }
-
-//     /// Define variables and expressions in scope.
-//     /// Requires server version 5.6.0+.
-//     /// ```
-//     /// // 5 < a < 10
-//     pub fn exp_let(exps: Vec<FilterExpression>) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::exp_let(
-//                 exps.into_iter().map(|exp| exp._as).collect(),
-//             ),
-//         }
-//     }
-
-//     /// Assign variable to an expression that can be accessed later.
-//     /// Requires server version 5.6.0+.
-//     /// ```
-//     /// // 5 < a < 10
-//     pub fn def(name: String, value: FilterExpression) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::def(name, value._as),
-//         }
-//     }
-
-//     /// Retrieve expression value from a variable.
-//     /// Requires server version 5.6.0+.
-//     pub fn var(name: String) -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::var(name),
-//         }
-//     }
-
-//     /// Create unknown value. Used to intentionally fail an expression.
-//     /// The failure can be ignored with `ExpWriteFlags` `EVAL_NO_FAIL`
-//     /// or `ExpReadFlags` `EVAL_NO_FAIL`.
-//     /// Requires server version 5.6.0+.
-//     pub fn unknown() -> Self {
-//         FilterExpression {
-//             _as: aerospike_core::expressions::unknown(),
-//         }
-//     }
-// }
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  Priority
-//
-////////////////////////////////////////////////////////////////////////////////////////////
-
-/// Priority of operations on database server.
-#[derive(Debug, Clone, Copy)]
-pub enum _Priority {
-    Default,
-    Low,
-    Medium,
-    High,
+#[php_class(name = "Aerospike\\Expression")]
+pub struct Expression {
+    _as: proto::Expression,
 }
 
-#[php_class(name = "Aerospike\\Priority")]
-pub struct Priority {
-    v: _Priority,
-}
-
-impl FromZval<'_> for Priority {
+impl FromZval<'_> for Expression {
     const TYPE: DataType = DataType::Mixed;
 
     fn from_zval(zval: &Zval) -> Option<Self> {
-        let f: &Priority = zval.extract()?;
+        let f: &Expression = zval.extract()?;
 
-        Some(Priority { v: f.v.clone() })
+        Some(Expression { _as: f._as.clone() })
     }
 }
 
 #[php_impl]
 #[derive(ZvalConvert)]
-impl Priority {
-    /// Default determines that the server defines the priority.
-    pub fn default() -> Self {
-        Priority {
-            v: _Priority::Default,
+impl Expression {
+    pub fn new(
+        cmd: Option<i32>,
+        val: Option<PHPValue>,
+        bin: Option<&Expression>,
+        flags: Option<i64>,
+        module: Option<ExpType>,
+        exps: Vec<&Expression>,
+    ) -> Self {
+        Expression {
+            _as: proto::Expression {
+                cmd: cmd.map(|v| v.into()),
+                val: val.map(|v| v.into()),
+                bin: bin.map(|v| Box::new(v._as.clone())),
+                flags: flags,
+                module: module.map(|v| v.into()),
+                exps: exps.iter().map(|e| e._as.clone()).collect(),
+            },
         }
     }
 
-    /// Low determines that the server should run the operation in a background thread.
-    pub fn low() -> Self {
-        Priority { v: _Priority::Low }
+    /// Create a record key expression of specified type.
+    pub fn key(exp_type: ExpType) -> Self {
+        let exp_type: i32 = exp_type.into();
+        Expression::new(
+            Some(proto::ExpOp::Key.into()),
+            Some(PHPValue::Int(exp_type as i64).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
     }
 
-    /// Medium determines that the server should run the operation at medium priority.
-    pub fn medium() -> Self {
-        Priority {
-            v: _Priority::Medium,
-        }
+    /// Create function that returns if the primary key is stored in the record meta data
+    /// as a boolean expression. This would occur when `send_key` is true on record write.
+    pub fn key_exists() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::KeyExists.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
     }
 
-    /// High determines that the server should run the operation at the highest priority.
-    pub fn high() -> Self {
-        Priority { v: _Priority::High }
+    /// Create 64 bit int bin expression.
+    pub fn int_bin(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Bin.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            Some(ExpType::int()),
+            vec![],
+        )
+    }
+
+    /// Create string bin expression.
+    pub fn string_bin(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Bin.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            Some(ExpType::string()),
+            vec![],
+        )
+    }
+
+    /// Create blob bin expression.
+    pub fn blob_bin(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Bin.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            Some(ExpType::blob()),
+            vec![],
+        )
+    }
+
+    /// Create 64 bit float bin expression.
+    pub fn float_bin(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Bin.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            Some(ExpType::float()),
+            vec![],
+        )
+    }
+
+    /// Create geo bin expression.
+    pub fn geo_bin(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Bin.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            Some(ExpType::geo()),
+            vec![],
+        )
+    }
+
+    /// Create list bin expression.
+    pub fn list_bin(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Bin.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            Some(ExpType::list()),
+            vec![],
+        )
+    }
+
+    /// Create map bin expression.
+    pub fn map_bin(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Bin.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            Some(ExpType::map()),
+            vec![],
+        )
+    }
+
+    /// Create a HLL bin expression
+    pub fn hll_bin(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Bin.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            Some(ExpType::hll()),
+            vec![],
+        )
+    }
+
+    /// Create function that returns if bin of specified name exists.
+    pub fn bin_exists(name: String) -> Self {
+        Expression::ne(
+            &Expression::bin_type(name),
+            &Expression::int_val(ParticleType::null().into()),
+        )
+    }
+
+    /// ExpBinType creates a function that returns bin's integer particle type. Valid values are:
+    ///
+    ///	NULL    = 0
+    ///	INTEGER = 1
+    ///	FLOAT   = 2
+    ///	STRING  = 3
+    ///	BLOB    = 4
+    ///	DIGEST  = 6
+    ///	BOOL    = 17
+    ///	HLL     = 18
+    ///	MAP     = 19
+    ///	LIST    = 20
+    ///	LDT     = 21
+    ///	GEOJSON = 23
+    pub fn bin_type(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::BinType.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create function that returns record set name string.
+    pub fn set_name() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::SetName.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create function that returns record size on disk.
+    /// If server storage-engine is memory, then zero is returned.
+    ///
+    /// This expression should only be used for server versions less than 7.0. Use
+    /// record_size for server version 7.0+.
+    pub fn device_size() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::DeviceSize.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create expression that returns record size in memory. If server storage-engine is
+    /// not memory nor data-in-memory, then zero is returned. This expression usually evaluates
+    /// quickly because record meta data is cached in memory.
+    ///
+    /// Requires server version between 5.3 inclusive and 7.0 exclusive.
+    /// Use record_size for server version 7.0+.
+    pub fn memory_size() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::MemorySize.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create function that returns record last update time expressed as 64 bit integer
+    /// nanoseconds since 1970-01-01 epoch.
+    pub fn last_update() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::LastUpdate.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create expression that returns milliseconds since the record was last updated.
+    /// This expression usually evaluates quickly because record meta data is cached in memory.
+    pub fn since_update() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::SinceUpdate.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create function that returns record expiration time expressed as 64 bit integer
+    /// nanoseconds since 1970-01-01 epoch.
+    pub fn void_time() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::VoidTime.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create function that returns record expiration time (time to live) in integer seconds.
+    pub fn ttl() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Ttl.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create expression that returns if record has been deleted and is still in tombstone state.
+    /// This expression usually evaluates quickly because record meta data is cached in memory.
+    pub fn is_tombstone() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IsTombstone.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create function that returns record digest modulo as integer.
+    pub fn digest_modulo(modulo: i64) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::DigestModulo.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create function like regular expression string operation.
+    pub fn regex_compare(regex: String, flags: i64, bin: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Regex.into()),
+            Some(PHPValue::String(regex).into()),
+            Some(bin),
+            Some(flags),
+            None,
+            vec![],
+        )
+    }
+
+    /// Create compare geospatial operation.
+    pub fn geo_compare(left: &Expression, right: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Geo.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![left, right],
+        )
+    }
+
+    /// Creates 64 bit integer value
+    pub fn int_val(val: i64) -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::Int(val).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Creates a Boolean value
+    pub fn bool_val(val: bool) -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::Bool(val).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Creates String bin value
+    pub fn string_val(val: String) -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::String(val).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Creates 64 bit float bin value
+    pub fn float_val(val: f64) -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::Float(ordered_float::OrderedFloat(val)).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Creates Blob bin value
+    pub fn blob_val(val: Vec<u8>) -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::Blob(val).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create List bin PHPValue
+    /// Not Supported in pre-alpha release
+    pub fn list_val(val: Vec<PHPValue>) -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::List(val).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create Map bin PHPValue
+    /// Not Supported in pre-alpha release
+    // pub fn map_val(val: HashMap<PHPValue, PHPValue>) -> Self {
+    //  TODO(khosrow): Implement
+    //     Expression::new(
+    //         None,
+    //         Some(PHPValue::HashMap(val).into()),
+    //         None,
+    //         None,
+    //         None,
+    //         vec![],
+    //     )
+    // }
+
+    /// Create geospatial json string value.
+    pub fn geo_val(val: String) -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::GeoJSON(val).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create a Nil PHPValue
+    pub fn nil() -> Self {
+        Expression::new(None, Some(PHPValue::Nil.into()), None, None, None, vec![])
+    }
+
+    /// Create a Infinity PHPValue
+    pub fn infinity() -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::Infinity.into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create a WildCard PHPValue
+    pub fn wildcard() -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::Wildcard.into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create "not" operator expression.
+    pub fn not(exp: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Not.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![exp],
+        )
+    }
+
+    /// Create "and" (&&) operator that applies to a variable number of expressions.
+    /// // (a > 5 || a == 0) && b < 3
+    pub fn and(exps: Vec<&Expression>) -> Self {
+        Expression::new(Some(proto::ExpOp::And.into()), None, None, None, None, exps)
+    }
+
+    /// Create "or" (||) operator that applies to a variable number of expressions.
+    pub fn or(exps: Vec<&Expression>) -> Self {
+        Expression::new(Some(proto::ExpOp::Or.into()), None, None, None, None, exps)
+    }
+
+    /// Create "xor" (^) operator that applies to a variable number of expressions.
+    pub fn xor(exps: Vec<&Expression>) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntXor.into()),
+            None,
+            None,
+            None,
+            None,
+            exps,
+        )
+    }
+
+    /// Create equal (==) expression.
+    pub fn eq(left: &Expression, right: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Eq.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![left, right],
+        )
+    }
+
+    /// Create not equal (!=) expression
+    pub fn ne(left: &Expression, right: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Ne.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![left, right],
+        )
+    }
+
+    /// Create greater than (>) operation.
+    pub fn gt(left: &Expression, right: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Gt.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![left, right],
+        )
+    }
+
+    /// Create greater than or equal (>=) operation.
+    pub fn ge(left: &Expression, right: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Ge.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![left, right],
+        )
+    }
+
+    /// Create less than (<) operation.
+    pub fn lt(left: &Expression, right: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Lt.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![left, right],
+        )
+    }
+
+    /// Create less than or equals (<=) operation.
+    pub fn le(left: &Expression, right: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Le.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![left, right],
+        )
+    }
+
+    /// Create "add" (+) operator that applies to a variable number of expressions.
+    /// Return sum of all `FilterExpressions` given. All arguments must resolve to the same type (integer or float).
+    /// Requires server version 5.6.0+.
+    pub fn num_add(exps: Vec<&Expression>) -> Self {
+        Expression::new(Some(proto::ExpOp::Add.into()), None, None, None, None, exps)
+    }
+
+    /// Create "subtract" (-) operator that applies to a variable number of expressions.
+    /// If only one `FilterExpressions` is provided, return the negation of that argument.
+    /// Otherwise, return the sum of the 2nd to Nth `FilterExpressions` subtracted from the 1st
+    /// `FilterExpressions`. All `FilterExpressions` must resolve to the same type (integer or float).
+    /// Requires server version 5.6.0+.
+    pub fn num_sub(exps: Vec<&Expression>) -> Self {
+        Expression::new(Some(proto::ExpOp::Sub.into()), None, None, None, None, exps)
+    }
+
+    /// Create "multiply" (*) operator that applies to a variable number of expressions.
+    /// Return the product of all `FilterExpressions`. If only one `FilterExpressions` is supplied, return
+    /// that `FilterExpressions`. All `FilterExpressions` must resolve to the same type (integer or float).
+    /// Requires server version 5.6.0+.
+    pub fn num_mul(exps: Vec<&Expression>) -> Self {
+        Expression::new(Some(proto::ExpOp::Mul.into()), None, None, None, None, exps)
+    }
+
+    /// Create "divide" (/) operator that applies to a variable number of expressions.
+    /// If there is only one `FilterExpressions`, returns the reciprocal for that `FilterExpressions`.
+    /// Otherwise, return the first `FilterExpressions` divided by the product of the rest.
+    /// All `FilterExpressions` must resolve to the same type (integer or float).
+    /// Requires server version 5.6.0+.
+    pub fn num_div(exps: Vec<&Expression>) -> Self {
+        Expression::new(Some(proto::ExpOp::Div.into()), None, None, None, None, exps)
+    }
+
+    /// Create "power" operator that raises a "base" to the "exponent" power.
+    /// All arguments must resolve to floats.
+    /// Requires server version 5.6.0+.
+    pub fn num_pow(base: &Expression, exponent: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Pow.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![base, exponent],
+        )
+    }
+
+    /// Create "log" operator for logarithm of "num" with base "base".
+    /// All arguments must resolve to floats.
+    /// Requires server version 5.6.0+.
+    pub fn num_log(num: &Expression, base: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Log.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![num, base],
+        )
+    }
+
+    /// Create "modulo" (%) operator that determines the remainder of "numerator"
+    /// divided by "denominator". All arguments must resolve to integers.
+    /// Requires server version 5.6.0+.
+    pub fn num_mod(numerator: &Expression, denominator: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Mod.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![numerator, denominator],
+        )
+    }
+
+    /// Create operator that returns absolute value of a number.
+    /// All arguments must resolve to integer or float.
+    /// Requires server version 5.6.0+.
+    pub fn num_abs(value: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Abs.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![value],
+        )
+    }
+
+    /// Create expression that rounds a floating point number down to the closest integer value.
+    /// The return type is float.
+    // Requires server version 5.6.0+.
+    pub fn num_floor(num: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Floor.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![num],
+        )
+    }
+
+    /// Create expression that rounds a floating point number up to the closest integer value.
+    /// The return type is float.
+    /// Requires server version 5.6.0+.
+    pub fn num_ceil(num: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Ceil.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![num],
+        )
+    }
+
+    /// Create expression that converts an integer to a float.
+    /// Requires server version 5.6.0+.
+    pub fn to_int(num: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::ToInt.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![num],
+        )
+    }
+
+    /// Create expression that converts a float to an integer.
+    /// Requires server version 5.6.0+.
+    pub fn to_float(num: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::ToFloat.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![num],
+        )
+    }
+
+    /// Create integer "and" (&) operator that is applied to two or more integers.
+    /// All arguments must resolve to integers.
+    /// Requires server version 5.6.0+.
+    pub fn int_and(exps: Vec<&Expression>) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntAnd.into()),
+            None,
+            None,
+            None,
+            None,
+            exps,
+        )
+    }
+
+    /// Create integer "or" (|) operator that is applied to two or more integers.
+    /// All arguments must resolve to integers.
+    /// Requires server version 5.6.0+.
+    pub fn int_or(exps: Vec<&Expression>) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntOr.into()),
+            None,
+            None,
+            None,
+            None,
+            exps,
+        )
+    }
+
+    /// Create integer "xor" (^) operator that is applied to two or more integers.
+    /// All arguments must resolve to integers.
+    /// Requires server version 5.6.0+.
+    pub fn int_xor(exps: Vec<&Expression>) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntXor.into()),
+            None,
+            None,
+            None,
+            None,
+            exps,
+        )
+    }
+
+    /// Create integer "not" (~) operator.
+    /// Requires server version 5.6.0+.
+    pub fn int_not(exp: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntNot.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![exp],
+        )
+    }
+
+    /// Create integer "left shift" (<<) operator.
+    /// Requires server version 5.6.0+.
+    pub fn int_lshift(value: &Expression, shift: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntLShift.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![value, shift],
+        )
+    }
+
+    /// Create integer "logical right shift" (>>>) operator.
+    /// Requires server version 5.6.0+.
+    pub fn int_rshift(value: &Expression, shift: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntRShift.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![value, shift],
+        )
+    }
+
+    /// Create integer "arithmetic right shift" (>>) operator.
+    /// The sign bit is preserved and not shifted.
+    /// Requires server version 5.6.0+.
+    pub fn int_arshift(value: &Expression, shift: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntArShift.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![value, shift],
+        )
+    }
+
+    /// Create expression that returns count of integer bits that are set to 1.
+    /// Requires server version 5.6.0+
+    pub fn int_count(exp: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntCount.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![exp],
+        )
+    }
+
+    /// Create expression that scans integer bits from left (most significant bit) to
+    /// right (least significant bit), looking for a search bit value. When the
+    /// search value is found, the index of that bit (where the most significant bit is
+    /// index 0) is returned. If "search" is true, the scan will search for the bit
+    /// value 1. If "search" is false it will search for bit value 0.
+    /// Requires server version 5.6.0+.
+    pub fn int_lscan(value: &Expression, search: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntLScan.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![value, search],
+        )
+    }
+
+    /// Create expression that scans integer bits from right (least significant bit) to
+    /// left (most significant bit), looking for a search bit value. When the
+    /// search value is found, the index of that bit (where the most significant bit is
+    /// index 0) is returned. If "search" is true, the scan will search for the bit
+    /// value 1. If "search" is false it will search for bit value 0.
+    /// Requires server version 5.6.0+.
+    pub fn int_rscan(value: &Expression, search: &Expression) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::IntRScan.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![value, search],
+        )
+    }
+
+    /// Create expression that returns the minimum value in a variable number of expressions.
+    /// All arguments must be the same type (integer or float).
+    /// Requires server version 5.6.0+.
+    pub fn min(exps: Vec<&Expression>) -> Self {
+        Expression::new(Some(proto::ExpOp::Min.into()), None, None, None, None, exps)
+    }
+
+    /// Create expression that returns the maximum value in a variable number of expressions.
+    /// All arguments must be the same type (integer or float).
+    /// Requires server version 5.6.0+.
+    pub fn max(exps: Vec<&Expression>) -> Self {
+        Expression::new(Some(proto::ExpOp::Max.into()), None, None, None, None, exps)
+    }
+
+    //--------------------------------------------------
+    // Variables
+    //--------------------------------------------------
+
+    /// Conditionally select an expression from a variable number of expression pairs
+    /// followed by default expression action.
+    /// Requires server version 5.6.0+.
+    /// ```
+    /// // Args Format: bool exp1, action exp1, bool exp2, action exp2, ..., action-default
+    /// // Apply operator based on type.
+    pub fn cond(exps: Vec<&Expression>) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Cond.into()),
+            None,
+            None,
+            None,
+            None,
+            exps,
+        )
+    }
+
+    /// Define variables and expressions in scope.
+    /// Requires server version 5.6.0+.
+    /// ```
+    /// // 5 < a < 10
+    pub fn exp_let(exps: Vec<&Expression>) -> Self {
+        Expression::new(Some(proto::ExpOp::Let.into()), None, None, None, None, exps)
+    }
+
+    /// Assign variable to an expression that can be accessed later.
+    /// Requires server version 5.6.0+.
+    /// ```
+    /// // 5 < a < 10
+    pub fn def(name: String, value: &Expression) -> Self {
+        Expression::new(
+            None,
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            None,
+            vec![value],
+        )
+    }
+
+    /// Retrieve expression value from a variable.
+    /// Requires server version 5.6.0+.
+    pub fn var(name: String) -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Var.into()),
+            Some(PHPValue::String(name).into()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
+
+    /// Create unknown value. Used to intentionally fail an expression.
+    /// The failure can be ignored with `ExpWriteFlags` `EVAL_NO_FAIL`
+    /// or `ExpReadFlags` `EVAL_NO_FAIL`.
+    /// Requires server version 5.6.0+.
+    pub fn unknown() -> Self {
+        Expression::new(
+            Some(proto::ExpOp::Unknown.into()),
+            None,
+            None,
+            None,
+            None,
+            vec![],
+        )
     }
 }
 
-impl From<&Priority> for proto::Priority {
-    fn from(input: &Priority) -> Self {
-        match &input.v {
-            _Priority::Default => proto::Priority::Default,
-            _Priority::Low => proto::Priority::Low,
-            _Priority::Medium => proto::Priority::Medium,
-            _Priority::High => proto::Priority::High,
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  ReadModeAP
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\ReadModeAP")]
+pub struct ReadModeAP {
+    _as: proto::ReadModeAp,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl ReadModeAP {
+    pub fn One() -> Self {
+        ReadModeAP {
+            _as: proto::ReadModeAp::One,
         }
+    }
+
+    pub fn All() -> Self {
+        ReadModeAP {
+            _as: proto::ReadModeAp::All,
+        }
+    }
+}
+
+impl From<&ReadModeAP> for i32 {
+    fn from(v: &ReadModeAP) -> i32 {
+        match v._as {
+            proto::ReadModeAp::One => 0,
+            proto::ReadModeAp::All => 1,
+        }
+    }
+}
+
+impl From<i32> for ReadModeAP {
+    fn from(v: i32) -> ReadModeAP {
+        match v {
+            0 => ReadModeAP {
+                _as: proto::ReadModeAp::One,
+            },
+            1 => ReadModeAP {
+                _as: proto::ReadModeAp::All,
+            },
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl FromZval<'_> for ReadModeAP {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &ReadModeAP = zval.extract()?;
+
+        Some(ReadModeAP { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  ReadModeSC
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\ReadModeSC")]
+pub struct ReadModeSC {
+    _as: proto::ReadModeSc,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl ReadModeSC {
+    pub fn Session() -> Self {
+        ReadModeSC {
+            _as: proto::ReadModeSc::Session,
+        }
+    }
+
+    pub fn Linearize() -> Self {
+        ReadModeSC {
+            _as: proto::ReadModeSc::Linearize,
+        }
+    }
+
+    pub fn AllowReplica() -> Self {
+        ReadModeSC {
+            _as: proto::ReadModeSc::AllowReplica,
+        }
+    }
+
+    pub fn AllowUnavailable() -> Self {
+        ReadModeSC {
+            _as: proto::ReadModeSc::AllowUnavailable,
+        }
+    }
+}
+
+impl From<&ReadModeSC> for i32 {
+    fn from(v: &ReadModeSC) -> i32 {
+        match &v._as {
+            proto::ReadModeSc::Session => 0,
+            proto::ReadModeSc::Linearize => 1,
+            proto::ReadModeSc::AllowReplica => 2,
+            proto::ReadModeSc::AllowUnavailable => 3,
+        }
+    }
+}
+
+impl From<i32> for ReadModeSC {
+    fn from(v: i32) -> ReadModeSC {
+        match v {
+            0 => ReadModeSC {
+                _as: proto::ReadModeSc::Session,
+            },
+            1 => ReadModeSC {
+                _as: proto::ReadModeSc::Linearize,
+            },
+            2 => ReadModeSC {
+                _as: proto::ReadModeSc::AllowReplica,
+            },
+            3 => ReadModeSC {
+                _as: proto::ReadModeSc::AllowUnavailable,
+            },
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl FromZval<'_> for ReadModeSC {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &ReadModeSC = zval.extract()?;
+
+        Some(ReadModeSC { _as: f._as.clone() })
     }
 }
 
@@ -1145,19 +1570,9 @@ impl From<&Priority> for proto::Priority {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-/// `RecordExistsAction` determines how to handle record writes based on record generation.
-#[derive(Debug, PartialEq, Clone)]
-pub enum _RecordExistsAction {
-    Update,
-    UpdateOnly,
-    Replace,
-    ReplaceOnly,
-    CreateOnly,
-}
-
 #[php_class(name = "Aerospike\\RecordExistsAction")]
 pub struct RecordExistsAction {
-    v: _RecordExistsAction,
+    _as: proto::RecordExistsAction,
 }
 
 impl FromZval<'_> for RecordExistsAction {
@@ -1166,7 +1581,7 @@ impl FromZval<'_> for RecordExistsAction {
     fn from_zval(zval: &Zval) -> Option<Self> {
         let f: &RecordExistsAction = zval.extract()?;
 
-        Some(RecordExistsAction { v: f.v.clone() })
+        Some(RecordExistsAction { _as: f._as.clone() })
     }
 }
 
@@ -1177,7 +1592,7 @@ impl RecordExistsAction {
     /// Merge write command bins with existing bins.
     pub fn update() -> Self {
         RecordExistsAction {
-            v: _RecordExistsAction::Update,
+            _as: proto::RecordExistsAction::Update,
         }
     }
 
@@ -1185,7 +1600,7 @@ impl RecordExistsAction {
     /// Merge write command bins with existing bins.
     pub fn update_only() -> Self {
         RecordExistsAction {
-            v: _RecordExistsAction::UpdateOnly,
+            _as: proto::RecordExistsAction::UpdateOnly,
         }
     }
 
@@ -1195,7 +1610,7 @@ impl RecordExistsAction {
     /// Aerospike 3 server versions >= 3.1.6.
     pub fn replace() -> Self {
         RecordExistsAction {
-            v: _RecordExistsAction::Replace,
+            _as: proto::RecordExistsAction::Replace,
         }
     }
 
@@ -1205,29 +1620,29 @@ impl RecordExistsAction {
     /// Aerospike 3 server versions >= 3.1.6.
     pub fn replace_only() -> Self {
         RecordExistsAction {
-            v: _RecordExistsAction::ReplaceOnly,
+            _as: proto::RecordExistsAction::ReplaceOnly,
         }
     }
 
     /// CreateOnly means: Create only. Fail if record exists.
     pub fn create_only() -> Self {
         RecordExistsAction {
-            v: _RecordExistsAction::CreateOnly,
+            _as: proto::RecordExistsAction::CreateOnly,
         }
     }
 }
 
-impl From<&RecordExistsAction> for proto::RecordExistsAction {
-    fn from(input: &RecordExistsAction) -> Self {
-        match &input.v {
-            _RecordExistsAction::Update => proto::RecordExistsAction::Update,
-            _RecordExistsAction::UpdateOnly => proto::RecordExistsAction::UpdateOnly,
-            _RecordExistsAction::Replace => proto::RecordExistsAction::Replace,
-            _RecordExistsAction::ReplaceOnly => proto::RecordExistsAction::ReplaceOnly,
-            _RecordExistsAction::CreateOnly => proto::RecordExistsAction::CreateOnly,
-        }
-    }
-}
+// impl From<&RecordExistsAction> for proto::RecordExistsAction {
+//     fn from(input: &RecordExistsAction) -> Self {
+//         match &input._as {
+//             proto::RecordExistsAction::Update => proto::RecordExistsAction::Update,
+//             proto::RecordExistsAction::UpdateOnly => proto::RecordExistsAction::UpdateOnly,
+//             proto::RecordExistsAction::Replace => proto::RecordExistsAction::Replace,
+//             proto::RecordExistsAction::ReplaceOnly => proto::RecordExistsAction::ReplaceOnly,
+//             proto::RecordExistsAction::CreateOnly => proto::RecordExistsAction::CreateOnly,
+//         }
+//     }
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1235,15 +1650,9 @@ impl From<&RecordExistsAction> for proto::RecordExistsAction {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Debug, Clone)]
-pub enum _CommitLevel {
-    CommitAll,
-    CommitMaster,
-}
-
 #[php_class(name = "Aerospike\\CommitLevel")]
 pub struct CommitLevel {
-    v: _CommitLevel,
+    _as: proto::CommitLevel,
 }
 
 impl FromZval<'_> for CommitLevel {
@@ -1252,7 +1661,7 @@ impl FromZval<'_> for CommitLevel {
     fn from_zval(zval: &Zval) -> Option<Self> {
         let f: &CommitLevel = zval.extract()?;
 
-        Some(CommitLevel { v: f.v.clone() })
+        Some(CommitLevel { _as: f._as.clone() })
     }
 }
 
@@ -1263,26 +1672,26 @@ impl CommitLevel {
     /// replicas.
     pub fn commit_all() -> Self {
         CommitLevel {
-            v: _CommitLevel::CommitAll,
+            _as: proto::CommitLevel::CommitAll,
         }
     }
 
     /// CommitMaster indicates the server should wait until successfully committing master only.
     pub fn commit_master() -> Self {
         CommitLevel {
-            v: _CommitLevel::CommitMaster,
+            _as: proto::CommitLevel::CommitMaster,
         }
     }
 }
 
-impl From<&CommitLevel> for proto::CommitLevel {
-    fn from(input: &CommitLevel) -> Self {
-        match &input.v {
-            _CommitLevel::CommitAll => proto::CommitLevel::CommitAll,
-            _CommitLevel::CommitMaster => proto::CommitLevel::CommitMaster,
-        }
-    }
-}
+// impl From<&CommitLevel> for proto::CommitLevel {
+//     fn from(input: &CommitLevel) -> Self {
+//         match &input.v {
+//             _CommitLevel::CommitAll => proto::CommitLevel::CommitAll,
+//             _CommitLevel::CommitMaster => proto::CommitLevel::CommitMaster,
+//         }
+//     }
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1347,17 +1756,10 @@ impl From<&ConsistencyLevel> for proto::ConsistencyLevel {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[derive(Debug, PartialEq, Clone)]
-pub enum _GenerationPolicy {
-    None,
-    ExpectGenEqual,
-    ExpectGenGreater,
-}
-
 /// `GenerationPolicy` determines how to handle record writes based on record generation.
 #[php_class(name = "Aerospike\\GenerationPolicy")]
 pub struct GenerationPolicy {
-    v: _GenerationPolicy,
+    _as: proto::GenerationPolicy,
 }
 
 impl FromZval<'_> for GenerationPolicy {
@@ -1366,7 +1768,7 @@ impl FromZval<'_> for GenerationPolicy {
     fn from_zval(zval: &Zval) -> Option<Self> {
         let f: &GenerationPolicy = zval.extract()?;
 
-        Some(GenerationPolicy { v: f.v.clone() })
+        Some(GenerationPolicy { _as: f._as.clone() })
     }
 }
 
@@ -1376,7 +1778,7 @@ impl GenerationPolicy {
     /// None means: Do not use record generation to restrict writes.
     pub fn none() -> Self {
         GenerationPolicy {
-            v: _GenerationPolicy::None,
+            _as: proto::GenerationPolicy::None,
         }
     }
 
@@ -1384,7 +1786,7 @@ impl GenerationPolicy {
     /// generation. Otherwise, fail.
     pub fn expect_gen_equal() -> Self {
         GenerationPolicy {
-            v: _GenerationPolicy::ExpectGenEqual,
+            _as: proto::GenerationPolicy::ExpectGenEqual,
         }
     }
 
@@ -1392,20 +1794,20 @@ impl GenerationPolicy {
     /// generation. Otherwise, fail. This is useful for restore after backup.
     pub fn expect_gen_greater() -> Self {
         GenerationPolicy {
-            v: _GenerationPolicy::ExpectGenGreater,
+            _as: proto::GenerationPolicy::ExpectGenGt,
         }
     }
 }
 
-impl From<&GenerationPolicy> for proto::GenerationPolicy {
-    fn from(input: &GenerationPolicy) -> Self {
-        match &input.v {
-            _GenerationPolicy::None => proto::GenerationPolicy::None,
-            _GenerationPolicy::ExpectGenEqual => proto::GenerationPolicy::ExpectGenEqual,
-            _GenerationPolicy::ExpectGenGreater => proto::GenerationPolicy::ExpectGenGt,
-        }
-    }
-}
+// impl From<&GenerationPolicy> for proto::GenerationPolicy {
+//     fn from(input: &GenerationPolicy) -> Self {
+//         match &input.v {
+//             _GenerationPolicy::None => proto::GenerationPolicy::None,
+//             _GenerationPolicy::ExpectGenEqual => proto::GenerationPolicy::ExpectGenEqual,
+//             _GenerationPolicy::ExpectGenGreater => proto::GenerationPolicy::ExpectGenGt,
+//         }
+//     }
+// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1428,7 +1830,7 @@ pub enum _Expiration {
 /// Record expiration, also known as time-to-live (TTL).
 #[php_class(name = "Aerospike\\Expiration")]
 pub struct Expiration {
-    v: _Expiration,
+    _as: _Expiration,
 }
 
 impl FromZval<'_> for Expiration {
@@ -1437,7 +1839,7 @@ impl FromZval<'_> for Expiration {
     fn from_zval(zval: &Zval) -> Option<Self> {
         let f: &Expiration = zval.extract()?;
 
-        Some(Expiration { v: f.v.clone() })
+        Some(Expiration { _as: f._as.clone() })
     }
 }
 
@@ -1447,14 +1849,14 @@ impl Expiration {
     /// Set the record to expire X seconds from now
     pub fn seconds(seconds: u32) -> Self {
         Expiration {
-            v: _Expiration::Seconds(seconds),
+            _as: _Expiration::Seconds(seconds),
         }
     }
 
     /// Set the record's expiry time using the default time-to-live (TTL) value for the namespace
     pub fn namespace_default() -> Self {
         Expiration {
-            v: _Expiration::NamespaceDefault,
+            _as: _Expiration::NamespaceDefault,
         }
     }
 
@@ -1462,7 +1864,7 @@ impl Expiration {
     /// Aerospike 3 server version 3.1.4 or later. Do not use with older servers.
     pub fn never() -> Self {
         Expiration {
-            v: _Expiration::Never,
+            _as: _Expiration::Never,
         }
     }
 
@@ -1470,18 +1872,29 @@ impl Expiration {
     /// version 3.10.1 or later.
     pub fn dont_update() -> Self {
         Expiration {
-            v: _Expiration::DontUpdate,
+            _as: _Expiration::DontUpdate,
         }
     }
 }
 
 impl From<&Expiration> for u32 {
     fn from(exp: &Expiration) -> u32 {
-        match &exp.v {
+        match &exp._as {
             _Expiration::Seconds(secs) => *secs,
             _Expiration::NamespaceDefault => NAMESPACE_DEFAULT,
             _Expiration::Never => NEVER_EXPIRE,
             _Expiration::DontUpdate => DONT_UPDATE,
+        }
+    }
+}
+
+impl From<u32> for Expiration {
+    fn from(exp: u32) -> Expiration {
+        match exp {
+            NAMESPACE_DEFAULT => Expiration::namespace_default(),
+            NEVER_EXPIRE => Expiration::never(),
+            DONT_UPDATE => Expiration::dont_update(),
+            secs => Expiration::seconds(secs),
         }
     }
 }
@@ -1776,15 +2189,15 @@ impl MapOrderType {
 //     }
 
 //     #[getter]
-//     pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+//     pub fn get_filter_expression(&self) -> Option<Expression> {
 //         match &self._as.filter_expression {
-//             Some(fe) => Some(FilterExpression { _as: fe.clone() }),
+//             Some(fe) => Some(Expression { _as: fe.clone() }),
 //             None => None,
 //         }
 //     }
 
 //     #[setter]
-//     pub fn set_filter_expression(&mut self, filter_expression: Option<FilterExpression>) {
+//     pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
 //         match filter_expression {
 //             Some(fe) => self._as.filter_expression = Some(fe._as),
 //             None => self._as.filter_expression = None,
@@ -1969,63 +2382,128 @@ impl ReadPolicy {
         }
     }
 
-    // #[getter]
-    // pub fn get_priority(&self) -> Priority {
-    //     Priority {
-    //         _as: self._as.priority.clone(),
-    //         v: match &self._as.priority {
-    //             aerospike_sync::Priority::Default => _Priority::Default,
-    //             aerospike_sync::Priority::Low => _Priority::Low,
-    //             aerospike_sync::Priority::Medium => _Priority::Medium,
-    //             aerospike_sync::Priority::High => _Priority::High,
-    //         },
-    //     }
-    // }
+    #[getter]
+    pub fn get_max_retries(&self) -> u32 {
+        self._as.max_retries
+    }
 
-    // #[setter]
-    // pub fn set_priority(&mut self, priority: Priority) {
-    //     self._as.priority = priority._as;
-    // }
+    #[setter]
+    pub fn set_max_retries(&mut self, max_retries: u32) {
+        self._as.max_retries = max_retries;
+    }
 
-    // #[getter]
-    // pub fn get_max_retries(&self) -> Option<usize> {
-    //     self._as.max_retries
-    // }
+    #[getter]
+    pub fn get_sleep_multiplier(&self) -> f64 {
+        self._as.sleep_multiplier
+    }
 
-    // #[setter]
-    // pub fn set_max_retries(&mut self, max_retries: Option<usize>) {
-    //     self._as.max_retries = max_retries;
-    // }
+    #[setter]
+    pub fn set_sleep_multiplier(&mut self, sleep_multiplier: f64) {
+        self._as.sleep_multiplier = sleep_multiplier;
+    }
 
-    // #[getter]
-    // pub fn get_timeout(&self) -> u64 {
-    //     self._as
-    //         .timeout
-    //         .map(|duration| duration.as_millis() as u64)
-    //         .unwrap_or_default()
-    // }
+    #[getter]
+    pub fn get_total_timeout(&self) -> u64 {
+        self._as.total_timeout
+    }
 
-    // #[setter]
-    // pub fn set_timeout(&mut self, timeout_millis: u64) {
-    //     let timeout = Duration::from_millis(timeout_millis);
-    //     self._as.timeout = Some(timeout);
-    // }
+    #[setter]
+    pub fn set_total_timeout(&mut self, timeout_millis: u64) {
+        self._as.total_timeout = timeout_millis;
+    }
 
-    // #[getter]
-    // pub fn get_filter_expression(&self) -> Option<FilterExpression> {
-    //     match &self._as.filter_expression {
-    //         Some(fe) => Some(FilterExpression { _as: fe.clone() }),
-    //         None => None,
-    //     }
-    // }
+    #[getter]
+    pub fn get_socket_timeout(&self) -> u64 {
+        self._as.socket_timeout
+    }
 
-    // #[setter]
-    // pub fn set_filter_expression(&mut self, filter_expression: Option<FilterExpression>) {
-    //     match filter_expression {
-    //         Some(fe) => self._as.filter_expression = Some(fe._as),
-    //         None => self._as.filter_expression = None,
-    //     }
-    // }
+    #[setter]
+    pub fn set_socket_timeout(&mut self, timeout_millis: u64) {
+        self._as.socket_timeout = timeout_millis;
+    }
+
+    #[getter]
+    pub fn get_send_key(&self) -> bool {
+        self._as.send_key
+    }
+
+    #[setter]
+    pub fn set_send_key(&mut self, send_key: bool) {
+        self._as.send_key = send_key;
+    }
+
+    #[getter]
+    pub fn get_use_compression(&self) -> bool {
+        self._as.use_compression
+    }
+
+    #[setter]
+    pub fn set_use_compression(&mut self, use_compression: bool) {
+        self._as.use_compression = use_compression;
+    }
+
+    #[getter]
+    pub fn get_exit_fast_on_exhausted_connection_pool(&self) -> bool {
+        self._as.exit_fast_on_exhausted_connection_pool
+    }
+
+    #[setter]
+    pub fn set_exit_fast_on_exhausted_connection_pool(
+        &mut self,
+        exit_fast_on_exhausted_connection_pool: bool,
+    ) {
+        self._as.exit_fast_on_exhausted_connection_pool = exit_fast_on_exhausted_connection_pool;
+    }
+
+    #[getter]
+    pub fn get_read_mode_ap(&self) -> ReadModeAP {
+        ReadModeAP {
+            _as: match self._as.read_mode_ap {
+                0 => proto::ReadModeAp::One,
+                1 => proto::ReadModeAp::All,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_ap(&mut self, read_mode_ap: ReadModeAP) {
+        self._as.read_mode_ap = read_mode_ap._as.into();
+    }
+
+    #[getter]
+    pub fn get_read_mode_sc(&self) -> ReadModeSC {
+        ReadModeSC {
+            _as: match self._as.read_mode_ap {
+                0 => proto::ReadModeSc::Session,
+                1 => proto::ReadModeSc::Linearize,
+                2 => proto::ReadModeSc::AllowReplica,
+                3 => proto::ReadModeSc::AllowUnavailable,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_sc(&mut self, read_mode_sc: ReadModeSC) {
+        self._as.read_mode_sc = read_mode_sc._as.into();
+    }
+
+    #[getter]
+    pub fn get_filter_expression(&self) -> Option<Expression> {
+        self._as
+            .filter_expression
+            .clone()
+            .map(|fe| Expression { _as: fe })
+    }
+
+    #[setter]
+    pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
+        match filter_expression {
+            Some(fe) => self._as.filter_expression = Some(fe._as),
+            None => self._as.filter_expression = None,
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -2083,89 +2561,82 @@ impl WritePolicy {
     //     self._as.base_policy = base_policy._as;
     // }
 
-    // #[getter]
-    // pub fn get_record_exists_action(&self) -> RecordExistsAction {
-    //     RecordExistsAction {
-    //         _as: self._as.record_exists_action.clone(),
-    //         v: match &self._as.record_exists_action {
-    //             aerospike_core::RecordExistsAction::Update => _RecordExistsAction::Update,
-    //             aerospike_core::RecordExistsAction::UpdateOnly => _RecordExistsAction::UpdateOnly,
-    //             aerospike_core::RecordExistsAction::Replace => _RecordExistsAction::Replace,
-    //             aerospike_core::RecordExistsAction::ReplaceOnly => _RecordExistsAction::ReplaceOnly,
-    //             aerospike_core::RecordExistsAction::CreateOnly => _RecordExistsAction::CreateOnly,
-    //         },
-    //     }
-    // }
+    #[getter]
+    pub fn get_record_exists_action(&self) -> RecordExistsAction {
+        RecordExistsAction {
+            _as: match &self._as.record_exists_action {
+                0 => proto::RecordExistsAction::Update,
+                1 => proto::RecordExistsAction::UpdateOnly,
+                2 => proto::RecordExistsAction::Replace,
+                3 => proto::RecordExistsAction::ReplaceOnly,
+                4 => proto::RecordExistsAction::CreateOnly,
+                _ => unreachable!(),
+            },
+        }
+    }
 
-    // #[setter]
-    // pub fn set_record_exists_action(&mut self, record_exists_action: RecordExistsAction) {
-    //     self._as.record_exists_action = record_exists_action._as;
-    // }
+    #[setter]
+    pub fn set_record_exists_action(&mut self, record_exists_action: RecordExistsAction) {
+        self._as.record_exists_action = record_exists_action._as.into();
+    }
 
-    // #[getter]
-    // pub fn get_generation_policy(&self) -> GenerationPolicy {
-    //     GenerationPolicy {
-    //         _as: self._as.generation_policy.clone(),
-    //         v: match &self._as.generation_policy {
-    //             aerospike_core::GenerationPolicy::None => _GenerationPolicy::None,
-    //             aerospike_core::GenerationPolicy::ExpectGenEqual => {
-    //                 _GenerationPolicy::ExpectGenEqual
-    //             }
-    //             aerospike_core::GenerationPolicy::ExpectGenGreater => {
-    //                 _GenerationPolicy::ExpectGenGreater
-    //             }
-    //         },
-    //     }
-    // }
+    #[getter]
+    pub fn get_generation_policy(&self) -> GenerationPolicy {
+        GenerationPolicy {
+            _as: match &self._as.generation_policy {
+                0 => proto::GenerationPolicy::None,
+                1 => proto::GenerationPolicy::ExpectGenEqual,
+                2 => proto::GenerationPolicy::ExpectGenGt,
+                _ => unreachable!(),
+            },
+        }
+    }
 
-    // #[setter]
-    // pub fn set_generation_policy(&mut self, generation_policy: GenerationPolicy) {
-    //     self._as.generation_policy = generation_policy._as;
-    // }
+    #[setter]
+    pub fn set_generation_policy(&mut self, generation_policy: GenerationPolicy) {
+        self._as.generation_policy = generation_policy._as.into();
+    }
 
-    // #[getter]
-    // pub fn get_commit_level(&self) -> CommitLevel {
-    //     CommitLevel {
-    //         _as: self._as.commit_level.clone(),
-    //         v: match &self._as.commit_level {
-    //             aerospike_core::CommitLevel::CommitAll => _CommitLevel::CommitAll,
-    //             aerospike_core::CommitLevel::CommitMaster => _CommitLevel::CommitMaster,
-    //         },
-    //     }
-    // }
+    #[getter]
+    pub fn get_commit_level(&self) -> CommitLevel {
+        CommitLevel {
+            _as: match &self._as.commit_level {
+                0 => proto::CommitLevel::CommitAll,
+                1 => proto::CommitLevel::CommitMaster,
+                _ => unreachable!(),
+            },
+        }
+    }
 
-    // #[setter]
-    // pub fn set_commit_level(&mut self, commit_level: CommitLevel) {
-    //     self._as.commit_level = commit_level._as;
-    // }
+    #[setter]
+    pub fn set_commit_level(&mut self, commit_level: CommitLevel) {
+        self._as.commit_level = commit_level._as.into();
+    }
 
-    // #[getter]
-    // pub fn get_generation(&self) -> u32 {
-    //     self._as.generation
-    // }
+    #[getter]
+    pub fn get_generation(&self) -> u32 {
+        self._as.generation
+    }
 
-    // #[setter]
-    // pub fn set_generation(&mut self, generation: u32) {
-    //     self._as.generation = generation;
-    // }
+    #[setter]
+    pub fn set_generation(&mut self, generation: u32) {
+        self._as.generation = generation;
+    }
 
-    // #[getter]
-    // pub fn get_expiration(&self) -> Expiration {
-    //     Expiration {
-    //         _as: self._as.expiration,
-    //         v: match &self._as.expiration {
-    //             aerospike_core::Expiration::Seconds(secs) => _Expiration::Seconds(*secs),
-    //             aerospike_core::Expiration::NamespaceDefault => _Expiration::NamespaceDefault,
-    //             aerospike_core::Expiration::Never => _Expiration::Never,
-    //             aerospike_core::Expiration::DontUpdate => _Expiration::DontUpdate,
-    //         },
-    //     }
-    // }
+    #[getter]
+    pub fn get_expiration(&self) -> Expiration {
+        match self._as.expiration {
+            NAMESPACE_DEFAULT => Expiration::namespace_default(),
+            NEVER => Expiration::never(),
+            DONT_UPDATE => Expiration::dont_update(),
+            secs => Expiration::seconds(secs),
+        }
+    }
 
-    // #[setter]
-    // pub fn set_expiration(&mut self, expiration: Expiration) {
-    //     self._as.expiration = expiration._as;
-    // }
+    #[setter]
+    pub fn set_expiration(&mut self, expiration: Expiration) {
+        self._as.expiration = (&expiration).into();
+    }
 
     // #[getter]
     // pub fn get_send_key(&self) -> bool {
@@ -2177,36 +2648,36 @@ impl WritePolicy {
     //     self._as.send_key = send_key;
     // }
 
+    #[getter]
+    pub fn get_respond_per_each_op(&self) -> bool {
+        self._as.respond_per_each_op
+    }
+
+    #[setter]
+    pub fn set_respond_per_each_op(&mut self, respond_per_each_op: bool) {
+        self._as.respond_per_each_op = respond_per_each_op;
+    }
+
+    #[getter]
+    pub fn get_durable_delete(&self) -> bool {
+        self._as.respond_per_each_op
+    }
+
+    #[setter]
+    pub fn set_durable_delete(&mut self, durable_delete: bool) {
+        self._as.durable_delete = durable_delete;
+    }
+
     // #[getter]
-    // pub fn get_respond_per_each_op(&self) -> bool {
-    //     self._as.respond_per_each_op
-    // }
-
-    // #[setter]
-    // pub fn set_respond_per_each_op(&mut self, respond_per_each_op: bool) {
-    //     self._as.respond_per_each_op = respond_per_each_op;
-    // }
-
-    // #[getter]
-    // pub fn get_durable_delete(&self) -> bool {
-    //     self._as.respond_per_each_op
-    // }
-
-    // #[setter]
-    // pub fn set_durable_delete(&mut self, durable_delete: bool) {
-    //     self._as.durable_delete = durable_delete;
-    // }
-
-    // #[getter]
-    // pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+    // pub fn get_filter_expression(&self) -> Option<Expression> {
     //     match &self._as.filter_expression {
-    //         Some(fe) => Some(FilterExpression { _as: fe.clone() }),
+    //         Some(fe) => Some(Expression { _as: fe.clone() }),
     //         None => None,
     //     }
     // }
 
     // #[setter]
-    // pub fn set_filter_expression(&mut self, filter_expression: Option<FilterExpression>) {
+    // pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
     //     match filter_expression {
     //         Some(fe) => self._as.filter_expression = Some(fe._as),
     //         None => self._as.filter_expression = None,
@@ -2277,15 +2748,15 @@ impl WritePolicy {
 //     }
 
 //     #[getter]
-//     pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+//     pub fn get_filter_expression(&self) -> Option<Expression> {
 //         match &self._as.filter_expression {
-//             Some(fe) => Some(FilterExpression { _as: fe.clone() }),
+//             Some(fe) => Some(Expression { _as: fe.clone() }),
 //             None => None,
 //         }
 //     }
 
 //     #[setter]
-//     pub fn set_filter_expression(&mut self, filter_expression: Option<FilterExpression>) {
+//     pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
 //         match filter_expression {
 //             Some(fe) => self._as.filter_expression = Some(fe._as),
 //             None => self._as.filter_expression = None,
@@ -2377,15 +2848,15 @@ impl WritePolicy {
 //     }
 
 //     #[getter]
-//     pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+//     pub fn get_filter_expression(&self) -> Option<Expression> {
 //         match &self._as.filter_expression {
-//             Some(fe) => Some(FilterExpression { _as: fe.clone() }),
+//             Some(fe) => Some(Expression { _as: fe.clone() }),
 //             None => None,
 //         }
 //     }
 
 //     #[setter]
-//     pub fn set_filter_expression(&mut self, filter_expression: Option<FilterExpression>) {
+//     pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
 //         match filter_expression {
 //             Some(fe) => self._as.filter_expression = Some(fe._as),
 //             None => self._as.filter_expression = None,
@@ -2425,6 +2896,106 @@ impl IndexCollectionType {
     pub fn MapValues() -> Self {
         IndexCollectionType {
             _as: proto::IndexCollectionType::MapValues,
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  ParticleType
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\ParticleType")]
+pub struct ParticleType {
+    _as: proto::ParticleType,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl ParticleType {
+    pub fn null() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::Null,
+        }
+    }
+
+    pub fn integer() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::Integer,
+        }
+    }
+
+    pub fn float() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::Float,
+        }
+    }
+
+    pub fn string() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::String,
+        }
+    }
+
+    pub fn blob() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::Blob,
+        }
+    }
+
+    pub fn digest() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::Digest,
+        }
+    }
+
+    pub fn bool() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::Bool,
+        }
+    }
+
+    pub fn hll() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::Hll,
+        }
+    }
+
+    pub fn map() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::Map,
+        }
+    }
+
+    pub fn list() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::List,
+        }
+    }
+
+    pub fn geo_json() -> Self {
+        ParticleType {
+            _as: proto::ParticleType::GeoJson,
+        }
+    }
+}
+
+impl From<ParticleType> for i64 {
+    fn from(input: ParticleType) -> Self {
+        match &input._as {
+            proto::ParticleType::Null => 0,
+            proto::ParticleType::Integer => 1,
+            proto::ParticleType::Float => 2,
+            proto::ParticleType::String => 3,
+            proto::ParticleType::Blob => 4,
+            proto::ParticleType::Digest => 6,
+            proto::ParticleType::Bool => 17,
+            proto::ParticleType::Hll => 18,
+            proto::ParticleType::Map => 19,
+            proto::ParticleType::List => 20,
+            proto::ParticleType::Ldt => 21,
+            proto::ParticleType::GeoJson => 23,
         }
     }
 }
@@ -2838,15 +3409,15 @@ impl BatchPolicy {
     //     }
 
     //     #[getter]
-    //     pub fn get_filter_expression(&self) -> Option<FilterExpression> {
+    //     pub fn get_filter_expression(&self) -> Option<Expression> {
     //         match &self._as.filter_expression {
-    //             Some(fe) => Some(FilterExpression { _as: fe.clone() }),
+    //             Some(fe) => Some(Expression { _as: fe.clone() }),
     //             None => None,
     //         }
     //     }
 
     //     #[setter]
-    //     pub fn set_filter_expression(&mut self, filter_expression: Option<FilterExpression>) {
+    //     pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
     //         match filter_expression {
     //             Some(fe) => self._as.filter_expression = Some(fe._as),
     //             None => self._as.filter_expression = None,
@@ -2874,6 +3445,56 @@ impl BatchReadPolicy {
             _as: proto::BatchReadPolicy::default(),
         }
     }
+
+    #[getter]
+    pub fn get_filter_expression(&self) -> Option<Expression> {
+        self._as
+            .filter_expression
+            .clone()
+            .map(|fe| Expression { _as: fe })
+    }
+
+    #[setter]
+    pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
+        match filter_expression {
+            Some(fe) => self._as.filter_expression = Some(fe._as),
+            None => self._as.filter_expression = None,
+        }
+    }
+
+    #[getter]
+    pub fn get_read_mode_ap(&self) -> ReadModeAP {
+        ReadModeAP {
+            _as: match self._as.read_mode_ap {
+                0 => proto::ReadModeAp::One,
+                1 => proto::ReadModeAp::All,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_ap(&mut self, read_mode_ap: ReadModeAP) {
+        self._as.read_mode_ap = read_mode_ap._as.into();
+    }
+
+    #[getter]
+    pub fn get_read_mode_sc(&self) -> ReadModeSC {
+        ReadModeSC {
+            _as: match self._as.read_mode_ap {
+                0 => proto::ReadModeSc::Session,
+                1 => proto::ReadModeSc::Linearize,
+                2 => proto::ReadModeSc::AllowReplica,
+                3 => proto::ReadModeSc::AllowUnavailable,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_sc(&mut self, read_mode_sc: ReadModeSC) {
+        self._as.read_mode_sc = read_mode_sc._as.into();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -2895,6 +3516,109 @@ impl BatchWritePolicy {
         BatchWritePolicy {
             _as: proto::BatchWritePolicy::default(),
         }
+    }
+
+    #[getter]
+    pub fn get_filter_expression(&self) -> Option<Expression> {
+        self._as
+            .filter_expression
+            .clone()
+            .map(|fe| Expression { _as: fe })
+    }
+
+    #[setter]
+    pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
+        match filter_expression {
+            Some(fe) => self._as.filter_expression = Some(fe._as),
+            None => self._as.filter_expression = None,
+        }
+    }
+
+    #[getter]
+    pub fn get_record_exists_action(&self) -> RecordExistsAction {
+        RecordExistsAction {
+            _as: match &self._as.record_exists_action {
+                0 => proto::RecordExistsAction::Update,
+                1 => proto::RecordExistsAction::UpdateOnly,
+                2 => proto::RecordExistsAction::Replace,
+                3 => proto::RecordExistsAction::ReplaceOnly,
+                4 => proto::RecordExistsAction::CreateOnly,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_record_exists_action(&mut self, record_exists_action: RecordExistsAction) {
+        self._as.record_exists_action = record_exists_action._as.into();
+    }
+
+    #[getter]
+    pub fn get_generation_policy(&self) -> GenerationPolicy {
+        GenerationPolicy {
+            _as: match &self._as.generation_policy {
+                0 => proto::GenerationPolicy::None,
+                1 => proto::GenerationPolicy::ExpectGenEqual,
+                2 => proto::GenerationPolicy::ExpectGenGt,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_generation_policy(&mut self, generation_policy: GenerationPolicy) {
+        self._as.generation_policy = generation_policy._as.into();
+    }
+
+    #[getter]
+    pub fn get_commit_level(&self) -> CommitLevel {
+        CommitLevel {
+            _as: match &self._as.commit_level {
+                0 => proto::CommitLevel::CommitAll,
+                1 => proto::CommitLevel::CommitMaster,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_commit_level(&mut self, commit_level: CommitLevel) {
+        self._as.commit_level = commit_level._as.into();
+    }
+
+    #[getter]
+    pub fn get_generation(&self) -> u32 {
+        self._as.generation
+    }
+
+    #[setter]
+    pub fn set_generation(&mut self, generation: u32) {
+        self._as.generation = generation;
+    }
+
+    #[getter]
+    pub fn get_expiration(&self) -> Expiration {
+        match self._as.expiration {
+            NAMESPACE_DEFAULT => Expiration::namespace_default(),
+            NEVER => Expiration::never(),
+            DONT_UPDATE => Expiration::dont_update(),
+            secs => Expiration::seconds(secs),
+        }
+    }
+
+    #[setter]
+    pub fn set_expiration(&mut self, expiration: Expiration) {
+        self._as.expiration = (&expiration).into();
+    }
+
+    #[getter]
+    pub fn get_durable_delete(&self) -> bool {
+        self._as.durable_delete
+    }
+
+    #[setter]
+    pub fn set_durable_delete(&mut self, durable_delete: bool) {
+        self._as.durable_delete = durable_delete;
     }
 }
 
@@ -2918,6 +3642,68 @@ impl BatchDeletePolicy {
             _as: proto::BatchDeletePolicy::default(),
         }
     }
+
+    #[getter]
+    pub fn get_filter_expression(&self) -> Option<Expression> {
+        self._as
+            .filter_expression
+            .clone()
+            .map(|fe| Expression { _as: fe })
+    }
+
+    #[setter]
+    pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
+        match filter_expression {
+            Some(fe) => self._as.filter_expression = Some(fe._as),
+            None => self._as.filter_expression = None,
+        }
+    }
+
+    #[getter]
+    pub fn get_commit_level(&self) -> CommitLevel {
+        CommitLevel {
+            _as: match &self._as.commit_level {
+                0 => proto::CommitLevel::CommitAll,
+                1 => proto::CommitLevel::CommitMaster,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_commit_level(&mut self, commit_level: CommitLevel) {
+        self._as.commit_level = commit_level._as.into();
+    }
+
+    #[getter]
+    pub fn get_generation(&self) -> u32 {
+        self._as.generation
+    }
+
+    #[setter]
+    pub fn set_generation(&mut self, generation: u32) {
+        self._as.generation = generation;
+    }
+
+    #[getter]
+    pub fn get_durable_delete(&self) -> bool {
+        self._as.durable_delete
+    }
+
+    #[setter]
+    pub fn set_durable_delete(&mut self, durable_delete: bool) {
+        self._as.durable_delete = durable_delete;
+    }
+
+    #[getter]
+    pub fn get_send_key(&self) -> bool {
+        self._as.send_key
+    }
+
+    #[setter]
+    pub fn set_send_key(&mut self, send_key: bool) {
+        self._as.send_key = send_key;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -2939,6 +3725,73 @@ impl BatchUdfPolicy {
         BatchUdfPolicy {
             _as: proto::BatchUdfPolicy::default(),
         }
+    }
+
+    #[getter]
+    pub fn get_filter_expression(&self) -> Option<Expression> {
+        self._as
+            .filter_expression
+            .clone()
+            .map(|fe| Expression { _as: fe })
+    }
+
+    #[setter]
+    pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
+        match filter_expression {
+            Some(fe) => self._as.filter_expression = Some(fe._as),
+            None => self._as.filter_expression = None,
+        }
+    }
+
+    #[getter]
+    pub fn get_commit_level(&self) -> CommitLevel {
+        CommitLevel {
+            _as: match &self._as.commit_level {
+                0 => proto::CommitLevel::CommitAll,
+                1 => proto::CommitLevel::CommitMaster,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_commit_level(&mut self, commit_level: CommitLevel) {
+        self._as.commit_level = commit_level._as.into();
+    }
+
+    #[getter]
+    pub fn get_expiration(&self) -> Expiration {
+        match self._as.expiration {
+            NAMESPACE_DEFAULT => Expiration::namespace_default(),
+            NEVER => Expiration::never(),
+            DONT_UPDATE => Expiration::dont_update(),
+            secs => Expiration::seconds(secs),
+        }
+    }
+
+    #[setter]
+    pub fn set_expiration(&mut self, expiration: Expiration) {
+        self._as.expiration = (&expiration).into();
+    }
+
+    #[getter]
+    pub fn get_durable_delete(&self) -> bool {
+        self._as.durable_delete
+    }
+
+    #[setter]
+    pub fn set_durable_delete(&mut self, durable_delete: bool) {
+        self._as.durable_delete = durable_delete;
+    }
+
+    #[getter]
+    pub fn get_send_key(&self) -> bool {
+        self._as.send_key
+    }
+
+    #[setter]
+    pub fn set_send_key(&mut self, send_key: bool) {
+        self._as.send_key = send_key;
     }
 }
 
@@ -3455,11 +4308,14 @@ impl Client {
             proto::Error {
                 result_code,
                 in_doubt,
-            } =>{
-                let error = AspException { message: "Exception in append".to_string() , code: *result_code };
+            } => {
+                let error = AspException {
+                    message: "Exception in append".to_string(),
+                    code: *result_code,
+                };
                 let _ = throw_object(error.into_zval(true).unwrap());
                 Err(AerospikeException::new("TODO(Sachin): Implement Exception").into())
-            } 
+            }
         }
     }
 
@@ -3942,6 +4798,44 @@ impl fmt::Display for Json {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+//  Infinity
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\Infinity")]
+pub struct Infinity {}
+
+impl FromZval<'_> for Infinity {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &Infinity = zval.extract()?;
+
+        Some(Infinity {})
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Wildcard
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\Wildcard")]
+pub struct Wildcard {}
+
+impl FromZval<'_> for Wildcard {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &Wildcard = zval.extract()?;
+
+        Some(Wildcard {})
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 //  HLL
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -4034,6 +4928,12 @@ pub enum PHPValue {
 
     /// HLL value
     HLL(Vec<u8>),
+
+    /// Wildcard value.
+    Wildcard,
+
+    /// Infinity value.
+    Infinity,
 }
 
 #[allow(clippy::derive_hash_xor_eq)]
@@ -4053,6 +4953,8 @@ impl Hash for PHPValue {
             PHPValue::List(ref val) => val.hash(state),
             PHPValue::HashMap(_) => panic!("HashMaps cannot be used as map keys."),
             PHPValue::Json(_) => panic!("Jsons cannot be used as map keys."),
+            PHPValue::Infinity => panic!("Infinity cannot be used as map keys."),
+            PHPValue::Wildcard => panic!("Infinity cannot be used as map keys."),
             // PHPValue::OrderedMap(_) => panic!("OrderedMaps cannot be used as map keys."),
         }
     }
@@ -4074,6 +4976,8 @@ impl PHPValue {
             PHPValue::List(ref val) => format!("{:?}", val),
             PHPValue::HashMap(ref val) => format!("{:?}", val),
             PHPValue::Json(ref val) => format!("{:?}", val),
+            PHPValue::Infinity => "<infinity>".to_string(),
+            PHPValue::Wildcard => "<wildcard>".to_string(),
             // PHPValue::OrderedMap(ref val) => format!("{:?}", val),
         }
     }
@@ -4124,6 +5028,16 @@ impl IntoZval for PHPValue {
             PHPValue::HLL(b) => {
                 let hll = HLL { v: b };
                 let zo: ZBox<ZendObject> = hll.into_zend_object()?;
+                zv.set_object(zo.into_raw());
+            }
+            PHPValue::Infinity => {
+                let inf = Infinity {};
+                let zo: ZBox<ZendObject> = inf.into_zend_object()?;
+                zv.set_object(zo.into_raw());
+            }
+            PHPValue::Wildcard => {
+                let inf = Wildcard {};
+                let zo: ZBox<ZendObject> = inf.into_zend_object()?;
                 zv.set_object(zo.into_raw());
             }
         }
@@ -4182,13 +5096,16 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
                 return Some(PHPValue::GeoJSON(o.v));
             } else if let Some(o) = zval.extract::<HLL>() {
                 return Some(PHPValue::HLL(o.v));
+            } else if let Some(o) = zval.extract::<Infinity>() {
+                return Some(PHPValue::Infinity);
+            } else if let Some(o) = zval.extract::<Wildcard>() {
+                return Some(PHPValue::Wildcard);
             }
             panic!("Invalid value");
         }
         _ => unreachable!(),
     }
 }
-
 
 impl FromZval<'_> for PHPValue {
     const TYPE: DataType = DataType::Mixed;
@@ -4208,37 +5125,61 @@ impl From<HashMap<String, proto::Value>> for PHPValue {
     }
 }
 
+impl From<HashMap<PHPValue, PHPValue>> for PHPValue {
+    fn from(h: HashMap<PHPValue, PHPValue>) -> Self {
+        PHPValue::HashMap(h)
+    }
+}
+
+// impl FromZval<'_> for HashMap<PHPValue, PHPValue> {
+//     const TYPE: DataType = DataType::Mixed;
+
+//     fn from_zval(zval: &Zval) -> Option<Self> {
+//         from_zval(zval)
+//     }
+// }
+
+// impl FromZval<'_> for HashMap<PHPValue, PHPValue> {
+//     fn from(h: HashMap<String, proto::Value>) -> Self {
+//         let mut hash = HashMap::<PHPValue, PHPValue>::with_capacity(h.len());
+//         h.iter().for_each(|(k, v)| {
+//             hash.insert(PHPValue::String(k.into()), v.into());
+//         });
+//         PHPValue::HashMap(hash)
+//     }
+// }
+
 impl From<PHPValue> for proto::Value {
     fn from(other: PHPValue) -> Self {
         match other {
             PHPValue::Nil => proto::Value {
                 nil: Some(true),
                 ..Default::default()
-            }, //aerospike_core::Value::Nil,
+            },
             PHPValue::Bool(b) => proto::Value {
                 b: Some(b),
                 ..Default::default()
-            }, //aerospike_core::Value::Bool(b),
+            },
             PHPValue::Int(i) => proto::Value {
                 i: Some(i),
                 ..Default::default()
-            }, //aerospike_core::Value::Int(i),
+            },
             PHPValue::UInt(ui) => proto::Value {
                 i: Some(ui as i64),
                 ..Default::default()
-            }, //aerospike_core::Value::UInt(ui),
+            },
             PHPValue::Float(f) => proto::Value {
                 f: Some(f64::from(f).into()),
                 ..Default::default()
-            }, //aerospike_core::Value::Float(f64::from(f).into()),
+            },
             PHPValue::String(s) => proto::Value {
                 s: Some(s),
                 ..Default::default()
-            }, //aerospike_core::Value::String(s),
+            },
             PHPValue::Blob(b) => proto::Value {
                 blob: Some(b),
                 ..Default::default()
-            }, //aerospike_core::Value::Blob(b),
+            },
             PHPValue::List(l) => {
                 let mut nl = Vec::<proto::Value>::with_capacity(l.len());
                 l.iter().for_each(|v| nl.push(v.clone().into()));
@@ -4276,11 +5217,19 @@ impl From<PHPValue> for proto::Value {
             PHPValue::GeoJSON(gj) => proto::Value {
                 geo: Some(gj),
                 ..Default::default()
-            }, //aerospike_core::Value::GeoJSON(gj),
+            },
             PHPValue::HLL(b) => proto::Value {
                 hll: Some(b),
                 ..Default::default()
-            }, //aerospike_core::Value::HLL(b),
+            },
+            PHPValue::Infinity => proto::Value {
+                infinity: Some(true),
+                ..Default::default()
+            },
+            PHPValue::Wildcard => proto::Value {
+                wildcard: Some(true),
+                ..Default::default()
+            },
         }
     }
 }
@@ -4324,6 +5273,14 @@ impl From<&proto::Value> for PHPValue {
             }
             proto::Value { geo: Some(gj), .. } => PHPValue::GeoJSON(gj.into()),
             proto::Value { hll: Some(b), .. } => PHPValue::HLL(b.to_vec()),
+            proto::Value {
+                infinity: Some(true),
+                ..
+            } => PHPValue::Infinity,
+            proto::Value {
+                wildcard: Some(true),
+                ..
+            } => PHPValue::Wildcard,
             _ => unreachable!(),
         }
     }
@@ -4335,40 +5292,52 @@ impl From<&proto::Value> for PHPValue {
 // //
 // ////////////////////////////////////////////////////////////////////////////////////////////
 
-// #[php_class(name = "Aerospike\\Value")]
-// pub struct Value;
+#[php_class(name = "Aerospike\\Value")]
+pub struct Value;
 
-// #[php_impl]
-// #[derive(ZvalConvert)]
-// impl Value {
-//     pub fn nil() -> PHPValue {
-//         PHPValue::Nil
-//     }
+#[php_impl]
+#[derive(ZvalConvert)]
+impl Value {
+    pub fn nil() -> PHPValue {
+        PHPValue::Nil
+    }
 
-//     pub fn int(val: i64) -> PHPValue {
-//         PHPValue::Int(val)
-//     }
+    pub fn int(val: i64) -> PHPValue {
+        PHPValue::Int(val)
+    }
 
-//     pub fn uint(val: u64) -> PHPValue {
-//         PHPValue::UInt(val)
-//     }
+    pub fn uint(val: u64) -> PHPValue {
+        PHPValue::UInt(val)
+    }
 
-//     pub fn string(val: String) -> PHPValue {
-//         PHPValue::String(val)
-//     }
+    pub fn string(val: String) -> PHPValue {
+        PHPValue::String(val)
+    }
 
-//     pub fn blob(val: Vec<u8>) -> PHPValue {
-//         PHPValue::Blob(val)
-//     }
+    pub fn blob(val: Vec<u8>) -> PHPValue {
+        PHPValue::Blob(val)
+    }
 
-//     pub fn geo_json(val: String) -> GeoJSON {
-//         GeoJSON { v: val }
-//     }
+    pub fn geo_json(val: String) -> GeoJSON {
+        GeoJSON { v: val }
+    }
 
-//     pub fn hll(val: Vec<u8>) -> HLL {
-//         HLL { v: val }
-//     }
-// }
+    pub fn hll(val: Vec<u8>) -> HLL {
+        HLL { v: val }
+    }
+
+    pub fn json(val: HashMap<String, PHPValue>) -> PHPValue {
+        PHPValue::Json(val)
+    }
+
+    pub fn infinity() -> PHPValue {
+        PHPValue::Infinity
+    }
+
+    pub fn wildcard() -> PHPValue {
+        PHPValue::Wildcard
+    }
+}
 
 // ////////////////////////////////////////////////////////////////////////////////////////////
 // //
