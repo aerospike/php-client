@@ -329,7 +329,7 @@ message ReadPolicy {
 // Write policy attributes used in write database commands that are not part of
 // the wire protocol.
 message WritePolicy {
-	ReadPolicy readPolicy = 1;
+	ReadPolicy policy = 1;
 
 	// RecordExistsAction qualifies how to handle writes where the record already exists.
 	RecordExistsAction recordExistsAction = 2;

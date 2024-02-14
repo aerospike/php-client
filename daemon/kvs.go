@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
-	"reflect"
 	"time"
 
 	aero "github.com/aerospike/aerospike-client-go/v7"
@@ -21,12 +19,8 @@ func (s *server) Get(ctx context.Context, in *pb.AerospikeGetRequest) (*pb.Aeros
 	key := toKey(in.Key)
 	rec, err := client.Get(policy, key, in.BinNames...)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
 		return &pb.AerospikeSingleResponse{
-			Error: &pb.Error{
-				ResultCode: 0, // TODO: return result code
-				InDoubt:    inDoubt,
-			},
+			Error:  fromError(err),
 			Record: fromRecord(rec),
 		}, nil
 	}
@@ -41,12 +35,8 @@ func (s *server) GetHeader(ctx context.Context, in *pb.AerospikeGetHeaderRequest
 	key := toKey(in.Key)
 	rec, err := client.GetHeader(policy, key)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
 		return &pb.AerospikeSingleResponse{
-			Error: &pb.Error{
-				ResultCode: 0, // TODO: return result code
-				InDoubt:    inDoubt,
-			},
+			Error:  fromError(err),
 			Record: fromRecord(rec),
 		}, nil
 	}
@@ -61,12 +51,8 @@ func (s *server) Exists(ctx context.Context, in *pb.AerospikeExistsRequest) (*pb
 	key := toKey(in.Key)
 	exists, err := client.Exists(policy, key)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
 		return &pb.AerospikeExistsResponse{
-			Error: &pb.Error{
-				ResultCode: 0, // TODO: return result code
-				InDoubt:    inDoubt,
-			},
+			Error:  fromError(err),
 			Exists: &exists,
 		}, nil
 	}
@@ -81,11 +67,7 @@ func (s *server) Put(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Error
 	key := toKey(in.Key)
 	err := client.PutBins(policy, key, toBins(in.Bins)...)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
-		return &pb.Error{
-			ResultCode: 0, // TODO: return result code
-			InDoubt:    inDoubt,
-		}, nil
+		return fromError(err), nil
 	}
 
 	return &pb.Error{
@@ -98,11 +80,7 @@ func (s *server) Add(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Error
 	key := toKey(in.Key)
 	err := client.AddBins(policy, key, toBins(in.Bins)...)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
-		return &pb.Error{
-			ResultCode: 0, // TODO: return result code
-			InDoubt:    inDoubt,
-		}, nil
+		return fromError(err), nil
 	}
 
 	return &pb.Error{
@@ -115,11 +93,7 @@ func (s *server) Append(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Er
 	key := toKey(in.Key)
 	err := client.AppendBins(policy, key, toBins(in.Bins)...)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
-		return &pb.Error{
-			ResultCode: 0, // TODO: return result code
-			InDoubt:    inDoubt,
-		}, nil
+		return fromError(err), nil
 	}
 
 	return &pb.Error{
@@ -132,11 +106,7 @@ func (s *server) Prepend(ctx context.Context, in *pb.AerospikePutRequest) (*pb.E
 	key := toKey(in.Key)
 	err := client.PrependBins(policy, key, toBins(in.Bins)...)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
-		return &pb.Error{
-			ResultCode: 0, // TODO: return result code
-			InDoubt:    inDoubt,
-		}, nil
+		return fromError(err), nil
 	}
 
 	return &pb.Error{
@@ -149,12 +119,8 @@ func (s *server) Delete(ctx context.Context, in *pb.AerospikeDeleteRequest) (*pb
 	key := toKey(in.Key)
 	existed, err := client.Delete(policy, key)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
 		return &pb.AerospikeDeleteResponse{
-			Error: &pb.Error{
-				ResultCode: 0, // TODO: return result code
-				InDoubt:    inDoubt,
-			},
+			Error:   fromError(err),
 			Existed: &existed,
 		}, nil
 	}
@@ -169,11 +135,7 @@ func (s *server) Touch(ctx context.Context, in *pb.AerospikeTouchRequest) (*pb.E
 	key := toKey(in.Key)
 	err := client.Touch(policy, key)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
-		return &pb.Error{
-			ResultCode: 0, // TODO: return result code
-			InDoubt:    inDoubt,
-		}, nil
+		return fromError(err), nil
 	}
 
 	return &pb.Error{
@@ -185,12 +147,8 @@ func (s *server) BatchOperate(ctx context.Context, in *pb.AerospikeBatchOperateR
 	brecs := toBatchRecords(in.Records)
 	err := client.BatchOperate(toBatchPolicy(in.Policy), brecs)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
 		return &pb.AerospikeBatchOperateResponse{
-			Error: &pb.Error{
-				ResultCode: 0, // TODO: return result code
-				InDoubt:    inDoubt,
-			},
+			Error:   fromError(err),
 			Records: fromBatchRecords(brecs),
 		}, nil
 	}
@@ -204,12 +162,8 @@ func (s *server) CreateIndex(ctx context.Context, in *pb.AerospikeCreateIndexReq
 	// TODO(Khosrow): return the task
 	_, err := client.CreateComplexIndex(toWritePolicy(in.Policy), in.Namespace, in.SetName, in.IndexName, in.BinName, toIndexType(in.IndexType), toIndexCollectionType(in.IndexCollectionType))
 	if err != nil {
-		inDoubt := err.IsInDoubt()
 		return &pb.AerospikeCreateIndexResponse{
-			Error: &pb.Error{
-				ResultCode: 0, // TODO: return result code
-				InDoubt:    inDoubt,
-			},
+			Error: fromError(err),
 		}, nil
 	}
 
@@ -219,12 +173,8 @@ func (s *server) CreateIndex(ctx context.Context, in *pb.AerospikeCreateIndexReq
 func (s *server) DropIndex(ctx context.Context, in *pb.AerospikeDropIndexRequest) (*pb.AerospikeDropIndexResponse, error) {
 	err := client.DropIndex(toWritePolicy(in.Policy), in.Namespace, in.SetName, in.IndexName)
 	if err != nil {
-		inDoubt := err.IsInDoubt()
 		return &pb.AerospikeDropIndexResponse{
-			Error: &pb.Error{
-				ResultCode: 0, // TODO: return result code
-				InDoubt:    inDoubt,
-			},
+			Error: fromError(err),
 		}, nil
 	}
 
@@ -234,12 +184,8 @@ func (s *server) DropIndex(ctx context.Context, in *pb.AerospikeDropIndexRequest
 func (s *server) Truncate(ctx context.Context, in *pb.AerospikeTruncateRequest) (*pb.AerospikeTruncateResponse, error) {
 	err := client.Truncate(toInfoPolicy(in.Policy), in.Namespace, in.SetName, toTime(in.BeforeNanos))
 	if err != nil {
-		inDoubt := err.IsInDoubt()
 		return &pb.AerospikeTruncateResponse{
-			Error: &pb.Error{
-				ResultCode: 0, // TODO: return result code
-				InDoubt:    inDoubt,
-			},
+			Error: fromError(err),
 		}, nil
 	}
 
@@ -286,14 +232,36 @@ func toIndexCollectionType(in pb.IndexCollectionType) aero.IndexCollectionType {
 
 func toReadPolicy(in *pb.ReadPolicy) *aero.BasePolicy {
 	if in != nil {
-		return &aero.BasePolicy{}
+		return &aero.BasePolicy{
+			FilterExpression:                  toExpression(in.FilterExpression),
+			ReadModeAP:                        aero.ReadModeAP(in.ReadModeAP),
+			ReadModeSC:                        aero.ReadModeSC(in.ReadModeSC),
+			TotalTimeout:                      time.Duration(in.TotalTimeout * uint64(time.Millisecond)),
+			SocketTimeout:                     time.Duration(in.SocketTimeout * uint64(time.Millisecond)),
+			MaxRetries:                        int(in.MaxRetries),
+			SleepBetweenRetries:               time.Duration(time.Duration(in.SleepBetweenRetries) * time.Millisecond),
+			SleepMultiplier:                   in.SleepMultiplier,
+			ExitFastOnExhaustedConnectionPool: in.ExitFastOnExhaustedConnectionPool,
+			SendKey:                           in.SendKey,
+			UseCompression:                    in.UseCompression,
+			ReplicaPolicy:                     aero.ReplicaPolicy(in.ReplicaPolicy),
+		}
 	}
 	return nil
 }
 
 func toWritePolicy(in *pb.WritePolicy) *aero.WritePolicy {
 	if in != nil {
-		return &aero.WritePolicy{}
+		return &aero.WritePolicy{
+			BasePolicy:         *toReadPolicy(in.Policy),
+			RecordExistsAction: aero.RecordExistsAction(in.RecordExistsAction),
+			GenerationPolicy:   aero.GenerationPolicy(in.GenerationPolicy),
+			CommitLevel:        aero.CommitLevel(in.CommitLevel),
+			Generation:         in.Generation,
+			Expiration:         in.Expiration,
+			RespondPerEachOp:   in.RespondPerEachOp,
+			DurableDelete:      in.DurableDelete,
+		}
 	}
 	return nil
 }
@@ -307,35 +275,68 @@ func toInfoPolicy(in *pb.InfoPolicy) *aero.InfoPolicy {
 
 func toBatchPolicy(in *pb.BatchPolicy) *aero.BatchPolicy {
 	if in != nil {
-		return &aero.BatchPolicy{}
+		return &aero.BatchPolicy{
+			BasePolicy:          *toReadPolicy(in.Policy),
+			ConcurrentNodes:     int(*in.ConcurrentNodes),
+			AllowInline:         in.AllowInline,
+			AllowInlineSSD:      in.AllowInlineSSD,
+			RespondAllKeys:      in.RespondAllKeys,
+			AllowPartialResults: in.AllowPartialResults,
+		}
 	}
 	return nil
 }
 
 func toBatchReadPolicy(in *pb.BatchReadPolicy) *aero.BatchReadPolicy {
 	if in != nil {
-		return &aero.BatchReadPolicy{}
+		return &aero.BatchReadPolicy{
+			FilterExpression: toExpression(in.FilterExpression),
+			ReadModeAP:       aero.ReadModeAP(in.ReadModeAP),
+			ReadModeSC:       aero.ReadModeSC(in.ReadModeSC),
+		}
 	}
 	return nil
 }
 
 func toBatchWritePolicy(in *pb.BatchWritePolicy) *aero.BatchWritePolicy {
 	if in != nil {
-		return &aero.BatchWritePolicy{}
+		return &aero.BatchWritePolicy{
+			FilterExpression:   toExpression(in.FilterExpression),
+			RecordExistsAction: aero.RecordExistsAction(in.RecordExistsAction),
+			CommitLevel:        aero.CommitLevel(in.CommitLevel),
+			GenerationPolicy:   aero.GenerationPolicy(in.GenerationPolicy),
+			Generation:         in.Generation,
+			Expiration:         in.Expiration,
+			DurableDelete:      in.DurableDelete,
+			SendKey:            in.SendKey,
+		}
 	}
 	return nil
 }
 
 func toBatchDeletePolicy(in *pb.BatchDeletePolicy) *aero.BatchDeletePolicy {
 	if in != nil {
-		return &aero.BatchDeletePolicy{}
+		return &aero.BatchDeletePolicy{
+			FilterExpression: toExpression(in.FilterExpression),
+			CommitLevel:      aero.CommitLevel(in.CommitLevel),
+			GenerationPolicy: aero.GenerationPolicy(in.GenerationPolicy),
+			Generation:       in.Generation,
+			DurableDelete:    in.DurableDelete,
+			SendKey:          in.SendKey,
+		}
 	}
 	return nil
 }
 
 func toBatchUDFPolicy(in *pb.BatchUDFPolicy) *aero.BatchUDFPolicy {
 	if in != nil {
-		return &aero.BatchUDFPolicy{}
+		return &aero.BatchUDFPolicy{
+			FilterExpression: toExpression(in.FilterExpression),
+			CommitLevel:      aero.CommitLevel(in.CommitLevel),
+			Expiration:       in.Expiration,
+			DurableDelete:    in.DurableDelete,
+			SendKey:          in.SendKey,
+		}
 	}
 	return nil
 }
@@ -494,6 +495,22 @@ func toValue(in *pb.Value) aero.Value {
 		return aero.HLLValue(in.Hll)
 	}
 
+	if in.Wildcard != nil {
+		return aero.NewWildCardValue()
+	}
+
+	if in.Infinity != nil {
+		return aero.NewInfinityValue()
+	}
+
+	if in.Json != nil {
+		j := make(map[string]interface{}, len(in.Json))
+		for i := range in.Json {
+			j[in.Json[i].K] = toValue(in.Json[i].V)
+		}
+		return aero.JsonValue(j)
+	}
+
 	if len(in.M) > 0 {
 		m := make(map[interface{}]interface{}, len(in.M))
 		for i := range in.M {
@@ -513,6 +530,18 @@ func toValue(in *pb.Value) aero.Value {
 	panic("UNREACHABLE")
 }
 
+func toListValue(in *pb.Value) []aero.Value {
+	if len(in.L) > 0 {
+		l := make([]aero.Value, len(in.L))
+		for i := range in.L {
+			l[i] = toValue(in.L[i])
+		}
+		return l
+	}
+
+	panic("UNREACHABLE")
+}
+
 func fromBatchRecords(in []aero.BatchRecordIfc) (res []*pb.BatchRecord) {
 	for i := range in {
 		res = append(res, fromBatchRecord(in[i]))
@@ -526,16 +555,28 @@ func fromBatchRecord(in aero.BatchRecordIfc) *pb.BatchRecord {
 		return &pb.BatchRecord{
 			Key:    fromKey(br.Key),
 			Record: fromRecord(br.Record),
-			Error:  fromError(br.Err, br.InDoubt),
+			Error:  fromError2(br.Err, br.InDoubt),
 		}
 	}
 	return nil
 }
 
-func fromError(in aero.Error, inDoubt bool) *pb.Error {
+func fromError(in aero.Error) *pb.Error {
 	if in != nil {
+		ae := in.(*aero.AerospikeError)
 		return &pb.Error{
-			ResultCode: 0, // TODO: Return ResultCode
+			ResultCode: int32(ae.ResultCode),
+			InDoubt:    ae.IsInDoubt(),
+		}
+	}
+	return nil
+}
+
+func fromError2(in aero.Error, inDoubt bool) *pb.Error {
+	if in != nil {
+		ae := in.(*aero.AerospikeError)
+		return &pb.Error{
+			ResultCode: int32(ae.ResultCode),
 			InDoubt:    inDoubt,
 		}
 	}
@@ -567,6 +608,7 @@ func fromKey(in *aero.Key) *pb.Key {
 func fromRecord(in *aero.Record) *pb.Record {
 	if in != nil {
 		return &pb.Record{
+			Key:        fromKey(in.Key),
 			Generation: in.Generation,
 			Expiration: in.Expiration,
 			Bins:       fromBins(in.Bins),
@@ -611,6 +653,9 @@ func fromValue(in any) *pb.Value {
 			m = append(m, &proto.MapEntry{K: fromValue(k), V: fromValue(v)})
 		}
 		return &pb.Value{M: m}
+	case aero.NullValue:
+		b := true
+		return &pb.Value{Nil: &b}
 	case aero.IntegerValue:
 		i64 := int64(v)
 		return &pb.Value{I: &i64}
@@ -632,14 +677,17 @@ func fromValue(in any) *pb.Value {
 			m = append(m, &proto.JsonEntry{K: k, V: fromValue(v)})
 		}
 		return &pb.Value{Json: m}
-	case aero.NullValue:
-		b := true
-		return &pb.Value{Nil: &b}
 	case aero.HLLValue:
 		return &pb.Value{Hll: v.GetObject().([]byte)}
 	case aero.GeoJSONValue:
 		s := v.GetObject().(string)
 		return &pb.Value{Geo: &s}
+	case aero.WildCardValue:
+		t := true
+		return &pb.Value{Wildcard: &t}
+	case aero.InfinityValue:
+		t := true
+		return &pb.Value{Infinity: &t}
 	}
 
 	if in == nil {
@@ -647,7 +695,183 @@ func fromValue(in any) *pb.Value {
 		return &pb.Value{Nil: &b}
 	}
 
-	log.Printf("%#v", in)
-	log.Println(reflect.TypeOf(in).Elem())
+	// log.Printf("%#v", in)
+	// log.Println(reflect.TypeOf(in).Elem())
+	panic("UNREACHABLE")
+}
+
+func toExpressions(in []*pb.Expression) (res []*aero.Expression) {
+	for i := range in {
+		res = append(res, toExpression(in[i]))
+	}
+	return res
+}
+
+func toExpression(in *pb.Expression) *aero.Expression {
+	if in == nil {
+		return nil
+	}
+
+	if in.Cmd == nil {
+		if in.Val.Nil != nil {
+			return aero.ExpNilValue()
+		} else if in.Val.I != nil {
+			return aero.ExpIntVal(*in.Val.I)
+		} else if in.Val.F != nil {
+			return aero.ExpFloatVal(*in.Val.F)
+		} else if in.Val.S != nil {
+			return aero.ExpStringVal(*in.Val.S)
+		} else if in.Val.B != nil {
+			return aero.ExpBoolVal(*in.Val.B)
+		} else if in.Val.Blob != nil {
+			return aero.ExpBlobVal(in.Val.Blob)
+		} else if in.Val.L != nil {
+			return aero.ExpListVal(toListValue(in.Val)...)
+		} else if in.Val.M != nil {
+			return aero.ExpMapVal(toValue(in.Val).(aero.MapValue))
+			// } else if in.Val.Json != nil {
+			// 	return aero.ExpJsonVal(toValue(in.Val.Json))
+		} else if in.Val.Geo != nil {
+			return aero.ExpGeoVal(*in.Val.Geo)
+			// } else if in.Val.Hll != nil {
+			// 	return aero.ExpHllVal(toValue(in.Val))
+		} else if in.Val.Wildcard != nil {
+			return aero.ExpWildCardValue()
+		} else if in.Val.Infinity != nil {
+			return aero.ExpInfinityValue()
+		}
+	}
+
+	switch *in.Cmd {
+	case pb.ExpOp_ExpOpUnknown:
+		return aero.ExpUnknown()
+	case pb.ExpOp_ExpOpEq:
+		return aero.ExpEq(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpNe:
+		return aero.ExpNotEq(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpGt:
+		return aero.ExpGreater(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpGe:
+		return aero.ExpGreaterEq(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpLt:
+		return aero.ExpLess(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpLe:
+		return aero.ExpLessEq(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpRegex:
+		return aero.ExpRegexCompare(toValue(in.Val).String(), aero.ExpRegexFlags(*in.Flags), toExpression(in.Bin))
+	case pb.ExpOp_ExpOpGeo:
+		return aero.ExpGeoCompare(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpAnd:
+		return aero.ExpAnd(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpOr:
+		return aero.ExpOr(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpNot:
+		return aero.ExpNot(toExpression(in.Exps[0]))
+	case pb.ExpOp_ExpOpExclusive:
+		return aero.ExpExclusive(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpAdd:
+		return aero.ExpNumAdd(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpSub:
+		return aero.ExpNumSub(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpMul:
+		return aero.ExpNumMul(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpDiv:
+		return aero.ExpNumDiv(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpPow:
+		return aero.ExpNumPow(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpLog:
+		return aero.ExpNumLog(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpMod:
+		return aero.ExpNumMod(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpAbs:
+		return aero.ExpNumAbs(toExpression(in.Exps[0]))
+	case pb.ExpOp_ExpOpFloor:
+	case pb.ExpOp_ExpOpCeil:
+		return aero.ExpNumCeil(toExpression(in.Exps[0]))
+	case pb.ExpOp_ExpOpToInt:
+		return aero.ExpToInt(toExpression(in.Exps[0]))
+	case pb.ExpOp_ExpOpToFloat:
+		return aero.ExpToFloat(toExpression(in.Exps[0]))
+	case pb.ExpOp_ExpOpIntAnd:
+		return aero.ExpIntAnd(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpIntOr:
+		return aero.ExpIntOr(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpIntXor:
+		return aero.ExpIntXor(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpIntNot:
+		return aero.ExpIntNot(toExpression(in.Exps[0]))
+	case pb.ExpOp_ExpOpIntLShift:
+		return aero.ExpIntLShift(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpIntRShift:
+		return aero.ExpIntRShift(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpIntARShift:
+		return aero.ExpIntARShift(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpIntCount:
+		return aero.ExpIntCount(toExpression(in.Exps[0]))
+	case pb.ExpOp_ExpOpIntLScan:
+		return aero.ExpIntLScan(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpIntRScan:
+		return aero.ExpIntRScan(toExpression(in.Exps[0]), toExpression(in.Exps[1]))
+	case pb.ExpOp_ExpOpMin:
+		return aero.ExpMin(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpMax:
+		return aero.ExpMax(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpDigestModulo:
+		return aero.ExpDigestModulo(*in.Val.I)
+	case pb.ExpOp_ExpOpDeviceSize:
+		return aero.ExpDeviceSize()
+	case pb.ExpOp_ExpOpLastUpdate:
+		return aero.ExpLastUpdate()
+	case pb.ExpOp_ExpOpSinceUpdate:
+		return aero.ExpSinceUpdate()
+	case pb.ExpOp_ExpOpVoidTime:
+		return aero.ExpVoidTime()
+	case pb.ExpOp_ExpOpTtl:
+		return aero.ExpTTL()
+	case pb.ExpOp_ExpOpSetName:
+		return aero.ExpSetName()
+	case pb.ExpOp_ExpOpKeyExists:
+		return aero.ExpKeyExists()
+	case pb.ExpOp_ExpOpIsTombstone:
+		return aero.ExpIsTombstone()
+	case pb.ExpOp_ExpOpMemorySize:
+		return aero.ExpMemorySize()
+	case pb.ExpOp_ExpOpRecordSize:
+		return aero.ExpRecordSize()
+	case pb.ExpOp_ExpOpKey:
+		return aero.ExpKey(aero.ExpType(*in.Val.I))
+	case pb.ExpOp_ExpOpBin:
+		switch *in.Module {
+		case pb.ExpType_ExpTypeBool:
+			return aero.ExpBoolBin(*in.Val.S)
+		case pb.ExpType_ExpTypeInt:
+			return aero.ExpIntBin(*in.Val.S)
+		case pb.ExpType_ExpTypeString:
+			return aero.ExpStringBin(*in.Val.S)
+		case pb.ExpType_ExpTypeList:
+			return aero.ExpListBin(*in.Val.S)
+		case pb.ExpType_ExpTypeMap:
+			return aero.ExpMapBin(*in.Val.S)
+		case pb.ExpType_ExpTypeBlob:
+			return aero.ExpBlobBin(*in.Val.S)
+		case pb.ExpType_ExpTypeFloat:
+			return aero.ExpFloatBin(*in.Val.S)
+		case pb.ExpType_ExpTypeGeo:
+			return aero.ExpGeoBin(*in.Val.S)
+			// case pb.ExpType_ExpTypeHll:
+			// 	return aero.ExpHllBin(toValue(in.Val).String())
+		}
+		panic("UNREACHABLE")
+	case pb.ExpOp_ExpOpBinType:
+		return aero.ExpBinType(toValue(in.Val).String())
+	case pb.ExpOp_ExpOpCond:
+		return aero.ExpCond(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpVar:
+		return aero.ExpVar(toValue(in.Val).String())
+	case pb.ExpOp_ExpOpLet:
+		return aero.ExpLet(toExpressions(in.Exps)...)
+	case pb.ExpOp_ExpOpQuoted:
+		return aero.ExpListVal(toValue(in.Val))
+	}
 	panic("UNREACHABLE")
 }

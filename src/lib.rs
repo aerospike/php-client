@@ -785,7 +785,7 @@ impl Expression {
     pub fn digest_modulo(modulo: i64) -> Self {
         Expression::new(
             Some(proto::ExpOp::DigestModulo.into()),
-            None,
+            Some(PHPValue::Int(modulo).into()),
             None,
             None,
             None,
@@ -2545,21 +2545,12 @@ pub struct WritePolicy {
 impl WritePolicy {
     pub fn __construct() -> Self {
         WritePolicy {
-            _as: proto::WritePolicy::default(),
+            _as: proto::WritePolicy {
+                policy: Some(proto::ReadPolicy::default()),
+                ..proto::WritePolicy::default()
+            },
         }
     }
-
-    // #[getter]
-    // pub fn get_base_policy(&self) -> BasePolicy {
-    //     BasePolicy {
-    //         _as: self._as.base_policy.clone(),
-    //     }
-    // }
-
-    // #[setter]
-    // pub fn set_base_policy(&mut self, base_policy: BasePolicy) {
-    //     self._as.base_policy = base_policy._as;
-    // }
 
     #[getter]
     pub fn get_record_exists_action(&self) -> RecordExistsAction {
@@ -2638,16 +2629,6 @@ impl WritePolicy {
         self._as.expiration = (&expiration).into();
     }
 
-    // #[getter]
-    // pub fn get_send_key(&self) -> bool {
-    //     self._as.send_key
-    // }
-
-    // #[setter]
-    // pub fn set_send_key(&mut self, send_key: bool) {
-    //     self._as.send_key = send_key;
-    // }
-
     #[getter]
     pub fn get_respond_per_each_op(&self) -> bool {
         self._as.respond_per_each_op
@@ -2668,21 +2649,173 @@ impl WritePolicy {
         self._as.durable_delete = durable_delete;
     }
 
-    // #[getter]
-    // pub fn get_filter_expression(&self) -> Option<Expression> {
-    //     match &self._as.filter_expression {
-    //         Some(fe) => Some(Expression { _as: fe.clone() }),
-    //         None => None,
-    //     }
-    // }
+    // ***************************************************************************
+    // ReadPolicy Attrs
+    // ***************************************************************************
 
-    // #[setter]
-    // pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
-    //     match filter_expression {
-    //         Some(fe) => self._as.filter_expression = Some(fe._as),
-    //         None => self._as.filter_expression = None,
-    //     }
-    // }
+    #[getter]
+    pub fn get_max_retries(&self) -> u32 {
+        self._as.policy.as_ref().unwrap().max_retries
+    }
+
+    #[setter]
+    pub fn set_max_retries(&mut self, max_retries: u32) {
+        self._as
+            .policy
+            .as_mut()
+            .map(|ref mut p| p.max_retries = max_retries);
+    }
+
+    #[getter]
+    pub fn get_sleep_multiplier(&self) -> f64 {
+        self._as.policy.as_ref().unwrap().sleep_multiplier
+    }
+
+    #[setter]
+    pub fn set_sleep_multiplier(&mut self, sleep_multiplier: f64) {
+        self._as
+            .policy
+            .as_mut()
+            .map(|ref mut p| p.sleep_multiplier = sleep_multiplier);
+    }
+
+    #[getter]
+    pub fn get_total_timeout(&self) -> u64 {
+        self._as.policy.as_ref().unwrap().total_timeout
+    }
+
+    #[setter]
+    pub fn set_total_timeout(&mut self, timeout_millis: u64) {
+        self._as
+            .policy
+            .as_mut()
+            .map(|ref mut p| p.total_timeout = timeout_millis);
+    }
+
+    #[getter]
+    pub fn get_socket_timeout(&self) -> u64 {
+        self._as.policy.as_ref().unwrap().socket_timeout
+    }
+
+    #[setter]
+    pub fn set_socket_timeout(&mut self, timeout_millis: u64) {
+        self._as
+            .policy
+            .as_mut()
+            .map(|ref mut p| p.socket_timeout = timeout_millis);
+    }
+
+    #[getter]
+    pub fn get_send_key(&self) -> bool {
+        self._as.policy.as_ref().unwrap().send_key
+    }
+
+    #[setter]
+    pub fn set_send_key(&mut self, send_key: bool) {
+        self._as
+            .policy
+            .as_mut()
+            .map(|ref mut p| p.send_key = send_key);
+    }
+
+    #[getter]
+    pub fn get_use_compression(&self) -> bool {
+        self._as.policy.as_ref().unwrap().use_compression
+    }
+
+    #[setter]
+    pub fn set_use_compression(&mut self, use_compression: bool) {
+        self._as
+            .policy
+            .as_mut()
+            .map(|ref mut p| p.use_compression = use_compression);
+    }
+
+    #[getter]
+    pub fn get_exit_fast_on_exhausted_connection_pool(&self) -> bool {
+        self._as
+            .policy
+            .as_ref()
+            .unwrap()
+            .exit_fast_on_exhausted_connection_pool
+    }
+
+    #[setter]
+    pub fn set_exit_fast_on_exhausted_connection_pool(
+        &mut self,
+        exit_fast_on_exhausted_connection_pool: bool,
+    ) {
+        self._as.policy.as_mut().map(|ref mut p| {
+            p.exit_fast_on_exhausted_connection_pool = exit_fast_on_exhausted_connection_pool
+        });
+    }
+
+    #[getter]
+    pub fn get_read_mode_ap(&self) -> ReadModeAP {
+        ReadModeAP {
+            _as: match self._as.policy.as_ref().unwrap().read_mode_ap {
+                0 => proto::ReadModeAp::One,
+                1 => proto::ReadModeAp::All,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_ap(&mut self, read_mode_ap: ReadModeAP) {
+        self._as
+            .policy
+            .as_mut()
+            .map(|ref mut p| p.read_mode_ap = read_mode_ap._as.into());
+    }
+
+    #[getter]
+    pub fn get_read_mode_sc(&self) -> ReadModeSC {
+        ReadModeSC {
+            _as: match self._as.policy.as_ref().unwrap().read_mode_ap {
+                0 => proto::ReadModeSc::Session,
+                1 => proto::ReadModeSc::Linearize,
+                2 => proto::ReadModeSc::AllowReplica,
+                3 => proto::ReadModeSc::AllowUnavailable,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_sc(&mut self, read_mode_sc: ReadModeSC) {
+        self._as
+            .policy
+            .as_mut()
+            .map(|ref mut p| p.read_mode_sc = read_mode_sc._as.into());
+    }
+
+    #[getter]
+    pub fn get_filter_expression(&self) -> Option<Expression> {
+        self._as
+            .policy
+            .as_ref()
+            .unwrap()
+            .filter_expression
+            .clone()
+            .map(|fe| Expression { _as: fe })
+    }
+
+    #[setter]
+    pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
+        match filter_expression {
+            Some(fe) => self
+                ._as
+                .policy
+                .as_mut()
+                .map(|ref mut p| p.filter_expression = Some(fe._as)),
+            None => self
+                ._as
+                .policy
+                .as_mut()
+                .map(|ref mut p| p.filter_expression = None),
+        };
+    }
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////////////
