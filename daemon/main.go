@@ -13,7 +13,10 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	aero "github.com/aerospike/aerospike-client-go/v7"
+	"github.com/spf13/cobra"
 
+	"github.com/aerospike/php-client/asld/common/config"
+	"github.com/aerospike/php-client/asld/common/flags"
 	pb "github.com/aerospike/php-client/asld/proto"
 )
 
@@ -30,25 +33,47 @@ const (
 var client *aero.Client
 
 func main() {
-	var err error
-	if client, err = aero.NewClient("localhost", 3000); err != nil {
-		log.Fatalln(err)
+	configFileFlags := flags.NewConfFileFlags()
+	aerospikeFlags := flags.NewDefaultAerospikeFlags()
+
+	appCmd := &cobra.Command{
+		Use:     "asld",
+		Short:   "Aerospike Local Daemon",
+		Version: "0.1.0",
+		Run: func(cmd *cobra.Command, args []string) {
+			_, err := config.InitConfig(configFileFlags.File, configFileFlags.Instance, cmd.Flags())
+			if err != nil {
+				log.Fatalln("Failed to initialize config:", err)
+			}
+		},
 	}
 
-	key, _ := aero.NewKey("test", "test", 1)
-	if err := client.Put(nil, key, aero.BinMap{
-		"int":   1,
-		"float": 11.11,
-		"str":   "hello world!",
-		"bytes": []byte{1, 2, 3, 4, 5},
-		"map": map[any]any{
-			1:      1,
-			2:      "hello",
-			"map":  map[any]any{1: 1, 2: 2, 3: 3.1},
-			"list": []any{1, 2, 3},
-		}},
-	); err != nil {
-		panic(err)
+	cfFlagSet := configFileFlags.NewFlagSet(flags.DefaultWrapHelpString)
+	asFlagSet := aerospikeFlags.NewFlagSet(flags.DefaultWrapHelpString)
+
+	appCmd.PersistentFlags().AddFlagSet(cfFlagSet)
+
+	// This is what connects the flags to fields of the same name in the config file.
+	config.BindPFlags(asFlagSet, "cluster")
+
+	appCmd.PersistentFlags().AddFlagSet(asFlagSet)
+	flags.SetupRoot(appCmd, "Aerospike Local Daemon")
+
+	if err := appCmd.Execute(); err != nil {
+		os.Exit(1)
+	}
+
+	ac := aerospikeFlags.NewAerospikeConfig()
+	cp, err2 := ac.NewClientPolicy()
+	if err2 != nil {
+		log.Fatalln(err2)
+	}
+
+	seeds := ac.NewHosts()
+
+	var err error
+	if client, err = aero.NewClientWithPolicyAndHost(cp, seeds...); err != nil {
+		log.Fatalln(err)
 	}
 
 	// runtime.GOMAXPROCS(2)
