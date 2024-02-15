@@ -1,6 +1,6 @@
 use tokio::runtime::{Builder, Runtime};
 
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryFrom;
 use tokio::net::UnixStream;
 use tonic::transport::{Endpoint, Uri};
 use tower::service_fn;
@@ -137,46 +137,3 @@ impl BlockingClient {
         self.rt.block_on(self.client.truncate(request))
     }
 }
-
-// fn main() -> Result<()> {
-//     let mut client = BlockingClient::connect("/tmp/asld_grpc.sock".into())?;
-
-//     const REQ_COUNT: u32 = 100_000;
-//     use std::time::Instant;
-//     let now = Instant::now();
-
-//     for _ in 0..REQ_COUNT {
-//         let policy = proto::ReadPolicy {
-//             replica: proto::Replica::Sequence.into(),
-//             read_mode_ap: proto::ReadModeAp::One.into(),
-//             read_mode_sc: proto::ReadModeSc::Session.into(),
-//         };
-
-//         let k = aerospike_core::Key::new("test", "test", 1.into()).unwrap();
-//         let key = proto::Key {
-//             namespace: Some(k.namespace),
-//             set: Some(k.set_name),
-//             value: None, // TODO(khosrow): Implement the value conversions
-//             digest: k.digest.into(),
-//         };
-
-//         let request = tonic::Request::new(AerospikeGetRequest {
-//             policy: Some(policy),
-//             key: Some(key),
-//             bin_names: vec![],
-//         });
-
-//         let _ = client.get(request)?;
-//         // println!("RESPONSE={:?}", response);
-//     }
-
-//     let elapsed = now.elapsed();
-//     println!(
-//         "Elapsed: {:.2?}, {:.2?} per request, {:.2?} rps",
-//         elapsed,
-//         elapsed / REQ_COUNT.into(),
-//         (REQ_COUNT as f64) / (elapsed.as_secs() as f64),
-//     );
-
-//     Ok(())
-// }

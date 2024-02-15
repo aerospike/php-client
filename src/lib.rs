@@ -23,33 +23,24 @@ use grpc::proto;
 
 use ext_php_rs::prelude::*;
 
-use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::fmt;
-use std::fs::File;
 use std::hash::{Hash, Hasher};
-use std::io::Read;
-use std::io::Write;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::time::Duration;
 
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::convert::IntoZendObject;
-use ext_php_rs::convert::{FromZval, FromZvalMut, IntoZval};
+use ext_php_rs::convert::{FromZval, IntoZval};
 use ext_php_rs::error::Result;
 use ext_php_rs::exception::throw_object;
-use ext_php_rs::exception::throw_with_code;
 use ext_php_rs::flags::DataType;
 use ext_php_rs::php_class;
 use ext_php_rs::types::ArrayKey;
 use ext_php_rs::types::ZendHashTable;
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
-use ext_php_rs::zend::{ce, ClassEntry};
 
-use chrono::Local;
-use colored::*;
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use log::{debug, info, trace, warn};
@@ -3438,7 +3429,7 @@ pub struct Record {
 impl Record {
     pub fn bin(&self, name: &str) -> Option<PHPValue> {
         let b = self._as.bins.get(name);
-        b.map(|v| v.into())
+        b.map(|v| (*v).clone().into())
     }
 
     #[getter]
@@ -4393,6 +4384,45 @@ impl Client {
         }
     }
 
+    /// Read record for the specified key. Depending on the bins value provided, all record bins,
+    /// only selected record bins or only the record headers will be returned. The policy can be
+    /// used to specify timeouts.
+    pub fn get_header(&mut self, policy: &ReadPolicy, key: &Key) -> PhpResult<Option<Record>> {
+        let mut request = tonic::Request::new(proto::AerospikeGetHeaderRequest {
+            policy: Some(policy._as.clone()),
+            key: Some(key._as.clone()),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.get_header(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeSingleResponse {
+                error: None,
+                record: Some(rec),
+            } => Ok(Some(Record {
+                _as: (*rec).clone(),
+            })),
+            // Not found: Do not throw an exception
+            proto::AerospikeSingleResponse {
+                error:
+                    Some(proto::Error {
+                        result_code: 0, //ResultCode::KeyNotFoundError,
+                        in_doubt: false,
+                    }),
+                record: None,
+            } => Ok(None),
+            proto::AerospikeSingleResponse {
+                error:
+                    Some(proto::Error {
+                        result_code,
+                        in_doubt,
+                    }),
+                record: None,
+            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            _ => unreachable!(),
+        }
+    }
+
     /// Add integer bin values to existing record bin values. The policy specifies the transaction
     /// timeout, record expiration and how the transaction is handled when the record already
     /// exists. This call only works for integer values.
@@ -4591,7 +4621,7 @@ impl Client {
         match res.get_ref() {
             proto::AerospikeBatchOperateResponse {
                 error: None,
-                records: records,
+                records,
             } => Ok(records
                 .into_iter()
                 .map(|v| BatchRecord { _as: (*v).clone() })
@@ -4818,7 +4848,7 @@ impl Key {
 
     #[getter]
     pub fn get_value(&self) -> Option<PHPValue> {
-        self._as.value.clone().map(|v| (&v.clone()).into())
+        self._as.value.clone().map(|v| v.into())
     }
 
     // #[getter]
@@ -5252,7 +5282,7 @@ impl From<HashMap<String, proto::Value>> for PHPValue {
     fn from(h: HashMap<String, proto::Value>) -> Self {
         let mut hash = HashMap::<PHPValue, PHPValue>::with_capacity(h.len());
         h.iter().for_each(|(k, v)| {
-            hash.insert(PHPValue::String(k.into()), v.into());
+            hash.insert(PHPValue::String(k.into()), (*v).clone().into());
         });
         PHPValue::HashMap(hash)
     }
@@ -5286,39 +5316,31 @@ impl From<PHPValue> for proto::Value {
     fn from(other: PHPValue) -> Self {
         match other {
             PHPValue::Nil => proto::Value {
-                nil: Some(true),
-                ..Default::default()
+                v: Some(proto::value::V::Nil(true)),
             },
             PHPValue::Bool(b) => proto::Value {
-                b: Some(b),
-                ..Default::default()
+                v: Some(proto::value::V::B(b)),
             },
             PHPValue::Int(i) => proto::Value {
-                i: Some(i),
-                ..Default::default()
+                v: Some(proto::value::V::I(i)),
             },
             PHPValue::UInt(ui) => proto::Value {
-                i: Some(ui as i64),
-                ..Default::default()
+                v: Some(proto::value::V::I(ui as i64)),
             },
             PHPValue::Float(f) => proto::Value {
-                f: Some(f64::from(f).into()),
-                ..Default::default()
+                v: Some(proto::value::V::F(f64::from(f).into())),
             },
             PHPValue::String(s) => proto::Value {
-                s: Some(s),
-                ..Default::default()
+                v: Some(proto::value::V::S(s)),
             },
             PHPValue::Blob(b) => proto::Value {
-                blob: Some(b),
-                ..Default::default()
+                v: Some(proto::value::V::Blob(b)),
             },
             PHPValue::List(l) => {
                 let mut nl = Vec::<proto::Value>::with_capacity(l.len());
                 l.iter().for_each(|v| nl.push(v.clone().into()));
                 proto::Value {
-                    l: nl,
-                    ..Default::default()
+                    v: Some(proto::value::V::L(proto::List { l: nl })),
                 }
             }
             PHPValue::HashMap(h) => {
@@ -5330,8 +5352,7 @@ impl From<PHPValue> for proto::Value {
                     });
                 });
                 proto::Value {
-                    m: arr,
-                    ..Default::default()
+                    v: Some(proto::value::V::M(proto::Map { m: arr })),
                 }
             }
             PHPValue::Json(h) => {
@@ -5343,78 +5364,60 @@ impl From<PHPValue> for proto::Value {
                     });
                 });
                 proto::Value {
-                    json: arr,
-                    ..Default::default()
+                    v: Some(proto::value::V::Json(proto::Json { j: arr })),
                 }
             }
             PHPValue::GeoJSON(gj) => proto::Value {
-                geo: Some(gj),
-                ..Default::default()
+                v: Some(proto::value::V::Geo(gj)),
             },
             PHPValue::HLL(b) => proto::Value {
-                hll: Some(b),
-                ..Default::default()
+                v: Some(proto::value::V::Hll(b)),
             },
             PHPValue::Infinity => proto::Value {
-                infinity: Some(true),
-                ..Default::default()
+                v: Some(proto::value::V::Infinity(true)),
             },
             PHPValue::Wildcard => proto::Value {
-                wildcard: Some(true),
-                ..Default::default()
+                v: Some(proto::value::V::Wildcard(true)),
             },
         }
     }
 }
 
-impl From<&proto::Value> for PHPValue {
-    fn from(other: &proto::Value) -> Self {
-        match other {
-            &proto::Value {
-                nil: Some(true), ..
-            } => PHPValue::Nil,
-            &proto::Value { b: Some(b), .. } => PHPValue::Bool(b),
-            &proto::Value { i: Some(i), .. } => PHPValue::Int(i),
-            &proto::Value { f: Some(f), .. } => {
-                PHPValue::Float(ordered_float::OrderedFloat(f.into()))
-            }
-            proto::Value { s: Some(s), .. } => PHPValue::String(s.into()),
-            proto::Value {
-                blob: Some(blob), ..
-            } => PHPValue::Blob(blob.to_vec()),
-            proto::Value { l: l, .. } => {
-                let mut nl = Vec::<PHPValue>::with_capacity(l.len());
-                l.iter().for_each(|v| nl.push(v.into()));
+impl From<proto::Value> for PHPValue {
+    fn from(other: proto::Value) -> Self {
+        match other.v.unwrap() {
+            proto::value::V::Nil(_) => PHPValue::Nil,
+            proto::value::V::B(b) => PHPValue::Bool(b),
+            proto::value::V::I(i) => PHPValue::Int(i),
+            proto::value::V::F(f) => PHPValue::Float(ordered_float::OrderedFloat(f.into())),
+            proto::value::V::S(s) => PHPValue::String(s.into()),
+            proto::value::V::Blob(blob) => PHPValue::Blob(blob.to_vec()),
+            proto::value::V::L(l) => {
+                let mut nl = Vec::<PHPValue>::with_capacity(l.l.len());
+                l.l.iter().for_each(|v| nl.push((*v).clone().into()));
                 PHPValue::List(nl)
             }
-            proto::Value { json: j, .. } => {
-                let mut arr = HashMap::<String, PHPValue>::with_capacity(j.len());
-                j.iter().for_each(|me| {
-                    arr.insert(me.k.clone(), (&me.v.clone().unwrap()).into());
+            proto::value::V::Json(json) => {
+                let mut arr = HashMap::<String, PHPValue>::with_capacity(json.j.len());
+                json.j.iter().for_each(|me| {
+                    arr.insert(me.k.clone(), (me.v.clone().unwrap()).into());
                 });
                 PHPValue::Json(arr)
             }
-            proto::Value { m: h, .. } => {
-                let mut arr = HashMap::<PHPValue, PHPValue>::with_capacity(h.len());
-                h.iter().for_each(|me| {
+            proto::value::V::M(h) => {
+                let mut arr = HashMap::<PHPValue, PHPValue>::with_capacity(h.m.len());
+                h.m.iter().for_each(|me| {
                     arr.insert(
-                        (&me.k.clone().unwrap()).into(),
-                        (&me.v.clone().unwrap()).into(),
+                        (me.k.clone().unwrap()).into(),
+                        (me.v.clone().unwrap()).into(),
                     );
                 });
                 PHPValue::HashMap(arr)
             }
-            proto::Value { geo: Some(gj), .. } => PHPValue::GeoJSON(gj.into()),
-            proto::Value { hll: Some(b), .. } => PHPValue::HLL(b.to_vec()),
-            proto::Value {
-                infinity: Some(true),
-                ..
-            } => PHPValue::Infinity,
-            proto::Value {
-                wildcard: Some(true),
-                ..
-            } => PHPValue::Wildcard,
-            _ => unreachable!(),
+            proto::value::V::Geo(gj) => PHPValue::GeoJSON(gj.into()),
+            proto::value::V::Hll(b) => PHPValue::HLL(b.to_vec()),
+            proto::value::V::Infinity(_) => PHPValue::Infinity,
+            proto::value::V::Wildcard(_) => PHPValue::Wildcard,
         }
     }
 }
@@ -5569,18 +5572,3 @@ fn get_persisted_client(key: &str) -> Option<Zval> {
 pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
     module
 }
-
-// #[cfg(test)]
-// mod tests {
-//     #[test]
-//     fn it_works() {
-//         let cp = crate::ClientPolicy::__construct();
-//         let client = crate::Aerospike(&mut cp, "localhost:3000");
-
-//         let policy = crate::ReadPolicy::__construct();
-//         let key = crate::Key::__construct("test".into(), "test".into(), crate::PHPValue::Int(1));
-//         let res = client.get(&policy, &key, None).unwrap();
-
-//         println!("{}", res._as.bins.ro_s());
-//     }
-// }

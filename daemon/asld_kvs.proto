@@ -602,9 +602,17 @@ message Bin {
   Value value = 2;
 }
 
+message List {
+  repeated Value l = 1;
+}
+
 message MapEntry {
   Value k = 1;
   Value v = 2;
+}
+
+message Map {
+	repeated MapEntry m = 1;
 }
 
 message JsonEntry {
@@ -612,20 +620,26 @@ message JsonEntry {
   Value v = 2;
 }
 
+message Json {
+	repeated JsonEntry j = 1;
+}
+
 message Value {
-  optional bool nil  = 1;
-  optional int64 i = 2;
-  optional double f = 3;
-  optional string s = 4;
-  optional bool b = 5;
-  optional bytes blob = 6;
-  repeated Value l = 7;
-  repeated MapEntry m = 8;
-  repeated JsonEntry json = 9;
-  optional string geo = 10;
-  optional bytes hll = 11;
-  optional bool wildcard = 12;
-  optional bool infinity = 13;
+  oneof v {
+	bool nil  = 1;
+	int64 i = 2;
+	double f = 3;
+	string s = 4;
+	bool b = 5;
+	bytes blob = 6;
+	List l = 7;
+	Map m = 8;
+	Json json = 9;
+	string geo = 10;
+	bytes hll = 11;
+	bool wildcard = 12;
+	bool infinity = 13;
+  }
 }
 
 message Key {

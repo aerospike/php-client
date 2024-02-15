@@ -465,66 +465,69 @@ func toValue(in *pb.Value) aero.Value {
 		return aero.NewNullValue()
 	}
 
-	if in.Nil != nil {
+	if _, ok := in.V.(*pb.Value_Nil); ok {
 		return aero.NewNullValue()
 	}
 
-	if in.I != nil {
-		return aero.IntegerValue(*in.I)
+	if v, ok := in.V.(*pb.Value_I); ok {
+		return aero.IntegerValue(v.I)
 	}
 
-	if in.S != nil {
-		return aero.StringValue(*in.S)
+	if v, ok := in.V.(*pb.Value_S); ok {
+		return aero.StringValue(v.S)
 	}
 
-	if in.F != nil {
-		return aero.FloatValue(*in.F)
+	if v, ok := in.V.(*pb.Value_F); ok {
+		return aero.FloatValue(v.F)
 	}
 
-	if in.B != nil {
-		return aero.BoolValue(*in.B)
+	if v, ok := in.V.(*pb.Value_B); ok {
+		return aero.BoolValue(v.B)
 	}
 
-	if in.Blob != nil {
-		return aero.BytesValue(in.Blob)
+	if v, ok := in.V.(*pb.Value_Blob); ok {
+		return aero.BytesValue(v.Blob)
 	}
 
-	if in.Geo != nil {
-		return aero.GeoJSONValue(*in.Geo)
+	if v, ok := in.V.(*pb.Value_Geo); ok {
+		return aero.GeoJSONValue(v.Geo)
 	}
 
-	if in.Hll != nil {
-		return aero.HLLValue(in.Hll)
+	if v, ok := in.V.(*pb.Value_Hll); ok {
+		return aero.HLLValue(v.Hll)
 	}
 
-	if in.Wildcard != nil {
+	if _, ok := in.V.(*pb.Value_Wildcard); ok {
 		return aero.NewWildCardValue()
 	}
 
-	if in.Infinity != nil {
+	if _, ok := in.V.(*pb.Value_Infinity); ok {
 		return aero.NewInfinityValue()
 	}
 
-	if in.Json != nil {
-		j := make(map[string]interface{}, len(in.Json))
-		for i := range in.Json {
-			j[in.Json[i].K] = toValue(in.Json[i].V)
+	if j, ok := in.V.(*pb.Value_Json); ok {
+		jsn := j.Json.GetJ()
+		j := make(map[string]interface{}, len(jsn))
+		for i := range jsn {
+			j[jsn[i].K] = toValue(jsn[i].V)
 		}
 		return aero.JsonValue(j)
 	}
 
-	if len(in.M) > 0 {
-		m := make(map[interface{}]interface{}, len(in.M))
-		for i := range in.M {
-			m[toValue(in.M[i].K)] = toValue(in.M[i].V)
+	if m, ok := in.V.(*pb.Value_M); ok {
+		mp := m.M.GetM()
+		m := make(map[interface{}]interface{}, len(mp))
+		for i := range mp {
+			m[toValue(mp[i].K)] = toValue(mp[i].V)
 		}
 		return aero.MapValue(m)
 	}
 
-	if len(in.L) > 0 {
-		l := make([]interface{}, len(in.L))
-		for i := range in.L {
-			l[i] = toValue(in.L[i])
+	if l, ok := in.V.(*pb.Value_L); ok {
+		lst := l.L.L
+		l := make([]interface{}, len(lst))
+		for i := range lst {
+			l[i] = toValue(lst[i])
 		}
 		return aero.ListValue(l)
 	}
@@ -533,10 +536,11 @@ func toValue(in *pb.Value) aero.Value {
 }
 
 func toListValue(in *pb.Value) []aero.Value {
-	if len(in.L) > 0 {
-		l := make([]aero.Value, len(in.L))
-		for i := range in.L {
-			l[i] = toValue(in.L[i])
+	lst := in.GetL().L
+	if len(lst) > 0 {
+		l := make([]aero.Value, len(lst))
+		for i := range lst {
+			l[i] = toValue(lst[i])
 		}
 		return l
 	}
@@ -631,74 +635,62 @@ func fromBins(in aero.BinMap) map[string]*pb.Value {
 }
 
 func fromValue(in any) *pb.Value {
+	if in == nil {
+		return &pb.Value{V: &pb.Value_Nil{Nil: true}}
+	}
+
 	switch v := in.(type) {
 	case int:
 		i64 := int64(v)
-		return &pb.Value{I: &i64}
+		return &pb.Value{V: &pb.Value_I{I: i64}}
 	case float64:
-		return &pb.Value{F: &v}
+		return &pb.Value{V: &pb.Value_F{F: v}}
 	case string:
-		return &pb.Value{S: &v}
+		return &pb.Value{V: &pb.Value_S{S: v}}
 	case bool:
-		return &pb.Value{B: &v}
+		return &pb.Value{V: &pb.Value_B{B: v}}
 	case []byte:
-		return &pb.Value{Blob: v}
+		return &pb.Value{V: &pb.Value_Blob{Blob: v}}
 	case []any:
 		l := make([]*pb.Value, len(v))
 		for i := range v {
 			l[i] = fromValue(v[i])
 		}
-		return &pb.Value{L: l}
+		return &pb.Value{V: &pb.Value_L{L: &pb.List{L: l}}}
 	case map[any]any:
 		m := make([]*pb.MapEntry, len(v))
 		for k, v := range v {
 			m = append(m, &proto.MapEntry{K: fromValue(k), V: fromValue(v)})
 		}
-		return &pb.Value{M: m}
+		return &pb.Value{V: &pb.Value_M{M: &pb.Map{M: m}}}
 	case aero.NullValue:
-		b := true
-		return &pb.Value{Nil: &b}
+		return &pb.Value{V: &pb.Value_Nil{Nil: true}}
 	case aero.IntegerValue:
-		i64 := int64(v)
-		return &pb.Value{I: &i64}
+		return &pb.Value{V: &pb.Value_I{I: int64(v)}}
 	case aero.FloatValue:
-		f64 := float64(v)
-		return &pb.Value{F: &f64}
+		return &pb.Value{V: &pb.Value_F{F: float64(v)}}
 	case aero.StringValue:
-		s := string(v)
-		return &pb.Value{S: &s}
+		return &pb.Value{V: &pb.Value_S{S: string(v)}}
 	case aero.BoolValue:
-		b := bool(v)
-		return &pb.Value{B: &b}
+		return &pb.Value{V: &pb.Value_B{B: bool(v)}}
 	case aero.BytesValue:
-		b := []byte(v)
-		return &pb.Value{Blob: b}
+		return &pb.Value{V: &pb.Value_Blob{Blob: []byte(v)}}
 	case aero.JsonValue:
 		m := make([]*pb.JsonEntry, len(v))
 		for k, v := range v {
 			m = append(m, &proto.JsonEntry{K: k, V: fromValue(v)})
 		}
-		return &pb.Value{Json: m}
+		return &pb.Value{V: &pb.Value_Json{Json: &pb.Json{J: m}}}
 	case aero.HLLValue:
-		return &pb.Value{Hll: v.GetObject().([]byte)}
+		return &pb.Value{V: &pb.Value_Hll{Hll: v.GetObject().([]byte)}}
 	case aero.GeoJSONValue:
-		s := v.GetObject().(string)
-		return &pb.Value{Geo: &s}
+		return &pb.Value{V: &pb.Value_Geo{Geo: v.GetObject().(string)}}
 	case aero.WildCardValue:
-		t := true
-		return &pb.Value{Wildcard: &t}
+		return &pb.Value{V: &pb.Value_Wildcard{Wildcard: true}}
 	case aero.InfinityValue:
-		t := true
-		return &pb.Value{Infinity: &t}
+		return &pb.Value{V: &pb.Value_Infinity{Infinity: true}}
 	}
 
-	if in == nil {
-		b := true
-		return &pb.Value{Nil: &b}
-	}
-
-	// log.Printf("%#v", in)
-	// log.Println(reflect.TypeOf(in).Elem())
 	panic("UNREACHABLE")
 }
 
@@ -715,31 +707,33 @@ func toExpression(in *pb.Expression) *aero.Expression {
 	}
 
 	if in.Cmd == nil {
-		if in.Val.Nil != nil {
+		val := toValue(in.Val)
+		switch v := val.(type) {
+		case aero.NullValue:
 			return aero.ExpNilValue()
-		} else if in.Val.I != nil {
-			return aero.ExpIntVal(*in.Val.I)
-		} else if in.Val.F != nil {
-			return aero.ExpFloatVal(*in.Val.F)
-		} else if in.Val.S != nil {
-			return aero.ExpStringVal(*in.Val.S)
-		} else if in.Val.B != nil {
-			return aero.ExpBoolVal(*in.Val.B)
-		} else if in.Val.Blob != nil {
-			return aero.ExpBlobVal(in.Val.Blob)
-		} else if in.Val.L != nil {
+		case aero.IntegerValue:
+			return aero.ExpIntVal(int64(v))
+		case aero.FloatValue:
+			return aero.ExpFloatVal(float64(v))
+		case aero.StringValue:
+			return aero.ExpStringVal(string(v))
+		case aero.BoolValue:
+			return aero.ExpBoolVal(bool(v))
+		case aero.BytesValue:
+			return aero.ExpBlobVal([]byte(v))
+		case aero.ListValue:
 			return aero.ExpListVal(toListValue(in.Val)...)
-		} else if in.Val.M != nil {
+		case aero.MapValue:
 			return aero.ExpMapVal(toValue(in.Val).(aero.MapValue))
-			// } else if in.Val.Json != nil {
+			// case .aero.ExpJsonValue:
 			// 	return aero.ExpJsonVal(toValue(in.Val.Json))
-		} else if in.Val.Geo != nil {
-			return aero.ExpGeoVal(*in.Val.Geo)
-			// } else if in.Val.Hll != nil {
+		case aero.GeoJSONValue:
+			return aero.ExpGeoVal(string(v))
+			// case .aero.ExpHllValue:
 			// 	return aero.ExpHllVal(toValue(in.Val))
-		} else if in.Val.Wildcard != nil {
+		case aero.WildCardValue:
 			return aero.ExpWildCardValue()
-		} else if in.Val.Infinity != nil {
+		case aero.InfinityValue:
 			return aero.ExpInfinityValue()
 		}
 	}
@@ -819,7 +813,7 @@ func toExpression(in *pb.Expression) *aero.Expression {
 	case pb.ExpOp_ExpOpMax:
 		return aero.ExpMax(toExpressions(in.Exps)...)
 	case pb.ExpOp_ExpOpDigestModulo:
-		return aero.ExpDigestModulo(*in.Val.I)
+		return aero.ExpDigestModulo(in.Val.V.(*pb.Value_I).I)
 	case pb.ExpOp_ExpOpDeviceSize:
 		return aero.ExpDeviceSize()
 	case pb.ExpOp_ExpOpLastUpdate:
@@ -841,25 +835,25 @@ func toExpression(in *pb.Expression) *aero.Expression {
 	case pb.ExpOp_ExpOpRecordSize:
 		return aero.ExpRecordSize()
 	case pb.ExpOp_ExpOpKey:
-		return aero.ExpKey(aero.ExpType(*in.Val.I))
+		return aero.ExpKey(aero.ExpType(in.Val.V.(*pb.Value_I).I))
 	case pb.ExpOp_ExpOpBin:
 		switch *in.Module {
 		case pb.ExpType_ExpTypeBool:
-			return aero.ExpBoolBin(*in.Val.S)
+			return aero.ExpBoolBin(in.Val.V.(*pb.Value_S).S)
 		case pb.ExpType_ExpTypeInt:
-			return aero.ExpIntBin(*in.Val.S)
+			return aero.ExpIntBin(in.Val.V.(*pb.Value_S).S)
 		case pb.ExpType_ExpTypeString:
-			return aero.ExpStringBin(*in.Val.S)
+			return aero.ExpStringBin(in.Val.V.(*pb.Value_S).S)
 		case pb.ExpType_ExpTypeList:
-			return aero.ExpListBin(*in.Val.S)
+			return aero.ExpListBin(in.Val.V.(*pb.Value_S).S)
 		case pb.ExpType_ExpTypeMap:
-			return aero.ExpMapBin(*in.Val.S)
+			return aero.ExpMapBin(in.Val.V.(*pb.Value_S).S)
 		case pb.ExpType_ExpTypeBlob:
-			return aero.ExpBlobBin(*in.Val.S)
+			return aero.ExpBlobBin(in.Val.V.(*pb.Value_S).S)
 		case pb.ExpType_ExpTypeFloat:
-			return aero.ExpFloatBin(*in.Val.S)
+			return aero.ExpFloatBin(in.Val.V.(*pb.Value_S).S)
 		case pb.ExpType_ExpTypeGeo:
-			return aero.ExpGeoBin(*in.Val.S)
+			return aero.ExpGeoBin(in.Val.V.(*pb.Value_S).S)
 			// case pb.ExpType_ExpTypeHll:
 			// 	return aero.ExpHllBin(toValue(in.Val).String())
 		}
