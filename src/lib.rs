@@ -5509,10 +5509,12 @@ impl From<proto::Value> for PHPValue {
             proto::value::V::M(h) => {
                 let mut arr = HashMap::<PHPValue, PHPValue>::with_capacity(h.m.len());
                 h.m.iter().for_each(|me| {
-                    arr.insert(
-                        (me.k.clone().unwrap()).into(),
-                        (me.v.clone().unwrap()).into(),
-                    );
+                    if me.k.is_some() {
+                        arr.insert(
+                            (me.k.clone().unwrap()).into(),
+                            (me.v.clone().unwrap()).into(),
+                        );
+                    };
                 });
                 PHPValue::HashMap(arr)
             }
@@ -5548,20 +5550,39 @@ impl Value {
         PHPValue::UInt(val)
     }
 
+    pub fn bool(val: bool) -> PHPValue {
+        PHPValue::Bool(val)
+    }
+
     pub fn string(val: String) -> PHPValue {
         PHPValue::String(val)
+    }
+
+    pub fn list(val: Vec<PHPValue>) -> PHPValue {
+        PHPValue::List(val)
+    }
+
+    pub fn map(val: &Zval) -> PHPValue {
+        match from_zval(val) {
+            Some(PHPValue::HashMap(hm)) => PHPValue::HashMap(hm),
+            _ => {
+                let error = AerospikeException::new("Invalid value".into());
+                let _ = throw_object(error.into_zval(true).unwrap());
+                PHPValue::Nil
+            }
+        }
     }
 
     pub fn blob(val: Vec<u8>) -> PHPValue {
         PHPValue::Blob(val)
     }
 
-    pub fn geo_json(val: String) -> GeoJSON {
-        GeoJSON { v: val }
+    pub fn geo_json(val: String) -> PHPValue {
+        PHPValue::GeoJSON(val)
     }
 
-    pub fn hll(val: Vec<u8>) -> HLL {
-        HLL { v: val }
+    pub fn hll(val: Vec<u8>) -> PHPValue {
+        PHPValue::HLL(val)
     }
 
     pub fn json(val: HashMap<String, PHPValue>) -> PHPValue {

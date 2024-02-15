@@ -10,6 +10,8 @@ import (
 	pb "github.com/aerospike/php-client/asld/proto"
 )
 
+const UNREACHABLE = "UNREACHABLE"
+
 type server struct {
 	pb.UnimplementedKVSServer
 
@@ -214,7 +216,7 @@ func toIndexType(in pb.IndexType) aero.IndexType {
 		return aero.GEO2DSPHERE
 	}
 
-	panic("UNREACHABLE")
+	panic(UNREACHABLE)
 }
 
 func toIndexCollectionType(in pb.IndexCollectionType) aero.IndexCollectionType {
@@ -229,7 +231,7 @@ func toIndexCollectionType(in pb.IndexCollectionType) aero.IndexCollectionType {
 		return aero.ICT_MAPVALUES
 	}
 
-	panic("UNREACHABLE")
+	panic(UNREACHABLE)
 }
 
 func toReadPolicy(in *pb.ReadPolicy) *aero.BasePolicy {
@@ -368,7 +370,7 @@ func toBatchRecordIfc(in *pb.BatchOperate) aero.BatchRecordIfc {
 		return aero.NewBatchUDF(toBatchUDFPolicy(in.Bu.Policy), toKey(in.Bu.BatchRecord.Key), in.Bu.PackageName, in.Bu.FunctionName, toValues(in.Bu.FunctionArgs)...)
 	}
 
-	panic("UNREACHABLE")
+	panic(UNREACHABLE)
 }
 
 func toOps(in []*pb.Operation) (res []*aero.Operation) {
@@ -414,7 +416,7 @@ func toOp(in *pb.Operation) *aero.Operation {
 		}
 	}
 
-	panic("UNREACHABLE")
+	panic(UNREACHABLE)
 }
 
 func toBins(in []*pb.Bin) (res []*aero.Bin) {
@@ -532,7 +534,7 @@ func toValue(in *pb.Value) aero.Value {
 		return aero.ListValue(l)
 	}
 
-	panic("UNREACHABLE")
+	panic(UNREACHABLE)
 }
 
 func toListValue(in *pb.Value) []aero.Value {
@@ -545,7 +547,7 @@ func toListValue(in *pb.Value) []aero.Value {
 		return l
 	}
 
-	panic("UNREACHABLE")
+	panic(UNREACHABLE)
 }
 
 func fromBatchRecords(in []aero.BatchRecordIfc) (res []*pb.BatchRecord) {
@@ -691,7 +693,7 @@ func fromValue(in any) *pb.Value {
 		return &pb.Value{V: &pb.Value_Infinity{Infinity: true}}
 	}
 
-	panic("UNREACHABLE")
+	panic(UNREACHABLE)
 }
 
 func toExpressions(in []*pb.Expression) (res []*aero.Expression) {
@@ -857,7 +859,7 @@ func toExpression(in *pb.Expression) *aero.Expression {
 			// case pb.ExpType_ExpTypeHll:
 			// 	return aero.ExpHllBin(toValue(in.Val).String())
 		}
-		panic("UNREACHABLE")
+		panic(UNREACHABLE)
 	case pb.ExpOp_ExpOpBinType:
 		return aero.ExpBinType(toValue(in.Val).String())
 	case pb.ExpOp_ExpOpCond:
@@ -869,5 +871,5 @@ func toExpression(in *pb.Expression) *aero.Expression {
 	case pb.ExpOp_ExpOpQuoted:
 		return aero.ExpListVal(toValue(in.Val))
 	}
-	panic("UNREACHABLE")
+	panic(UNREACHABLE)
 }
