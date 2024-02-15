@@ -16,6 +16,7 @@
  */
 
 #![cfg_attr(windows, feature(abi_vectorcall))]
+#![allow(non_snake_case)]
 
 mod grpc;
 
@@ -51,6 +52,8 @@ lazy_static! {
 }
 
 pub type AspResult<T = ()> = std::result::Result<T, AspException>;
+
+#[allow(non_camel_case_types)]
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -4091,7 +4094,7 @@ impl BatchRead {
         }
     }
 
-    pub fn Ops(policy: &BatchReadPolicy, key: &Key, ops: Vec<&Operation>) -> Self {
+    pub fn ops(policy: &BatchReadPolicy, key: &Key, ops: Vec<&Operation>) -> Self {
         BatchRead {
             _as: proto::BatchRead {
                 batch_record: Some(proto::BatchRecord {
@@ -4107,7 +4110,7 @@ impl BatchRead {
         }
     }
 
-    pub fn Header(policy: &BatchReadPolicy, key: &Key) -> Self {
+    pub fn header(policy: &BatchReadPolicy, key: &Key) -> Self {
         BatchRead {
             _as: proto::BatchRead {
                 batch_record: Some(proto::BatchRecord {
@@ -4204,9 +4207,9 @@ impl BatchUdf {
     pub fn __construct(
         policy: &BatchUdfPolicy,
         key: &Key,
-        packageName: String,
-        functionName: String,
-        functionArgs: Vec<PHPValue>,
+        package_name: String,
+        function_name: String,
+        function_args: Vec<PHPValue>,
     ) -> Self {
         BatchUdf {
             _as: proto::BatchUdf {
@@ -4216,9 +4219,9 @@ impl BatchUdf {
                     error: None,
                 }),
                 policy: Some(policy._as.clone()),
-                package_name: packageName,
-                function_name: functionName,
-                function_args: functionArgs.into_iter().map(|v| v.into()).collect(),
+                package_name: package_name,
+                function_name: function_name,
+                function_args: function_args.into_iter().map(|v| v.into()).collect(),
             },
         }
     }
