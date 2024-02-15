@@ -2715,7 +2715,7 @@ impl WritePolicy {
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
             NAMESPACE_DEFAULT => Expiration::namespace_default(),
-            NEVER => Expiration::never(),
+            NEVER_EXPIRE => Expiration::never(),
             DONT_UPDATE => Expiration::dont_update(),
             secs => Expiration::seconds(secs),
         }
@@ -3830,7 +3830,7 @@ impl BatchWritePolicy {
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
             NAMESPACE_DEFAULT => Expiration::namespace_default(),
-            NEVER => Expiration::never(),
+            NEVER_EXPIRE => Expiration::never(),
             DONT_UPDATE => Expiration::dont_update(),
             secs => Expiration::seconds(secs),
         }
@@ -3993,7 +3993,7 @@ impl BatchUdfPolicy {
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
             NAMESPACE_DEFAULT => Expiration::namespace_default(),
-            NEVER => Expiration::never(),
+            NEVER_EXPIRE => Expiration::never(),
             DONT_UPDATE => Expiration::dont_update(),
             secs => Expiration::seconds(secs),
         }
