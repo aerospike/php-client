@@ -4319,7 +4319,7 @@ impl Client {
     pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
         let bins: Vec<proto::Bin> = bins.into_iter().map(|b| b.into()).collect();
 
-        let mut request = tonic::Request::new(proto::AerospikePutRequest {
+        let request = tonic::Request::new(proto::AerospikePutRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
             bins: bins.into(),
@@ -4348,7 +4348,7 @@ impl Client {
         key: &Key,
         bins: Option<Vec<String>>,
     ) -> PhpResult<Option<Record>> {
-        let mut request = tonic::Request::new(proto::AerospikeGetRequest {
+        let request = tonic::Request::new(proto::AerospikeGetRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
             bin_names: bins.unwrap_or(vec![]),
@@ -4388,7 +4388,7 @@ impl Client {
     /// only selected record bins or only the record headers will be returned. The policy can be
     /// used to specify timeouts.
     pub fn get_header(&mut self, policy: &ReadPolicy, key: &Key) -> PhpResult<Option<Record>> {
-        let mut request = tonic::Request::new(proto::AerospikeGetHeaderRequest {
+        let request = tonic::Request::new(proto::AerospikeGetHeaderRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
         });
@@ -4429,7 +4429,7 @@ impl Client {
     pub fn add(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
         let bins: Vec<proto::Bin> = bins.into_iter().map(|b| b.into()).collect();
 
-        let mut request = tonic::Request::new(proto::AerospikePutRequest {
+        let request = tonic::Request::new(proto::AerospikePutRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
             bins: bins.into(),
@@ -4455,7 +4455,7 @@ impl Client {
     pub fn append(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
         let bins: Vec<proto::Bin> = bins.into_iter().map(|b| b.into()).collect();
 
-        let mut request = tonic::Request::new(proto::AerospikePutRequest {
+        let request = tonic::Request::new(proto::AerospikePutRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
             bins: bins.into(),
@@ -4488,7 +4488,7 @@ impl Client {
     pub fn prepend(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
         let bins: Vec<proto::Bin> = bins.into_iter().map(|b| b.into()).collect();
 
-        let mut request = tonic::Request::new(proto::AerospikePutRequest {
+        let request = tonic::Request::new(proto::AerospikePutRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
             bins: bins.into(),
@@ -4511,7 +4511,7 @@ impl Client {
     /// Delete record for specified key. The policy specifies the transaction timeout.
     /// The call returns `true` if the record existed on the server before deletion.
     pub fn delete(&self, policy: &WritePolicy, key: &Key) -> PhpResult<bool> {
-        let mut request = tonic::Request::new(proto::AerospikeDeleteRequest {
+        let request = tonic::Request::new(proto::AerospikeDeleteRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
         });
@@ -4538,7 +4538,7 @@ impl Client {
     /// Reset record's time to expiration using the policy's expiration. Fail if the record does
     /// not exist.
     pub fn touch(&self, policy: &WritePolicy, key: &Key) -> PhpResult<()> {
-        let mut request = tonic::Request::new(proto::AerospikeTouchRequest {
+        let request = tonic::Request::new(proto::AerospikeTouchRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
         });
@@ -4559,7 +4559,7 @@ impl Client {
 
     /// Determine if a record key exists. The policy can be used to specify timeouts.
     pub fn exists(&self, policy: &ReadPolicy, key: &Key) -> PhpResult<bool> {
-        let mut request = tonic::Request::new(proto::AerospikeExistsRequest {
+        let request = tonic::Request::new(proto::AerospikeExistsRequest {
             policy: Some(policy._as.clone()),
             key: Some(key._as.clone()),
         });
@@ -4611,7 +4611,7 @@ impl Client {
             }
         });
 
-        let mut request = tonic::Request::new(proto::AerospikeBatchOperateRequest {
+        let request = tonic::Request::new(proto::AerospikeBatchOperateRequest {
             policy: Some(policy._as.clone()),
             records: res,
         });
@@ -4648,7 +4648,7 @@ impl Client {
     ) -> PhpResult<()> {
         // let before_nanos = before_nanos.unwrap_or_default();
 
-        let mut request = tonic::Request::new(proto::AerospikeTruncateRequest {
+        let request = tonic::Request::new(proto::AerospikeTruncateRequest {
             policy: Some(policy._as.clone()),
             namespace: namespace.into(),
             set_name: set_name.into(),
@@ -4715,7 +4715,7 @@ impl Client {
         cit: &IndexCollectionType,
         ctx: Vec<&CDTContext>,
     ) -> PhpResult<()> {
-        let mut request = tonic::Request::new(proto::AerospikeCreateIndexRequest {
+        let request = tonic::Request::new(proto::AerospikeCreateIndexRequest {
             policy: Some(policy._as.clone()),
             namespace: namespace.into(),
             set_name: set_name.into(),
@@ -4748,7 +4748,7 @@ impl Client {
         set_name: &str,
         index_name: &str,
     ) -> PhpResult<()> {
-        let mut request = tonic::Request::new(proto::AerospikeDropIndexRequest {
+        let request = tonic::Request::new(proto::AerospikeDropIndexRequest {
             policy: Some(policy._as.clone()),
             namespace: namespace.into(),
             set_name: set_name.into(),
