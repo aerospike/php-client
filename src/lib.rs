@@ -4975,7 +4975,7 @@ impl FromZval<'_> for Infinity {
     const TYPE: DataType = DataType::Mixed;
 
     fn from_zval(zval: &Zval) -> Option<Self> {
-        let f: &Infinity = zval.extract()?;
+        let _f: &Infinity = zval.extract()?;
 
         Some(Infinity {})
     }
@@ -5262,9 +5262,9 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
                 return Some(PHPValue::GeoJSON(o.v));
             } else if let Some(o) = zval.extract::<HLL>() {
                 return Some(PHPValue::HLL(o.v));
-            } else if let Some(o) = zval.extract::<Infinity>() {
+            } else if let Some(_) = zval.extract::<Infinity>() {
                 return Some(PHPValue::Infinity);
-            } else if let Some(o) = zval.extract::<Wildcard>() {
+            } else if let Some(_) = zval.extract::<Wildcard>() {
                 return Some(PHPValue::Wildcard);
             }
             panic!("Invalid value");
