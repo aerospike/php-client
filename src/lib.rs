@@ -42,6 +42,9 @@ use ext_php_rs::types::ZendHashTable;
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
 
+use num_derive::FromPrimitive;
+use num_traits::FromPrimitive;
+
 use lazy_static::lazy_static;
 use log::LevelFilter;
 use log::{debug, info, trace, warn};
@@ -51,16 +54,16 @@ lazy_static! {
         Mutex::new(HashMap::new());
 }
 
-pub type AspResult<T = ()> = std::result::Result<T, AspException>;
+// pub type AspResult<T = ()> = std::result::Result<T, AspException>;
+pub type AsResult<T = ()> = std::result::Result<T, AerospikeException>;
 
 #[allow(non_camel_case_types)]
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 // ResultCode
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
-
+#[derive(FromPrimitive)]
 enum ResultCode {
     // GRPC_ERROR is wrapped and directly returned from the grpc library
     GrpcError = -21,
@@ -151,7 +154,7 @@ enum ResultCode {
     ServerMemError = 8,
 
     // TIMEOUT defines client or server has timed out.
-    TIMEOUT = 9,
+    Timeout = 9,
 
     // ALWAYS_FORBIDDEN defines operation not allowed in current configuration.
     AlwaysForbidden = 10,
@@ -304,28 +307,28 @@ enum ResultCode {
     IndexFound = 200,
 
     // INDEX_NOTFOUND defines requested secondary index does not exist.
-    IndexNotfound = 201,
+    IndexNotFound = 201,
 
     // INDEX_OOM defines secondary index memory space exceeded.
     IndexOom = 202,
 
     // INDEX_NOTREADABLE defines secondary index not available.
-    IndexNotreadable = 203,
+    IndexNotReadable = 203,
 
     // INDEX_GENERIC defines generic secondary index error.
     IndexGeneric = 204,
 
     // INDEX_NAME_MAXLEN defines index name maximum length exceeded.
-    IndexNameMaxlen = 205,
+    IndexNameMaxLen = 205,
 
     // INDEX_MAXCOUNT defines maximum number of indexes exceeded.
-    IndexMaxcount = 206,
+    IndexMaxCount = 206,
 
     // QUERY_ABORTED defines secondary index query aborted.
     QueryAborted = 210,
 
     // QUERY_QUEUEFULL defines secondary index queue full.
-    QueryQueuefull = 211,
+    QueryQueueFull = 211,
 
     // QUERY_TIMEOUT defines secondary index query timed out on server.
     QueryTimeout = 212,
@@ -334,7 +337,7 @@ enum ResultCode {
     QueryGeneric = 213,
 
     // QUERY_NETIO_ERR defines query NetIO error on server
-    QueryNetioErr = 214,
+    QueryNetIoErr = 214,
 
     // QUERY_DUPLICATE defines duplicate TaskId sent for the statement
     QueryDuplicate = 215,
@@ -344,6 +347,106 @@ enum ResultCode {
 
     // AEROSPIKE_ERR_LUA_FILE_NOT_FOUND defines LUA file does not exist.
     AerospikeErrLuaFileNotFound = 1302,
+}
+
+impl From<ResultCode> for String {
+    fn from(input: ResultCode) -> Self {
+        match input {
+    ResultCode::GrpcError => "wrapped and directly returned from the grpc library".into(),
+    ResultCode::BatchFailed => "one or more keys failed in a batch".into(),
+    ResultCode::NoResponse => "no response was received from the server".into(),
+    ResultCode::NetworkError => "a network error. Checked the wrapped error for detail".into(),
+    ResultCode::CommonError => "a common, none-aerospike error. Checked the wrapped error for detail".into(),
+    ResultCode::MaxRetriesExceeded => "max retries limit reached".into(),
+    ResultCode::MaxErrorRate => "max errors limit reached".into(),
+    ResultCode::RackNotDefined => "requested Rack for node/namespace was not defined in the cluster".into(),
+    ResultCode::InvalidClusterPartitionMap => "cluster has an invalid partition map, usually due to bad configuration".into(),
+    ResultCode::ServerNotAvailable => "server is not accepting requests".into(),
+    ResultCode::ClusterNameMismatchError => "cluster Name does not match the ClientPolicy.ClusterName value".into(),
+    ResultCode::RecordsetClosed => "recordset has already been closed or cancelled".into(),
+    ResultCode::NoAvailableConnectionsToNode => "there were no connections available to the node in the pool, and the pool was limited".into(),
+    ResultCode::TypeNotSupported => "data type is not supported by aerospike server".into(),
+    ResultCode::CommandRejected => "info Command was rejected by the server".into(),
+    ResultCode::QueryTerminated => "query was terminated by user".into(),
+    ResultCode::ScanTerminated => "scan was terminated by user".into(),
+    ResultCode::InvalidNodeError => "chosen node is not currently active".into(),
+    ResultCode::ParseError => "client parse error".into(),
+    ResultCode::SerializeError => "client serialization error".into(),
+    ResultCode::OK => "operation was successful".into(),
+    ResultCode::ServerError => "unknown server failure".into(),
+    ResultCode::KeyNotFoundError => "on retrieving, touching or replacing a record that doesn't exist".into(),
+    ResultCode::GenerationError => "on modifying a record with unexpected generation".into(),
+    ResultCode::ParameterError => "bad parameter(s) were passed in database operation call".into(),
+    ResultCode::KeyExistsError => "on create-only (write unique) operations on a record that already exists".into(),
+    ResultCode::BinExistsError => "bin already exists on a create-only operation".into(),
+    ResultCode::ClusterKeyMismatch => "expected cluster ID was not received".into(),
+    ResultCode::ServerMemError => "server has run out of memory".into(),
+    ResultCode::Timeout => "client or server has timed out".into(),
+    ResultCode::AlwaysForbidden => "operation not allowed in current configuration".into(),
+    ResultCode::PartitionUnavailable => "partition is unavailable".into(),
+    ResultCode::BinTypeError => "operation is not supported with configured bin type (single-bin or multi-bin)".into(),
+    ResultCode::RecordTooBig => "record size exceeds limit".into(),
+    ResultCode::KeyBusy => "too many concurrent operations on the same record".into(),
+    ResultCode::ScanAbort => "scan aborted by server".into(),
+    ResultCode::UnsupportedFeature => "unsupported Server Feature (e.g. Scan + UDF)".into(),
+    ResultCode::BinNotFound => "bin not found on update-only operation".into(),
+    ResultCode::DeviceOverload => "device not keeping up with writes".into(),
+    ResultCode::KeyMismatch => "key type mismatch".into(),
+    ResultCode::InvalidNamespace => "invalid namespace".into(),
+    ResultCode::BinNameTooLong => "bin name length greater than 14 characters, or maximum number of unique bin names are exceeded".into(),
+    ResultCode::FailForbidden => "operation not allowed at this time".into(),
+    ResultCode::FailElementNotFound => "element Not Found in CDT".into(),
+    ResultCode::FailElementExists => "element Already Exists in CDT".into(),
+    ResultCode::EnterpriseOnly => "attempt to use an Enterprise feature on a Community server or a server without the applicable feature key".into(),
+    ResultCode::OpNotApplicable => "the operation cannot be applied to the current bin value on the server".into(),
+    ResultCode::FilteredOut => "the transaction was not performed because the filter was false".into(),
+    ResultCode::LostConflict => "write command loses conflict to XDR".into(),
+    ResultCode::QueryEnd => "there are no more records left for query".into(),
+    ResultCode::SecurityNotSupported => "security type not supported by connected server".into(),
+    ResultCode::SecurityNotEnabled => "administration command is invalid".into(),
+    ResultCode::SecuritySchemeNotSupported => "administration field is invalid".into(),
+    ResultCode::InvalidCommand => "administration command is invalid".into(),
+    ResultCode::InvalidField => "administration field is invalid".into(),
+    ResultCode::IllegalState => "security protocol not followed".into(),
+    ResultCode::InvalidUser => "user name is invalid".into(),
+    ResultCode::UserAlreadyExists => "user was previously created".into(),
+    ResultCode::InvalidPassword => "password is invalid".into(),
+    ResultCode::ExpiredPassword => "security credential is invalid".into(),
+    ResultCode::ForbiddenPassword => "forbidden password (e.g. recently used)".into(),
+    ResultCode::InvalidCredential => "security credential is invalid".into(),
+    ResultCode::ExpiredSession => "login session expired".into(),
+    ResultCode::InvalidRole => "role name is invalid".into(),
+    ResultCode::RoleAlreadyExists => "role already exists".into(),
+    ResultCode::InvalidPrivilege => "privilege is invalid".into(),
+    ResultCode::InvalidWhitelist => "invalid IP address whiltelist".into(),
+    ResultCode::QuotasNotEnabled => "Quotas not enabled on server".into(),
+    ResultCode::InvalidQuota => "invalid quota value".into(),
+    ResultCode::NotAuthenticated => "user must be authentication before performing database operations".into(),
+    ResultCode::RoleViolation => "user does not posses the required role to perform the database operation".into(),
+    ResultCode::NotWhitelisted => "command not allowed because sender IP address not whitelisted".into(),
+    ResultCode::QuotaExceeded => "Quota exceeded".into(),
+    ResultCode::UdfBadResponse => "a user defined function returned an error code".into(),
+    ResultCode::BatchDisabled => "batch functionality has been disabled".into(),
+    ResultCode::BatchMaxRequestsExceeded => "batch max requests have been exceeded".into(),
+    ResultCode::BatchQueuesFull => "all batch queues are full".into(),
+    ResultCode::GeoInvalidGeojson => "invalid GeoJSON on insert/update".into(),
+    ResultCode::IndexFound => "secondary index already exists".into(),
+    ResultCode::IndexNotFound => "requested secondary index does not exist".into(),
+    ResultCode::IndexOom => "secondary index memory space exceeded".into(),
+    ResultCode::IndexNotReadable => "secondary index not available".into(),
+    ResultCode::IndexGeneric => "generic secondary index error".into(),
+    ResultCode::IndexNameMaxLen => "index name maximum length exceeded".into(),
+    ResultCode::IndexMaxCount => "maximum number of indexes exceeded".into(),
+    ResultCode::QueryAborted => "secondary index query aborted".into(),
+    ResultCode::QueryQueueFull => "secondary index queue full".into(),
+    ResultCode::QueryTimeout => "secondary index query timed out on server".into(),
+    ResultCode::QueryGeneric => "generic query error".into(),
+    ResultCode::QueryNetIoErr => "query NetIO error on server".into(),
+    ResultCode::QueryDuplicate => "duplicate TaskId sent for the statement".into(),
+    ResultCode::AerospikeErrUdfNotFound => "UDF does not exist".into(),
+    ResultCode::AerospikeErrLuaFileNotFound => "LUA file does not exist".into(),
+    }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -4335,10 +4438,11 @@ impl Client {
                 result_code: 0,
                 in_doubt: _,
             } => Ok(()),
-            proto::Error {
-                result_code,
-                in_doubt,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            pe => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
         }
     }
 
@@ -4370,19 +4474,19 @@ impl Client {
             proto::AerospikeSingleResponse {
                 error:
                     Some(proto::Error {
-                        result_code: 0, //ResultCode::KeyNotFoundError,
+                        result_code: 2, // ResultCode::KeyNotFoundError
                         in_doubt: false,
                     }),
                 record: None,
             } => Ok(None),
             proto::AerospikeSingleResponse {
-                error:
-                    Some(proto::Error {
-                        result_code,
-                        in_doubt,
-                    }),
+                error: Some(pe),
                 record: None,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(None)
+            }
             _ => unreachable!(),
         }
     }
@@ -4409,19 +4513,19 @@ impl Client {
             proto::AerospikeSingleResponse {
                 error:
                     Some(proto::Error {
-                        result_code: 0, //ResultCode::KeyNotFoundError,
+                        result_code: 2, //ResultCode::KeyNotFoundError,
                         in_doubt: false,
                     }),
                 record: None,
             } => Ok(None),
             proto::AerospikeSingleResponse {
-                error:
-                    Some(proto::Error {
-                        result_code,
-                        in_doubt,
-                    }),
+                error: Some(pe),
                 record: None,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(None)
+            }
             _ => unreachable!(),
         }
     }
@@ -4445,10 +4549,11 @@ impl Client {
                 result_code: 0,
                 in_doubt: _,
             } => Ok(()),
-            proto::Error {
-                result_code,
-                in_doubt,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            pe => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
         }
     }
 
@@ -4471,16 +4576,10 @@ impl Client {
                 result_code: 0,
                 in_doubt: _,
             } => Ok(()),
-            proto::Error {
-                result_code,
-                in_doubt,
-            } => {
-                let error = AspException {
-                    message: "Exception in append".to_string(),
-                    code: *result_code,
-                };
-                let _ = throw_object(error.into_zval(true).unwrap());
-                Err(AerospikeException::new("TODO(Sachin): Implement Exception").into())
+            pe => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
             }
         }
     }
@@ -4500,14 +4599,11 @@ impl Client {
         let mut client = self.client.lock().unwrap();
         let res = client.prepend(request).map_err(|e| e.to_string())?;
         match res.get_ref() {
-            proto::Error {
-                result_code: 0,
-                in_doubt: _,
-            } => Ok(()),
-            proto::Error {
-                result_code,
-                in_doubt,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            proto::Error { result_code: 0, .. } => Ok(()),
+            pe => {
+                let error: AerospikeException = pe.into();
+                Ok(throw_object(error.into_zval(false)?)?)
+            }
         }
     }
 
@@ -4524,17 +4620,15 @@ impl Client {
         match res.get_ref() {
             proto::AerospikeDeleteResponse {
                 error: None,
-                existed: Some(existed),
-            } => Ok(*existed),
+                existed,
+            } => Ok(existed.is_some()),
             proto::AerospikeDeleteResponse {
-                error:
-                    Some(proto::Error {
-                        result_code,
-                        in_doubt,
-                    }),
-                ..
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
-            _ => unreachable!(),
+                error: Some(pe), ..
+            } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(false)
+            }
         }
     }
 
@@ -4549,14 +4643,12 @@ impl Client {
         let mut client = self.client.lock().unwrap();
         let res = client.touch(request).map_err(|e| e.to_string())?;
         match res.get_ref() {
-            proto::Error {
-                result_code: 0,
-                in_doubt: _,
-            } => Ok(()),
-            proto::Error {
-                result_code,
-                in_doubt,
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
+            proto::Error { result_code: 0, .. } => Ok(()),
+            pe => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
         }
     }
 
@@ -4572,17 +4664,15 @@ impl Client {
         match res.get_ref() {
             proto::AerospikeExistsResponse {
                 error: None,
-                exists: Some(exists),
-            } => Ok(*exists),
+                exists,
+            } => Ok(exists.is_some()),
             proto::AerospikeExistsResponse {
-                error:
-                    Some(proto::Error {
-                        result_code,
-                        in_doubt,
-                    }),
-                ..
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
-            _ => unreachable!(),
+                error: Some(pe), ..
+            } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(false)
+            }
         }
     }
 
@@ -4610,7 +4700,8 @@ impl Client {
                     ..proto::BatchOperate::default()
                 });
             } else {
-                panic!("TODO(Sachin): Implement Exception");
+                let error = AerospikeException::new("Invalid Batch command".into());
+                let _ = throw_object(error.into_zval(true).unwrap());
             }
         });
 
@@ -4630,14 +4721,12 @@ impl Client {
                 .map(|v| BatchRecord { _as: (*v).clone() })
                 .collect()),
             proto::AerospikeBatchOperateResponse {
-                error:
-                    Some(proto::Error {
-                        result_code,
-                        in_doubt,
-                    }),
-                ..
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
-            _ => unreachable!(),
+                error: Some(pe), ..
+            } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(vec![])
+            }
         }
     }
 
@@ -4662,14 +4751,11 @@ impl Client {
         let res = client.truncate(request).map_err(|e| e.to_string())?;
         match res.get_ref() {
             proto::AerospikeTruncateResponse { error: None } => Ok(()),
-            proto::AerospikeTruncateResponse {
-                error:
-                    Some(proto::Error {
-                        result_code,
-                        in_doubt,
-                    }),
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
-            _ => unreachable!(),
+            proto::AerospikeTruncateResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
         }
     }
 
@@ -4733,14 +4819,11 @@ impl Client {
         let res = client.create_index(request).map_err(|e| e.to_string())?;
         match res.get_ref() {
             proto::AerospikeCreateIndexResponse { error: None } => Ok(()),
-            proto::AerospikeCreateIndexResponse {
-                error:
-                    Some(proto::Error {
-                        result_code,
-                        in_doubt,
-                    }),
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
-            _ => unreachable!(),
+            proto::AerospikeCreateIndexResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
         }
     }
 
@@ -4762,49 +4845,52 @@ impl Client {
         let res = client.drop_index(request).map_err(|e| e.to_string())?;
         match res.get_ref() {
             proto::AerospikeDropIndexResponse { error: None } => Ok(()),
-            proto::AerospikeDropIndexResponse {
-                error:
-                    Some(proto::Error {
-                        result_code,
-                        in_doubt,
-                    }),
-            } => Err(AerospikeException::new("TODO(Sachin): Implement Exception").into()), // TODO:
-            _ => unreachable!(),
+            proto::AerospikeDropIndexResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
         }
     }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  AspException
+//  AerospikeException
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\AspException")]
+#[php_class(name = "Aerospike\\AerospikeException")]
 #[extends(ext_php_rs::zend::ce::exception())]
-pub struct AspException {
+#[derive(Debug, Clone)]
+pub struct AerospikeException {
     #[prop(flags = ext_php_rs::flags::PropertyFlags::Public)]
     message: String,
     #[prop(flags = ext_php_rs::flags::PropertyFlags::Public)]
     code: i32,
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  Aerospike Excetpion
-//
-////////////////////////////////////////////////////////////////////////////////////////////
-
-#[derive(Debug)]
-#[php_class(name = "Aerospike\\AerospikeException")]
-pub struct AerospikeException {
-    pub message: String,
+    #[prop(flags = ext_php_rs::flags::PropertyFlags::Public)]
+    in_doubt: bool,
 }
 
 impl AerospikeException {
     pub fn new(message: &str) -> Self {
         AerospikeException {
             message: message.to_string(),
+            code: 0,
+            in_doubt: false,
+        }
+    }
+}
+
+impl From<&proto::Error> for AerospikeException {
+    fn from(error: &proto::Error) -> AerospikeException {
+        let msg: String = FromPrimitive::from_i32(error.result_code)
+            .map(|rc: ResultCode| rc.into())
+            .unwrap_or("unknown error".into());
+        AerospikeException {
+            message: msg,
+            code: error.result_code,
+            in_doubt: error.in_doubt,
         }
     }
 }
@@ -5117,11 +5203,22 @@ impl Hash for PHPValue {
             PHPValue::String(ref val) | PHPValue::GeoJSON(ref val) => val.hash(state),
             PHPValue::Blob(ref val) | PHPValue::HLL(ref val) => val.hash(state),
             PHPValue::List(ref val) => val.hash(state),
-            PHPValue::HashMap(_) => panic!("HashMaps cannot be used as map keys."),
-            PHPValue::Json(_) => panic!("Jsons cannot be used as map keys."),
-            PHPValue::Infinity => panic!("Infinity cannot be used as map keys."),
-            PHPValue::Wildcard => panic!("Infinity cannot be used as map keys."),
-            // PHPValue::OrderedMap(_) => panic!("OrderedMaps cannot be used as map keys."),
+            PHPValue::HashMap(_) => {
+                let error = AerospikeException::new("HashMaps cannot be used as map keys.");
+                let _ = throw_object(error.into_zval(true).unwrap());
+            }
+            PHPValue::Json(_) => {
+                let error = AerospikeException::new("Jsons cannot be used as map keys.");
+                let _ = throw_object(error.into_zval(true).unwrap());
+            }
+            PHPValue::Infinity => {
+                let error = AerospikeException::new("Infinity cannot be used as map keys.");
+                let _ = throw_object(error.into_zval(true).unwrap());
+            }
+            PHPValue::Wildcard => {
+                let error = AerospikeException::new("Infinity cannot be used as map keys.");
+                let _ = throw_object(error.into_zval(true).unwrap());
+            } // PHPValue::OrderedMap(_) => panic!("OrderedMaps cannot be used as map keys."),
         }
     }
 }
@@ -5267,7 +5364,9 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
             } else if let Some(_) = zval.extract::<Wildcard>() {
                 return Some(PHPValue::Wildcard);
             }
-            panic!("Invalid value");
+            let error = AerospikeException::new("Invalid Object");
+            let _ = throw_object(error.into_zval(true).unwrap());
+            None
         }
         _ => unreachable!(),
     }
@@ -5425,11 +5524,11 @@ impl From<proto::Value> for PHPValue {
     }
 }
 
-// ////////////////////////////////////////////////////////////////////////////////////////////
-// //
-// //  Value
-// //
-// ////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Value
+//
+////////////////////////////////////////////////////////////////////////////////////////////
 
 #[php_class(name = "Aerospike\\Value")]
 pub struct Value;
@@ -5478,17 +5577,11 @@ impl Value {
     }
 }
 
-// ////////////////////////////////////////////////////////////////////////////////////////////
-// //
-// //  Converters
-// //
-// ////////////////////////////////////////////////////////////////////////////////////////////
-
-// impl From<aerospike_core::Bin> for Bin {
-//     fn from(other: aerospike_core::Bin) -> Self {
-//         Bin { _as: other }
-//     }
-// }
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Converters
+//
+////////////////////////////////////////////////////////////////////////////////////////////
 
 impl From<&proto::Key> for Key {
     fn from(other: &proto::Key) -> Self {
@@ -5522,27 +5615,6 @@ impl std::fmt::Display for AeroPHPError {
         write!(f, "{}", self.0)
     }
 }
-
-// impl std::error::Error for AeroPHPError {}
-
-// impl std::convert::From<String> for AeroPHPError {
-//     fn from(msg: String) -> Self {
-//         Self(msg)
-//     }
-// }
-
-// TODO: Implement the Aerospike::Exception class
-// impl From<aerospike_core::Error> for AeroPHPError {
-//     fn from(e: aerospike_core::Error) -> Self {
-//         Self(e.to_string())
-//     }
-// }
-
-// impl From<AeroPHPError> for ext_php_rs::error::Error {
-//     fn from(e: AeroPHPError) -> Self {
-//         Self(e.to_string())
-//     }
-// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
