@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"net"
 	"os"
@@ -13,92 +14,91 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	aero "github.com/aerospike/aerospike-client-go/v7"
-	"github.com/spf13/cobra"
 
+	"github.com/aerospike/php-client/asld/common/client"
 	"github.com/aerospike/php-client/asld/common/config"
-	"github.com/aerospike/php-client/asld/common/flags"
 	pb "github.com/aerospike/php-client/asld/proto"
 )
 
 const (
-	// unix socket
-	PROTOCOL = "unix"
-	SOCKET   = "/tmp/asld_grpc.sock"
-
-	// tcp protocol
-	PROTOCOL_TCP = "tcp"
-	ADDR         = "localhost:8080"
+	version = "0.1.0"
 )
 
-var client *aero.Client
-
 func main() {
-	configFileFlags := flags.NewConfFileFlags()
-	aerospikeFlags := flags.NewDefaultAerospikeFlags()
+	var (
+		configFile  = flag.String("config-file", "/etc/aerospike-local-daemon/asld.toml", "Config File")
+		showUsage   = flag.Bool("h", false, "Show usage information")
+		showVersion = flag.Bool("v", false, "Print version")
+	)
 
-	appCmd := &cobra.Command{
-		Use:     "asld",
-		Short:   "Aerospike Local Daemon",
-		Version: "0.1.0",
-		Run: func(cmd *cobra.Command, args []string) {
-			_, err := config.InitConfig(configFileFlags.File, configFileFlags.Instance, cmd.Flags())
-			if err != nil {
-				log.Fatalln("Failed to initialize config:", err)
-			}
-		},
+	flag.Parse()
+	if *showUsage {
+		flag.Usage()
+		os.Exit(0)
 	}
 
-	cfFlagSet := configFileFlags.NewFlagSet(flags.DefaultWrapHelpString)
-	asFlagSet := aerospikeFlags.NewFlagSet(flags.DefaultWrapHelpString)
+	if *showVersion {
+		log.Println(version)
+		os.Exit(0)
+	}
 
-	appCmd.PersistentFlags().AddFlagSet(cfFlagSet)
+	conf, err := config.Read(*configFile)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer cleanUp(conf)
 
-	// This is what connects the flags to fields of the same name in the config file.
-	config.BindPFlags(asFlagSet, "cluster")
-
-	appCmd.PersistentFlags().AddFlagSet(asFlagSet)
-	flags.SetupRoot(appCmd, "Aerospike Local Daemon")
-
-	if err := appCmd.Execute(); err != nil {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
 		os.Exit(1)
+	}()
+
+	for cluster, ac := range conf {
+		go launchServer(cluster, ac)
 	}
 
-	ac := aerospikeFlags.NewAerospikeConfig()
-	cp, err2 := ac.NewClientPolicy()
-	if err2 != nil {
-		log.Fatalln(err2)
+	e := make(chan struct{}, 1)
+	<-e
+}
+
+func cleanUp(conf map[string]*client.AerospikeConfig) {
+	for _, ac := range conf {
+		os.Remove(ac.Socket)
+	}
+}
+
+func launchServer(name string, ac *client.AerospikeConfig) {
+	cp, err := ac.NewClientPolicy()
+	if err != nil {
+		log.Fatalln(err)
 	}
 
 	seeds := ac.NewHosts()
 
-	var err error
-	if client, err = aero.NewClientWithPolicyAndHost(cp, seeds...); err != nil {
+	client, err := aero.NewClientWithPolicyAndHost(cp, seeds...)
+	if err != nil {
 		log.Fatalln(err)
 	}
 
-	// runtime.GOMAXPROCS(2)
-
-	ln, err := net.Listen(PROTOCOL, SOCKET)
+	log.Printf("Server is Initializing for cluster `%s`. There will be cake...", name)
+	ln, err := net.Listen("unix", ac.Socket)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Server initialization failed: %s", err)
+		log.Fatalln("The cake was a lie!")
 	}
+
+	defer os.Remove(ac.Socket)
 
 	// tcpLn, err := net.Listen(PROTOCOL_TCP, ADDR)
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		os.Remove(SOCKET)
-		os.Exit(1)
-	}()
-
 	srv := grpc.NewServer()
 	grpc_health_v1.RegisterHealthServer(srv, health.NewServer())
-	pb.RegisterKVSServer(srv, &server{})
+	pb.RegisterKVSServer(srv, &server{client: client})
 	reflection.Register(srv)
 
 	// go func() {
@@ -106,6 +106,6 @@ func main() {
 	// 	log.Fatal(srv.Serve(tcpLn))
 	// }()
 
-	log.Printf("grpc ran on unix socket protocol %s", SOCKET)
+	log.Printf("Server ready for unix socket protocol: %s", ac.Socket)
 	log.Fatal(srv.Serve(ln))
 }

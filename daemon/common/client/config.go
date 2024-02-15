@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"time"
 
 	as "github.com/aerospike/aerospike-client-go/v7"
 )
@@ -24,6 +25,24 @@ type AerospikeConfig struct {
 	TLSProtocolsMinVersion TLSProtocol
 	TLSProtocolsMaxVersion TLSProtocol
 	// TLSCipherSuites        []uint16 // TODO
+
+	ClusterName                 string
+	Timeout                     time.Duration
+	IdleTimeout                 time.Duration
+	LoginTimeout                time.Duration
+	ConnectionQueueSize         int
+	MinConnectionsPerNode       int
+	MaxErrorRate                int
+	ErrorRateWindow             int
+	LimitConnectionsToQueueSize bool
+	OpeningConnectionThreshold  int
+	FailIfNotConnected          bool
+	TendInterval                time.Duration
+	UseServicesAlternate        bool
+	RackAware                   bool
+	RackIds                     []int
+	IgnoreOtherSubnetAliases    bool
+	SeedOnlyCluster             bool
 }
 
 // NewDefaultAerospikeConfig creates a new default AerospikeConfig instance.
@@ -35,12 +54,30 @@ func NewDefaultAerospikeConfig() *AerospikeConfig {
 
 // NewClientPolicy creates a new Aerospike client policy based on the
 // AerospikeConfig.
-
 func (ac *AerospikeConfig) NewClientPolicy() (*as.ClientPolicy, error) {
 	clientPolicy := as.NewClientPolicy()
+
 	clientPolicy.User = ac.User
 	clientPolicy.Password = ac.Password
 	clientPolicy.AuthMode = ac.AuthMode
+
+	clientPolicy.ClusterName = ac.ClusterName
+	clientPolicy.Timeout = ac.Timeout
+	clientPolicy.IdleTimeout = ac.IdleTimeout
+	clientPolicy.LoginTimeout = ac.LoginTimeout
+	clientPolicy.ConnectionQueueSize = ac.ConnectionQueueSize
+	clientPolicy.MinConnectionsPerNode = ac.MinConnectionsPerNode
+	clientPolicy.MaxErrorRate = ac.MaxErrorRate
+	clientPolicy.ErrorRateWindow = ac.ErrorRateWindow
+	clientPolicy.LimitConnectionsToQueueSize = ac.LimitConnectionsToQueueSize
+	clientPolicy.OpeningConnectionThreshold = ac.OpeningConnectionThreshold
+	clientPolicy.FailIfNotConnected = ac.FailIfNotConnected
+	clientPolicy.TendInterval = ac.TendInterval
+	clientPolicy.UseServicesAlternate = ac.UseServicesAlternate
+	clientPolicy.RackAware = ac.RackAware
+	clientPolicy.RackIds = ac.RackIds
+	clientPolicy.IgnoreOtherSubnetAliases = ac.IgnoreOtherSubnetAliases
+	clientPolicy.SeedOnlyCluster = ac.SeedOnlyCluster
 
 	tlsConfig, err := ac.newTLSConfig()
 	if err != nil {

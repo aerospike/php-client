@@ -21,7 +21,7 @@ build:
 	$(GOBUILD) .
 run: clean proto
 	$(GOBUILD) -o $(BINARY_NAME) -v .
-	./$(BINARY_NAME)
+	./$(BINARY_NAME) -config-file asld.toml
 deps:
 	$(GOGET) -u .
 modtidy:

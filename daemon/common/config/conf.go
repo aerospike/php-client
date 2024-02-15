@@ -1,132 +1,222 @@
 package config
 
 import (
-	"fmt"
-	"path"
-	"strings"
+	"os"
+	"time"
 
-	"github.com/spf13/pflag"
-	"github.com/spf13/viper"
+	"github.com/aerospike/php-client/asld/common/client"
+	"github.com/aerospike/php-client/asld/common/flags"
+	"github.com/pelletier/go-toml/v2"
 )
 
-// A map that maps config keys i.e. "cluster.host" to flag names i.e. "host".
-// This is only needed because if "instance". Otherwise we would just run
-// RegisterAlias inside the BindPFlags function.
-var configToFlagMap = map[string]string{}
-
-// InitConfig reads in config file and ENV variables if set. Should be called
-// from the root commands PersistentPreRunE function with the flags of the current command.
-func InitConfig(cfgFile, instance string, flags *pflag.FlagSet) (string, error) {
-	configFileUsed := ""
-
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-		configFileUsed = cfgFile
-	} else {
-		viper.AddConfigPath(".")
-		viper.AddConfigPath(AsToolsConfDir)
-		viper.SetConfigName(AsToolsConfName)
-		configFileUsed = path.Join(AsToolsConfDir, AsToolsConfName)
+func Read(configFile string) (map[string]*client.AerospikeConfig, error) {
+	doc, err := os.ReadFile(configFile)
+	if err != nil {
+		return nil, err
 	}
 
-	if strings.HasSuffix(configFileUsed, ".conf") {
-		// If .conf then explicitly set type to toml.
-		viper.SetConfigType("toml")
+	cfg := map[string]map[string]any{}
+	if err := toml.Unmarshal(doc, &cfg); err != nil {
+		return nil, err
 	}
 
-	if err := viper.ReadInConfig(); err != nil {
-		if cfgFile != "" {
-			// User provided specific file, so we should return an error no
-			// matter what.
-			return "", fmt.Errorf("failed to read config file: %w", err)
-		} else if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
-			// We are relying on the default config file destination. If the
-			// file is not found don't consider it an error.
-			return "", fmt.Errorf("failed to read config file: %w", err)
-		}
-	}
+	res := make(map[string]*client.AerospikeConfig, len(cfg))
 
-	configFileUsed = viper.ConfigFileUsed()
+	for section, valMap := range cfg {
+		f := flags.NewDefaultAerospikeFlags()
 
-	if configFileUsed == "" {
-		return "", nil
-	}
-
-	var persistedErr error
-
-	flags.VisitAll(func(f *pflag.Flag) {
-		// Convert "host" into "cluster_<instance>.host"
-		alias := getAlias(f.Name, instance)
-
-		// Could be done in BindPFlags if not for "instance". Without this
-		// we would need to do viper.GetString("cluster.host") instead of
-		// viper.GetString("host").
-		viper.RegisterAlias(f.Name, alias)
-
-		// We must bind the flags for GetString to return flags as well as
-		// config file values.
-		err := viper.BindPFlag(alias, f)
-		if err != nil {
-			persistedErr = fmt.Errorf("failed to bind flag %s: %s", f.Name, err)
-			return
+		if v, exists := valMap["socket"]; exists {
+			f.Socket = v.(string)
 		}
 
-		val := viper.GetString(f.Name)
-
-		// Apply the viper config value to the flag when viper has a value
-		if viper.IsSet(f.Name) && !f.Changed {
-			if err := f.Value.Set(val); err != nil {
-				persistedErr = fmt.Errorf("failed to parse flag %s: %s", f.Name, err)
+		if v, exists := valMap["host"]; exists {
+			seeds := flags.NewHostTLSPortSliceFlag()
+			if err := seeds.Set(v.(string)); err != nil {
+				return nil, err
+			} else {
+				f.Seeds = seeds
 			}
 		}
-	})
 
-	return configFileUsed, persistedErr
-}
+		if v, exists := valMap["port"]; exists {
+			f.DefaultPort = int(v.(int64))
+		}
 
-// BindPFlags binds the flags to viper. Should be called after the flag set is
-// created. The section is prepended to the flag name to create the viper key.
-// For example, if the config is found under the "cluster" section then we will
-// bind "cluster.host" to the flag "host". If the section is empty then the flag
-// name is used as the key.
-func BindPFlags(flags *pflag.FlagSet, section string) {
-	if section != "" {
-		section += "."
+		if v, exists := valMap["user"]; exists {
+			f.User = v.(string)
+		}
+
+		if v, exists := valMap["password"]; exists {
+			var pass flags.PasswordFlag
+			if err := pass.Set(v.(string)); err != nil {
+				return nil, err
+			} else {
+				f.Password = pass
+			}
+		}
+
+		if v, exists := valMap["auth"]; exists {
+			var auth flags.AuthModeFlag
+			if err := auth.Set(v.(string)); err != nil {
+				return nil, err
+			} else {
+				f.AuthMode = auth
+			}
+		}
+
+		if v, exists := valMap["tls-enable"]; exists {
+			f.TLSEnable = v.(bool)
+		}
+
+		if v, exists := valMap["tls-name"]; exists {
+			f.TLSName = v.(string)
+		}
+
+		if v, exists := valMap["tls-protocols"]; exists {
+			var cv flags.TLSProtocolsFlag
+			if err := cv.Set(v.(string)); err != nil {
+				return nil, err
+			} else {
+				f.TLSProtocols = cv
+			}
+		}
+
+		if v, exists := valMap["tls-cafile"]; exists {
+			var cv flags.CertFlag
+			if err := cv.Set(v.(string)); err != nil {
+				return nil, err
+			} else {
+				f.TLSRootCAFile = cv
+			}
+		}
+
+		if v, exists := valMap["tls-capath"]; exists {
+			var cv flags.CertPathFlag
+			if err := cv.Set(v.(string)); err != nil {
+				return nil, err
+			} else {
+				f.TLSRootCAPath = cv
+			}
+		}
+
+		if v, exists := valMap["tls-certfile"]; exists {
+			var cv flags.CertFlag
+			if err := cv.Set(v.(string)); err != nil {
+				return nil, err
+			} else {
+				f.TLSCertFile = cv
+			}
+		}
+
+		if v, exists := valMap["tls-keyfile"]; exists {
+			var cv flags.CertFlag
+			if err := cv.Set(v.(string)); err != nil {
+				return nil, err
+			} else {
+				f.TLSKeyFile = cv
+			}
+		}
+
+		if v, exists := valMap["tls-keyfile-password"]; exists {
+			var cv flags.PasswordFlag
+			if err := cv.Set(v.(string)); err != nil {
+				return nil, err
+			} else {
+				f.TLSKeyFilePass = cv
+			}
+		}
+
+		if v, exists := valMap["cluster-name"]; exists {
+			f.ClusterName = v.(string)
+		}
+
+		if v, exists := valMap["timeout"]; exists {
+			v, err := time.ParseDuration(v.(string))
+			if err != nil {
+				return nil, err
+			}
+			f.Timeout = v
+		}
+
+		if v, exists := valMap["idle-timeout"]; exists {
+			v, err := time.ParseDuration(v.(string))
+			if err != nil {
+				return nil, err
+			}
+			f.IdleTimeout = v
+		}
+
+		if v, exists := valMap["login-timeout"]; exists {
+			v, err := time.ParseDuration(v.(string))
+			if err != nil {
+				return nil, err
+			}
+			f.LoginTimeout = v
+		}
+
+		if v, exists := valMap["connection-queue-size"]; exists {
+			f.ConnectionQueueSize = int(v.(int64))
+		}
+
+		if v, exists := valMap["min-connections-per-node"]; exists {
+			f.MinConnectionsPerNode = int(v.(int64))
+		}
+
+		if v, exists := valMap["max-error-rate"]; exists {
+			f.MaxErrorRate = int(v.(int64))
+		}
+
+		if v, exists := valMap["error-rate-window"]; exists {
+			f.ErrorRateWindow = int(v.(int64))
+		}
+
+		if v, exists := valMap["limit-connections-to-queue-size"]; exists {
+			f.LimitConnectionsToQueueSize = v.(bool)
+		}
+
+		if v, exists := valMap["opening-connection-threshold"]; exists {
+			f.OpeningConnectionThreshold = int(v.(int64))
+		}
+
+		if v, exists := valMap["fail-if-not-connected"]; exists {
+			f.FailIfNotConnected = v.(bool)
+		}
+
+		if v, exists := valMap["tend-interval"]; exists {
+			v, err := time.ParseDuration(v.(string))
+			if err != nil {
+				return nil, err
+			}
+			f.TendInterval = v
+		}
+
+		if v, exists := valMap["use-services-alternate"]; exists {
+			f.UseServicesAlternate = v.(bool)
+		}
+
+		if v, exists := valMap["rack-aware"]; exists {
+			f.RackAware = v.(bool)
+		}
+
+		if v, exists := valMap["rack-ids"]; exists {
+			v := v.([]any)
+			res := make([]int, len(v))
+			for i := range v {
+				res[i] = int(v[i].(int64))
+			}
+			f.RackIds = res
+		}
+
+		if v, exists := valMap["ignore-other-subnet-aliases"]; exists {
+			f.IgnoreOtherSubnetAliases = v.(bool)
+		}
+
+		if v, exists := valMap["seed-only-cluster"]; exists {
+			f.SeedOnlyCluster = v.(bool)
+		}
+
+		res[section] = f.NewAerospikeConfig()
 	}
 
-	flags.VisitAll(func(f *pflag.Flag) {
-		// We need this to handle the "instance" flag. We will Bind the flags later
-		configToFlagMap[f.Name] = section + f.Name
-	})
-}
-
-// Reset resets the global configToFlagMap and viper instance.
-// Should be called before or after tests that use InitConfig or BindPFlags.
-// If using testify suites call it in the SetupTest function and or
-// SetupSubTests if using suite.T().Run(...).
-func Reset() {
-	configToFlagMap = map[string]string{}
-
-	viper.Reset()
-}
-
-func getAlias(key, instance string) string {
-	if instance != "" {
-		instance = "_" + instance
-	}
-
-	if k, ok := configToFlagMap[key]; ok {
-		key = k
-	}
-
-	keySplit := strings.SplitN(key, ".", 2)
-
-	if len(keySplit) == 1 {
-		return key
-	}
-
-	keySplit[0] += instance
-
-	return strings.Join(keySplit, ".")
+	return res, nil
 }

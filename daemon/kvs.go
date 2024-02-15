@@ -12,12 +12,14 @@ import (
 
 type server struct {
 	pb.UnimplementedKVSServer
+
+	client *aero.Client
 }
 
 func (s *server) Get(ctx context.Context, in *pb.AerospikeGetRequest) (*pb.AerospikeSingleResponse, error) {
 	policy := toReadPolicy(in.Policy)
 	key := toKey(in.Key)
-	rec, err := client.Get(policy, key, in.BinNames...)
+	rec, err := s.client.Get(policy, key, in.BinNames...)
 	if err != nil {
 		return &pb.AerospikeSingleResponse{
 			Error:  fromError(err),
@@ -33,7 +35,7 @@ func (s *server) Get(ctx context.Context, in *pb.AerospikeGetRequest) (*pb.Aeros
 func (s *server) GetHeader(ctx context.Context, in *pb.AerospikeGetHeaderRequest) (*pb.AerospikeSingleResponse, error) {
 	policy := toReadPolicy(in.Policy)
 	key := toKey(in.Key)
-	rec, err := client.GetHeader(policy, key)
+	rec, err := s.client.GetHeader(policy, key)
 	if err != nil {
 		return &pb.AerospikeSingleResponse{
 			Error:  fromError(err),
@@ -49,7 +51,7 @@ func (s *server) GetHeader(ctx context.Context, in *pb.AerospikeGetHeaderRequest
 func (s *server) Exists(ctx context.Context, in *pb.AerospikeExistsRequest) (*pb.AerospikeExistsResponse, error) {
 	policy := toReadPolicy(in.Policy)
 	key := toKey(in.Key)
-	exists, err := client.Exists(policy, key)
+	exists, err := s.client.Exists(policy, key)
 	if err != nil {
 		return &pb.AerospikeExistsResponse{
 			Error:  fromError(err),
@@ -65,7 +67,7 @@ func (s *server) Exists(ctx context.Context, in *pb.AerospikeExistsRequest) (*pb
 func (s *server) Put(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Error, error) {
 	policy := toWritePolicy(in.Policy)
 	key := toKey(in.Key)
-	err := client.PutBins(policy, key, toBins(in.Bins)...)
+	err := s.client.PutBins(policy, key, toBins(in.Bins)...)
 	if err != nil {
 		return fromError(err), nil
 	}
@@ -78,7 +80,7 @@ func (s *server) Put(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Error
 func (s *server) Add(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Error, error) {
 	policy := toWritePolicy(in.Policy)
 	key := toKey(in.Key)
-	err := client.AddBins(policy, key, toBins(in.Bins)...)
+	err := s.client.AddBins(policy, key, toBins(in.Bins)...)
 	if err != nil {
 		return fromError(err), nil
 	}
@@ -91,7 +93,7 @@ func (s *server) Add(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Error
 func (s *server) Append(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Error, error) {
 	policy := toWritePolicy(in.Policy)
 	key := toKey(in.Key)
-	err := client.AppendBins(policy, key, toBins(in.Bins)...)
+	err := s.client.AppendBins(policy, key, toBins(in.Bins)...)
 	if err != nil {
 		return fromError(err), nil
 	}
@@ -104,7 +106,7 @@ func (s *server) Append(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Er
 func (s *server) Prepend(ctx context.Context, in *pb.AerospikePutRequest) (*pb.Error, error) {
 	policy := toWritePolicy(in.Policy)
 	key := toKey(in.Key)
-	err := client.PrependBins(policy, key, toBins(in.Bins)...)
+	err := s.client.PrependBins(policy, key, toBins(in.Bins)...)
 	if err != nil {
 		return fromError(err), nil
 	}
@@ -117,7 +119,7 @@ func (s *server) Prepend(ctx context.Context, in *pb.AerospikePutRequest) (*pb.E
 func (s *server) Delete(ctx context.Context, in *pb.AerospikeDeleteRequest) (*pb.AerospikeDeleteResponse, error) {
 	policy := toWritePolicy(in.Policy)
 	key := toKey(in.Key)
-	existed, err := client.Delete(policy, key)
+	existed, err := s.client.Delete(policy, key)
 	if err != nil {
 		return &pb.AerospikeDeleteResponse{
 			Error:   fromError(err),
@@ -133,7 +135,7 @@ func (s *server) Delete(ctx context.Context, in *pb.AerospikeDeleteRequest) (*pb
 func (s *server) Touch(ctx context.Context, in *pb.AerospikeTouchRequest) (*pb.Error, error) {
 	policy := toWritePolicy(in.Policy)
 	key := toKey(in.Key)
-	err := client.Touch(policy, key)
+	err := s.client.Touch(policy, key)
 	if err != nil {
 		return fromError(err), nil
 	}
@@ -145,7 +147,7 @@ func (s *server) Touch(ctx context.Context, in *pb.AerospikeTouchRequest) (*pb.E
 
 func (s *server) BatchOperate(ctx context.Context, in *pb.AerospikeBatchOperateRequest) (*pb.AerospikeBatchOperateResponse, error) {
 	brecs := toBatchRecords(in.Records)
-	err := client.BatchOperate(toBatchPolicy(in.Policy), brecs)
+	err := s.client.BatchOperate(toBatchPolicy(in.Policy), brecs)
 	if err != nil {
 		return &pb.AerospikeBatchOperateResponse{
 			Error:   fromError(err),
@@ -160,7 +162,7 @@ func (s *server) BatchOperate(ctx context.Context, in *pb.AerospikeBatchOperateR
 
 func (s *server) CreateIndex(ctx context.Context, in *pb.AerospikeCreateIndexRequest) (*pb.AerospikeCreateIndexResponse, error) {
 	// TODO(Khosrow): return the task
-	_, err := client.CreateComplexIndex(toWritePolicy(in.Policy), in.Namespace, in.SetName, in.IndexName, in.BinName, toIndexType(in.IndexType), toIndexCollectionType(in.IndexCollectionType))
+	_, err := s.client.CreateComplexIndex(toWritePolicy(in.Policy), in.Namespace, in.SetName, in.IndexName, in.BinName, toIndexType(in.IndexType), toIndexCollectionType(in.IndexCollectionType))
 	if err != nil {
 		return &pb.AerospikeCreateIndexResponse{
 			Error: fromError(err),
@@ -171,7 +173,7 @@ func (s *server) CreateIndex(ctx context.Context, in *pb.AerospikeCreateIndexReq
 }
 
 func (s *server) DropIndex(ctx context.Context, in *pb.AerospikeDropIndexRequest) (*pb.AerospikeDropIndexResponse, error) {
-	err := client.DropIndex(toWritePolicy(in.Policy), in.Namespace, in.SetName, in.IndexName)
+	err := s.client.DropIndex(toWritePolicy(in.Policy), in.Namespace, in.SetName, in.IndexName)
 	if err != nil {
 		return &pb.AerospikeDropIndexResponse{
 			Error: fromError(err),
@@ -182,7 +184,7 @@ func (s *server) DropIndex(ctx context.Context, in *pb.AerospikeDropIndexRequest
 }
 
 func (s *server) Truncate(ctx context.Context, in *pb.AerospikeTruncateRequest) (*pb.AerospikeTruncateResponse, error) {
-	err := client.Truncate(toInfoPolicy(in.Policy), in.Namespace, in.SetName, toTime(in.BeforeNanos))
+	err := s.client.Truncate(toInfoPolicy(in.Policy), in.Namespace, in.SetName, toTime(in.BeforeNanos))
 	if err != nil {
 		return &pb.AerospikeTruncateResponse{
 			Error: fromError(err),
