@@ -4994,7 +4994,7 @@ impl FromZval<'_> for Wildcard {
     const TYPE: DataType = DataType::Mixed;
 
     fn from_zval(zval: &Zval) -> Option<Self> {
-        let f: &Wildcard = zval.extract()?;
+        let _f: &Wildcard = zval.extract()?;
 
         Some(Wildcard {})
     }
