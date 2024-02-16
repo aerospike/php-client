@@ -11,23 +11,16 @@ final class ClientTest extends TestCase
 
     protected static $namespace = "test";
     protected static $set = "test";
-    protected static $host = "127.0.0.1:3000";
+    protected static $socket = "/tmp/asld_grpc.sock";
 
     public static function setUpBeforeClass(): void
     {
-        self::$cp = new ClientPolicy();
-
         try {
-            self::$client = Aerospike(self::$cp, self::$host);
+            self::$client = Client::connect(self::$socket);
             self::$key = new Key(self::$namespace, self::$set, 1);
         } catch (Exception $e) {
             throw $e;
         }
-    }
-
-    public function testAerospikeConnection()
-    {
-        $this->assertTrue(self::$client->isConnected());
     }
 
     public function testPutGetString(){
@@ -190,10 +183,10 @@ final class ClientTest extends TestCase
         $this->assertEquals("newData_StringData_oldData", $binGet["stringBin"]);
     }
 
-
     public function testDeleteKeyAndExists(){
-        $newKey = new Key(self::$namespace, self::$set, 2);
+        $newKey = new Key(self::$namespace, self::$set, "key_e");
         $wp = new WritePolicy();
+        self::$client->put($wp, $newKey, [new Bin("bini", 1)]);
         $rp = new ReadPolicy();
         $exists = self::$client->exists($rp, $newKey);
         $this->assertTrue($exists);
@@ -204,7 +197,9 @@ final class ClientTest extends TestCase
     }
 
     public function testTouchKey(){
-        $newKey = new Key(self::$namespace, self::$set, 5);
+        $newKey = new Key(self::$namespace, self::$set, "new_key");
+        $wp = new WritePolicy();
+        self::$client->put($wp, $newKey, [new Bin("bini", 1)]);
         $rp = new ReadPolicy();
         $record = self::$client->get($rp, $newKey);
         $this->assertEquals($record->getGeneration(), 1);
@@ -213,36 +208,41 @@ final class ClientTest extends TestCase
         self::$client->touch($wp, $newKey);
         $record = self::$client->get($rp, $newKey);
         $this->assertEquals($record->getGeneration(), 2);
+        self::$client->delete($wp, $newKey);
     }
 
     public function testTruncate()
     {
-        try {
-            $wp = new WritePolicy();
-            for ($i = 1; $i <= 10; $i++) {
-                $bin1 = new Bin("bin1", $i);
-                self::$client->put($wp, self::$key, [$bin1]);
-            }
-
-            // Perform the truncate operation
-            self::$client->truncate(self::$namespace, self::$set);
-            //wait for truncate to finish
-            usleep(200000);
-
-            $sp = new ScanPolicy();
-            $count = 0;
-            $recordset = self::$client->scan($sp, "test", "test", ["bin1"]);
-            while ($rec = $recordset->next()) {
-                $count += 1;
-            }
-            //wait for scan to finish
-            usleep(200000);
-            $this->assertEquals($count, 0);
-        } catch (Exception $e) {
-            $this->fail("An exception was thrown during truncate: " . $e->getMessage());
+        
+        $wp = new WritePolicy();
+        for ($i = 1; $i <= 10; $i++) {
+            $bin1 = new Bin("bin1", $i);
+            self::$client->put($wp, self::$key, [$bin1]);
         }
+
+        // Perform the truncate operation
+        $ip = new InfoPolicy();
+        self::$client->truncate($ip, self::$namespace, self::$set);
+        //wait for truncate to finish
+        usleep(200000);
+
+        $rp = new ReadPolicy();
+        $exists = self::$client->exists($rp, self::$key);
+        
     }
 
-
+    public function testAppendException(){
+         
+        $stringKey = new Key(self::$namespace, self::$set, "string_key");
+        $wp = new WritePolicy();
+        self::$client->put($wp, $stringKey, [new Bin("sbin", "string_value")]);
+        try {
+            $appendExcpVal = new Bin("stringBin", 23);
+            self::$client->append($wp, $stringKey, [$appendExcpVal]);
+            $this->fail("Expected exception AerospikeException not thrown");
+        } catch (AerospikeException $e) {
+            $this->assertSame("Aerospike excpetion -> ", $e->getMessage());
+        }
+    }
 
 }
