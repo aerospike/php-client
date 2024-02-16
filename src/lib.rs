@@ -2605,6 +2605,26 @@ impl ReadPolicy {
     }
 }
 
+impl Default for ReadPolicy {
+    fn default() -> Self {
+        ReadPolicy {
+            _as: proto::ReadPolicy {
+                max_retries: 3,
+                sleep_multiplier: 1.0,
+                total_timeout: 1000,
+                socket_timeout: 500,
+                send_key: false,
+                use_compression: false,
+                exit_fast_on_exhausted_connection_pool: false,
+                read_mode_ap: ReadModeAP::One as i32,
+                read_mode_sc: ReadModeSC::Session as i32,
+                filter_expression: None,
+                sleep_between_retries: 1,
+                replica_policy: 1,
+            },
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3816,6 +3836,22 @@ impl BatchPolicy {
 }
 
 
+impl Default for BatchPolicy {
+    fn default() -> Self {
+        let rp = ReadPolicy::default();
+        BatchPolicy {
+            _as: proto::BatchPolicy {
+                policy: Some(rp._as),
+                concurrent_nodes: Some(1), // Default concurrent nodes value
+                allow_inline: true,        // Default allow inline value
+                allow_inline_ssd: false,   // Default allow inline SSD value
+                respond_all_keys: true,    // Default respond all keys value
+                allow_partial_results: false, // Default allow partial results value
+            },
+        }
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  BatchReadPolicy
@@ -4869,10 +4905,6 @@ impl Client {
             records: res,
         });
 
-        if let Err(err) = write_log_to_file(&request) {
-            println!("Error writing request to file: {}", err);
-        }
-        
         let mut client = self.client.lock().unwrap();
         let res = client.batch_operate(request).map_err(|e| e.to_string())?;
         match res.get_ref() {
@@ -5825,12 +5857,6 @@ fn get_persisted_client(key: &str) -> Option<Zval> {
     let zo: ZBox<ZendObject> = client.into_zend_object().ok()?;
     zval.set_object(zo.into_raw());
     Some(zval)
-}
-
-fn write_log_to_file(request: &tonic::Request<proto::AerospikeBatchOperateRequest>) -> std::io::Result<()> {
-    let mut file = File::create("batch_request.txt")?;
-    writeln!(&mut file, "{:?}", request)?;
-    Ok(())
 }
 
 #[php_module]
