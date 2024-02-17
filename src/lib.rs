@@ -2476,9 +2476,7 @@ pub struct ReadPolicy {
 #[derive(ZvalConvert)]
 impl ReadPolicy {
     pub fn __construct() -> Self {
-        ReadPolicy {
-            _as: proto::ReadPolicy::default(),
-        }
+        ReadPolicy::default()
     }
 
     #[getter]
@@ -2616,12 +2614,12 @@ impl Default for ReadPolicy {
                 send_key: false,
                 use_compression: false,
                 exit_fast_on_exhausted_connection_pool: false,
-                read_mode_ap: ReadModeAP::One as i32,
-                read_mode_sc: ReadModeSC::Session as i32,
+                read_mode_ap: proto::ReadModeAp::One.into(),
+                read_mode_sc: proto::ReadModeSc::Session.into(),
                 filter_expression: None,
                 sleep_between_retries: 1,
                 replica_policy: 1,
-            },
+            }
         }
     }
 }
@@ -3605,13 +3603,9 @@ pub struct BatchPolicy {
 #[derive(ZvalConvert)]
 impl BatchPolicy {
     pub fn __construct() -> Self {
-        BatchPolicy {
-            _as: proto::BatchPolicy {
-                policy: Some(proto::ReadPolicy::default()),
-                ..proto::BatchPolicy::default()
-            },
-        }
+        BatchPolicy::default()
     }
+
     // ***************************************************************************
     // ReadPolicy Attrs
     // ***************************************************************************
@@ -3735,7 +3729,7 @@ impl BatchPolicy {
     #[getter]
     pub fn get_read_mode_sc(&self) -> ReadModeSC {
         ReadModeSC {
-            _as: match self._as.policy.as_ref().unwrap().read_mode_ap {
+            _as: match self._as.policy.as_ref().unwrap().read_mode_sc {
                 0 => proto::ReadModeSc::Session,
                 1 => proto::ReadModeSc::Linearize,
                 2 => proto::ReadModeSc::AllowReplica,
@@ -3835,19 +3829,18 @@ impl BatchPolicy {
     }
 }
 
-
 impl Default for BatchPolicy {
     fn default() -> Self {
         let rp = ReadPolicy::default();
         BatchPolicy {
-            _as: proto::BatchPolicy {
+            _as: proto::BatchPolicy{
                 policy: Some(rp._as),
                 concurrent_nodes: Some(1), // Default concurrent nodes value
-                allow_inline: true,        // Default allow inline value
-                allow_inline_ssd: false,   // Default allow inline SSD value
-                respond_all_keys: true,    // Default respond all keys value
+                allow_inline: true, // Default allow inline value
+                allow_inline_ssd: false, // Default allow inline SSD value
+                respond_all_keys: true, // Default respond all keys value
                 allow_partial_results: false, // Default allow partial results value
-            },
+            }
         }
     }
 }
