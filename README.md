@@ -20,7 +20,6 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP 8+.
 
 * Does not support Scan/Query API features/
 * Use Aerospike Server 6.3 for testing, the Rust client does not fully support newer versions.
-* Should have the local go daemon setup.
 
 ## Setup
 
