@@ -4053,7 +4053,6 @@ pub struct BatchDeletePolicy {
     _as: proto::BatchDeletePolicy,
 }
 
-/// `WritePolicy` encapsulates parameters for all write operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl BatchDeletePolicy {
@@ -4430,7 +4429,6 @@ pub struct BatchWrite {
     _as: proto::BatchWrite,
 }
 
-/// `WritePolicy` encapsulates parameters for all write operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl BatchWrite {
@@ -4461,7 +4459,6 @@ pub struct BatchDelete {
     _as: proto::BatchDelete,
 }
 
-/// `WritePolicy` encapsulates parameters for all write operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl BatchDelete {
@@ -4491,7 +4488,6 @@ pub struct BatchUdf {
     _as: proto::BatchUdf,
 }
 
-/// `WritePolicy` encapsulates parameters for all write operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl BatchUdf {

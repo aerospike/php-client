@@ -62,13 +62,57 @@ final class BatchOpsTest extends TestCase
     public function testBatchOpsRead(){
         $brp = new BatchReadPolicy();
 
-        $bkey = new Key(self::$namespace, self::$set, 1);
-        $batchRead = new BatchRead($brp, $bkey);
+        $brkey = new Key(self::$namespace, self::$set, 1);
+        $batchRead = new BatchRead($brp, $brkey, []);
         
         $bp = new BatchPolicy();
-        $recs = $client->batch($bp, [$batchRead]);
-        var_dump($recs);
+        $recs = self::$client->batch($bp, [$batchRead]);
+        $this->assertIsArray($recs);
     }
 
+    public function testBatchOpsWrite(){
+
+        $stringKey = new Key(self::$namespace, self::$set, "string_key");
+        $bwp = new BatchWritePolicy();
+        $ops = [Operation::put(new Bin("ibin", 10)), Operation::put(new Bin("sbin", "string_val"))];
+        $bw = new BatchWrite($bwp, $stringKey, $ops);
+        
+        $bp = new BatchPolicy();
+        $recs = self::$client->batch($bp, [$bw]);
+        $this->assertIsArray($recs);
+    }
+
+    public function testBatchOpsDelete(){
+        $bdp = new BatchDeletePolicy();
+
+        $bdkey = new Key(self::$namespace, self::$set, "string_key");
+        $batchDelete = new BatchDelete($bdp, $bdkey);
+        
+        $bp = new BatchPolicy();
+        self::$client->batch($bp, [$batchDelete]);
+
+        $rp  = new ReadPolicy();
+        $this->assertFalse(self::$client->exists($rp, $bdkey));
+    }
+
+    public function testInvalidBatchCmd(){
+        $this->expectException(AerospikeException::class);
+        $batchOp = [];
+        $bp = new BatchPolicy();
+        self::$client->batch($bp, [$batchOp]);
+    }
+
+    public function testBatchReadWrite(){
+        $brp = new BatchReadPolicy();
+        $bwp = new BatchWritePolicy();
+        $batchKey = new Key(self::$namespace, self::$set, "batch_key");
+        $ops = [Operation::put(new Bin("ibin", 10)), Operation::put(new Bin("sbin", "string_val"))];
+        $batchRead = new BatchRead($brp, $batchKey, []);
+        $batchWrite = new BatchWrite($bwp, $batchKey, $ops);
+
+        $bp = new BatchPolicy();
+        $batchRecords = self::$client->batch($bp, [$batchWrite, $batchRead]);
+        $this->assertIsArray($batchRecords);
+    }
 
 }
