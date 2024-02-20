@@ -1,10 +1,10 @@
 ## This project is beta, and should not be used in production. If you're an enterprise customer feel free to reach out to our support with feedback and feature requests. We appreciate feedback from the Aerospike community on issues related to the new PHP client.
 
-# Aerospike PHP 8+ Client
+# Aerospike PHP 8+ Client (v0.5.0-beta)
 
 An [Aerospike](https://www.aerospike.com/) client library for PHP 8+.
 
-## PHP-Client Architecture 
+## PHP-Client Introduction 
 
 This is the documentation for the Aerospike PHP Client. The PHP client comprises of two essential components. Firstly, we have a robust PHP client written in Rust and a connection manager written in Go, serving as a shared resource among PHP processes. The connection manager daemon efficiently handles all requests and responses between the PHP processes and the Aerospike server.
 
