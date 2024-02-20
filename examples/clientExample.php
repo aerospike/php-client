@@ -10,12 +10,11 @@ $cp = new ClientPolicy();
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client = Aerospike($cp, "127.0.0.1:3000");
-// $client = Aerospike($cp, "172.17.0.2:3000");
-// $client = Aerospike($cp, "172.17.0.2:3000");
-$connected = $client->isConnected();
+$socket = "/tmp/asld_grpc.sock";
 
-var_dump($connected);
+$client = Client::connect($socket);
+
+var_dump($client->hosts);
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Key object
@@ -35,8 +34,8 @@ var_dump($key);
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client = Aerospike($cp, "localhost:3000");
-$client->truncate("test", "test");
+$ip = new InfoPolicy();
+$client->truncate($ip, "test", "test");
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -75,7 +74,6 @@ $bin5 = new Bin("bin5", [
 for ($x = 0; $x < 1000; $x++) {
 	$key = new Key("test", "test", $x);
 	$bin1 = new Bin("bin1", $x);
-	$client = Aerospike($cp, "localhost:3000");
 	$client->put($wp, $key, [$bin1, $bin2, $bin3, $bin4, $bin5]);
 }
 
@@ -113,7 +111,6 @@ for ($x = 0; $x <= 1000; $x++) {
 	$record = $client->get($rp, $key, ["bin1"]);
 }
 
-$client = Aerospike($cp, "localhost:3000");
 $record = $client->get($rp, $key);
 var_dump($record->bins);
 var_dump($record->generation);
@@ -125,63 +122,34 @@ var_dump($record->key);
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client = Aerospike($cp, "localhost:3000");
 $client->touch($wp, $key);
 
-$client = Aerospike($cp, "localhost:3000");
 $record = $client->get($rp, $key, []);
 var_dump($record->bin("bin1"));
 var_dump($record->bin("bin2"));
 var_dump($record->generation);
 
-$client = Aerospike($cp, "localhost:3000");
 $record = $client->get($rp, $key, ["bin1"]);
 var_dump($record->bin("bin1"));
 var_dump($record->bin("bin2"));
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// client->batchGet
+// client->batchRead
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client = Aerospike($cp, "localhost:3000");
+$brp = new BatchReadPolicy();
+
+$brkey = new Key(self::$namespace, self::$set, 1);
+$batchRead = new BatchRead($brp, $brkey, []);
+
 $bp = new BatchPolicy();
+$recs = self::$client->batch($bp, [$batchRead]);
 
-
-$br = [
-	new BatchRead($key, ["bin1"]),
-	new BatchRead($key),
-	new BatchRead($key, []),
-];
-
-$batch_reads = $client->batchGet($bp, $br);
-foreach ($batch_reads as &$br) {
-	var_dump($br->record()->bins);
+foreach ($recs->bins as $rec) {
+	var_dump($rec);
 }
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// client->scan
-//
-////////////////////////////////////////////////////////////////////////////////
-
-
-$sp = new ScanPolicy();
-$client = Aerospike($cp, "localhost:3000");
-$recordset = $client->scan($sp, "test", "test");
-
-$count = 0;
-$sum = 0;
-while ($rec = $recordset->next()) {
-	// var_dump($rec->bins["bin1"]);
-	$count++;
-	$sum+=$rec->bins["bin3"];
-}
-
-echo "Scan results count: $count\n";
-echo "Scan results sum: $sum\n";
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -190,8 +158,6 @@ echo "Scan results sum: $sum\n";
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-$client = Aerospike($cp, "localhost:3000");
 $exists = $client->exists($rp, $key);
 var_dump($exists);
 
@@ -202,11 +168,9 @@ var_dump($exists);
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client = Aerospike($cp, "localhost:3000");
 $deleted = $client->delete($wp, $key);
 var_dump($deleted);
 
-$client = Aerospike($cp, "localhost:3000");
 $exists = $client->exists($rp, $key);
 var_dump($exists);
 
@@ -216,7 +180,6 @@ var_dump($exists);
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client = Aerospike($cp, "localhost:3000");
 $client->dropIndex("test", "test", "test.test.bin1");
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -225,33 +188,9 @@ $client->dropIndex("test", "test", "test.test.bin1");
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client = Aerospike($cp, "localhost:3000");
 $client->createIndex("test", "test", "bin1", "test.test.bin1", IndexType::Numeric());
 
 sleep(1);
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// $client->query
-//
-////////////////////////////////////////////////////////////////////////////////
-
-$qp = new QueryPolicy();
-$statement = new Statement("test", "test", ["bin1"]);
-$statement->filters = [Filter::range("bin1", 1, 10)];
-$client = Aerospike($cp, "localhost:3000");
-$recordset = $client->query($qp, $statement);
-
-$count = 0;
-$sum = 0;
-while ($rec = $recordset->next()) {
-	var_dump($rec->bins["bin1"]);
-	$count++;
-	$sum+=$rec->bins["bin1"];
-}
-
-echo "Query results count: $count\n";
-echo "Query results sum: $sum\n";
 
 
 ////////////////////////////////////////////////////////////////////////////////

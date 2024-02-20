@@ -6,3 +6,5 @@ aerospike-rust-client.sublime-workspace
 /log
 .idea/
 .DS_Store
+src/com.aerospike.daemon.rs
+daemon/asld

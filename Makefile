@@ -1,7 +1,7 @@
 # Go parameters
 hosts ?= ""
 host ?= localhost
-port ?= 3000 
+port ?= 3000
 user ?= ""
 pass ?= ""
 ns ?= "test"
@@ -28,7 +28,7 @@ ifeq ($(shell awk 'BEGIN{ print ("$(PHP_VERSION)" >= "8.0") }'), 0)
     $(error PHP version must be greater than or equal to 8.0)
 endif
 
-.PHONY: build install test clean 
+.PHONY: build install test clean
 all: lint build install test clean
 
 lint:

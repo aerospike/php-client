@@ -1,5 +1,7 @@
 <?php
 
+/* This feature will be added in the next release */
+
 namespace Aerospike;
 
 function createClient() {
