@@ -1,3 +1,4 @@
+[![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client)
 ## This project is beta, and should not be used in production. If you're an enterprise customer feel free to reach out to our support with feedback and feature requests. We appreciate feedback from the Aerospike community on issues related to the new PHP client.
 
 # Aerospike PHP 8+ Client (v0.5.0-beta)
