@@ -31,7 +31,7 @@ final class BatchOpsTest extends TestCase
         $numRecords = 10;
         try {
             self::$client = Client::connect(self::$socket);
-        } catch (\Exception $e) {
+        } catch (AerospikeException $e) {
             throw $e;
         }
         for ($i = 1; $i <= $numRecords; $i++) {
@@ -113,6 +113,60 @@ final class BatchOpsTest extends TestCase
         $bp = new BatchPolicy();
         $batchRecords = self::$client->batch($bp, [$batchWrite, $batchRead]);
         $this->assertIsArray($batchRecords);
+    }
+
+    public function testBatchWriteMultipleOpsAppend(){
+        $bwp = new BatchWritePolicy();
+        $batchKey = new Key(self::$namespace, self::$set, "batch_key");
+        $wp = new WritePolicy();
+        self::$client->put($wp, $batchKey, [new Bin("sbinapp", "db")]);
+        $ops = [Operation::append(new Bin("sbinapp", "aerospike_"))];
+        $batchWrite = new BatchWrite($bwp, $batchKey, $ops);
+
+        $bp = new BatchPolicy();
+        self::$client->batch($bp, [$batchWrite]);
+
+        $rp = new ReadPolicy();
+        $recs = self::$client->get($rp, $batchKey);
+        $bins = $recs->getBins();
+
+        $this->assertEquals("dbaerospike_", $bins["sbinapp"]);
+    }
+
+    public function testBatchWriteMultipleOpsPrepend(){
+        $bwp = new BatchWritePolicy();
+        $batchKey = new Key(self::$namespace, self::$set, "batch_key");
+        $wp = new WritePolicy();
+        self::$client->put($wp, $batchKey, [new Bin("sbinpre", "db")]);
+        $ops = [Operation::prepend(new Bin("sbinpre", "aerospike_"))];
+        $batchWrite = new BatchWrite($bwp, $batchKey, $ops);
+
+        $bp = new BatchPolicy();
+        self::$client->batch($bp, [$batchWrite]);
+
+        $rp = new ReadPolicy();
+        $recs = self::$client->get($rp, $batchKey);
+        $bins = $recs->getBins();
+
+        $this->assertEquals("aerospike_db", $bins["sbinpre"]);
+    }
+
+    public function testBatchWriteMultipleOpsAdd(){
+        $bwp = new BatchWritePolicy();
+        $batchKey = new Key(self::$namespace, self::$set, "batch_key");
+        $wp = new WritePolicy();
+        self::$client->put($wp, $batchKey, [new Bin("ibin", 1)]);
+        $ops = [Operation::add(new Bin("ibin", 20))];
+        $batchWrite = new BatchWrite($bwp, $batchKey, $ops);
+
+        $bp = new BatchPolicy();
+        self::$client->batch($bp, [$batchWrite]);
+
+        $rp = new ReadPolicy();
+        $recs = self::$client->get($rp, $batchKey);
+        $bins = $recs->getBins();
+
+        $this->assertEquals(21, $bins["ibin"]);
     }
 
 }

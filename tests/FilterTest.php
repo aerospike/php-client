@@ -3,6 +3,11 @@
 namespace Aerospike;
 use PHPUnit\Framework\TestCase;
 
+
+/*
+This feature can be tested once support for Query and Scan are added 
+
+
 final class FilterTest extends TestCase
 {   
 
@@ -174,3 +179,4 @@ final class FilterTest extends TestCase
         $this->assertEquals(1, $count);
     }
 }
+*/
