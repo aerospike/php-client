@@ -1,4 +1,4 @@
-## This project is pre-alpha, and should not be used in production. If you're an enterprise customer feel free to reach out to our support with feedback and feature requests. We appreciate feedback from the Aerospike community on issues related to the new PHP client.
+## This project is beta, and should not be used in production. If you're an enterprise customer feel free to reach out to our support with feedback and feature requests. We appreciate feedback from the Aerospike community on issues related to the new PHP client.
 
 # Aerospike PHP 8+ Client
 
@@ -8,7 +8,7 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP 8+.
 
 * PHP 8.1+
 * Cargo
-* Aerospike server 6.3
+* Aerospike server
 * Linux or Darwin 
 * PHPUnit v10
 * Rustc v1.74 =<
@@ -51,7 +51,7 @@ sudo make
 ```bash 
 php -v
 ```
-* Install and setup the Aerospike [6.3 server version](https://aerospike.com/download/) 
+* Install and setup the Aerospike [Aerospike server](https://aerospike.com/download/) 
 * To build and install the `PHP-Client` in the default paths run the makefile
 ```bash
 cd php-client
