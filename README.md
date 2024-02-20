@@ -51,7 +51,7 @@ cd php-client/daemon
 ```bash
 sudo make
 ```
-**NOTE:** Please view the README.md in the `php-client/daemon` directory for more information about the setting up the go local daemon and configuring the client policy.
+**NOTE:** Please view the README.md in the [`php-client/daemon`](./daemon/README.md) directory for more information about the setting up the go local daemon and configuring the client policy.
 
 ### Build and Install the PHP-Client
 * Check the php version 
@@ -217,4 +217,4 @@ var_dump($recs);
 
 ```
 
-For more detailed examples you can see the examples direcotry [php-client/examples]
+For more detailed examples you can see the examples direcotry [php-client/examples](./examples/)
