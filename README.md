@@ -4,21 +4,26 @@
 
 An [Aerospike](https://www.aerospike.com/) client library for PHP 8+.
 
+## PHP-Client Architecture 
+
+This is the documentation for the Aerospike PHP Client. The PHP client comprises of two essential components. Firstly, we have a robust PHP client written in Rust and a connection manager written in Go, serving as a shared resource among PHP processes. The connection manager daemon efficiently handles all requests and responses between the PHP processes and the Aerospike server.
+
+
 ## Requirements
 
-* PHP 8.1+
+* PHP v8.1+
 * Cargo
 * Aerospike server
 * Linux or Darwin 
 * PHPUnit v10
-* Rustc v1.74 =<
+* Rustc >= v1.74 
 * Go Toolchain [Go Toolchains - The Go Programming Language](https://go.dev/doc/toolchain)
 * Protobuf Compiler [protoc-gen-go command - google.golang.org/protobuf/cmd/protoc-gen-go - Go Packages](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go)
 * ext-php-rs v0.12.0 [github repository link](https://github.com/davidcole1340/ext-php-rs/tree/master)
 
 ## Current Limitations
 
-* Does not support Scan/Query API features/
+* Does not support Scan/Query API features
 * Does not support CDTs
 
 ## Setup
@@ -28,8 +33,9 @@ An [Aerospike](https://www.aerospike.com/) client library for PHP 8+.
 cd php-client
 ```
 
-### Setting up the Go Local Daemon: 
+### Setting up the Aerospike client connection manager: 
 
+## Setting up the go dependencies
 1. Make sure the go toolchain has been installed. Download the package from [The Go Programming Language](https://golang.org/dl/). Follow the steps to correctly install Go.
    **NOTE:** Ensure that the PATH variable has been updated with the GOBIN path.
 2. Install protobuf compiler:
@@ -71,15 +77,33 @@ cargo clean && cargo build --release
 ### Running your PHP Project
 
 1. Running your PHP script:
-  - Before running your script pre-requisites are Go Local Daemon and Aerospike Server 6.3 server must be running.  
+  - Before running your script pre-requisites are Aerospike connection manager and Aerospike Server must be running.  
   - Once the build is successful and all the pre-requisites are met, import the Aerospike namespace to your PHP script. 
-  - To connect to the local Go daemon add:
-```php
-$socket = "/tmp/asld_grpc.sock";
-$client = Client::connect($socket); 
-```
+  - To connect to the Aerospike connection manager add:
+	```php
+	$socket = "/tmp/asld_grpc.sock";
+	$client = Client::connect($socket); 
+	```
   - Run the php script
   If there are no Errors then you have successfully connected to the Aerospike Db. 
+
+***NOTE:*** If the connection manager daemon crashes, you will have to manually remove the file `/tmp/asld_grpc.sock` from its path.
+```bash 
+sudo rm -r /tmp/asld_grpc.soc
+```
+
+   - Configuring policies: Configuring Policies (Read, Write, Batch and Info) - These policies can be set via getters and setter in the php code. On creating an object of that policy class, the default values are initialized for that policy. For example: 
+
+```php
+	// Instantiate the WritePolicy object
+	$writePolicy = new WritePolicy();
+
+	$writePolicy->setRecordExistsAction(RecordExistsAction::Update);
+	$writePolicy->setGenerationPolicy(GenerationPolicy::ExpectGenEqual);
+	$writePolicy->setExpiration(Expiration::seconds(3600)); // Expiring in 1 hour
+	$writePolicy->setMaxRetries(3);
+	$writePolicy->setSocketTimeout(5000);
+```
 
 ## Documentation
 
