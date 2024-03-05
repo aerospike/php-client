@@ -240,6 +240,226 @@ func (s *server) UDFExecute(ctx context.Context, in *pb.AerospikeUDFExecuteReque
 	return &pb.AerospikeUDFExecuteResponse{Error: nil, Result: fromValue(res)}, nil
 }
 
+func (s *server) CreateUser(ctx context.Context, in *pb.AerospikeCreateUserRequest) (*pb.AerospikeCreateUserResponse, error) {
+	err := s.client.CreateUser(toAdminPolicy(in.Policy), in.User, in.Password, in.Roles)
+	return &pb.AerospikeCreateUserResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) DropUser(ctx context.Context, in *pb.AerospikeDropUserRequest) (*pb.AerospikeDropUserResponse, error) {
+	err := s.client.DropUser(toAdminPolicy(in.Policy), in.User)
+	return &pb.AerospikeDropUserResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) ChangePassword(ctx context.Context, in *pb.AerospikeChangePasswordRequest) (*pb.AerospikeChangePasswordResponse, error) {
+	err := s.client.ChangePassword(toAdminPolicy(in.Policy), in.User, in.Password)
+	return &pb.AerospikeChangePasswordResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) GrantRoles(ctx context.Context, in *pb.AerospikeGrantRolesRequest) (*pb.AerospikeGrantRolesResponse, error) {
+	err := s.client.GrantRoles(toAdminPolicy(in.Policy), in.User, in.Roles)
+	return &pb.AerospikeGrantRolesResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) RevokeRoles(ctx context.Context, in *pb.AerospikeRevokeRolesRequest) (*pb.AerospikeRevokeRolesResponse, error) {
+	err := s.client.RevokeRoles(toAdminPolicy(in.Policy), in.User, in.Roles)
+	return &pb.AerospikeRevokeRolesResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) QueryUsers(ctx context.Context, in *pb.AerospikeQueryUsersRequest) (*pb.AerospikeQueryUsersResponse, error) {
+	var err aero.Error
+	var res []*aero.UserRoles
+	if in.User != nil {
+		u, err1 := s.client.QueryUser(toAdminPolicy(in.Policy), *in.User)
+		res = []*aero.UserRoles{u}
+		err = err1
+	} else {
+		res, err = s.client.QueryUsers(toAdminPolicy(in.Policy))
+	}
+
+	if err != nil {
+		return &pb.AerospikeQueryUsersResponse{
+			Error: fromError(err),
+		}, nil
+	}
+
+	return &pb.AerospikeQueryUsersResponse{Error: nil, UserRoles: fromUserRoles(res)}, nil
+}
+
+func (s *server) QueryRoles(ctx context.Context, in *pb.AerospikeQueryRolesRequest) (*pb.AerospikeQueryRolesResponse, error) {
+	var err aero.Error
+	var res []*aero.Role
+	if in.RoleName != nil {
+		u, err1 := s.client.QueryRole(toAdminPolicy(in.Policy), *in.RoleName)
+		res = []*aero.Role{u}
+		err = err1
+	} else {
+		res, err = s.client.QueryRoles(toAdminPolicy(in.Policy))
+	}
+
+	if err != nil {
+		return &pb.AerospikeQueryRolesResponse{
+			Error: fromError(err),
+		}, nil
+	}
+
+	return &pb.AerospikeQueryRolesResponse{Error: nil, Roles: fromRoles(res)}, nil
+}
+
+func (s *server) CreateRole(ctx context.Context, in *pb.AerospikeCreateRoleRequest) (*pb.AerospikeCreateRoleResponse, error) {
+	err := s.client.CreateRole(toAdminPolicy(in.Policy), in.RoleName, toPrivileges(in.Privileges), in.Allowlist, in.ReadQuota, in.WriteQuota)
+	return &pb.AerospikeCreateRoleResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) DropRole(ctx context.Context, in *pb.AerospikeDropRoleRequest) (*pb.AerospikeDropRoleResponse, error) {
+	err := s.client.DropRole(toAdminPolicy(in.Policy), in.RoleName)
+	return &pb.AerospikeDropRoleResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) GrantPrivileges(ctx context.Context, in *pb.AerospikeGrantPrivilegesRequest) (*pb.AerospikeGrantPrivilegesResponse, error) {
+	err := s.client.GrantPrivileges(toAdminPolicy(in.Policy), in.RoleName, toPrivileges(in.Privileges))
+	return &pb.AerospikeGrantPrivilegesResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) RevokePrivileges(ctx context.Context, in *pb.AerospikeRevokePrivilegesRequest) (*pb.AerospikeRevokePrivilegesResponse, error) {
+	err := s.client.RevokePrivileges(toAdminPolicy(in.Policy), in.RoleName, toPrivileges(in.Privileges))
+	return &pb.AerospikeRevokePrivilegesResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) SetAllowlist(ctx context.Context, in *pb.AerospikeSetAllowlistRequest) (*pb.AerospikeSetAllowlistResponse, error) {
+	err := s.client.SetWhitelist(toAdminPolicy(in.Policy), in.RoleName, in.Allowlist)
+	return &pb.AerospikeSetAllowlistResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func (s *server) SetQuotas(ctx context.Context, in *pb.AerospikeSetQuotasRequest) (*pb.AerospikeSetQuotasResponse, error) {
+	err := s.client.SetQuotas(toAdminPolicy(in.Policy), in.RoleName, in.ReadQuota, in.WriteQuota)
+	return &pb.AerospikeSetQuotasResponse{
+		Error: fromError(err),
+	}, nil
+}
+
+func toPrivilegeCode(in string) aero.Privilege {
+
+	panic(UNREACHABLE)
+}
+
+func toPrivileges(in []*proto.Privilege) []aero.Privilege {
+	res := make([]aero.Privilege, len(in))
+	for i := range in {
+		res[i] = toPrivilege(in[i])
+	}
+	return res
+}
+
+func toPrivilege(in *proto.Privilege) aero.Privilege {
+	switch in.Name {
+	case string(aero.UserAdmin):
+		return aero.Privilege{Code: aero.UserAdmin, Namespace: in.Namespace, SetName: in.SetName}
+	case string(aero.SysAdmin):
+		return aero.Privilege{Code: aero.SysAdmin, Namespace: in.Namespace, SetName: in.SetName}
+	case string(aero.DataAdmin):
+		return aero.Privilege{Code: aero.DataAdmin, Namespace: in.Namespace, SetName: in.SetName}
+	case string(aero.UDFAdmin):
+		return aero.Privilege{Code: aero.UDFAdmin, Namespace: in.Namespace, SetName: in.SetName}
+	case string(aero.SIndexAdmin):
+		return aero.Privilege{Code: aero.SIndexAdmin, Namespace: in.Namespace, SetName: in.SetName}
+	case string(aero.ReadWriteUDF):
+		return aero.Privilege{Code: aero.ReadWriteUDF, Namespace: in.Namespace, SetName: in.SetName}
+	case string(aero.ReadWrite):
+		return aero.Privilege{Code: aero.ReadWrite, Namespace: in.Namespace, SetName: in.SetName}
+	case string(aero.Read):
+		return aero.Privilege{Code: aero.Read, Namespace: in.Namespace, SetName: in.SetName}
+	case string(aero.Write):
+		return aero.Privilege{Code: aero.Write, Namespace: in.Namespace, SetName: in.SetName}
+	case string(aero.Truncate):
+		return aero.Privilege{Code: aero.Truncate, Namespace: in.Namespace, SetName: in.SetName}
+	}
+	panic("UNREACHABLE")
+}
+
+func fromPrivileges(in []aero.Privilege) []*proto.Privilege {
+	res := make([]*proto.Privilege, len(in))
+	for i := range in {
+		res[i] = fromPrivilege(&in[i])
+	}
+	return res
+}
+
+func fromPrivilege(in *aero.Privilege) *proto.Privilege {
+	return &proto.Privilege{
+		Name:      string(in.Code),
+		Namespace: in.Namespace,
+		SetName:   in.SetName,
+	}
+}
+
+func fromRoles(in []*aero.Role) []*proto.Role {
+	res := make([]*proto.Role, len(in))
+	for i := range in {
+		res[i] = fromRole(in[i])
+	}
+	return res
+}
+
+func fromRole(in *aero.Role) *proto.Role {
+	return &proto.Role{
+		Name:       in.Name,
+		Privileges: fromPrivileges(in.Privileges),
+		Allowlist:  in.Whitelist,
+		ReadQuota:  in.ReadQuota,
+		WriteQuota: in.WriteQuota,
+	}
+}
+
+type Int interface {
+	int | uint | int64 | int32 | int16 | int8 | uint64 | uint32 | uint16 | uint8
+}
+
+func convIntList[T Int, U Int](l []T) []U {
+	res := make([]U, len(l))
+	for i := range l {
+		res[i] = U(l[i])
+	}
+	return res
+}
+
+func fromUserRoles(in []*aero.UserRoles) []*proto.UserRole {
+	res := make([]*proto.UserRole, len(in))
+	for i := range in {
+		res[i] = fromUserRole(in[i])
+	}
+	return res
+}
+
+func fromUserRole(in *aero.UserRoles) *proto.UserRole {
+	return &proto.UserRole{
+		User:       in.User,
+		Roles:      in.Roles,
+		ReadInfo:   convIntList[int, uint64](in.ReadInfo),
+		WriteInfo:  convIntList[int, uint64](in.WriteInfo),
+		ConnsInUse: uint64(in.ConnsInUse),
+	}
+}
+
 func fromUDFs(in []*aero.UDF) []*proto.UDFMeta {
 	res := make([]*proto.UDFMeta, len(in))
 	for i := range in {
@@ -342,6 +562,13 @@ func toWritePolicy(in *pb.WritePolicy) *aero.WritePolicy {
 			RespondPerEachOp:   in.RespondPerEachOp,
 			DurableDelete:      in.DurableDelete,
 		}
+	}
+	return nil
+}
+
+func toAdminPolicy(in *pb.AdminPolicy) *aero.AdminPolicy {
+	if in != nil {
+		return &aero.AdminPolicy{Timeout: time.Duration(in.Timeout * uint32(time.Millisecond))}
 	}
 	return nil
 }

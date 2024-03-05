@@ -19,23 +19,36 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	KVS_Put_FullMethodName          = "/com.aerospike.daemon.KVS/Put"
-	KVS_Add_FullMethodName          = "/com.aerospike.daemon.KVS/Add"
-	KVS_Append_FullMethodName       = "/com.aerospike.daemon.KVS/Append"
-	KVS_Prepend_FullMethodName      = "/com.aerospike.daemon.KVS/Prepend"
-	KVS_Get_FullMethodName          = "/com.aerospike.daemon.KVS/Get"
-	KVS_GetHeader_FullMethodName    = "/com.aerospike.daemon.KVS/GetHeader"
-	KVS_Exists_FullMethodName       = "/com.aerospike.daemon.KVS/Exists"
-	KVS_Delete_FullMethodName       = "/com.aerospike.daemon.KVS/Delete"
-	KVS_Touch_FullMethodName        = "/com.aerospike.daemon.KVS/Touch"
-	KVS_BatchOperate_FullMethodName = "/com.aerospike.daemon.KVS/BatchOperate"
-	KVS_CreateIndex_FullMethodName  = "/com.aerospike.daemon.KVS/CreateIndex"
-	KVS_DropIndex_FullMethodName    = "/com.aerospike.daemon.KVS/DropIndex"
-	KVS_Truncate_FullMethodName     = "/com.aerospike.daemon.KVS/Truncate"
-	KVS_RegisterUDF_FullMethodName  = "/com.aerospike.daemon.KVS/RegisterUDF"
-	KVS_DropUDF_FullMethodName      = "/com.aerospike.daemon.KVS/DropUDF"
-	KVS_ListUDF_FullMethodName      = "/com.aerospike.daemon.KVS/ListUDF"
-	KVS_UDFExecute_FullMethodName   = "/com.aerospike.daemon.KVS/UDFExecute"
+	KVS_Put_FullMethodName              = "/com.aerospike.daemon.KVS/Put"
+	KVS_Add_FullMethodName              = "/com.aerospike.daemon.KVS/Add"
+	KVS_Append_FullMethodName           = "/com.aerospike.daemon.KVS/Append"
+	KVS_Prepend_FullMethodName          = "/com.aerospike.daemon.KVS/Prepend"
+	KVS_Get_FullMethodName              = "/com.aerospike.daemon.KVS/Get"
+	KVS_GetHeader_FullMethodName        = "/com.aerospike.daemon.KVS/GetHeader"
+	KVS_Exists_FullMethodName           = "/com.aerospike.daemon.KVS/Exists"
+	KVS_Delete_FullMethodName           = "/com.aerospike.daemon.KVS/Delete"
+	KVS_Touch_FullMethodName            = "/com.aerospike.daemon.KVS/Touch"
+	KVS_BatchOperate_FullMethodName     = "/com.aerospike.daemon.KVS/BatchOperate"
+	KVS_CreateIndex_FullMethodName      = "/com.aerospike.daemon.KVS/CreateIndex"
+	KVS_DropIndex_FullMethodName        = "/com.aerospike.daemon.KVS/DropIndex"
+	KVS_Truncate_FullMethodName         = "/com.aerospike.daemon.KVS/Truncate"
+	KVS_RegisterUDF_FullMethodName      = "/com.aerospike.daemon.KVS/RegisterUDF"
+	KVS_DropUDF_FullMethodName          = "/com.aerospike.daemon.KVS/DropUDF"
+	KVS_ListUDF_FullMethodName          = "/com.aerospike.daemon.KVS/ListUDF"
+	KVS_UDFExecute_FullMethodName       = "/com.aerospike.daemon.KVS/UDFExecute"
+	KVS_CreateUser_FullMethodName       = "/com.aerospike.daemon.KVS/CreateUser"
+	KVS_DropUser_FullMethodName         = "/com.aerospike.daemon.KVS/DropUser"
+	KVS_ChangePassword_FullMethodName   = "/com.aerospike.daemon.KVS/ChangePassword"
+	KVS_GrantRoles_FullMethodName       = "/com.aerospike.daemon.KVS/GrantRoles"
+	KVS_RevokeRoles_FullMethodName      = "/com.aerospike.daemon.KVS/RevokeRoles"
+	KVS_QueryUsers_FullMethodName       = "/com.aerospike.daemon.KVS/QueryUsers"
+	KVS_QueryRoles_FullMethodName       = "/com.aerospike.daemon.KVS/QueryRoles"
+	KVS_CreateRole_FullMethodName       = "/com.aerospike.daemon.KVS/CreateRole"
+	KVS_DropRole_FullMethodName         = "/com.aerospike.daemon.KVS/DropRole"
+	KVS_GrantPrivileges_FullMethodName  = "/com.aerospike.daemon.KVS/GrantPrivileges"
+	KVS_RevokePrivileges_FullMethodName = "/com.aerospike.daemon.KVS/RevokePrivileges"
+	KVS_SetAllowlist_FullMethodName     = "/com.aerospike.daemon.KVS/SetAllowlist"
+	KVS_SetQuotas_FullMethodName        = "/com.aerospike.daemon.KVS/SetQuotas"
 )
 
 // KVSClient is the client API for KVS service.
@@ -88,6 +101,36 @@ type KVSClient interface {
 	// Lists all packages containing user defined functions in the server.
 	// This method is only supported by Aerospike 3+ servers.
 	UDFExecute(ctx context.Context, in *AerospikeUDFExecuteRequest, opts ...grpc.CallOption) (*AerospikeUDFExecuteResponse, error)
+	// CreateUser creates a new user with password and roles.
+	CreateUser(ctx context.Context, in *AerospikeCreateUserRequest, opts ...grpc.CallOption) (*AerospikeCreateUserResponse, error)
+	// DropUser removes a user from the cluster.
+	DropUser(ctx context.Context, in *AerospikeDropUserRequest, opts ...grpc.CallOption) (*AerospikeDropUserResponse, error)
+	// ChangePassword changes a user's password. Clear-text password will be hashed using bcrypt before sending to server.
+	ChangePassword(ctx context.Context, in *AerospikeChangePasswordRequest, opts ...grpc.CallOption) (*AerospikeChangePasswordResponse, error)
+	// GrantRoles adds roles to user's list of roles.
+	GrantRoles(ctx context.Context, in *AerospikeGrantRolesRequest, opts ...grpc.CallOption) (*AerospikeGrantRolesResponse, error)
+	// RevokeRoles removes roles from user's list of roles.
+	RevokeRoles(ctx context.Context, in *AerospikeRevokeRolesRequest, opts ...grpc.CallOption) (*AerospikeRevokeRolesResponse, error)
+	// QueryUsers retrieves all users and their roles.
+	QueryUsers(ctx context.Context, in *AerospikeQueryUsersRequest, opts ...grpc.CallOption) (*AerospikeQueryUsersResponse, error)
+	// QueryRoles retrieves all roles and their privileges.
+	QueryRoles(ctx context.Context, in *AerospikeQueryRolesRequest, opts ...grpc.CallOption) (*AerospikeQueryRolesResponse, error)
+	// CreateRole creates a user-defined role.
+	// Quotas require server security configuration "enable-quotas" to be set to true.
+	// Pass 0 for quota values for no limit.
+	CreateRole(ctx context.Context, in *AerospikeCreateRoleRequest, opts ...grpc.CallOption) (*AerospikeCreateRoleResponse, error)
+	// DropRole removes a user-defined role.
+	DropRole(ctx context.Context, in *AerospikeDropRoleRequest, opts ...grpc.CallOption) (*AerospikeDropRoleResponse, error)
+	// GrantPrivileges grant privileges to a user-defined role.
+	GrantPrivileges(ctx context.Context, in *AerospikeGrantPrivilegesRequest, opts ...grpc.CallOption) (*AerospikeGrantPrivilegesResponse, error)
+	// RevokePrivileges revokes privileges from a user-defined role.
+	RevokePrivileges(ctx context.Context, in *AerospikeRevokePrivilegesRequest, opts ...grpc.CallOption) (*AerospikeRevokePrivilegesResponse, error)
+	// SetAllowlist sets IP address whitelist for a role. If whitelist is nil or empty, it removes existing whitelist from role.
+	SetAllowlist(ctx context.Context, in *AerospikeSetAllowlistRequest, opts ...grpc.CallOption) (*AerospikeSetAllowlistResponse, error)
+	// SetQuotas sets maximum reads/writes per second limits for a role.  If a quota is zero, the limit is removed.
+	// Quotas require server security configuration "enable-quotas" to be set to true.
+	// Pass 0 for quota values for no limit.
+	SetQuotas(ctx context.Context, in *AerospikeSetQuotasRequest, opts ...grpc.CallOption) (*AerospikeSetQuotasResponse, error)
 }
 
 type kVSClient struct {
@@ -251,6 +294,123 @@ func (c *kVSClient) UDFExecute(ctx context.Context, in *AerospikeUDFExecuteReque
 	return out, nil
 }
 
+func (c *kVSClient) CreateUser(ctx context.Context, in *AerospikeCreateUserRequest, opts ...grpc.CallOption) (*AerospikeCreateUserResponse, error) {
+	out := new(AerospikeCreateUserResponse)
+	err := c.cc.Invoke(ctx, KVS_CreateUser_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) DropUser(ctx context.Context, in *AerospikeDropUserRequest, opts ...grpc.CallOption) (*AerospikeDropUserResponse, error) {
+	out := new(AerospikeDropUserResponse)
+	err := c.cc.Invoke(ctx, KVS_DropUser_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) ChangePassword(ctx context.Context, in *AerospikeChangePasswordRequest, opts ...grpc.CallOption) (*AerospikeChangePasswordResponse, error) {
+	out := new(AerospikeChangePasswordResponse)
+	err := c.cc.Invoke(ctx, KVS_ChangePassword_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) GrantRoles(ctx context.Context, in *AerospikeGrantRolesRequest, opts ...grpc.CallOption) (*AerospikeGrantRolesResponse, error) {
+	out := new(AerospikeGrantRolesResponse)
+	err := c.cc.Invoke(ctx, KVS_GrantRoles_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) RevokeRoles(ctx context.Context, in *AerospikeRevokeRolesRequest, opts ...grpc.CallOption) (*AerospikeRevokeRolesResponse, error) {
+	out := new(AerospikeRevokeRolesResponse)
+	err := c.cc.Invoke(ctx, KVS_RevokeRoles_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) QueryUsers(ctx context.Context, in *AerospikeQueryUsersRequest, opts ...grpc.CallOption) (*AerospikeQueryUsersResponse, error) {
+	out := new(AerospikeQueryUsersResponse)
+	err := c.cc.Invoke(ctx, KVS_QueryUsers_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) QueryRoles(ctx context.Context, in *AerospikeQueryRolesRequest, opts ...grpc.CallOption) (*AerospikeQueryRolesResponse, error) {
+	out := new(AerospikeQueryRolesResponse)
+	err := c.cc.Invoke(ctx, KVS_QueryRoles_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) CreateRole(ctx context.Context, in *AerospikeCreateRoleRequest, opts ...grpc.CallOption) (*AerospikeCreateRoleResponse, error) {
+	out := new(AerospikeCreateRoleResponse)
+	err := c.cc.Invoke(ctx, KVS_CreateRole_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) DropRole(ctx context.Context, in *AerospikeDropRoleRequest, opts ...grpc.CallOption) (*AerospikeDropRoleResponse, error) {
+	out := new(AerospikeDropRoleResponse)
+	err := c.cc.Invoke(ctx, KVS_DropRole_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) GrantPrivileges(ctx context.Context, in *AerospikeGrantPrivilegesRequest, opts ...grpc.CallOption) (*AerospikeGrantPrivilegesResponse, error) {
+	out := new(AerospikeGrantPrivilegesResponse)
+	err := c.cc.Invoke(ctx, KVS_GrantPrivileges_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) RevokePrivileges(ctx context.Context, in *AerospikeRevokePrivilegesRequest, opts ...grpc.CallOption) (*AerospikeRevokePrivilegesResponse, error) {
+	out := new(AerospikeRevokePrivilegesResponse)
+	err := c.cc.Invoke(ctx, KVS_RevokePrivileges_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) SetAllowlist(ctx context.Context, in *AerospikeSetAllowlistRequest, opts ...grpc.CallOption) (*AerospikeSetAllowlistResponse, error) {
+	out := new(AerospikeSetAllowlistResponse)
+	err := c.cc.Invoke(ctx, KVS_SetAllowlist_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) SetQuotas(ctx context.Context, in *AerospikeSetQuotasRequest, opts ...grpc.CallOption) (*AerospikeSetQuotasResponse, error) {
+	out := new(AerospikeSetQuotasResponse)
+	err := c.cc.Invoke(ctx, KVS_SetQuotas_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KVSServer is the server API for KVS service.
 // All implementations must embed UnimplementedKVSServer
 // for forward compatibility
@@ -301,6 +461,36 @@ type KVSServer interface {
 	// Lists all packages containing user defined functions in the server.
 	// This method is only supported by Aerospike 3+ servers.
 	UDFExecute(context.Context, *AerospikeUDFExecuteRequest) (*AerospikeUDFExecuteResponse, error)
+	// CreateUser creates a new user with password and roles.
+	CreateUser(context.Context, *AerospikeCreateUserRequest) (*AerospikeCreateUserResponse, error)
+	// DropUser removes a user from the cluster.
+	DropUser(context.Context, *AerospikeDropUserRequest) (*AerospikeDropUserResponse, error)
+	// ChangePassword changes a user's password. Clear-text password will be hashed using bcrypt before sending to server.
+	ChangePassword(context.Context, *AerospikeChangePasswordRequest) (*AerospikeChangePasswordResponse, error)
+	// GrantRoles adds roles to user's list of roles.
+	GrantRoles(context.Context, *AerospikeGrantRolesRequest) (*AerospikeGrantRolesResponse, error)
+	// RevokeRoles removes roles from user's list of roles.
+	RevokeRoles(context.Context, *AerospikeRevokeRolesRequest) (*AerospikeRevokeRolesResponse, error)
+	// QueryUsers retrieves all users and their roles.
+	QueryUsers(context.Context, *AerospikeQueryUsersRequest) (*AerospikeQueryUsersResponse, error)
+	// QueryRoles retrieves all roles and their privileges.
+	QueryRoles(context.Context, *AerospikeQueryRolesRequest) (*AerospikeQueryRolesResponse, error)
+	// CreateRole creates a user-defined role.
+	// Quotas require server security configuration "enable-quotas" to be set to true.
+	// Pass 0 for quota values for no limit.
+	CreateRole(context.Context, *AerospikeCreateRoleRequest) (*AerospikeCreateRoleResponse, error)
+	// DropRole removes a user-defined role.
+	DropRole(context.Context, *AerospikeDropRoleRequest) (*AerospikeDropRoleResponse, error)
+	// GrantPrivileges grant privileges to a user-defined role.
+	GrantPrivileges(context.Context, *AerospikeGrantPrivilegesRequest) (*AerospikeGrantPrivilegesResponse, error)
+	// RevokePrivileges revokes privileges from a user-defined role.
+	RevokePrivileges(context.Context, *AerospikeRevokePrivilegesRequest) (*AerospikeRevokePrivilegesResponse, error)
+	// SetAllowlist sets IP address whitelist for a role. If whitelist is nil or empty, it removes existing whitelist from role.
+	SetAllowlist(context.Context, *AerospikeSetAllowlistRequest) (*AerospikeSetAllowlistResponse, error)
+	// SetQuotas sets maximum reads/writes per second limits for a role.  If a quota is zero, the limit is removed.
+	// Quotas require server security configuration "enable-quotas" to be set to true.
+	// Pass 0 for quota values for no limit.
+	SetQuotas(context.Context, *AerospikeSetQuotasRequest) (*AerospikeSetQuotasResponse, error)
 	mustEmbedUnimplementedKVSServer()
 }
 
@@ -358,6 +548,45 @@ func (UnimplementedKVSServer) ListUDF(context.Context, *AerospikeListUDFRequest)
 }
 func (UnimplementedKVSServer) UDFExecute(context.Context, *AerospikeUDFExecuteRequest) (*AerospikeUDFExecuteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UDFExecute not implemented")
+}
+func (UnimplementedKVSServer) CreateUser(context.Context, *AerospikeCreateUserRequest) (*AerospikeCreateUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (UnimplementedKVSServer) DropUser(context.Context, *AerospikeDropUserRequest) (*AerospikeDropUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropUser not implemented")
+}
+func (UnimplementedKVSServer) ChangePassword(context.Context, *AerospikeChangePasswordRequest) (*AerospikeChangePasswordResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
+}
+func (UnimplementedKVSServer) GrantRoles(context.Context, *AerospikeGrantRolesRequest) (*AerospikeGrantRolesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GrantRoles not implemented")
+}
+func (UnimplementedKVSServer) RevokeRoles(context.Context, *AerospikeRevokeRolesRequest) (*AerospikeRevokeRolesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeRoles not implemented")
+}
+func (UnimplementedKVSServer) QueryUsers(context.Context, *AerospikeQueryUsersRequest) (*AerospikeQueryUsersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryUsers not implemented")
+}
+func (UnimplementedKVSServer) QueryRoles(context.Context, *AerospikeQueryRolesRequest) (*AerospikeQueryRolesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QueryRoles not implemented")
+}
+func (UnimplementedKVSServer) CreateRole(context.Context, *AerospikeCreateRoleRequest) (*AerospikeCreateRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
+}
+func (UnimplementedKVSServer) DropRole(context.Context, *AerospikeDropRoleRequest) (*AerospikeDropRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropRole not implemented")
+}
+func (UnimplementedKVSServer) GrantPrivileges(context.Context, *AerospikeGrantPrivilegesRequest) (*AerospikeGrantPrivilegesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GrantPrivileges not implemented")
+}
+func (UnimplementedKVSServer) RevokePrivileges(context.Context, *AerospikeRevokePrivilegesRequest) (*AerospikeRevokePrivilegesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokePrivileges not implemented")
+}
+func (UnimplementedKVSServer) SetAllowlist(context.Context, *AerospikeSetAllowlistRequest) (*AerospikeSetAllowlistResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetAllowlist not implemented")
+}
+func (UnimplementedKVSServer) SetQuotas(context.Context, *AerospikeSetQuotasRequest) (*AerospikeSetQuotasResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetQuotas not implemented")
 }
 func (UnimplementedKVSServer) mustEmbedUnimplementedKVSServer() {}
 
@@ -678,6 +907,240 @@ func _KVS_UDFExecute_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KVS_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeCreateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).CreateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_CreateUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).CreateUser(ctx, req.(*AerospikeCreateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_DropUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeDropUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).DropUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_DropUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).DropUser(ctx, req.(*AerospikeDropUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_ChangePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeChangePasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).ChangePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_ChangePassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).ChangePassword(ctx, req.(*AerospikeChangePasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_GrantRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeGrantRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).GrantRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_GrantRoles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).GrantRoles(ctx, req.(*AerospikeGrantRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_RevokeRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeRevokeRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).RevokeRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_RevokeRoles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).RevokeRoles(ctx, req.(*AerospikeRevokeRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_QueryUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeQueryUsersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).QueryUsers(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_QueryUsers_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).QueryUsers(ctx, req.(*AerospikeQueryUsersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_QueryRoles_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeQueryRolesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).QueryRoles(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_QueryRoles_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).QueryRoles(ctx, req.(*AerospikeQueryRolesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_CreateRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeCreateRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).CreateRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_CreateRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).CreateRole(ctx, req.(*AerospikeCreateRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_DropRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeDropRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).DropRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_DropRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).DropRole(ctx, req.(*AerospikeDropRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_GrantPrivileges_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeGrantPrivilegesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).GrantPrivileges(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_GrantPrivileges_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).GrantPrivileges(ctx, req.(*AerospikeGrantPrivilegesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_RevokePrivileges_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeRevokePrivilegesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).RevokePrivileges(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_RevokePrivileges_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).RevokePrivileges(ctx, req.(*AerospikeRevokePrivilegesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_SetAllowlist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeSetAllowlistRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).SetAllowlist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_SetAllowlist_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).SetAllowlist(ctx, req.(*AerospikeSetAllowlistRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_SetQuotas_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeSetQuotasRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).SetQuotas(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_SetQuotas_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).SetQuotas(ctx, req.(*AerospikeSetQuotasRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KVS_ServiceDesc is the grpc.ServiceDesc for KVS service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -752,6 +1215,58 @@ var KVS_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UDFExecute",
 			Handler:    _KVS_UDFExecute_Handler,
+		},
+		{
+			MethodName: "CreateUser",
+			Handler:    _KVS_CreateUser_Handler,
+		},
+		{
+			MethodName: "DropUser",
+			Handler:    _KVS_DropUser_Handler,
+		},
+		{
+			MethodName: "ChangePassword",
+			Handler:    _KVS_ChangePassword_Handler,
+		},
+		{
+			MethodName: "GrantRoles",
+			Handler:    _KVS_GrantRoles_Handler,
+		},
+		{
+			MethodName: "RevokeRoles",
+			Handler:    _KVS_RevokeRoles_Handler,
+		},
+		{
+			MethodName: "QueryUsers",
+			Handler:    _KVS_QueryUsers_Handler,
+		},
+		{
+			MethodName: "QueryRoles",
+			Handler:    _KVS_QueryRoles_Handler,
+		},
+		{
+			MethodName: "CreateRole",
+			Handler:    _KVS_CreateRole_Handler,
+		},
+		{
+			MethodName: "DropRole",
+			Handler:    _KVS_DropRole_Handler,
+		},
+		{
+			MethodName: "GrantPrivileges",
+			Handler:    _KVS_GrantPrivileges_Handler,
+		},
+		{
+			MethodName: "RevokePrivileges",
+			Handler:    _KVS_RevokePrivileges_Handler,
+		},
+		{
+			MethodName: "SetAllowlist",
+			Handler:    _KVS_SetAllowlist_Handler,
+		},
+		{
+			MethodName: "SetQuotas",
+			Handler:    _KVS_SetQuotas_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

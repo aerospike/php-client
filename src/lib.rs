@@ -2627,6 +2627,39 @@ impl Default for ReadPolicy {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+//  AdminPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\AdminPolicy")]
+pub struct AdminPolicy {
+    _as: proto::AdminPolicy,
+}
+
+/// `AdminPolicy` encapsulates parameters for all admin operations.
+#[php_impl]
+#[derive(ZvalConvert)]
+impl AdminPolicy {
+    pub fn __construct() -> Self {
+        AdminPolicy {
+            _as: proto::AdminPolicy::default(),
+        }
+    }
+
+    #[getter]
+    pub fn get_timeout(&self) -> u32 {
+        self._as.timeout
+    }
+
+    #[setter]
+    pub fn set_timeout(&mut self, timeout_millis: u32) {
+        self._as.timeout = timeout_millis;
+    }
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 //  InfoPolicy
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -4550,7 +4583,6 @@ impl From<proto::UdfLanguage> for UdfLanguage {
     }
 }
 
-
 impl From<i32> for UdfLanguage {
     fn from(input: i32) -> Self {
         match input {
@@ -4596,6 +4628,207 @@ impl UdfMeta {
     #[getter]
     pub fn get_language(&self) -> UdfLanguage {
             self._as.language.into()
+    }
+}
+
+impl From<&proto::UserRole> for UserRole {
+    fn from(input: &proto::UserRole) -> Self {
+        UserRole { _as: input.clone() }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  UserRole
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\UserRole")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct UserRole {
+    _as: proto::UserRole,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl UserRole {
+    #[getter]
+    pub fn get_user(&self) -> String {
+            self._as.user.clone()
+    }
+
+    #[getter]
+    pub fn get_roles(&self) -> Vec<String> {
+            self._as.roles.clone()
+    }
+
+    #[getter]
+    pub fn get_read_info(&self) -> Vec<u64> {
+            self._as.read_info.clone().into()
+    }
+
+    #[getter]
+    pub fn get_write_info(&self) -> Vec<u64> {
+            self._as.write_info.clone().into()
+    }
+
+    #[getter]
+    pub fn get_conns_in_use(&self) -> u64 {
+            self._as.conns_in_use.into()
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Role
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\Role")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct Role {
+    _as: proto::Role,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl Role {
+    #[getter]
+    pub fn get_name(&self) -> String {
+            self._as.name.clone()
+    }
+
+    #[getter]
+    pub fn get_privileges(&self) -> Vec<Privilege> {
+            self._as.privileges.iter().map(|v| v.into()).collect()
+    }
+
+    #[getter]
+    pub fn get_allowlist(&self) -> Vec<String> {
+            self._as.allowlist.clone().into()
+    }
+
+    #[getter]
+    pub fn get_read_quota(&self) -> u64 {
+            self._as.read_quota.into()
+    }
+
+    #[getter]
+    pub fn write_quota(&self) -> u64 {
+            self._as.write_quota.into()
+    }
+}
+
+impl From<&proto::Role> for Role {
+    fn from(input: &proto::Role) -> Self {
+        Role { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for Role {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &Role = zval.extract()?;
+
+        Some(Role { _as: f._as.clone() })
+    }
+}
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Privilege
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\Privilege")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct Privilege {
+    _as: proto::Privilege,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl Privilege {
+    #[getter]
+    pub fn get_name(&self) -> String {
+            self._as.name.clone()
+    }
+
+    #[getter]
+    pub fn get_namespace(&self) -> String {
+            self._as.namespace.clone()
+    }
+
+    #[getter]
+    pub fn get_setname(&self) -> String {
+            self._as.set_name.clone()
+    }
+
+	// UserAdmin allows to manages users and their roles.
+	pub fn user_admin() -> String {
+        "user-admin".into()
+    }
+
+	// SysAdmin allows to manage indexes, user defined functions and server configuration.
+	pub fn sys_admin() -> String {
+        "sys-admin".into()
+    }
+
+	// DataAdmin allows to manage indicies and user defined functions.
+	pub fn data_admin() -> String {
+        "data-admin".into()
+    }
+
+	// UDFAdmin allows to manage user defined functions.
+	pub fn udf_admin() -> String {
+        "udf-admin".into()
+    }
+
+	// SIndexAdmin allows to manage indicies.
+	pub fn sindex_admin() -> String {
+        "sindex-admin".into()
+    }
+
+	// ReadWriteUDF allows read, write and UDF transactions with the database.
+	pub fn read_write_udf() -> String {
+        "read-write-udf".into()
+    }
+
+	// ReadWrite allows read and write transactions with the database.
+	pub fn read_write() -> String {
+        "read-write".into()
+    }
+
+	// Read allows read transactions with the database.
+	pub fn read() -> String {
+        "read".into()
+    }
+
+	// Write allows write transactions with the database.
+	pub fn write() -> String {
+        "write".into()
+    }
+
+	// Truncate allow issuing truncate commands.
+	pub fn truncate() -> String {
+        "truncate".into()
+    }
+
+}
+
+impl From<&proto::Privilege> for Privilege {
+    fn from(input: &proto::Privilege) -> Self {
+        Privilege { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for Privilege {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &Privilege = zval.extract()?;
+
+        Some(Privilege { _as: f._as.clone() })
     }
 }
 
@@ -5239,6 +5472,329 @@ impl Client {
         }
     }
 
+    pub fn create_user(
+        &self,
+        policy: &AdminPolicy,
+        user: String,
+        password: String,
+        roles: Vec<String>,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeCreateUserRequest {
+            policy: Some(policy._as.clone()),
+            user: user.into(),
+            password: password.into(),
+            roles: roles.into(),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.create_user(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeCreateUserResponse { error: None } => Ok(()),
+            proto::AerospikeCreateUserResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn drop_user(
+        &self,
+        policy: &AdminPolicy,
+        user: String,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeDropUserRequest {
+            policy: Some(policy._as.clone()),
+            user: user.into(),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.drop_user(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeDropUserResponse { error: None } => Ok(()),
+            proto::AerospikeDropUserResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn change_password(
+        &self,
+        policy: &AdminPolicy,
+        user: String,
+        password: String,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeChangePasswordRequest {
+            policy: Some(policy._as.clone()),
+            user: user.into(),
+            password: password.into(),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.change_password(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeChangePasswordResponse { error: None } => Ok(()),
+            proto::AerospikeChangePasswordResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn grant_roles(
+        &self,
+        policy: &AdminPolicy,
+        user: String,
+        roles: Vec<String>,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeGrantRolesRequest {
+            policy: Some(policy._as.clone()),
+            user: user.into(),
+            roles: roles.into(),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.grant_roles(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeGrantRolesResponse { error: None } => Ok(()),
+            proto::AerospikeGrantRolesResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn revoke_roles(
+        &self,
+        policy: &AdminPolicy,
+        user: String,
+        roles: Vec<String>,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeRevokeRolesRequest {
+            policy: Some(policy._as.clone()),
+            user: user.into(),
+            roles: roles.into(),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.revoke_roles(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeRevokeRolesResponse { error: None } => Ok(()),
+            proto::AerospikeRevokeRolesResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn query_users(
+        &self,
+        policy: &AdminPolicy,
+        user: Option<String>,
+    ) -> PhpResult<Vec<UserRole>> {
+        let request = tonic::Request::new(proto::AerospikeQueryUsersRequest {
+            policy: Some(policy._as.clone()),
+            user: user,
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.query_users(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeQueryUsersResponse {
+                error: None,
+                user_roles,
+            } => Ok(user_roles.iter().map(|v| v.into()).collect()),
+            proto::AerospikeQueryUsersResponse {
+                error: Some(pe), ..
+            } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(vec![])
+            }
+        }
+    }
+
+    pub fn query_roles(
+        &self,
+        policy: &AdminPolicy,
+        role_name: Option<String>,
+    ) -> PhpResult<Vec<Role>> {
+        let request = tonic::Request::new(proto::AerospikeQueryRolesRequest {
+            policy: Some(policy._as.clone()),
+            role_name: role_name,
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.query_roles(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeQueryRolesResponse {
+                error: None,
+                roles,
+            } => Ok(roles.iter().map(|v| v.into()).collect()),
+            proto::AerospikeQueryRolesResponse {
+                error: Some(pe), ..
+            } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(vec![])
+            }
+        }
+    }
+
+    pub fn create_role(
+        &self,
+        policy: &AdminPolicy,
+        role_name: String,
+        privileges: Vec<Privilege>,
+        allowlist: Vec<String>,
+        read_quota: u32,
+        write_quota: u32,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeCreateRoleRequest {
+            policy: Some(policy._as.clone()),
+            role_name: role_name,
+            privileges: privileges.iter().map(|v| v._as.clone()).collect(),
+            allowlist: allowlist,
+            read_quota: read_quota,
+            write_quota: write_quota,
+            });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.create_role(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeCreateRoleResponse { error: None } => Ok(()),
+            proto::AerospikeCreateRoleResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn drop_role(
+        &self,
+        policy: &AdminPolicy,
+        role_name: String,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeDropRoleRequest {
+            policy: Some(policy._as.clone()),
+            role_name: role_name,
+            });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.drop_role(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeDropRoleResponse { error: None } => Ok(()),
+            proto::AerospikeDropRoleResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn grant_privileges(
+        &self,
+        policy: &AdminPolicy,
+        role_name: String,
+        privileges: Vec<Privilege>,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeGrantPrivilegesRequest {
+            policy: Some(policy._as.clone()),
+            role_name: role_name,
+            privileges: privileges.iter().map(|v| v._as.clone()).collect(),
+            });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.grant_privileges(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeGrantPrivilegesResponse { error: None } => Ok(()),
+            proto::AerospikeGrantPrivilegesResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn revoke_privileges(
+        &self,
+        policy: &AdminPolicy,
+        role_name: String,
+        privileges: Vec<Privilege>,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeRevokePrivilegesRequest {
+            policy: Some(policy._as.clone()),
+            role_name: role_name,
+            privileges: privileges.iter().map(|v| v._as.clone()).collect(),
+            });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.revoke_privileges(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeRevokePrivilegesResponse { error: None } => Ok(()),
+            proto::AerospikeRevokePrivilegesResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn set_allowlist(
+        &self,
+        policy: &AdminPolicy,
+        role_name: String,
+        allowlist: Vec<String>,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeSetAllowlistRequest {
+            policy: Some(policy._as.clone()),
+            role_name: role_name,
+            allowlist: allowlist,
+            });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.set_allowlist(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeSetAllowlistResponse { error: None } => Ok(()),
+            proto::AerospikeSetAllowlistResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn set_quotas(
+        &self,
+        policy: &AdminPolicy,
+        role_name: String,
+        read_quota: u32,
+        write_quota: u32,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeSetQuotasRequest {
+            policy: Some(policy._as.clone()),
+            role_name: role_name,
+            read_quota: read_quota,
+            write_quota: write_quota,
+                });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.set_quotas(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeSetQuotasResponse { error: None } => Ok(()),
+            proto::AerospikeSetQuotasResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////

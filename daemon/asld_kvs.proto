@@ -375,6 +375,12 @@ message WritePolicy {
 	bool durableDelete = 8;
 }
 
+// AdminPolicy contains attributes used for Admin commands.
+message AdminPolicy {
+	// Admin command socket timeout.
+	uint32 timeout = 1;
+}
+
 // InfoPolicy contains attributes used for info commands.
 message InfoPolicy {
 	// Info command socket timeout.
@@ -805,6 +811,71 @@ message BatchUDF {
 	repeated Value functionArgs = 5;
 }
 
+// UserRoles contains information about a user.
+message UserRole {
+	// User name.
+	string user = 1;
+
+	// Roles is a list of assigned roles.
+	repeated string roles = 2;
+
+	// ReadInfo is the list of read statistics. List may be nil.
+	// Current statistics by offset are:
+	//
+	// 0: read quota in records per second
+	// 1: single record read transaction rate (TPS)
+	// 2: read scan/query record per second rate (RPS)
+	// 3: number of limitless read scans/queries
+	//
+	// Future server releases may add additional statistics.
+	repeated uint64 readInfo = 3;
+
+	// WriteInfo is the list of write statistics. List may be nil.
+	// Current statistics by offset are:
+	//
+	// 0: write quota in records per second
+	// 1: single record write transaction rate (TPS)
+	// 2: write scan/query record per second rate (RPS)
+	// 3: number of limitless write scans/queries
+	//
+	// Future server releases may add additional statistics.
+	repeated uint64 writeInfo = 4;
+
+	// ConnsInUse is the number of currently open connections for the user
+	uint64 connsInUse = 5;
+}
+
+// Role allows granular access to database entities for users.
+message Role {
+	// Name is role name
+	string name = 1;
+
+	// Privilege is the list of assigned privileges
+	repeated Privilege privileges = 2;
+
+	// While is the list of allowable IP addresses
+	repeated string allowlist = 3;
+
+	// ReadQuota is the maximum reads per second limit for the role
+	uint32 ReadQuota = 4;
+
+	// WriteQuota is the maximum writes per second limit for the role
+	uint32 writeQuota = 5;
+}
+
+// Privilege determines user access granularity.
+message Privilege {
+	// Role
+	string Name = 1;
+
+	// Namespace determines namespace scope. Apply permission to this namespace only.
+	// If namespace is zero value, the privilege applies to all namespaces.
+	string namespace = 2;
+
+	// Set name scope. Apply permission to this set within namespace only.
+	// If set is zero value, the privilege applies to all sets within namespace.
+	string setName = 3;
+}
 
 // The response for KV commands.
 message AerospikeSingleResponse {
@@ -959,6 +1030,139 @@ message AerospikeUDFExecuteResponse {
   Value result = 2;
 }
 
+message AerospikeCreateUserRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+	string password = 3;
+	repeated string roles = 4;
+}
+
+message AerospikeCreateUserResponse {
+  optional Error error = 1;
+}
+
+message AerospikeDropUserRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+}
+
+message AerospikeDropUserResponse {
+  optional Error error = 1;
+}
+
+message AerospikeChangePasswordRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+	string password = 3;
+}
+
+message AerospikeChangePasswordResponse {
+  optional Error error = 1;
+}
+
+message AerospikeGrantRolesRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+	repeated string roles = 3;
+}
+
+message AerospikeGrantRolesResponse {
+  optional Error error = 1;
+}
+
+message AerospikeRevokeRolesRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+	repeated string roles = 3;
+}
+
+message AerospikeRevokeRolesResponse {
+  optional Error error = 1;
+}
+
+message AerospikeQueryUsersRequest {
+	AdminPolicy policy = 1;
+	optional string user = 2;
+}
+
+message AerospikeQueryUsersResponse {
+  optional Error error = 1;
+  repeated UserRole userRoles = 2;
+}
+
+message AerospikeQueryRolesRequest {
+	AdminPolicy policy = 1;
+	optional string roleName = 2;
+}
+
+message AerospikeQueryRolesResponse {
+  optional Error error = 1;
+  repeated Role roles = 2;
+}
+
+message AerospikeCreateRoleRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	repeated Privilege privileges = 3;
+	repeated string allowlist = 4;
+	uint32 readQuota = 5;
+	uint32 writeQuota = 6;
+}
+
+message AerospikeCreateRoleResponse {
+  optional Error error = 1;
+}
+
+message AerospikeDropRoleRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+}
+
+message AerospikeDropRoleResponse {
+  optional Error error = 1;
+}
+
+message AerospikeGrantPrivilegesRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	repeated Privilege privileges = 3;
+}
+
+message AerospikeGrantPrivilegesResponse {
+  optional Error error = 1;
+}
+
+message AerospikeRevokePrivilegesRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	repeated Privilege privileges = 3;
+}
+
+message AerospikeRevokePrivilegesResponse {
+  optional Error error = 1;
+}
+
+message AerospikeSetAllowlistRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	repeated string allowlist = 3;
+}
+
+message AerospikeSetAllowlistResponse {
+  optional Error error = 1;
+}
+
+message AerospikeSetQuotasRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	uint32 readQuota = 3;
+	uint32 writeQuota = 4;
+}
+
+message AerospikeSetQuotasResponse {
+  optional Error error = 1;
+}
+
 // Aerospike KVS operations service
 service KVS {
 	// Put a single record
@@ -1041,10 +1245,63 @@ service KVS {
 	rpc UDFExecute (AerospikeUDFExecuteRequest) returns
 		(AerospikeUDFExecuteResponse) {}
 
+	// CreateUser creates a new user with password and roles.
+	rpc CreateUser (AerospikeCreateUserRequest) returns
+		(AerospikeCreateUserResponse) {}
 
-// // ExecuteUDF single key user defined function on server and return results.
-//   rpc ExecuteUDF (AerospikeExecuteUDFRequest) returns
-//       (AerospikeRExecuteUDFesponse) {}
+
+	// DropUser removes a user from the cluster.
+	rpc DropUser (AerospikeDropUserRequest) returns
+		(AerospikeDropUserResponse) {}
+
+	// ChangePassword changes a user's password. Clear-text password will be hashed using bcrypt before sending to server.
+	rpc ChangePassword (AerospikeChangePasswordRequest) returns
+		(AerospikeChangePasswordResponse) {}
+
+	// GrantRoles adds roles to user's list of roles.
+	rpc GrantRoles (AerospikeGrantRolesRequest) returns
+			(AerospikeGrantRolesResponse) {}
+
+	// RevokeRoles removes roles from user's list of roles.
+	rpc RevokeRoles (AerospikeRevokeRolesRequest) returns
+			(AerospikeRevokeRolesResponse) {}
+
+	// QueryUsers retrieves all users and their roles.
+	rpc QueryUsers (AerospikeQueryUsersRequest) returns
+				(AerospikeQueryUsersResponse) {}
+
+	// QueryRoles retrieves all roles and their privileges.
+	rpc QueryRoles (AerospikeQueryRolesRequest) returns
+				(AerospikeQueryRolesResponse) {}
+
+	// CreateRole creates a user-defined role.
+	// Quotas require server security configuration "enable-quotas" to be set to true.
+	// Pass 0 for quota values for no limit.
+	rpc CreateRole (AerospikeCreateRoleRequest) returns
+				(AerospikeCreateRoleResponse) {}
+
+	// DropRole removes a user-defined role.
+	rpc DropRole (AerospikeDropRoleRequest) returns
+				(AerospikeDropRoleResponse) {}
+
+	// GrantPrivileges grant privileges to a user-defined role.
+	rpc GrantPrivileges (AerospikeGrantPrivilegesRequest) returns
+				(AerospikeGrantPrivilegesResponse) {}
+
+	// RevokePrivileges revokes privileges from a user-defined role.
+	rpc RevokePrivileges (AerospikeRevokePrivilegesRequest) returns
+				(AerospikeRevokePrivilegesResponse) {}
+
+	// SetAllowlist sets IP address whitelist for a role. If whitelist is nil or empty, it removes existing whitelist from role.
+	rpc SetAllowlist (AerospikeSetAllowlistRequest) returns
+				(AerospikeSetAllowlistResponse) {}
+
+	// SetQuotas sets maximum reads/writes per second limits for a role.  If a quota is zero, the limit is removed.
+	// Quotas require server security configuration "enable-quotas" to be set to true.
+	// Pass 0 for quota values for no limit.
+	rpc SetQuotas (AerospikeSetQuotasRequest) returns
+				(AerospikeSetQuotasResponse) {}
+
 }
 
 enum OperationType {

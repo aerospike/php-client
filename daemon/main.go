@@ -106,6 +106,6 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 	// 	log.Fatal(srv.Serve(tcpLn))
 	// }()
 
-	log.Printf("Server ready for unix socket protocol: %s", ac.Socket)
+	log.Printf("Cake is ready for unix socket protocol: %s", ac.Socket)
 	log.Fatal(srv.Serve(ln))
 }

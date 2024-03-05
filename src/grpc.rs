@@ -168,4 +168,108 @@ impl BlockingClient {
         // return the task ID and handle the task
         self.rt.block_on(self.client.udf_execute(request))
     }
+
+    pub fn create_user(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeCreateUserRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeCreateUserResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.create_user(request))
+    }
+
+    pub fn drop_user(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeDropUserRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeDropUserResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.drop_user(request))
+    }
+
+    pub fn change_password(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeChangePasswordRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeChangePasswordResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.change_password(request))
+    }
+
+    pub fn grant_roles(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeGrantRolesRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeGrantRolesResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.grant_roles(request))
+    }
+
+    pub fn revoke_roles(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeRevokeRolesRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeRevokeRolesResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.revoke_roles(request))
+    }
+
+    pub fn query_users(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeQueryUsersRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeQueryUsersResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.query_users(request))
+    }
+
+    pub fn query_roles(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeQueryRolesRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeQueryRolesResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.query_roles(request))
+    }
+
+    pub fn create_role(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeCreateRoleRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeCreateRoleResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.create_role(request))
+    }
+
+    pub fn drop_role(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeDropRoleRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeDropRoleResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.drop_role(request))
+    }
+
+    pub fn grant_privileges(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeGrantPrivilegesRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeGrantPrivilegesResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.grant_privileges(request))
+    }
+
+    pub fn revoke_privileges(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeRevokePrivilegesRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeRevokePrivilegesResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.revoke_privileges(request))
+    }
+
+    pub fn set_allowlist(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeSetAllowlistRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeSetAllowlistResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.set_allowlist(request))
+    }
+
+    pub fn set_quotas(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeSetQuotasRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeSetQuotasResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.set_quotas(request))
+    }
 }
