@@ -32,6 +32,10 @@ const (
 	KVS_CreateIndex_FullMethodName  = "/com.aerospike.daemon.KVS/CreateIndex"
 	KVS_DropIndex_FullMethodName    = "/com.aerospike.daemon.KVS/DropIndex"
 	KVS_Truncate_FullMethodName     = "/com.aerospike.daemon.KVS/Truncate"
+	KVS_RegisterUDF_FullMethodName  = "/com.aerospike.daemon.KVS/RegisterUDF"
+	KVS_DropUDF_FullMethodName      = "/com.aerospike.daemon.KVS/DropUDF"
+	KVS_ListUDF_FullMethodName      = "/com.aerospike.daemon.KVS/ListUDF"
+	KVS_UDFExecute_FullMethodName   = "/com.aerospike.daemon.KVS/UDFExecute"
 )
 
 // KVSClient is the client API for KVS service.
@@ -64,6 +68,26 @@ type KVSClient interface {
 	DropIndex(ctx context.Context, in *AerospikeDropIndexRequest, opts ...grpc.CallOption) (*AerospikeDropIndexResponse, error)
 	// Truncate removes records in specified namespace/set efficiently.
 	Truncate(ctx context.Context, in *AerospikeTruncateRequest, opts ...grpc.CallOption) (*AerospikeTruncateResponse, error)
+	// Registers a package containing user defined functions with server.
+	// This asynchronous server call will return before command is complete.
+	// The user can optionally wait for command completion by using the returned
+	// RegisterTask instance.
+	//
+	// This method is only supported by Aerospike 3+ servers.
+	RegisterUDF(ctx context.Context, in *AerospikeRegisterUDFRequest, opts ...grpc.CallOption) (*AerospikeRegisterUDFResponse, error)
+	// Removes a package containing user defined functions in the server.
+	// This asynchronous server call will return before command is complete.
+	// The user can optionally wait for command completion by using the returned
+	// RemoveTask instance.
+	//
+	// This method is only supported by Aerospike 3+ servers.
+	DropUDF(ctx context.Context, in *AerospikeDropUDFRequest, opts ...grpc.CallOption) (*AerospikeDropUDFResponse, error)
+	// Lists all packages containing user defined functions in the server.
+	// This method is only supported by Aerospike 3+ servers.
+	ListUDF(ctx context.Context, in *AerospikeListUDFRequest, opts ...grpc.CallOption) (*AerospikeListUDFResponse, error)
+	// Lists all packages containing user defined functions in the server.
+	// This method is only supported by Aerospike 3+ servers.
+	UDFExecute(ctx context.Context, in *AerospikeUDFExecuteRequest, opts ...grpc.CallOption) (*AerospikeUDFExecuteResponse, error)
 }
 
 type kVSClient struct {
@@ -191,6 +215,42 @@ func (c *kVSClient) Truncate(ctx context.Context, in *AerospikeTruncateRequest, 
 	return out, nil
 }
 
+func (c *kVSClient) RegisterUDF(ctx context.Context, in *AerospikeRegisterUDFRequest, opts ...grpc.CallOption) (*AerospikeRegisterUDFResponse, error) {
+	out := new(AerospikeRegisterUDFResponse)
+	err := c.cc.Invoke(ctx, KVS_RegisterUDF_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) DropUDF(ctx context.Context, in *AerospikeDropUDFRequest, opts ...grpc.CallOption) (*AerospikeDropUDFResponse, error) {
+	out := new(AerospikeDropUDFResponse)
+	err := c.cc.Invoke(ctx, KVS_DropUDF_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) ListUDF(ctx context.Context, in *AerospikeListUDFRequest, opts ...grpc.CallOption) (*AerospikeListUDFResponse, error) {
+	out := new(AerospikeListUDFResponse)
+	err := c.cc.Invoke(ctx, KVS_ListUDF_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *kVSClient) UDFExecute(ctx context.Context, in *AerospikeUDFExecuteRequest, opts ...grpc.CallOption) (*AerospikeUDFExecuteResponse, error) {
+	out := new(AerospikeUDFExecuteResponse)
+	err := c.cc.Invoke(ctx, KVS_UDFExecute_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // KVSServer is the server API for KVS service.
 // All implementations must embed UnimplementedKVSServer
 // for forward compatibility
@@ -221,6 +281,26 @@ type KVSServer interface {
 	DropIndex(context.Context, *AerospikeDropIndexRequest) (*AerospikeDropIndexResponse, error)
 	// Truncate removes records in specified namespace/set efficiently.
 	Truncate(context.Context, *AerospikeTruncateRequest) (*AerospikeTruncateResponse, error)
+	// Registers a package containing user defined functions with server.
+	// This asynchronous server call will return before command is complete.
+	// The user can optionally wait for command completion by using the returned
+	// RegisterTask instance.
+	//
+	// This method is only supported by Aerospike 3+ servers.
+	RegisterUDF(context.Context, *AerospikeRegisterUDFRequest) (*AerospikeRegisterUDFResponse, error)
+	// Removes a package containing user defined functions in the server.
+	// This asynchronous server call will return before command is complete.
+	// The user can optionally wait for command completion by using the returned
+	// RemoveTask instance.
+	//
+	// This method is only supported by Aerospike 3+ servers.
+	DropUDF(context.Context, *AerospikeDropUDFRequest) (*AerospikeDropUDFResponse, error)
+	// Lists all packages containing user defined functions in the server.
+	// This method is only supported by Aerospike 3+ servers.
+	ListUDF(context.Context, *AerospikeListUDFRequest) (*AerospikeListUDFResponse, error)
+	// Lists all packages containing user defined functions in the server.
+	// This method is only supported by Aerospike 3+ servers.
+	UDFExecute(context.Context, *AerospikeUDFExecuteRequest) (*AerospikeUDFExecuteResponse, error)
 	mustEmbedUnimplementedKVSServer()
 }
 
@@ -266,6 +346,18 @@ func (UnimplementedKVSServer) DropIndex(context.Context, *AerospikeDropIndexRequ
 }
 func (UnimplementedKVSServer) Truncate(context.Context, *AerospikeTruncateRequest) (*AerospikeTruncateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Truncate not implemented")
+}
+func (UnimplementedKVSServer) RegisterUDF(context.Context, *AerospikeRegisterUDFRequest) (*AerospikeRegisterUDFResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RegisterUDF not implemented")
+}
+func (UnimplementedKVSServer) DropUDF(context.Context, *AerospikeDropUDFRequest) (*AerospikeDropUDFResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropUDF not implemented")
+}
+func (UnimplementedKVSServer) ListUDF(context.Context, *AerospikeListUDFRequest) (*AerospikeListUDFResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUDF not implemented")
+}
+func (UnimplementedKVSServer) UDFExecute(context.Context, *AerospikeUDFExecuteRequest) (*AerospikeUDFExecuteResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UDFExecute not implemented")
 }
 func (UnimplementedKVSServer) mustEmbedUnimplementedKVSServer() {}
 
@@ -514,6 +606,78 @@ func _KVS_Truncate_Handler(srv interface{}, ctx context.Context, dec func(interf
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KVS_RegisterUDF_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeRegisterUDFRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).RegisterUDF(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_RegisterUDF_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).RegisterUDF(ctx, req.(*AerospikeRegisterUDFRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_DropUDF_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeDropUDFRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).DropUDF(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_DropUDF_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).DropUDF(ctx, req.(*AerospikeDropUDFRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_ListUDF_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeListUDFRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).ListUDF(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_ListUDF_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).ListUDF(ctx, req.(*AerospikeListUDFRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _KVS_UDFExecute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AerospikeUDFExecuteRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(KVSServer).UDFExecute(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: KVS_UDFExecute_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(KVSServer).UDFExecute(ctx, req.(*AerospikeUDFExecuteRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // KVS_ServiceDesc is the grpc.ServiceDesc for KVS service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -572,6 +736,22 @@ var KVS_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Truncate",
 			Handler:    _KVS_Truncate_Handler,
+		},
+		{
+			MethodName: "RegisterUDF",
+			Handler:    _KVS_RegisterUDF_Handler,
+		},
+		{
+			MethodName: "DropUDF",
+			Handler:    _KVS_DropUDF_Handler,
+		},
+		{
+			MethodName: "ListUDF",
+			Handler:    _KVS_ListUDF_Handler,
+		},
+		{
+			MethodName: "UDFExecute",
+			Handler:    _KVS_UDFExecute_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

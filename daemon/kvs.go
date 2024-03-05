@@ -196,6 +196,82 @@ func (s *server) Truncate(ctx context.Context, in *pb.AerospikeTruncateRequest) 
 	return &pb.AerospikeTruncateResponse{Error: nil}, nil
 }
 
+func (s *server) RegisterUDF(ctx context.Context, in *pb.AerospikeRegisterUDFRequest) (*pb.AerospikeRegisterUDFResponse, error) {
+	_, err := s.client.RegisterUDF(toWritePolicy(in.Policy), in.UdfBody, in.PackageName, toLanguage(in.Language))
+	if err != nil {
+		return &pb.AerospikeRegisterUDFResponse{
+			Error: fromError(err),
+		}, nil
+	}
+
+	return &pb.AerospikeRegisterUDFResponse{Error: nil}, nil
+}
+
+func (s *server) DropUDF(ctx context.Context, in *pb.AerospikeDropUDFRequest) (*pb.AerospikeDropUDFResponse, error) {
+	_, err := s.client.RemoveUDF(toWritePolicy(in.Policy), in.PackageName)
+	if err != nil {
+		return &pb.AerospikeDropUDFResponse{
+			Error: fromError(err),
+		}, nil
+	}
+
+	return &pb.AerospikeDropUDFResponse{Error: nil}, nil
+}
+
+func (s *server) ListUDF(ctx context.Context, in *pb.AerospikeListUDFRequest) (*pb.AerospikeListUDFResponse, error) {
+	udfList, err := s.client.ListUDF(toReadPolicy(in.Policy))
+	if err != nil {
+		return &pb.AerospikeListUDFResponse{
+			Error: fromError(err),
+		}, nil
+	}
+
+	return &pb.AerospikeListUDFResponse{Error: nil, UdfList: fromUDFs(udfList)}, nil
+}
+
+func (s *server) UDFExecute(ctx context.Context, in *pb.AerospikeUDFExecuteRequest) (*pb.AerospikeUDFExecuteResponse, error) {
+	res, err := s.client.Execute(toWritePolicy(in.Policy), toKey(in.Key), in.PackageName, in.FunctionName, toValues(in.Args)...)
+	if err != nil {
+		return &pb.AerospikeUDFExecuteResponse{
+			Error: fromError(err),
+		}, nil
+	}
+
+	return &pb.AerospikeUDFExecuteResponse{Error: nil, Result: fromValue(res)}, nil
+}
+
+func fromUDFs(in []*aero.UDF) []*proto.UDFMeta {
+	res := make([]*proto.UDFMeta, len(in))
+	for i := range in {
+		res[i] = fromUDF(in[i])
+	}
+	return res
+}
+
+func fromUDF(in *aero.UDF) *proto.UDFMeta {
+	return &proto.UDFMeta{
+		PackageName: in.Filename,
+		Hash:        in.Hash,
+		Language:    fromLanguage(in.Language),
+	}
+}
+
+func fromLanguage(in aero.Language) proto.UDFLanguage {
+	switch in {
+	case aero.LUA:
+		return proto.UDFLanguage_LUA
+	}
+	panic(UNREACHABLE)
+}
+
+func toLanguage(in proto.UDFLanguage) aero.Language {
+	switch in {
+	case proto.UDFLanguage_LUA:
+		return aero.LUA
+	}
+	panic(UNREACHABLE)
+}
+
 func toTime(in *int64) *time.Time {
 	if in != nil {
 		t := time.Unix(0, *in)

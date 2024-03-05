@@ -624,6 +624,16 @@ message Json {
 	repeated JsonEntry j = 1;
 }
 
+enum UDFLanguage {
+	LUA = 0;
+}
+
+message UDFMeta {
+	string packageName = 1;
+	string hash = 2;
+	UDFLanguage language = 3;
+}
+
 message Value {
   oneof v {
 	bool nil  = 1;
@@ -907,59 +917,130 @@ message AerospikeTruncateResponse {
   optional Error error = 1;
 }
 
+message AerospikeRegisterUDFRequest {
+	WritePolicy policy = 1;
+	string packageName = 2;
+	bytes udfBody = 3;
+	UDFLanguage language = 4;
+}
+
+message AerospikeRegisterUDFResponse {
+  optional Error error = 1;
+}
+
+message AerospikeDropUDFRequest {
+	WritePolicy policy = 1;
+	string packageName = 2;
+}
+
+message AerospikeDropUDFResponse {
+  optional Error error = 1;
+}
+
+message AerospikeListUDFRequest {
+	ReadPolicy policy = 1;
+}
+
+message AerospikeListUDFResponse {
+  optional Error error = 1;
+  repeated UDFMeta udfList = 2;
+}
+
+message AerospikeUDFExecuteRequest {
+	WritePolicy policy = 1;
+	Key key = 2;
+	string packageName = 3;
+	string functionName = 4;
+	repeated Value args = 5;
+}
+
+message AerospikeUDFExecuteResponse {
+  optional Error error = 1;
+  Value result = 2;
+}
+
 // Aerospike KVS operations service
 service KVS {
-  // Put a single record
-  rpc Put (AerospikePutRequest) returns
-      (Error) {}
+	// Put a single record
+	rpc Put (AerospikePutRequest) returns
+		(Error) {}
 
-  // Add a single record
-  rpc Add (AerospikePutRequest) returns
-      (Error) {}
+	// Add a single record
+	rpc Add (AerospikePutRequest) returns
+		(Error) {}
 
-  // Append a single record
-  rpc Append (AerospikePutRequest) returns
-      (Error) {}
+	// Append a single record
+	rpc Append (AerospikePutRequest) returns
+		(Error) {}
 
-  // Prepend a single record
-  rpc Prepend (AerospikePutRequest) returns
-      (Error) {}
+	// Prepend a single record
+	rpc Prepend (AerospikePutRequest) returns
+		(Error) {}
 
-  // Read a single record
-  rpc Get(AerospikeGetRequest) returns
-      (AerospikeSingleResponse) {}
+	// Read a single record
+	rpc Get(AerospikeGetRequest) returns
+		(AerospikeSingleResponse) {}
 
-  // Get a single record header containing metadata like generation, expiration
-  rpc GetHeader (AerospikeGetHeaderRequest) returns
-      (AerospikeSingleResponse) {}
+	// Get a single record header containing metadata like generation, expiration
+	rpc GetHeader (AerospikeGetHeaderRequest) returns
+		(AerospikeSingleResponse) {}
 
-  // Check if a record exists.
-  rpc Exists (AerospikeExistsRequest) returns
-      (AerospikeExistsResponse) {}
+	// Check if a record exists.
+	rpc Exists (AerospikeExistsRequest) returns
+		(AerospikeExistsResponse) {}
 
-  // Delete a single record.
-  rpc Delete (AerospikeDeleteRequest) returns
-      (AerospikeDeleteResponse) {}
+	// Delete a single record.
+	rpc Delete (AerospikeDeleteRequest) returns
+		(AerospikeDeleteResponse) {}
 
-  // Reset single record's time to expiration using the write policy's expiration.
-  rpc Touch (AerospikeTouchRequest) returns
-      (Error) {}
+	// Reset single record's time to expiration using the write policy's expiration.
+	rpc Touch (AerospikeTouchRequest) returns
+		(Error) {}
 
-  // Process batch requests.
-  rpc BatchOperate (AerospikeBatchOperateRequest) returns
-      (AerospikeBatchOperateResponse) {}
+	// Process batch requests.
+	rpc BatchOperate (AerospikeBatchOperateRequest) returns
+		(AerospikeBatchOperateResponse) {}
 
-  // Process batch requests.
-  rpc CreateIndex (AerospikeCreateIndexRequest) returns
-      (AerospikeCreateIndexResponse) {}
+	// Process batch requests.
+	rpc CreateIndex (AerospikeCreateIndexRequest) returns
+		(AerospikeCreateIndexResponse) {}
 
-  // Process batch requests.
-  rpc DropIndex (AerospikeDropIndexRequest) returns
-      (AerospikeDropIndexResponse) {}
+	// Process batch requests.
+	rpc DropIndex (AerospikeDropIndexRequest) returns
+		(AerospikeDropIndexResponse) {}
 
-  // Truncate removes records in specified namespace/set efficiently.
-  rpc Truncate (AerospikeTruncateRequest) returns
-      (AerospikeTruncateResponse) {}
+	// Truncate removes records in specified namespace/set efficiently.
+	rpc Truncate (AerospikeTruncateRequest) returns
+		(AerospikeTruncateResponse) {}
+
+	// Registers a package containing user defined functions with server.
+	// This asynchronous server call will return before command is complete.
+	// The user can optionally wait for command completion by using the returned
+	// RegisterTask instance.
+	//
+	// This method is only supported by Aerospike 3+ servers.
+	rpc RegisterUDF (AerospikeRegisterUDFRequest) returns
+		(AerospikeRegisterUDFResponse) {}
+
+	// Removes a package containing user defined functions in the server.
+	// This asynchronous server call will return before command is complete.
+	// The user can optionally wait for command completion by using the returned
+	// RemoveTask instance.
+	//
+	// This method is only supported by Aerospike 3+ servers.
+	rpc DropUDF (AerospikeDropUDFRequest) returns
+		(AerospikeDropUDFResponse) {}
+
+	// Lists all packages containing user defined functions in the server.
+	// This method is only supported by Aerospike 3+ servers.
+	rpc ListUDF (AerospikeListUDFRequest) returns
+		(AerospikeListUDFResponse) {}
+
+	// Lists all packages containing user defined functions in the server.
+	// This method is only supported by Aerospike 3+ servers.
+	rpc UDFExecute (AerospikeUDFExecuteRequest) returns
+		(AerospikeUDFExecuteResponse) {}
+
 
 // // ExecuteUDF single key user defined function on server and return results.
 //   rpc ExecuteUDF (AerospikeExecuteUDFRequest) returns

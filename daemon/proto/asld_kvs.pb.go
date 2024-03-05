@@ -779,6 +779,49 @@ func (AuthMode) EnumDescriptor() ([]byte, []int) {
 	return file_asld_kvs_proto_rawDescGZIP(), []int{9}
 }
 
+type UDFLanguage int32
+
+const (
+	UDFLanguage_LUA UDFLanguage = 0
+)
+
+// Enum value maps for UDFLanguage.
+var (
+	UDFLanguage_name = map[int32]string{
+		0: "LUA",
+	}
+	UDFLanguage_value = map[string]int32{
+		"LUA": 0,
+	}
+)
+
+func (x UDFLanguage) Enum() *UDFLanguage {
+	p := new(UDFLanguage)
+	*p = x
+	return p
+}
+
+func (x UDFLanguage) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (UDFLanguage) Descriptor() protoreflect.EnumDescriptor {
+	return file_asld_kvs_proto_enumTypes[10].Descriptor()
+}
+
+func (UDFLanguage) Type() protoreflect.EnumType {
+	return &file_asld_kvs_proto_enumTypes[10]
+}
+
+func (x UDFLanguage) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use UDFLanguage.Descriptor instead.
+func (UDFLanguage) EnumDescriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{10}
+}
+
 // ListOrderType determines the order of returned values in CDT list operations.
 type ListOrderType int32
 
@@ -812,11 +855,11 @@ func (x ListOrderType) String() string {
 }
 
 func (ListOrderType) Descriptor() protoreflect.EnumDescriptor {
-	return file_asld_kvs_proto_enumTypes[10].Descriptor()
+	return file_asld_kvs_proto_enumTypes[11].Descriptor()
 }
 
 func (ListOrderType) Type() protoreflect.EnumType {
-	return &file_asld_kvs_proto_enumTypes[10]
+	return &file_asld_kvs_proto_enumTypes[11]
 }
 
 func (x ListOrderType) Number() protoreflect.EnumNumber {
@@ -825,7 +868,7 @@ func (x ListOrderType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ListOrderType.Descriptor instead.
 func (ListOrderType) EnumDescriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{10}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{11}
 }
 
 // MapOrder defines map storage order.
@@ -865,11 +908,11 @@ func (x MapOrderType) String() string {
 }
 
 func (MapOrderType) Descriptor() protoreflect.EnumDescriptor {
-	return file_asld_kvs_proto_enumTypes[11].Descriptor()
+	return file_asld_kvs_proto_enumTypes[12].Descriptor()
 }
 
 func (MapOrderType) Type() protoreflect.EnumType {
-	return &file_asld_kvs_proto_enumTypes[11]
+	return &file_asld_kvs_proto_enumTypes[12]
 }
 
 func (x MapOrderType) Number() protoreflect.EnumNumber {
@@ -878,7 +921,7 @@ func (x MapOrderType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use MapOrderType.Descriptor instead.
 func (MapOrderType) EnumDescriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{11}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{12}
 }
 
 type OperationType int32
@@ -959,11 +1002,11 @@ func (x OperationType) String() string {
 }
 
 func (OperationType) Descriptor() protoreflect.EnumDescriptor {
-	return file_asld_kvs_proto_enumTypes[12].Descriptor()
+	return file_asld_kvs_proto_enumTypes[13].Descriptor()
 }
 
 func (OperationType) Type() protoreflect.EnumType {
-	return &file_asld_kvs_proto_enumTypes[12]
+	return &file_asld_kvs_proto_enumTypes[13]
 }
 
 func (x OperationType) Number() protoreflect.EnumNumber {
@@ -972,7 +1015,7 @@ func (x OperationType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use OperationType.Descriptor instead.
 func (OperationType) EnumDescriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{12}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{13}
 }
 
 type RecordExistsAction int32
@@ -1025,11 +1068,11 @@ func (x RecordExistsAction) String() string {
 }
 
 func (RecordExistsAction) Descriptor() protoreflect.EnumDescriptor {
-	return file_asld_kvs_proto_enumTypes[13].Descriptor()
+	return file_asld_kvs_proto_enumTypes[14].Descriptor()
 }
 
 func (RecordExistsAction) Type() protoreflect.EnumType {
-	return &file_asld_kvs_proto_enumTypes[13]
+	return &file_asld_kvs_proto_enumTypes[14]
 }
 
 func (x RecordExistsAction) Number() protoreflect.EnumNumber {
@@ -1038,7 +1081,7 @@ func (x RecordExistsAction) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RecordExistsAction.Descriptor instead.
 func (RecordExistsAction) EnumDescriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{13}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{14}
 }
 
 type GenerationPolicy int32
@@ -1078,11 +1121,11 @@ func (x GenerationPolicy) String() string {
 }
 
 func (GenerationPolicy) Descriptor() protoreflect.EnumDescriptor {
-	return file_asld_kvs_proto_enumTypes[14].Descriptor()
+	return file_asld_kvs_proto_enumTypes[15].Descriptor()
 }
 
 func (GenerationPolicy) Type() protoreflect.EnumType {
-	return &file_asld_kvs_proto_enumTypes[14]
+	return &file_asld_kvs_proto_enumTypes[15]
 }
 
 func (x GenerationPolicy) Number() protoreflect.EnumNumber {
@@ -1091,7 +1134,7 @@ func (x GenerationPolicy) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use GenerationPolicy.Descriptor instead.
 func (GenerationPolicy) EnumDescriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{14}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{15}
 }
 
 type CommitLevel int32
@@ -1126,11 +1169,11 @@ func (x CommitLevel) String() string {
 }
 
 func (CommitLevel) Descriptor() protoreflect.EnumDescriptor {
-	return file_asld_kvs_proto_enumTypes[15].Descriptor()
+	return file_asld_kvs_proto_enumTypes[16].Descriptor()
 }
 
 func (CommitLevel) Type() protoreflect.EnumType {
-	return &file_asld_kvs_proto_enumTypes[15]
+	return &file_asld_kvs_proto_enumTypes[16]
 }
 
 func (x CommitLevel) Number() protoreflect.EnumNumber {
@@ -1139,7 +1182,7 @@ func (x CommitLevel) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CommitLevel.Descriptor instead.
 func (CommitLevel) EnumDescriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{15}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{16}
 }
 
 // Expression which can be applied to most commands, to control which records are
@@ -2501,6 +2544,69 @@ func (x *Json) GetJ() []*JsonEntry {
 	return nil
 }
 
+type UDFMeta struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	PackageName string      `protobuf:"bytes,1,opt,name=packageName,proto3" json:"packageName,omitempty"`
+	Hash        string      `protobuf:"bytes,2,opt,name=hash,proto3" json:"hash,omitempty"`
+	Language    UDFLanguage `protobuf:"varint,3,opt,name=language,proto3,enum=com.aerospike.daemon.UDFLanguage" json:"language,omitempty"`
+}
+
+func (x *UDFMeta) Reset() {
+	*x = UDFMeta{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_asld_kvs_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UDFMeta) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UDFMeta) ProtoMessage() {}
+
+func (x *UDFMeta) ProtoReflect() protoreflect.Message {
+	mi := &file_asld_kvs_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UDFMeta.ProtoReflect.Descriptor instead.
+func (*UDFMeta) Descriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *UDFMeta) GetPackageName() string {
+	if x != nil {
+		return x.PackageName
+	}
+	return ""
+}
+
+func (x *UDFMeta) GetHash() string {
+	if x != nil {
+		return x.Hash
+	}
+	return ""
+}
+
+func (x *UDFMeta) GetLanguage() UDFLanguage {
+	if x != nil {
+		return x.Language
+	}
+	return UDFLanguage_LUA
+}
+
 type Value struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -2527,7 +2633,7 @@ type Value struct {
 func (x *Value) Reset() {
 	*x = Value{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[15]
+		mi := &file_asld_kvs_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2540,7 +2646,7 @@ func (x *Value) String() string {
 func (*Value) ProtoMessage() {}
 
 func (x *Value) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[15]
+	mi := &file_asld_kvs_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2553,7 +2659,7 @@ func (x *Value) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Value.ProtoReflect.Descriptor instead.
 func (*Value) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{15}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{16}
 }
 
 func (m *Value) GetV() isValue_V {
@@ -2750,7 +2856,7 @@ type Key struct {
 func (x *Key) Reset() {
 	*x = Key{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[16]
+		mi := &file_asld_kvs_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2763,7 +2869,7 @@ func (x *Key) String() string {
 func (*Key) ProtoMessage() {}
 
 func (x *Key) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[16]
+	mi := &file_asld_kvs_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2776,7 +2882,7 @@ func (x *Key) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Key.ProtoReflect.Descriptor instead.
 func (*Key) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{16}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *Key) GetDigest() []byte {
@@ -2821,7 +2927,7 @@ type Record struct {
 func (x *Record) Reset() {
 	*x = Record{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[17]
+		mi := &file_asld_kvs_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2834,7 +2940,7 @@ func (x *Record) String() string {
 func (*Record) ProtoMessage() {}
 
 func (x *Record) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[17]
+	mi := &file_asld_kvs_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2847,7 +2953,7 @@ func (x *Record) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Record.ProtoReflect.Descriptor instead.
 func (*Record) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{17}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *Record) GetKey() *Key {
@@ -2901,7 +3007,7 @@ type Error struct {
 func (x *Error) Reset() {
 	*x = Error{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[18]
+		mi := &file_asld_kvs_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2914,7 +3020,7 @@ func (x *Error) String() string {
 func (*Error) ProtoMessage() {}
 
 func (x *Error) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[18]
+	mi := &file_asld_kvs_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2927,7 +3033,7 @@ func (x *Error) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Error.ProtoReflect.Descriptor instead.
 func (*Error) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{18}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *Error) GetResultCode() int32 {
@@ -2962,7 +3068,7 @@ type BatchRecord struct {
 func (x *BatchRecord) Reset() {
 	*x = BatchRecord{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[19]
+		mi := &file_asld_kvs_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2975,7 +3081,7 @@ func (x *BatchRecord) String() string {
 func (*BatchRecord) ProtoMessage() {}
 
 func (x *BatchRecord) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[19]
+	mi := &file_asld_kvs_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2988,7 +3094,7 @@ func (x *BatchRecord) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchRecord.ProtoReflect.Descriptor instead.
 func (*BatchRecord) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{19}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *BatchRecord) GetKey() *Key {
@@ -3028,7 +3134,7 @@ type CDTContext struct {
 func (x *CDTContext) Reset() {
 	*x = CDTContext{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[20]
+		mi := &file_asld_kvs_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3041,7 +3147,7 @@ func (x *CDTContext) String() string {
 func (*CDTContext) ProtoMessage() {}
 
 func (x *CDTContext) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[20]
+	mi := &file_asld_kvs_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3054,7 +3160,7 @@ func (x *CDTContext) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CDTContext.ProtoReflect.Descriptor instead.
 func (*CDTContext) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{20}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CDTContext) GetId() int32 {
@@ -3093,7 +3199,7 @@ type Operation struct {
 func (x *Operation) Reset() {
 	*x = Operation{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[21]
+		mi := &file_asld_kvs_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3106,7 +3212,7 @@ func (x *Operation) String() string {
 func (*Operation) ProtoMessage() {}
 
 func (x *Operation) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[21]
+	mi := &file_asld_kvs_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3119,7 +3225,7 @@ func (x *Operation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Operation.ProtoReflect.Descriptor instead.
 func (*Operation) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{21}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *Operation) GetOpType() OperationType {
@@ -3173,7 +3279,7 @@ type BatchWrite struct {
 func (x *BatchWrite) Reset() {
 	*x = BatchWrite{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[22]
+		mi := &file_asld_kvs_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3186,7 +3292,7 @@ func (x *BatchWrite) String() string {
 func (*BatchWrite) ProtoMessage() {}
 
 func (x *BatchWrite) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[22]
+	mi := &file_asld_kvs_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3199,7 +3305,7 @@ func (x *BatchWrite) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchWrite.ProtoReflect.Descriptor instead.
 func (*BatchWrite) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{22}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *BatchWrite) GetBatchRecord() *BatchRecord {
@@ -3251,7 +3357,7 @@ type BatchRead struct {
 func (x *BatchRead) Reset() {
 	*x = BatchRead{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[23]
+		mi := &file_asld_kvs_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3264,7 +3370,7 @@ func (x *BatchRead) String() string {
 func (*BatchRead) ProtoMessage() {}
 
 func (x *BatchRead) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[23]
+	mi := &file_asld_kvs_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3277,7 +3383,7 @@ func (x *BatchRead) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchRead.ProtoReflect.Descriptor instead.
 func (*BatchRead) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{23}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *BatchRead) GetBatchRecord() *BatchRecord {
@@ -3329,7 +3435,7 @@ type BatchDelete struct {
 func (x *BatchDelete) Reset() {
 	*x = BatchDelete{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[24]
+		mi := &file_asld_kvs_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3342,7 +3448,7 @@ func (x *BatchDelete) String() string {
 func (*BatchDelete) ProtoMessage() {}
 
 func (x *BatchDelete) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[24]
+	mi := &file_asld_kvs_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3355,7 +3461,7 @@ func (x *BatchDelete) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchDelete.ProtoReflect.Descriptor instead.
 func (*BatchDelete) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{24}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *BatchDelete) GetBatchRecord() *BatchRecord {
@@ -3392,7 +3498,7 @@ type BatchUDF struct {
 func (x *BatchUDF) Reset() {
 	*x = BatchUDF{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[25]
+		mi := &file_asld_kvs_proto_msgTypes[26]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3405,7 +3511,7 @@ func (x *BatchUDF) String() string {
 func (*BatchUDF) ProtoMessage() {}
 
 func (x *BatchUDF) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[25]
+	mi := &file_asld_kvs_proto_msgTypes[26]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3418,7 +3524,7 @@ func (x *BatchUDF) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchUDF.ProtoReflect.Descriptor instead.
 func (*BatchUDF) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{25}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *BatchUDF) GetBatchRecord() *BatchRecord {
@@ -3471,7 +3577,7 @@ type AerospikeSingleResponse struct {
 func (x *AerospikeSingleResponse) Reset() {
 	*x = AerospikeSingleResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[26]
+		mi := &file_asld_kvs_proto_msgTypes[27]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3484,7 +3590,7 @@ func (x *AerospikeSingleResponse) String() string {
 func (*AerospikeSingleResponse) ProtoMessage() {}
 
 func (x *AerospikeSingleResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[26]
+	mi := &file_asld_kvs_proto_msgTypes[27]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3497,7 +3603,7 @@ func (x *AerospikeSingleResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeSingleResponse.ProtoReflect.Descriptor instead.
 func (*AerospikeSingleResponse) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{26}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *AerospikeSingleResponse) GetError() *Error {
@@ -3527,7 +3633,7 @@ type AerospikeGetRequest struct {
 func (x *AerospikeGetRequest) Reset() {
 	*x = AerospikeGetRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[27]
+		mi := &file_asld_kvs_proto_msgTypes[28]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3540,7 +3646,7 @@ func (x *AerospikeGetRequest) String() string {
 func (*AerospikeGetRequest) ProtoMessage() {}
 
 func (x *AerospikeGetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[27]
+	mi := &file_asld_kvs_proto_msgTypes[28]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3553,7 +3659,7 @@ func (x *AerospikeGetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeGetRequest.ProtoReflect.Descriptor instead.
 func (*AerospikeGetRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{27}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *AerospikeGetRequest) GetPolicy() *ReadPolicy {
@@ -3589,7 +3695,7 @@ type AerospikeGetHeaderRequest struct {
 func (x *AerospikeGetHeaderRequest) Reset() {
 	*x = AerospikeGetHeaderRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[28]
+		mi := &file_asld_kvs_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3602,7 +3708,7 @@ func (x *AerospikeGetHeaderRequest) String() string {
 func (*AerospikeGetHeaderRequest) ProtoMessage() {}
 
 func (x *AerospikeGetHeaderRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[28]
+	mi := &file_asld_kvs_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3615,7 +3721,7 @@ func (x *AerospikeGetHeaderRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeGetHeaderRequest.ProtoReflect.Descriptor instead.
 func (*AerospikeGetHeaderRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{28}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *AerospikeGetHeaderRequest) GetPolicy() *ReadPolicy {
@@ -3644,7 +3750,7 @@ type AerospikeExistsRequest struct {
 func (x *AerospikeExistsRequest) Reset() {
 	*x = AerospikeExistsRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[29]
+		mi := &file_asld_kvs_proto_msgTypes[30]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3657,7 +3763,7 @@ func (x *AerospikeExistsRequest) String() string {
 func (*AerospikeExistsRequest) ProtoMessage() {}
 
 func (x *AerospikeExistsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[29]
+	mi := &file_asld_kvs_proto_msgTypes[30]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3670,7 +3776,7 @@ func (x *AerospikeExistsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeExistsRequest.ProtoReflect.Descriptor instead.
 func (*AerospikeExistsRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{29}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *AerospikeExistsRequest) GetPolicy() *ReadPolicy {
@@ -3701,7 +3807,7 @@ type AerospikeExistsResponse struct {
 func (x *AerospikeExistsResponse) Reset() {
 	*x = AerospikeExistsResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[30]
+		mi := &file_asld_kvs_proto_msgTypes[31]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3714,7 +3820,7 @@ func (x *AerospikeExistsResponse) String() string {
 func (*AerospikeExistsResponse) ProtoMessage() {}
 
 func (x *AerospikeExistsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[30]
+	mi := &file_asld_kvs_proto_msgTypes[31]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3727,7 +3833,7 @@ func (x *AerospikeExistsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeExistsResponse.ProtoReflect.Descriptor instead.
 func (*AerospikeExistsResponse) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{30}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *AerospikeExistsResponse) GetError() *Error {
@@ -3756,7 +3862,7 @@ type AerospikeDeleteRequest struct {
 func (x *AerospikeDeleteRequest) Reset() {
 	*x = AerospikeDeleteRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[31]
+		mi := &file_asld_kvs_proto_msgTypes[32]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3769,7 +3875,7 @@ func (x *AerospikeDeleteRequest) String() string {
 func (*AerospikeDeleteRequest) ProtoMessage() {}
 
 func (x *AerospikeDeleteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[31]
+	mi := &file_asld_kvs_proto_msgTypes[32]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3782,7 +3888,7 @@ func (x *AerospikeDeleteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeDeleteRequest.ProtoReflect.Descriptor instead.
 func (*AerospikeDeleteRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{31}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *AerospikeDeleteRequest) GetPolicy() *WritePolicy {
@@ -3813,7 +3919,7 @@ type AerospikeDeleteResponse struct {
 func (x *AerospikeDeleteResponse) Reset() {
 	*x = AerospikeDeleteResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[32]
+		mi := &file_asld_kvs_proto_msgTypes[33]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3826,7 +3932,7 @@ func (x *AerospikeDeleteResponse) String() string {
 func (*AerospikeDeleteResponse) ProtoMessage() {}
 
 func (x *AerospikeDeleteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[32]
+	mi := &file_asld_kvs_proto_msgTypes[33]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3839,7 +3945,7 @@ func (x *AerospikeDeleteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeDeleteResponse.ProtoReflect.Descriptor instead.
 func (*AerospikeDeleteResponse) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{32}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *AerospikeDeleteResponse) GetError() *Error {
@@ -3868,7 +3974,7 @@ type AerospikeTouchRequest struct {
 func (x *AerospikeTouchRequest) Reset() {
 	*x = AerospikeTouchRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[33]
+		mi := &file_asld_kvs_proto_msgTypes[34]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3881,7 +3987,7 @@ func (x *AerospikeTouchRequest) String() string {
 func (*AerospikeTouchRequest) ProtoMessage() {}
 
 func (x *AerospikeTouchRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[33]
+	mi := &file_asld_kvs_proto_msgTypes[34]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3894,7 +4000,7 @@ func (x *AerospikeTouchRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeTouchRequest.ProtoReflect.Descriptor instead.
 func (*AerospikeTouchRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{33}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *AerospikeTouchRequest) GetPolicy() *WritePolicy {
@@ -3924,7 +4030,7 @@ type AerospikePutRequest struct {
 func (x *AerospikePutRequest) Reset() {
 	*x = AerospikePutRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[34]
+		mi := &file_asld_kvs_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -3937,7 +4043,7 @@ func (x *AerospikePutRequest) String() string {
 func (*AerospikePutRequest) ProtoMessage() {}
 
 func (x *AerospikePutRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[34]
+	mi := &file_asld_kvs_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3950,7 +4056,7 @@ func (x *AerospikePutRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikePutRequest.ProtoReflect.Descriptor instead.
 func (*AerospikePutRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{34}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *AerospikePutRequest) GetPolicy() *WritePolicy {
@@ -3988,7 +4094,7 @@ type BatchOperate struct {
 func (x *BatchOperate) Reset() {
 	*x = BatchOperate{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[35]
+		mi := &file_asld_kvs_proto_msgTypes[36]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4001,7 +4107,7 @@ func (x *BatchOperate) String() string {
 func (*BatchOperate) ProtoMessage() {}
 
 func (x *BatchOperate) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[35]
+	mi := &file_asld_kvs_proto_msgTypes[36]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4014,7 +4120,7 @@ func (x *BatchOperate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BatchOperate.ProtoReflect.Descriptor instead.
 func (*BatchOperate) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{35}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *BatchOperate) GetBr() *BatchRead {
@@ -4057,7 +4163,7 @@ type AerospikeBatchOperateRequest struct {
 func (x *AerospikeBatchOperateRequest) Reset() {
 	*x = AerospikeBatchOperateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[36]
+		mi := &file_asld_kvs_proto_msgTypes[37]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4070,7 +4176,7 @@ func (x *AerospikeBatchOperateRequest) String() string {
 func (*AerospikeBatchOperateRequest) ProtoMessage() {}
 
 func (x *AerospikeBatchOperateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[36]
+	mi := &file_asld_kvs_proto_msgTypes[37]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4083,7 +4189,7 @@ func (x *AerospikeBatchOperateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeBatchOperateRequest.ProtoReflect.Descriptor instead.
 func (*AerospikeBatchOperateRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{36}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *AerospikeBatchOperateRequest) GetPolicy() *BatchPolicy {
@@ -4112,7 +4218,7 @@ type AerospikeBatchOperateResponse struct {
 func (x *AerospikeBatchOperateResponse) Reset() {
 	*x = AerospikeBatchOperateResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[37]
+		mi := &file_asld_kvs_proto_msgTypes[38]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4125,7 +4231,7 @@ func (x *AerospikeBatchOperateResponse) String() string {
 func (*AerospikeBatchOperateResponse) ProtoMessage() {}
 
 func (x *AerospikeBatchOperateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[37]
+	mi := &file_asld_kvs_proto_msgTypes[38]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4138,7 +4244,7 @@ func (x *AerospikeBatchOperateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeBatchOperateResponse.ProtoReflect.Descriptor instead.
 func (*AerospikeBatchOperateResponse) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{37}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *AerospikeBatchOperateResponse) GetError() *Error {
@@ -4173,7 +4279,7 @@ type AerospikeCreateIndexRequest struct {
 func (x *AerospikeCreateIndexRequest) Reset() {
 	*x = AerospikeCreateIndexRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[38]
+		mi := &file_asld_kvs_proto_msgTypes[39]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4186,7 +4292,7 @@ func (x *AerospikeCreateIndexRequest) String() string {
 func (*AerospikeCreateIndexRequest) ProtoMessage() {}
 
 func (x *AerospikeCreateIndexRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[38]
+	mi := &file_asld_kvs_proto_msgTypes[39]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4199,7 +4305,7 @@ func (x *AerospikeCreateIndexRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeCreateIndexRequest.ProtoReflect.Descriptor instead.
 func (*AerospikeCreateIndexRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{38}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *AerospikeCreateIndexRequest) GetPolicy() *WritePolicy {
@@ -4269,7 +4375,7 @@ type AerospikeCreateIndexResponse struct {
 func (x *AerospikeCreateIndexResponse) Reset() {
 	*x = AerospikeCreateIndexResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[39]
+		mi := &file_asld_kvs_proto_msgTypes[40]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4282,7 +4388,7 @@ func (x *AerospikeCreateIndexResponse) String() string {
 func (*AerospikeCreateIndexResponse) ProtoMessage() {}
 
 func (x *AerospikeCreateIndexResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[39]
+	mi := &file_asld_kvs_proto_msgTypes[40]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4295,7 +4401,7 @@ func (x *AerospikeCreateIndexResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeCreateIndexResponse.ProtoReflect.Descriptor instead.
 func (*AerospikeCreateIndexResponse) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{39}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *AerospikeCreateIndexResponse) GetError() *Error {
@@ -4319,7 +4425,7 @@ type AerospikeDropIndexRequest struct {
 func (x *AerospikeDropIndexRequest) Reset() {
 	*x = AerospikeDropIndexRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[40]
+		mi := &file_asld_kvs_proto_msgTypes[41]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4332,7 +4438,7 @@ func (x *AerospikeDropIndexRequest) String() string {
 func (*AerospikeDropIndexRequest) ProtoMessage() {}
 
 func (x *AerospikeDropIndexRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[40]
+	mi := &file_asld_kvs_proto_msgTypes[41]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4345,7 +4451,7 @@ func (x *AerospikeDropIndexRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeDropIndexRequest.ProtoReflect.Descriptor instead.
 func (*AerospikeDropIndexRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{40}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *AerospikeDropIndexRequest) GetPolicy() *WritePolicy {
@@ -4387,7 +4493,7 @@ type AerospikeDropIndexResponse struct {
 func (x *AerospikeDropIndexResponse) Reset() {
 	*x = AerospikeDropIndexResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[41]
+		mi := &file_asld_kvs_proto_msgTypes[42]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4400,7 +4506,7 @@ func (x *AerospikeDropIndexResponse) String() string {
 func (*AerospikeDropIndexResponse) ProtoMessage() {}
 
 func (x *AerospikeDropIndexResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[41]
+	mi := &file_asld_kvs_proto_msgTypes[42]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4413,7 +4519,7 @@ func (x *AerospikeDropIndexResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeDropIndexResponse.ProtoReflect.Descriptor instead.
 func (*AerospikeDropIndexResponse) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{41}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *AerospikeDropIndexResponse) GetError() *Error {
@@ -4437,7 +4543,7 @@ type AerospikeTruncateRequest struct {
 func (x *AerospikeTruncateRequest) Reset() {
 	*x = AerospikeTruncateRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[42]
+		mi := &file_asld_kvs_proto_msgTypes[43]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4450,7 +4556,7 @@ func (x *AerospikeTruncateRequest) String() string {
 func (*AerospikeTruncateRequest) ProtoMessage() {}
 
 func (x *AerospikeTruncateRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[42]
+	mi := &file_asld_kvs_proto_msgTypes[43]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4463,7 +4569,7 @@ func (x *AerospikeTruncateRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeTruncateRequest.ProtoReflect.Descriptor instead.
 func (*AerospikeTruncateRequest) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{42}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *AerospikeTruncateRequest) GetPolicy() *InfoPolicy {
@@ -4505,7 +4611,7 @@ type AerospikeTruncateResponse struct {
 func (x *AerospikeTruncateResponse) Reset() {
 	*x = AerospikeTruncateResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[43]
+		mi := &file_asld_kvs_proto_msgTypes[44]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4518,7 +4624,7 @@ func (x *AerospikeTruncateResponse) String() string {
 func (*AerospikeTruncateResponse) ProtoMessage() {}
 
 func (x *AerospikeTruncateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[43]
+	mi := &file_asld_kvs_proto_msgTypes[44]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4531,12 +4637,468 @@ func (x *AerospikeTruncateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AerospikeTruncateResponse.ProtoReflect.Descriptor instead.
 func (*AerospikeTruncateResponse) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{43}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *AerospikeTruncateResponse) GetError() *Error {
 	if x != nil {
 		return x.Error
+	}
+	return nil
+}
+
+type AerospikeRegisterUDFRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Policy      *WritePolicy `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
+	PackageName string       `protobuf:"bytes,2,opt,name=packageName,proto3" json:"packageName,omitempty"`
+	UdfBody     []byte       `protobuf:"bytes,3,opt,name=udfBody,proto3" json:"udfBody,omitempty"`
+	Language    UDFLanguage  `protobuf:"varint,4,opt,name=language,proto3,enum=com.aerospike.daemon.UDFLanguage" json:"language,omitempty"`
+}
+
+func (x *AerospikeRegisterUDFRequest) Reset() {
+	*x = AerospikeRegisterUDFRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_asld_kvs_proto_msgTypes[45]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AerospikeRegisterUDFRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AerospikeRegisterUDFRequest) ProtoMessage() {}
+
+func (x *AerospikeRegisterUDFRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_asld_kvs_proto_msgTypes[45]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AerospikeRegisterUDFRequest.ProtoReflect.Descriptor instead.
+func (*AerospikeRegisterUDFRequest) Descriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *AerospikeRegisterUDFRequest) GetPolicy() *WritePolicy {
+	if x != nil {
+		return x.Policy
+	}
+	return nil
+}
+
+func (x *AerospikeRegisterUDFRequest) GetPackageName() string {
+	if x != nil {
+		return x.PackageName
+	}
+	return ""
+}
+
+func (x *AerospikeRegisterUDFRequest) GetUdfBody() []byte {
+	if x != nil {
+		return x.UdfBody
+	}
+	return nil
+}
+
+func (x *AerospikeRegisterUDFRequest) GetLanguage() UDFLanguage {
+	if x != nil {
+		return x.Language
+	}
+	return UDFLanguage_LUA
+}
+
+type AerospikeRegisterUDFResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Error *Error `protobuf:"bytes,1,opt,name=error,proto3,oneof" json:"error,omitempty"`
+}
+
+func (x *AerospikeRegisterUDFResponse) Reset() {
+	*x = AerospikeRegisterUDFResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_asld_kvs_proto_msgTypes[46]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AerospikeRegisterUDFResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AerospikeRegisterUDFResponse) ProtoMessage() {}
+
+func (x *AerospikeRegisterUDFResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_asld_kvs_proto_msgTypes[46]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AerospikeRegisterUDFResponse.ProtoReflect.Descriptor instead.
+func (*AerospikeRegisterUDFResponse) Descriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *AerospikeRegisterUDFResponse) GetError() *Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
+type AerospikeDropUDFRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Policy      *WritePolicy `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
+	PackageName string       `protobuf:"bytes,2,opt,name=packageName,proto3" json:"packageName,omitempty"`
+}
+
+func (x *AerospikeDropUDFRequest) Reset() {
+	*x = AerospikeDropUDFRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_asld_kvs_proto_msgTypes[47]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AerospikeDropUDFRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AerospikeDropUDFRequest) ProtoMessage() {}
+
+func (x *AerospikeDropUDFRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_asld_kvs_proto_msgTypes[47]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AerospikeDropUDFRequest.ProtoReflect.Descriptor instead.
+func (*AerospikeDropUDFRequest) Descriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *AerospikeDropUDFRequest) GetPolicy() *WritePolicy {
+	if x != nil {
+		return x.Policy
+	}
+	return nil
+}
+
+func (x *AerospikeDropUDFRequest) GetPackageName() string {
+	if x != nil {
+		return x.PackageName
+	}
+	return ""
+}
+
+type AerospikeDropUDFResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Error *Error `protobuf:"bytes,1,opt,name=error,proto3,oneof" json:"error,omitempty"`
+}
+
+func (x *AerospikeDropUDFResponse) Reset() {
+	*x = AerospikeDropUDFResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_asld_kvs_proto_msgTypes[48]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AerospikeDropUDFResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AerospikeDropUDFResponse) ProtoMessage() {}
+
+func (x *AerospikeDropUDFResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_asld_kvs_proto_msgTypes[48]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AerospikeDropUDFResponse.ProtoReflect.Descriptor instead.
+func (*AerospikeDropUDFResponse) Descriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *AerospikeDropUDFResponse) GetError() *Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
+type AerospikeListUDFRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Policy *ReadPolicy `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
+}
+
+func (x *AerospikeListUDFRequest) Reset() {
+	*x = AerospikeListUDFRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_asld_kvs_proto_msgTypes[49]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AerospikeListUDFRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AerospikeListUDFRequest) ProtoMessage() {}
+
+func (x *AerospikeListUDFRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_asld_kvs_proto_msgTypes[49]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AerospikeListUDFRequest.ProtoReflect.Descriptor instead.
+func (*AerospikeListUDFRequest) Descriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *AerospikeListUDFRequest) GetPolicy() *ReadPolicy {
+	if x != nil {
+		return x.Policy
+	}
+	return nil
+}
+
+type AerospikeListUDFResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Error   *Error     `protobuf:"bytes,1,opt,name=error,proto3,oneof" json:"error,omitempty"`
+	UdfList []*UDFMeta `protobuf:"bytes,2,rep,name=udfList,proto3" json:"udfList,omitempty"`
+}
+
+func (x *AerospikeListUDFResponse) Reset() {
+	*x = AerospikeListUDFResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_asld_kvs_proto_msgTypes[50]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AerospikeListUDFResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AerospikeListUDFResponse) ProtoMessage() {}
+
+func (x *AerospikeListUDFResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_asld_kvs_proto_msgTypes[50]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AerospikeListUDFResponse.ProtoReflect.Descriptor instead.
+func (*AerospikeListUDFResponse) Descriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{50}
+}
+
+func (x *AerospikeListUDFResponse) GetError() *Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
+func (x *AerospikeListUDFResponse) GetUdfList() []*UDFMeta {
+	if x != nil {
+		return x.UdfList
+	}
+	return nil
+}
+
+type AerospikeUDFExecuteRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Policy       *WritePolicy `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
+	Key          *Key         `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	PackageName  string       `protobuf:"bytes,3,opt,name=packageName,proto3" json:"packageName,omitempty"`
+	FunctionName string       `protobuf:"bytes,4,opt,name=functionName,proto3" json:"functionName,omitempty"`
+	Args         []*Value     `protobuf:"bytes,5,rep,name=args,proto3" json:"args,omitempty"`
+}
+
+func (x *AerospikeUDFExecuteRequest) Reset() {
+	*x = AerospikeUDFExecuteRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_asld_kvs_proto_msgTypes[51]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AerospikeUDFExecuteRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AerospikeUDFExecuteRequest) ProtoMessage() {}
+
+func (x *AerospikeUDFExecuteRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_asld_kvs_proto_msgTypes[51]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AerospikeUDFExecuteRequest.ProtoReflect.Descriptor instead.
+func (*AerospikeUDFExecuteRequest) Descriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *AerospikeUDFExecuteRequest) GetPolicy() *WritePolicy {
+	if x != nil {
+		return x.Policy
+	}
+	return nil
+}
+
+func (x *AerospikeUDFExecuteRequest) GetKey() *Key {
+	if x != nil {
+		return x.Key
+	}
+	return nil
+}
+
+func (x *AerospikeUDFExecuteRequest) GetPackageName() string {
+	if x != nil {
+		return x.PackageName
+	}
+	return ""
+}
+
+func (x *AerospikeUDFExecuteRequest) GetFunctionName() string {
+	if x != nil {
+		return x.FunctionName
+	}
+	return ""
+}
+
+func (x *AerospikeUDFExecuteRequest) GetArgs() []*Value {
+	if x != nil {
+		return x.Args
+	}
+	return nil
+}
+
+type AerospikeUDFExecuteResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Error  *Error `protobuf:"bytes,1,opt,name=error,proto3,oneof" json:"error,omitempty"`
+	Result *Value `protobuf:"bytes,2,opt,name=result,proto3" json:"result,omitempty"`
+}
+
+func (x *AerospikeUDFExecuteResponse) Reset() {
+	*x = AerospikeUDFExecuteResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_asld_kvs_proto_msgTypes[52]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *AerospikeUDFExecuteResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AerospikeUDFExecuteResponse) ProtoMessage() {}
+
+func (x *AerospikeUDFExecuteResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_asld_kvs_proto_msgTypes[52]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AerospikeUDFExecuteResponse.ProtoReflect.Descriptor instead.
+func (*AerospikeUDFExecuteResponse) Descriptor() ([]byte, []int) {
+	return file_asld_kvs_proto_rawDescGZIP(), []int{52}
+}
+
+func (x *AerospikeUDFExecuteResponse) GetError() *Error {
+	if x != nil {
+		return x.Error
+	}
+	return nil
+}
+
+func (x *AerospikeUDFExecuteResponse) GetResult() *Value {
+	if x != nil {
+		return x.Result
 	}
 	return nil
 }
@@ -4639,7 +5201,7 @@ type BackgroundExecutePolicy struct {
 func (x *BackgroundExecutePolicy) Reset() {
 	*x = BackgroundExecutePolicy{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_asld_kvs_proto_msgTypes[44]
+		mi := &file_asld_kvs_proto_msgTypes[53]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -4652,7 +5214,7 @@ func (x *BackgroundExecutePolicy) String() string {
 func (*BackgroundExecutePolicy) ProtoMessage() {}
 
 func (x *BackgroundExecutePolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_asld_kvs_proto_msgTypes[44]
+	mi := &file_asld_kvs_proto_msgTypes[53]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4665,7 +5227,7 @@ func (x *BackgroundExecutePolicy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BackgroundExecutePolicy.ProtoReflect.Descriptor instead.
 func (*BackgroundExecutePolicy) Descriptor() ([]byte, []int) {
-	return file_asld_kvs_proto_rawDescGZIP(), []int{44}
+	return file_asld_kvs_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *BackgroundExecutePolicy) GetReplica() ReplicaPolicy {
@@ -5007,7 +5569,15 @@ var file_asld_kvs_proto_rawDesc = []byte{
 	0x76, 0x22, 0x35, 0x0a, 0x04, 0x4a, 0x73, 0x6f, 0x6e, 0x12, 0x2d, 0x0a, 0x01, 0x6a, 0x18, 0x01,
 	0x20, 0x03, 0x28, 0x0b, 0x32, 0x1f, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73,
 	0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x4a, 0x73, 0x6f, 0x6e,
-	0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x01, 0x6a, 0x22, 0xe3, 0x02, 0x0a, 0x05, 0x56, 0x61, 0x6c,
+	0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x01, 0x6a, 0x22, 0x7e, 0x0a, 0x07, 0x55, 0x44, 0x46, 0x4d,
+	0x65, 0x74, 0x61, 0x12, 0x20, 0x0a, 0x0b, 0x70, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x4e, 0x61,
+	0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x70, 0x61, 0x63, 0x6b, 0x61, 0x67,
+	0x65, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x12, 0x0a, 0x04, 0x68, 0x61, 0x73, 0x68, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x04, 0x68, 0x61, 0x73, 0x68, 0x12, 0x3d, 0x0a, 0x08, 0x6c, 0x61, 0x6e,
+	0x67, 0x75, 0x61, 0x67, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x21, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d,
+	0x6f, 0x6e, 0x2e, 0x55, 0x44, 0x46, 0x4c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x52, 0x08,
+	0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x22, 0xe3, 0x02, 0x0a, 0x05, 0x56, 0x61, 0x6c,
 	0x75, 0x65, 0x12, 0x12, 0x0a, 0x03, 0x6e, 0x69, 0x6c, 0x18, 0x01, 0x20, 0x01, 0x28, 0x08, 0x48,
 	0x00, 0x52, 0x03, 0x6e, 0x69, 0x6c, 0x12, 0x0e, 0x0a, 0x01, 0x69, 0x18, 0x02, 0x20, 0x01, 0x28,
 	0x03, 0x48, 0x00, 0x52, 0x01, 0x69, 0x12, 0x0e, 0x0a, 0x01, 0x66, 0x18, 0x03, 0x20, 0x01, 0x28,
@@ -5338,6 +5908,79 @@ var file_asld_kvs_proto_rawDesc = []byte{
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72,
 	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72,
 	0x72, 0x6f, 0x72, 0x48, 0x00, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x88, 0x01, 0x01, 0x42,
+	0x08, 0x0a, 0x06, 0x5f, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0xd3, 0x01, 0x0a, 0x1b, 0x41, 0x65,
+	0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x55,
+	0x44, 0x46, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x39, 0x0a, 0x06, 0x70, 0x6f, 0x6c,
+	0x69, 0x63, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x63, 0x6f, 0x6d, 0x2e,
+	0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e,
+	0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x06, 0x70, 0x6f,
+	0x6c, 0x69, 0x63, 0x79, 0x12, 0x20, 0x0a, 0x0b, 0x70, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x4e,
+	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x70, 0x61, 0x63, 0x6b, 0x61,
+	0x67, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x75, 0x64, 0x66, 0x42, 0x6f, 0x64,
+	0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x07, 0x75, 0x64, 0x66, 0x42, 0x6f, 0x64, 0x79,
+	0x12, 0x3d, 0x0a, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x0e, 0x32, 0x21, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
+	0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x55, 0x44, 0x46, 0x4c, 0x61, 0x6e,
+	0x67, 0x75, 0x61, 0x67, 0x65, 0x52, 0x08, 0x6c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x22,
+	0x60, 0x0a, 0x1c, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x52, 0x65, 0x67, 0x69,
+	0x73, 0x74, 0x65, 0x72, 0x55, 0x44, 0x46, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x36, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64,
+	0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x48, 0x00, 0x52, 0x05, 0x65,
+	0x72, 0x72, 0x6f, 0x72, 0x88, 0x01, 0x01, 0x42, 0x08, 0x0a, 0x06, 0x5f, 0x65, 0x72, 0x72, 0x6f,
+	0x72, 0x22, 0x76, 0x0a, 0x17, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x44, 0x72,
+	0x6f, 0x70, 0x55, 0x44, 0x46, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x39, 0x0a, 0x06,
+	0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x63,
+	0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65,
+	0x6d, 0x6f, 0x6e, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52,
+	0x06, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x20, 0x0a, 0x0b, 0x70, 0x61, 0x63, 0x6b, 0x61,
+	0x67, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x70, 0x61,
+	0x63, 0x6b, 0x61, 0x67, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0x5c, 0x0a, 0x18, 0x41, 0x65, 0x72,
+	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x44, 0x72, 0x6f, 0x70, 0x55, 0x44, 0x46, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x36, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73,
+	0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f,
+	0x72, 0x48, 0x00, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x88, 0x01, 0x01, 0x42, 0x08, 0x0a,
+	0x06, 0x5f, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x53, 0x0a, 0x17, 0x41, 0x65, 0x72, 0x6f, 0x73,
+	0x70, 0x69, 0x6b, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x44, 0x46, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x12, 0x38, 0x0a, 0x06, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x20, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
+	0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x52, 0x65, 0x61, 0x64, 0x50, 0x6f,
+	0x6c, 0x69, 0x63, 0x79, 0x52, 0x06, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x22, 0x95, 0x01, 0x0a,
+	0x18, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x44,
+	0x46, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x36, 0x0a, 0x05, 0x65, 0x72, 0x72,
+	0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61,
+	0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e,
+	0x45, 0x72, 0x72, 0x6f, 0x72, 0x48, 0x00, 0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x88, 0x01,
+	0x01, 0x12, 0x37, 0x0a, 0x07, 0x75, 0x64, 0x66, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x02, 0x20, 0x03,
+	0x28, 0x0b, 0x32, 0x1d, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
+	0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x55, 0x44, 0x46, 0x4d, 0x65, 0x74,
+	0x61, 0x52, 0x07, 0x75, 0x64, 0x66, 0x4c, 0x69, 0x73, 0x74, 0x42, 0x08, 0x0a, 0x06, 0x5f, 0x65,
+	0x72, 0x72, 0x6f, 0x72, 0x22, 0xfb, 0x01, 0x0a, 0x1a, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
+	0x6b, 0x65, 0x55, 0x44, 0x46, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x12, 0x39, 0x0a, 0x06, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x21, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70,
+	0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x57, 0x72, 0x69, 0x74, 0x65,
+	0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x52, 0x06, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x2b,
+	0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d,
+	0x6f, 0x6e, 0x2e, 0x4b, 0x65, 0x79, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x20, 0x0a, 0x0b, 0x70,
+	0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0b, 0x70, 0x61, 0x63, 0x6b, 0x61, 0x67, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x22, 0x0a,
+	0x0c, 0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x0c, 0x66, 0x75, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x4e, 0x61, 0x6d,
+	0x65, 0x12, 0x2f, 0x0a, 0x04, 0x61, 0x72, 0x67, 0x73, 0x18, 0x05, 0x20, 0x03, 0x28, 0x0b, 0x32,
+	0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e,
+	0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x04, 0x61, 0x72,
+	0x67, 0x73, 0x22, 0x94, 0x01, 0x0a, 0x1b, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65,
+	0x55, 0x44, 0x46, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x36, 0x0a, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b,
+	0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x48, 0x00,
+	0x52, 0x05, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x88, 0x01, 0x01, 0x12, 0x33, 0x0a, 0x06, 0x72, 0x65,
+	0x73, 0x75, 0x6c, 0x74, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x63, 0x6f, 0x6d,
+	0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f,
+	0x6e, 0x2e, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x52, 0x06, 0x72, 0x65, 0x73, 0x75, 0x6c, 0x74, 0x42,
 	0x08, 0x0a, 0x06, 0x5f, 0x65, 0x72, 0x72, 0x6f, 0x72, 0x22, 0xd0, 0x07, 0x0a, 0x17, 0x42, 0x61,
 	0x63, 0x6b, 0x67, 0x72, 0x6f, 0x75, 0x6e, 0x64, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x50,
 	0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x3d, 0x0a, 0x07, 0x72, 0x65, 0x70, 0x6c, 0x69, 0x63, 0x61,
@@ -5527,146 +6170,176 @@ var file_asld_kvs_proto_rawDesc = []byte{
 	0x12, 0x14, 0x0a, 0x10, 0x41, 0x75, 0x74, 0x68, 0x4d, 0x6f, 0x64, 0x65, 0x49, 0x6e, 0x74, 0x65,
 	0x72, 0x6e, 0x61, 0x6c, 0x10, 0x00, 0x12, 0x14, 0x0a, 0x10, 0x41, 0x75, 0x74, 0x68, 0x4d, 0x6f,
 	0x64, 0x65, 0x45, 0x78, 0x74, 0x65, 0x72, 0x6e, 0x61, 0x6c, 0x10, 0x01, 0x12, 0x0f, 0x0a, 0x0b,
-	0x41, 0x75, 0x74, 0x68, 0x4d, 0x6f, 0x64, 0x65, 0x50, 0x4b, 0x49, 0x10, 0x02, 0x2a, 0x45, 0x0a,
-	0x0d, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1a,
-	0x0a, 0x16, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x55,
-	0x6e, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x65, 0x64, 0x10, 0x00, 0x12, 0x18, 0x0a, 0x14, 0x4c, 0x69,
-	0x73, 0x74, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72,
-	0x65, 0x64, 0x10, 0x01, 0x2a, 0x66, 0x0a, 0x0c, 0x4d, 0x61, 0x70, 0x4f, 0x72, 0x64, 0x65, 0x72,
-	0x54, 0x79, 0x70, 0x65, 0x12, 0x19, 0x0a, 0x15, 0x4d, 0x61, 0x70, 0x4f, 0x72, 0x64, 0x65, 0x72,
-	0x54, 0x79, 0x70, 0x65, 0x55, 0x6e, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x65, 0x64, 0x10, 0x00, 0x12,
-	0x1a, 0x0a, 0x16, 0x4d, 0x61, 0x70, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x4b,
-	0x65, 0x79, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x65, 0x64, 0x10, 0x01, 0x12, 0x1f, 0x0a, 0x1b, 0x4d,
-	0x61, 0x70, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x4b, 0x65, 0x79, 0x56, 0x61,
-	0x6c, 0x75, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x65, 0x64, 0x10, 0x03, 0x2a, 0xe3, 0x03, 0x0a,
-	0x0d, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x12, 0x15,
-	0x0a, 0x11, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x52,
-	0x65, 0x61, 0x64, 0x10, 0x00, 0x12, 0x1b, 0x0a, 0x17, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x65, 0x61, 0x64, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72,
-	0x10, 0x01, 0x12, 0x16, 0x0a, 0x12, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54,
-	0x79, 0x70, 0x65, 0x57, 0x72, 0x69, 0x74, 0x65, 0x10, 0x02, 0x12, 0x18, 0x0a, 0x14, 0x4f, 0x70,
-	0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x43, 0x64, 0x74, 0x52, 0x65,
-	0x61, 0x64, 0x10, 0x03, 0x12, 0x1a, 0x0a, 0x16, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f,
-	0x6e, 0x54, 0x79, 0x70, 0x65, 0x43, 0x64, 0x74, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x10, 0x04,
-	0x12, 0x18, 0x0a, 0x14, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70,
-	0x65, 0x4d, 0x61, 0x70, 0x52, 0x65, 0x61, 0x64, 0x10, 0x05, 0x12, 0x1a, 0x0a, 0x16, 0x4f, 0x70,
-	0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x4d, 0x61, 0x70, 0x4d, 0x6f,
-	0x64, 0x69, 0x66, 0x79, 0x10, 0x06, 0x12, 0x14, 0x0a, 0x10, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x41, 0x64, 0x64, 0x10, 0x07, 0x12, 0x18, 0x0a, 0x14,
-	0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x45, 0x78, 0x70,
-	0x52, 0x65, 0x61, 0x64, 0x10, 0x08, 0x12, 0x1a, 0x0a, 0x16, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x45, 0x78, 0x70, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79,
-	0x10, 0x09, 0x12, 0x17, 0x0a, 0x13, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54,
-	0x79, 0x70, 0x65, 0x41, 0x70, 0x70, 0x65, 0x6e, 0x64, 0x10, 0x0a, 0x12, 0x18, 0x0a, 0x14, 0x4f,
-	0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x50, 0x72, 0x65, 0x70,
-	0x65, 0x6e, 0x64, 0x10, 0x0b, 0x12, 0x16, 0x0a, 0x12, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x54, 0x6f, 0x75, 0x63, 0x68, 0x10, 0x0c, 0x12, 0x18, 0x0a,
-	0x14, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x42, 0x69,
-	0x74, 0x52, 0x65, 0x61, 0x64, 0x10, 0x0d, 0x12, 0x1a, 0x0a, 0x16, 0x4f, 0x70, 0x65, 0x72, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x42, 0x69, 0x74, 0x4d, 0x6f, 0x64, 0x69, 0x66,
-	0x79, 0x10, 0x0e, 0x12, 0x17, 0x0a, 0x13, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x54, 0x79, 0x70, 0x65, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x10, 0x0f, 0x12, 0x18, 0x0a, 0x14,
-	0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x48, 0x6c, 0x6c,
-	0x52, 0x65, 0x61, 0x64, 0x10, 0x10, 0x12, 0x1a, 0x0a, 0x16, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x48, 0x6c, 0x6c, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79,
-	0x10, 0x11, 0x2a, 0x61, 0x0a, 0x12, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x45, 0x78, 0x69, 0x73,
-	0x74, 0x73, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x0a, 0x0a, 0x06, 0x55, 0x50, 0x44, 0x41,
-	0x54, 0x45, 0x10, 0x00, 0x12, 0x0f, 0x0a, 0x0b, 0x55, 0x50, 0x44, 0x41, 0x54, 0x45, 0x5f, 0x4f,
-	0x4e, 0x4c, 0x59, 0x10, 0x01, 0x12, 0x0b, 0x0a, 0x07, 0x52, 0x45, 0x50, 0x4c, 0x41, 0x43, 0x45,
-	0x10, 0x02, 0x12, 0x10, 0x0a, 0x0c, 0x52, 0x45, 0x50, 0x4c, 0x41, 0x43, 0x45, 0x5f, 0x4f, 0x4e,
-	0x4c, 0x59, 0x10, 0x03, 0x12, 0x0f, 0x0a, 0x0b, 0x43, 0x52, 0x45, 0x41, 0x54, 0x45, 0x5f, 0x4f,
-	0x4e, 0x4c, 0x59, 0x10, 0x04, 0x2a, 0x45, 0x0a, 0x10, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x12, 0x08, 0x0a, 0x04, 0x4e, 0x4f, 0x4e,
-	0x45, 0x10, 0x00, 0x12, 0x14, 0x0a, 0x10, 0x45, 0x58, 0x50, 0x45, 0x43, 0x54, 0x5f, 0x47, 0x45,
-	0x4e, 0x5f, 0x45, 0x51, 0x55, 0x41, 0x4c, 0x10, 0x01, 0x12, 0x11, 0x0a, 0x0d, 0x45, 0x58, 0x50,
-	0x45, 0x43, 0x54, 0x5f, 0x47, 0x45, 0x4e, 0x5f, 0x47, 0x54, 0x10, 0x02, 0x2a, 0x30, 0x0a, 0x0b,
-	0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x0e, 0x0a, 0x0a, 0x43,
-	0x4f, 0x4d, 0x4d, 0x49, 0x54, 0x5f, 0x41, 0x4c, 0x4c, 0x10, 0x00, 0x12, 0x11, 0x0a, 0x0d, 0x43,
-	0x4f, 0x4d, 0x4d, 0x49, 0x54, 0x5f, 0x4d, 0x41, 0x53, 0x54, 0x45, 0x52, 0x10, 0x01, 0x32, 0x9d,
-	0x0a, 0x0a, 0x03, 0x4b, 0x56, 0x53, 0x12, 0x4f, 0x0a, 0x03, 0x50, 0x75, 0x74, 0x12, 0x29, 0x2e,
-	0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61,
-	0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x50, 0x75,
-	0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61,
-	0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e,
-	0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12, 0x4f, 0x0a, 0x03, 0x41, 0x64, 0x64, 0x12, 0x29,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64,
-	0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x50,
-	0x75, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e,
+	0x41, 0x75, 0x74, 0x68, 0x4d, 0x6f, 0x64, 0x65, 0x50, 0x4b, 0x49, 0x10, 0x02, 0x2a, 0x16, 0x0a,
+	0x0b, 0x55, 0x44, 0x46, 0x4c, 0x61, 0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x12, 0x07, 0x0a, 0x03,
+	0x4c, 0x55, 0x41, 0x10, 0x00, 0x2a, 0x45, 0x0a, 0x0d, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x72, 0x64,
+	0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1a, 0x0a, 0x16, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x72,
+	0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x55, 0x6e, 0x6f, 0x72, 0x64, 0x65, 0x72, 0x65, 0x64,
+	0x10, 0x00, 0x12, 0x18, 0x0a, 0x14, 0x4c, 0x69, 0x73, 0x74, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54,
+	0x79, 0x70, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x65, 0x64, 0x10, 0x01, 0x2a, 0x66, 0x0a, 0x0c,
+	0x4d, 0x61, 0x70, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x12, 0x19, 0x0a, 0x15,
+	0x4d, 0x61, 0x70, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x55, 0x6e, 0x6f, 0x72,
+	0x64, 0x65, 0x72, 0x65, 0x64, 0x10, 0x00, 0x12, 0x1a, 0x0a, 0x16, 0x4d, 0x61, 0x70, 0x4f, 0x72,
+	0x64, 0x65, 0x72, 0x54, 0x79, 0x70, 0x65, 0x4b, 0x65, 0x79, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x65,
+	0x64, 0x10, 0x01, 0x12, 0x1f, 0x0a, 0x1b, 0x4d, 0x61, 0x70, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x54,
+	0x79, 0x70, 0x65, 0x4b, 0x65, 0x79, 0x56, 0x61, 0x6c, 0x75, 0x65, 0x4f, 0x72, 0x64, 0x65, 0x72,
+	0x65, 0x64, 0x10, 0x03, 0x2a, 0xe3, 0x03, 0x0a, 0x0d, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x12, 0x15, 0x0a, 0x11, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x65, 0x61, 0x64, 0x10, 0x00, 0x12, 0x1b, 0x0a,
+	0x17, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x65,
+	0x61, 0x64, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x10, 0x01, 0x12, 0x16, 0x0a, 0x12, 0x4f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x57, 0x72, 0x69, 0x74, 0x65,
+	0x10, 0x02, 0x12, 0x18, 0x0a, 0x14, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54,
+	0x79, 0x70, 0x65, 0x43, 0x64, 0x74, 0x52, 0x65, 0x61, 0x64, 0x10, 0x03, 0x12, 0x1a, 0x0a, 0x16,
+	0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x43, 0x64, 0x74,
+	0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x10, 0x04, 0x12, 0x18, 0x0a, 0x14, 0x4f, 0x70, 0x65, 0x72,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x4d, 0x61, 0x70, 0x52, 0x65, 0x61, 0x64,
+	0x10, 0x05, 0x12, 0x1a, 0x0a, 0x16, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54,
+	0x79, 0x70, 0x65, 0x4d, 0x61, 0x70, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x10, 0x06, 0x12, 0x14,
+	0x0a, 0x10, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x41,
+	0x64, 0x64, 0x10, 0x07, 0x12, 0x18, 0x0a, 0x14, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x54, 0x79, 0x70, 0x65, 0x45, 0x78, 0x70, 0x52, 0x65, 0x61, 0x64, 0x10, 0x08, 0x12, 0x1a,
+	0x0a, 0x16, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x45,
+	0x78, 0x70, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x10, 0x09, 0x12, 0x17, 0x0a, 0x13, 0x4f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x41, 0x70, 0x70, 0x65, 0x6e,
+	0x64, 0x10, 0x0a, 0x12, 0x18, 0x0a, 0x14, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x54, 0x79, 0x70, 0x65, 0x50, 0x72, 0x65, 0x70, 0x65, 0x6e, 0x64, 0x10, 0x0b, 0x12, 0x16, 0x0a,
+	0x12, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x54, 0x6f,
+	0x75, 0x63, 0x68, 0x10, 0x0c, 0x12, 0x18, 0x0a, 0x14, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69,
+	0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x42, 0x69, 0x74, 0x52, 0x65, 0x61, 0x64, 0x10, 0x0d, 0x12,
+	0x1a, 0x0a, 0x16, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65,
+	0x42, 0x69, 0x74, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x10, 0x0e, 0x12, 0x17, 0x0a, 0x13, 0x4f,
+	0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x44, 0x65, 0x6c, 0x65,
+	0x74, 0x65, 0x10, 0x0f, 0x12, 0x18, 0x0a, 0x14, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x54, 0x79, 0x70, 0x65, 0x48, 0x6c, 0x6c, 0x52, 0x65, 0x61, 0x64, 0x10, 0x10, 0x12, 0x1a,
+	0x0a, 0x16, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x48,
+	0x6c, 0x6c, 0x4d, 0x6f, 0x64, 0x69, 0x66, 0x79, 0x10, 0x11, 0x2a, 0x61, 0x0a, 0x12, 0x52, 0x65,
+	0x63, 0x6f, 0x72, 0x64, 0x45, 0x78, 0x69, 0x73, 0x74, 0x73, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e,
+	0x12, 0x0a, 0x0a, 0x06, 0x55, 0x50, 0x44, 0x41, 0x54, 0x45, 0x10, 0x00, 0x12, 0x0f, 0x0a, 0x0b,
+	0x55, 0x50, 0x44, 0x41, 0x54, 0x45, 0x5f, 0x4f, 0x4e, 0x4c, 0x59, 0x10, 0x01, 0x12, 0x0b, 0x0a,
+	0x07, 0x52, 0x45, 0x50, 0x4c, 0x41, 0x43, 0x45, 0x10, 0x02, 0x12, 0x10, 0x0a, 0x0c, 0x52, 0x45,
+	0x50, 0x4c, 0x41, 0x43, 0x45, 0x5f, 0x4f, 0x4e, 0x4c, 0x59, 0x10, 0x03, 0x12, 0x0f, 0x0a, 0x0b,
+	0x43, 0x52, 0x45, 0x41, 0x54, 0x45, 0x5f, 0x4f, 0x4e, 0x4c, 0x59, 0x10, 0x04, 0x2a, 0x45, 0x0a,
+	0x10, 0x47, 0x65, 0x6e, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63,
+	0x79, 0x12, 0x08, 0x0a, 0x04, 0x4e, 0x4f, 0x4e, 0x45, 0x10, 0x00, 0x12, 0x14, 0x0a, 0x10, 0x45,
+	0x58, 0x50, 0x45, 0x43, 0x54, 0x5f, 0x47, 0x45, 0x4e, 0x5f, 0x45, 0x51, 0x55, 0x41, 0x4c, 0x10,
+	0x01, 0x12, 0x11, 0x0a, 0x0d, 0x45, 0x58, 0x50, 0x45, 0x43, 0x54, 0x5f, 0x47, 0x45, 0x4e, 0x5f,
+	0x47, 0x54, 0x10, 0x02, 0x2a, 0x30, 0x0a, 0x0b, 0x43, 0x6f, 0x6d, 0x6d, 0x69, 0x74, 0x4c, 0x65,
+	0x76, 0x65, 0x6c, 0x12, 0x0e, 0x0a, 0x0a, 0x43, 0x4f, 0x4d, 0x4d, 0x49, 0x54, 0x5f, 0x41, 0x4c,
+	0x4c, 0x10, 0x00, 0x12, 0x11, 0x0a, 0x0d, 0x43, 0x4f, 0x4d, 0x4d, 0x49, 0x54, 0x5f, 0x4d, 0x41,
+	0x53, 0x54, 0x45, 0x52, 0x10, 0x01, 0x32, 0xe2, 0x0d, 0x0a, 0x03, 0x4b, 0x56, 0x53, 0x12, 0x4f,
+	0x0a, 0x03, 0x50, 0x75, 0x74, 0x12, 0x29, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f,
+	0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72,
+	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x50, 0x75, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65,
+	0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12,
+	0x4f, 0x0a, 0x03, 0x41, 0x64, 0x64, 0x12, 0x29, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72,
+	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65,
+	0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x50, 0x75, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b,
+	0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00,
+	0x12, 0x52, 0x0a, 0x06, 0x41, 0x70, 0x70, 0x65, 0x6e, 0x64, 0x12, 0x29, 0x2e, 0x63, 0x6f, 0x6d,
+	0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f,
+	0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x50, 0x75, 0x74, 0x52, 0x65,
+	0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f,
+	0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72,
+	0x6f, 0x72, 0x22, 0x00, 0x12, 0x53, 0x0a, 0x07, 0x50, 0x72, 0x65, 0x70, 0x65, 0x6e, 0x64, 0x12,
+	0x29, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e,
+	0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65,
+	0x50, 0x75, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x6d,
+	0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f,
+	0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12, 0x61, 0x0a, 0x03, 0x47, 0x65, 0x74,
+	0x12, 0x29, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65,
+	0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b,
+	0x65, 0x47, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2d, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d,
+	0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x53, 0x69, 0x6e, 0x67,
+	0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x6d, 0x0a, 0x09,
+	0x47, 0x65, 0x74, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x12, 0x2f, 0x2e, 0x63, 0x6f, 0x6d, 0x2e,
 	0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e,
-	0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12, 0x52, 0x0a, 0x06, 0x41, 0x70, 0x70, 0x65,
-	0x6e, 0x64, 0x12, 0x29, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
-	0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70,
-	0x69, 0x6b, 0x65, 0x50, 0x75, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e,
-	0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61,
-	0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12, 0x53, 0x0a, 0x07,
-	0x50, 0x72, 0x65, 0x70, 0x65, 0x6e, 0x64, 0x12, 0x29, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65,
-	0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41,
-	0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x50, 0x75, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
-	0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22,
-	0x00, 0x12, 0x61, 0x0a, 0x03, 0x47, 0x65, 0x74, 0x12, 0x29, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61,
-	0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e,
-	0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x47, 0x65, 0x74, 0x52, 0x65, 0x71, 0x75,
+	0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x47, 0x65, 0x74, 0x48, 0x65, 0x61,
+	0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2d, 0x2e, 0x63, 0x6f, 0x6d,
+	0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f,
+	0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x53, 0x69, 0x6e, 0x67, 0x6c,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x67, 0x0a, 0x06, 0x45,
+	0x78, 0x69, 0x73, 0x74, 0x73, 0x12, 0x2c, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f,
+	0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72,
+	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x45, 0x78, 0x69, 0x73, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75,
 	0x65, 0x73, 0x74, 0x1a, 0x2d, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70,
 	0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73,
-	0x70, 0x69, 0x6b, 0x65, 0x53, 0x69, 0x6e, 0x67, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x22, 0x00, 0x12, 0x6d, 0x0a, 0x09, 0x47, 0x65, 0x74, 0x48, 0x65, 0x61, 0x64, 0x65,
-	0x72, 0x12, 0x2f, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b,
-	0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
-	0x6b, 0x65, 0x47, 0x65, 0x74, 0x48, 0x65, 0x61, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65,
-	0x73, 0x74, 0x1a, 0x2d, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
-	0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70,
-	0x69, 0x6b, 0x65, 0x53, 0x69, 0x6e, 0x67, 0x6c, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x22, 0x00, 0x12, 0x67, 0x0a, 0x06, 0x45, 0x78, 0x69, 0x73, 0x74, 0x73, 0x12, 0x2c, 0x2e,
-	0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61,
-	0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x45, 0x78,
-	0x69, 0x73, 0x74, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2d, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d,
-	0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x45, 0x78, 0x69, 0x73,
-	0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x67, 0x0a, 0x06,
-	0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x12, 0x2c, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72,
+	0x70, 0x69, 0x6b, 0x65, 0x45, 0x78, 0x69, 0x73, 0x74, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x22, 0x00, 0x12, 0x67, 0x0a, 0x06, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x12, 0x2c,
+	0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64,
+	0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x44,
+	0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2d, 0x2e, 0x63,
+	0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65,
+	0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x44, 0x65, 0x6c,
+	0x65, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x53, 0x0a,
+	0x05, 0x54, 0x6f, 0x75, 0x63, 0x68, 0x12, 0x2b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72,
 	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65,
-	0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x65, 0x71,
-	0x75, 0x65, 0x73, 0x74, 0x1a, 0x2d, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73,
+	0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x54, 0x6f, 0x75, 0x63, 0x68, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70,
+	0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72,
+	0x22, 0x00, 0x12, 0x79, 0x0a, 0x0c, 0x42, 0x61, 0x74, 0x63, 0x68, 0x4f, 0x70, 0x65, 0x72, 0x61,
+	0x74, 0x65, 0x12, 0x32, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
+	0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70,
+	0x69, 0x6b, 0x65, 0x42, 0x61, 0x74, 0x63, 0x68, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x65, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x33, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72,
+	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65,
+	0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x42, 0x61, 0x74, 0x63, 0x68, 0x4f, 0x70, 0x65, 0x72,
+	0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x76, 0x0a,
+	0x0b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x12, 0x31, 0x2e, 0x63,
+	0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65,
+	0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x43, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
+	0x32, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e,
+	0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65,
+	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x70, 0x0a, 0x09, 0x44, 0x72, 0x6f, 0x70, 0x49, 0x6e, 0x64,
+	0x65, 0x78, 0x12, 0x2f, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69,
+	0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70,
+	0x69, 0x6b, 0x65, 0x44, 0x72, 0x6f, 0x70, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x30, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70,
+	0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73,
+	0x70, 0x69, 0x6b, 0x65, 0x44, 0x72, 0x6f, 0x70, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x6d, 0x0a, 0x08, 0x54, 0x72, 0x75, 0x6e, 0x63,
+	0x61, 0x74, 0x65, 0x12, 0x2e, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70,
+	0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73,
+	0x70, 0x69, 0x6b, 0x65, 0x54, 0x72, 0x75, 0x6e, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x2f, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70,
+	0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73,
+	0x70, 0x69, 0x6b, 0x65, 0x54, 0x72, 0x75, 0x6e, 0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x76, 0x0a, 0x0b, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74,
+	0x65, 0x72, 0x55, 0x44, 0x46, 0x12, 0x31, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f,
+	0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72,
+	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65, 0x72, 0x55, 0x44,
+	0x46, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x32, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61,
+	0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e,
+	0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x52, 0x65, 0x67, 0x69, 0x73, 0x74, 0x65,
+	0x72, 0x55, 0x44, 0x46, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x6a,
+	0x0a, 0x07, 0x44, 0x72, 0x6f, 0x70, 0x55, 0x44, 0x46, 0x12, 0x2d, 0x2e, 0x63, 0x6f, 0x6d, 0x2e,
+	0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e,
+	0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x44, 0x72, 0x6f, 0x70, 0x55, 0x44,
+	0x46, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2e, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61,
+	0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e,
+	0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x44, 0x72, 0x6f, 0x70, 0x55, 0x44, 0x46,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x6a, 0x0a, 0x07, 0x4c, 0x69,
+	0x73, 0x74, 0x55, 0x44, 0x46, 0x12, 0x2d, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f,
+	0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72,
+	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x44, 0x46, 0x52, 0x65, 0x71,
+	0x75, 0x65, 0x73, 0x74, 0x1a, 0x2e, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73,
 	0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f,
-	0x73, 0x70, 0x69, 0x6b, 0x65, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x53, 0x0a, 0x05, 0x54, 0x6f, 0x75, 0x63, 0x68, 0x12, 0x2b,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64,
-	0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x54,
-	0x6f, 0x75, 0x63, 0x68, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x1b, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d,
-	0x6f, 0x6e, 0x2e, 0x45, 0x72, 0x72, 0x6f, 0x72, 0x22, 0x00, 0x12, 0x79, 0x0a, 0x0c, 0x42, 0x61,
-	0x74, 0x63, 0x68, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x65, 0x12, 0x32, 0x2e, 0x63, 0x6f, 0x6d,
-	0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f,
-	0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x42, 0x61, 0x74, 0x63, 0x68,
-	0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x33,
-	0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64,
-	0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x42,
-	0x61, 0x74, 0x63, 0x68, 0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x76, 0x0a, 0x0b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x49,
-	0x6e, 0x64, 0x65, 0x78, 0x12, 0x31, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73,
+	0x73, 0x70, 0x69, 0x6b, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x55, 0x44, 0x46, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x73, 0x0a, 0x0a, 0x55, 0x44, 0x46, 0x45, 0x78, 0x65,
+	0x63, 0x75, 0x74, 0x65, 0x12, 0x30, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73,
 	0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f,
-	0x73, 0x70, 0x69, 0x6b, 0x65, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x49, 0x6e, 0x64, 0x65, 0x78,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x32, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65,
-	0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41,
-	0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x49, 0x6e,
-	0x64, 0x65, 0x78, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12, 0x70, 0x0a,
-	0x09, 0x44, 0x72, 0x6f, 0x70, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x12, 0x2f, 0x2e, 0x63, 0x6f, 0x6d,
-	0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f,
-	0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x44, 0x72, 0x6f, 0x70, 0x49,
-	0x6e, 0x64, 0x65, 0x78, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x30, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d,
-	0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x44, 0x72, 0x6f, 0x70,
-	0x49, 0x6e, 0x64, 0x65, 0x78, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x12,
-	0x6d, 0x0a, 0x08, 0x54, 0x72, 0x75, 0x6e, 0x63, 0x61, 0x74, 0x65, 0x12, 0x2e, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d,
-	0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x54, 0x72, 0x75, 0x6e,
-	0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x2f, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2e, 0x61, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d,
-	0x6f, 0x6e, 0x2e, 0x41, 0x65, 0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x54, 0x72, 0x75, 0x6e,
-	0x63, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x0e,
-	0x5a, 0x0c, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x3b, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x70, 0x69, 0x6b, 0x65, 0x55, 0x44, 0x46, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74, 0x65, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x31, 0x2e, 0x63, 0x6f, 0x6d, 0x2e, 0x61, 0x65, 0x72,
+	0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x2e, 0x64, 0x61, 0x65, 0x6d, 0x6f, 0x6e, 0x2e, 0x41, 0x65,
+	0x72, 0x6f, 0x73, 0x70, 0x69, 0x6b, 0x65, 0x55, 0x44, 0x46, 0x45, 0x78, 0x65, 0x63, 0x75, 0x74,
+	0x65, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x00, 0x42, 0x0e, 0x5a, 0x0c, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x2f, 0x3b, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -5681,8 +6354,8 @@ func file_asld_kvs_proto_rawDescGZIP() []byte {
 	return file_asld_kvs_proto_rawDescData
 }
 
-var file_asld_kvs_proto_enumTypes = make([]protoimpl.EnumInfo, 16)
-var file_asld_kvs_proto_msgTypes = make([]protoimpl.MessageInfo, 46)
+var file_asld_kvs_proto_enumTypes = make([]protoimpl.EnumInfo, 17)
+var file_asld_kvs_proto_msgTypes = make([]protoimpl.MessageInfo, 55)
 var file_asld_kvs_proto_goTypes = []interface{}{
 	(ParticleType)(0),                     // 0: com.aerospike.daemon.ParticleType
 	(ExpType)(0),                          // 1: com.aerospike.daemon.ExpType
@@ -5694,189 +6367,221 @@ var file_asld_kvs_proto_goTypes = []interface{}{
 	(IndexType)(0),                        // 7: com.aerospike.daemon.IndexType
 	(IndexCollectionType)(0),              // 8: com.aerospike.daemon.IndexCollectionType
 	(AuthMode)(0),                         // 9: com.aerospike.daemon.AuthMode
-	(ListOrderType)(0),                    // 10: com.aerospike.daemon.ListOrderType
-	(MapOrderType)(0),                     // 11: com.aerospike.daemon.MapOrderType
-	(OperationType)(0),                    // 12: com.aerospike.daemon.OperationType
-	(RecordExistsAction)(0),               // 13: com.aerospike.daemon.RecordExistsAction
-	(GenerationPolicy)(0),                 // 14: com.aerospike.daemon.GenerationPolicy
-	(CommitLevel)(0),                      // 15: com.aerospike.daemon.CommitLevel
-	(*Expression)(nil),                    // 16: com.aerospike.daemon.Expression
-	(*ReadPolicy)(nil),                    // 17: com.aerospike.daemon.ReadPolicy
-	(*WritePolicy)(nil),                   // 18: com.aerospike.daemon.WritePolicy
-	(*InfoPolicy)(nil),                    // 19: com.aerospike.daemon.InfoPolicy
-	(*BatchReadPolicy)(nil),               // 20: com.aerospike.daemon.BatchReadPolicy
-	(*BatchWritePolicy)(nil),              // 21: com.aerospike.daemon.BatchWritePolicy
-	(*BatchDeletePolicy)(nil),             // 22: com.aerospike.daemon.BatchDeletePolicy
-	(*BatchUDFPolicy)(nil),                // 23: com.aerospike.daemon.BatchUDFPolicy
-	(*BatchPolicy)(nil),                   // 24: com.aerospike.daemon.BatchPolicy
-	(*Bin)(nil),                           // 25: com.aerospike.daemon.Bin
-	(*List)(nil),                          // 26: com.aerospike.daemon.List
-	(*MapEntry)(nil),                      // 27: com.aerospike.daemon.MapEntry
-	(*Map)(nil),                           // 28: com.aerospike.daemon.Map
-	(*JsonEntry)(nil),                     // 29: com.aerospike.daemon.JsonEntry
-	(*Json)(nil),                          // 30: com.aerospike.daemon.Json
-	(*Value)(nil),                         // 31: com.aerospike.daemon.Value
-	(*Key)(nil),                           // 32: com.aerospike.daemon.Key
-	(*Record)(nil),                        // 33: com.aerospike.daemon.Record
-	(*Error)(nil),                         // 34: com.aerospike.daemon.Error
-	(*BatchRecord)(nil),                   // 35: com.aerospike.daemon.BatchRecord
-	(*CDTContext)(nil),                    // 36: com.aerospike.daemon.CDTContext
-	(*Operation)(nil),                     // 37: com.aerospike.daemon.Operation
-	(*BatchWrite)(nil),                    // 38: com.aerospike.daemon.BatchWrite
-	(*BatchRead)(nil),                     // 39: com.aerospike.daemon.BatchRead
-	(*BatchDelete)(nil),                   // 40: com.aerospike.daemon.BatchDelete
-	(*BatchUDF)(nil),                      // 41: com.aerospike.daemon.BatchUDF
-	(*AerospikeSingleResponse)(nil),       // 42: com.aerospike.daemon.AerospikeSingleResponse
-	(*AerospikeGetRequest)(nil),           // 43: com.aerospike.daemon.AerospikeGetRequest
-	(*AerospikeGetHeaderRequest)(nil),     // 44: com.aerospike.daemon.AerospikeGetHeaderRequest
-	(*AerospikeExistsRequest)(nil),        // 45: com.aerospike.daemon.AerospikeExistsRequest
-	(*AerospikeExistsResponse)(nil),       // 46: com.aerospike.daemon.AerospikeExistsResponse
-	(*AerospikeDeleteRequest)(nil),        // 47: com.aerospike.daemon.AerospikeDeleteRequest
-	(*AerospikeDeleteResponse)(nil),       // 48: com.aerospike.daemon.AerospikeDeleteResponse
-	(*AerospikeTouchRequest)(nil),         // 49: com.aerospike.daemon.AerospikeTouchRequest
-	(*AerospikePutRequest)(nil),           // 50: com.aerospike.daemon.AerospikePutRequest
-	(*BatchOperate)(nil),                  // 51: com.aerospike.daemon.BatchOperate
-	(*AerospikeBatchOperateRequest)(nil),  // 52: com.aerospike.daemon.AerospikeBatchOperateRequest
-	(*AerospikeBatchOperateResponse)(nil), // 53: com.aerospike.daemon.AerospikeBatchOperateResponse
-	(*AerospikeCreateIndexRequest)(nil),   // 54: com.aerospike.daemon.AerospikeCreateIndexRequest
-	(*AerospikeCreateIndexResponse)(nil),  // 55: com.aerospike.daemon.AerospikeCreateIndexResponse
-	(*AerospikeDropIndexRequest)(nil),     // 56: com.aerospike.daemon.AerospikeDropIndexRequest
-	(*AerospikeDropIndexResponse)(nil),    // 57: com.aerospike.daemon.AerospikeDropIndexResponse
-	(*AerospikeTruncateRequest)(nil),      // 58: com.aerospike.daemon.AerospikeTruncateRequest
-	(*AerospikeTruncateResponse)(nil),     // 59: com.aerospike.daemon.AerospikeTruncateResponse
-	(*BackgroundExecutePolicy)(nil),       // 60: com.aerospike.daemon.BackgroundExecutePolicy
-	nil,                                   // 61: com.aerospike.daemon.Record.BinsEntry
+	(UDFLanguage)(0),                      // 10: com.aerospike.daemon.UDFLanguage
+	(ListOrderType)(0),                    // 11: com.aerospike.daemon.ListOrderType
+	(MapOrderType)(0),                     // 12: com.aerospike.daemon.MapOrderType
+	(OperationType)(0),                    // 13: com.aerospike.daemon.OperationType
+	(RecordExistsAction)(0),               // 14: com.aerospike.daemon.RecordExistsAction
+	(GenerationPolicy)(0),                 // 15: com.aerospike.daemon.GenerationPolicy
+	(CommitLevel)(0),                      // 16: com.aerospike.daemon.CommitLevel
+	(*Expression)(nil),                    // 17: com.aerospike.daemon.Expression
+	(*ReadPolicy)(nil),                    // 18: com.aerospike.daemon.ReadPolicy
+	(*WritePolicy)(nil),                   // 19: com.aerospike.daemon.WritePolicy
+	(*InfoPolicy)(nil),                    // 20: com.aerospike.daemon.InfoPolicy
+	(*BatchReadPolicy)(nil),               // 21: com.aerospike.daemon.BatchReadPolicy
+	(*BatchWritePolicy)(nil),              // 22: com.aerospike.daemon.BatchWritePolicy
+	(*BatchDeletePolicy)(nil),             // 23: com.aerospike.daemon.BatchDeletePolicy
+	(*BatchUDFPolicy)(nil),                // 24: com.aerospike.daemon.BatchUDFPolicy
+	(*BatchPolicy)(nil),                   // 25: com.aerospike.daemon.BatchPolicy
+	(*Bin)(nil),                           // 26: com.aerospike.daemon.Bin
+	(*List)(nil),                          // 27: com.aerospike.daemon.List
+	(*MapEntry)(nil),                      // 28: com.aerospike.daemon.MapEntry
+	(*Map)(nil),                           // 29: com.aerospike.daemon.Map
+	(*JsonEntry)(nil),                     // 30: com.aerospike.daemon.JsonEntry
+	(*Json)(nil),                          // 31: com.aerospike.daemon.Json
+	(*UDFMeta)(nil),                       // 32: com.aerospike.daemon.UDFMeta
+	(*Value)(nil),                         // 33: com.aerospike.daemon.Value
+	(*Key)(nil),                           // 34: com.aerospike.daemon.Key
+	(*Record)(nil),                        // 35: com.aerospike.daemon.Record
+	(*Error)(nil),                         // 36: com.aerospike.daemon.Error
+	(*BatchRecord)(nil),                   // 37: com.aerospike.daemon.BatchRecord
+	(*CDTContext)(nil),                    // 38: com.aerospike.daemon.CDTContext
+	(*Operation)(nil),                     // 39: com.aerospike.daemon.Operation
+	(*BatchWrite)(nil),                    // 40: com.aerospike.daemon.BatchWrite
+	(*BatchRead)(nil),                     // 41: com.aerospike.daemon.BatchRead
+	(*BatchDelete)(nil),                   // 42: com.aerospike.daemon.BatchDelete
+	(*BatchUDF)(nil),                      // 43: com.aerospike.daemon.BatchUDF
+	(*AerospikeSingleResponse)(nil),       // 44: com.aerospike.daemon.AerospikeSingleResponse
+	(*AerospikeGetRequest)(nil),           // 45: com.aerospike.daemon.AerospikeGetRequest
+	(*AerospikeGetHeaderRequest)(nil),     // 46: com.aerospike.daemon.AerospikeGetHeaderRequest
+	(*AerospikeExistsRequest)(nil),        // 47: com.aerospike.daemon.AerospikeExistsRequest
+	(*AerospikeExistsResponse)(nil),       // 48: com.aerospike.daemon.AerospikeExistsResponse
+	(*AerospikeDeleteRequest)(nil),        // 49: com.aerospike.daemon.AerospikeDeleteRequest
+	(*AerospikeDeleteResponse)(nil),       // 50: com.aerospike.daemon.AerospikeDeleteResponse
+	(*AerospikeTouchRequest)(nil),         // 51: com.aerospike.daemon.AerospikeTouchRequest
+	(*AerospikePutRequest)(nil),           // 52: com.aerospike.daemon.AerospikePutRequest
+	(*BatchOperate)(nil),                  // 53: com.aerospike.daemon.BatchOperate
+	(*AerospikeBatchOperateRequest)(nil),  // 54: com.aerospike.daemon.AerospikeBatchOperateRequest
+	(*AerospikeBatchOperateResponse)(nil), // 55: com.aerospike.daemon.AerospikeBatchOperateResponse
+	(*AerospikeCreateIndexRequest)(nil),   // 56: com.aerospike.daemon.AerospikeCreateIndexRequest
+	(*AerospikeCreateIndexResponse)(nil),  // 57: com.aerospike.daemon.AerospikeCreateIndexResponse
+	(*AerospikeDropIndexRequest)(nil),     // 58: com.aerospike.daemon.AerospikeDropIndexRequest
+	(*AerospikeDropIndexResponse)(nil),    // 59: com.aerospike.daemon.AerospikeDropIndexResponse
+	(*AerospikeTruncateRequest)(nil),      // 60: com.aerospike.daemon.AerospikeTruncateRequest
+	(*AerospikeTruncateResponse)(nil),     // 61: com.aerospike.daemon.AerospikeTruncateResponse
+	(*AerospikeRegisterUDFRequest)(nil),   // 62: com.aerospike.daemon.AerospikeRegisterUDFRequest
+	(*AerospikeRegisterUDFResponse)(nil),  // 63: com.aerospike.daemon.AerospikeRegisterUDFResponse
+	(*AerospikeDropUDFRequest)(nil),       // 64: com.aerospike.daemon.AerospikeDropUDFRequest
+	(*AerospikeDropUDFResponse)(nil),      // 65: com.aerospike.daemon.AerospikeDropUDFResponse
+	(*AerospikeListUDFRequest)(nil),       // 66: com.aerospike.daemon.AerospikeListUDFRequest
+	(*AerospikeListUDFResponse)(nil),      // 67: com.aerospike.daemon.AerospikeListUDFResponse
+	(*AerospikeUDFExecuteRequest)(nil),    // 68: com.aerospike.daemon.AerospikeUDFExecuteRequest
+	(*AerospikeUDFExecuteResponse)(nil),   // 69: com.aerospike.daemon.AerospikeUDFExecuteResponse
+	(*BackgroundExecutePolicy)(nil),       // 70: com.aerospike.daemon.BackgroundExecutePolicy
+	nil,                                   // 71: com.aerospike.daemon.Record.BinsEntry
 }
 var file_asld_kvs_proto_depIdxs = []int32{
 	2,   // 0: com.aerospike.daemon.Expression.cmd:type_name -> com.aerospike.daemon.ExpOp
-	31,  // 1: com.aerospike.daemon.Expression.val:type_name -> com.aerospike.daemon.Value
-	16,  // 2: com.aerospike.daemon.Expression.bin:type_name -> com.aerospike.daemon.Expression
+	33,  // 1: com.aerospike.daemon.Expression.val:type_name -> com.aerospike.daemon.Value
+	17,  // 2: com.aerospike.daemon.Expression.bin:type_name -> com.aerospike.daemon.Expression
 	1,   // 3: com.aerospike.daemon.Expression.module:type_name -> com.aerospike.daemon.ExpType
-	16,  // 4: com.aerospike.daemon.Expression.exps:type_name -> com.aerospike.daemon.Expression
-	16,  // 5: com.aerospike.daemon.ReadPolicy.filterExpression:type_name -> com.aerospike.daemon.Expression
+	17,  // 4: com.aerospike.daemon.Expression.exps:type_name -> com.aerospike.daemon.Expression
+	17,  // 5: com.aerospike.daemon.ReadPolicy.filterExpression:type_name -> com.aerospike.daemon.Expression
 	3,   // 6: com.aerospike.daemon.ReadPolicy.readModeAP:type_name -> com.aerospike.daemon.ReadModeAP
 	4,   // 7: com.aerospike.daemon.ReadPolicy.readModeSC:type_name -> com.aerospike.daemon.ReadModeSC
 	5,   // 8: com.aerospike.daemon.ReadPolicy.replicaPolicy:type_name -> com.aerospike.daemon.ReplicaPolicy
-	17,  // 9: com.aerospike.daemon.WritePolicy.policy:type_name -> com.aerospike.daemon.ReadPolicy
-	13,  // 10: com.aerospike.daemon.WritePolicy.recordExistsAction:type_name -> com.aerospike.daemon.RecordExistsAction
-	14,  // 11: com.aerospike.daemon.WritePolicy.generationPolicy:type_name -> com.aerospike.daemon.GenerationPolicy
-	15,  // 12: com.aerospike.daemon.WritePolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
-	16,  // 13: com.aerospike.daemon.BatchReadPolicy.filter_expression:type_name -> com.aerospike.daemon.Expression
+	18,  // 9: com.aerospike.daemon.WritePolicy.policy:type_name -> com.aerospike.daemon.ReadPolicy
+	14,  // 10: com.aerospike.daemon.WritePolicy.recordExistsAction:type_name -> com.aerospike.daemon.RecordExistsAction
+	15,  // 11: com.aerospike.daemon.WritePolicy.generationPolicy:type_name -> com.aerospike.daemon.GenerationPolicy
+	16,  // 12: com.aerospike.daemon.WritePolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
+	17,  // 13: com.aerospike.daemon.BatchReadPolicy.filter_expression:type_name -> com.aerospike.daemon.Expression
 	3,   // 14: com.aerospike.daemon.BatchReadPolicy.readModeAP:type_name -> com.aerospike.daemon.ReadModeAP
 	4,   // 15: com.aerospike.daemon.BatchReadPolicy.readModeSC:type_name -> com.aerospike.daemon.ReadModeSC
-	16,  // 16: com.aerospike.daemon.BatchWritePolicy.filter_expression:type_name -> com.aerospike.daemon.Expression
-	13,  // 17: com.aerospike.daemon.BatchWritePolicy.RecordExistsAction:type_name -> com.aerospike.daemon.RecordExistsAction
-	15,  // 18: com.aerospike.daemon.BatchWritePolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
-	14,  // 19: com.aerospike.daemon.BatchWritePolicy.generationPolicy:type_name -> com.aerospike.daemon.GenerationPolicy
-	16,  // 20: com.aerospike.daemon.BatchDeletePolicy.filter_expression:type_name -> com.aerospike.daemon.Expression
-	15,  // 21: com.aerospike.daemon.BatchDeletePolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
-	14,  // 22: com.aerospike.daemon.BatchDeletePolicy.generationPolicy:type_name -> com.aerospike.daemon.GenerationPolicy
-	16,  // 23: com.aerospike.daemon.BatchUDFPolicy.filter_expression:type_name -> com.aerospike.daemon.Expression
-	15,  // 24: com.aerospike.daemon.BatchUDFPolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
-	17,  // 25: com.aerospike.daemon.BatchPolicy.policy:type_name -> com.aerospike.daemon.ReadPolicy
-	31,  // 26: com.aerospike.daemon.Bin.value:type_name -> com.aerospike.daemon.Value
-	31,  // 27: com.aerospike.daemon.List.l:type_name -> com.aerospike.daemon.Value
-	31,  // 28: com.aerospike.daemon.MapEntry.k:type_name -> com.aerospike.daemon.Value
-	31,  // 29: com.aerospike.daemon.MapEntry.v:type_name -> com.aerospike.daemon.Value
-	27,  // 30: com.aerospike.daemon.Map.m:type_name -> com.aerospike.daemon.MapEntry
-	31,  // 31: com.aerospike.daemon.JsonEntry.v:type_name -> com.aerospike.daemon.Value
-	29,  // 32: com.aerospike.daemon.Json.j:type_name -> com.aerospike.daemon.JsonEntry
-	26,  // 33: com.aerospike.daemon.Value.l:type_name -> com.aerospike.daemon.List
-	28,  // 34: com.aerospike.daemon.Value.m:type_name -> com.aerospike.daemon.Map
-	30,  // 35: com.aerospike.daemon.Value.json:type_name -> com.aerospike.daemon.Json
-	31,  // 36: com.aerospike.daemon.Key.value:type_name -> com.aerospike.daemon.Value
-	32,  // 37: com.aerospike.daemon.Record.key:type_name -> com.aerospike.daemon.Key
-	61,  // 38: com.aerospike.daemon.Record.Bins:type_name -> com.aerospike.daemon.Record.BinsEntry
-	32,  // 39: com.aerospike.daemon.BatchRecord.key:type_name -> com.aerospike.daemon.Key
-	33,  // 40: com.aerospike.daemon.BatchRecord.record:type_name -> com.aerospike.daemon.Record
-	34,  // 41: com.aerospike.daemon.BatchRecord.error:type_name -> com.aerospike.daemon.Error
-	31,  // 42: com.aerospike.daemon.CDTContext.value:type_name -> com.aerospike.daemon.Value
-	12,  // 43: com.aerospike.daemon.Operation.opType:type_name -> com.aerospike.daemon.OperationType
-	36,  // 44: com.aerospike.daemon.Operation.ctx:type_name -> com.aerospike.daemon.CDTContext
-	31,  // 45: com.aerospike.daemon.Operation.binValue:type_name -> com.aerospike.daemon.Value
-	35,  // 46: com.aerospike.daemon.BatchWrite.batchRecord:type_name -> com.aerospike.daemon.BatchRecord
-	21,  // 47: com.aerospike.daemon.BatchWrite.policy:type_name -> com.aerospike.daemon.BatchWritePolicy
-	37,  // 48: com.aerospike.daemon.BatchWrite.ops:type_name -> com.aerospike.daemon.Operation
-	35,  // 49: com.aerospike.daemon.BatchRead.batchRecord:type_name -> com.aerospike.daemon.BatchRecord
-	20,  // 50: com.aerospike.daemon.BatchRead.policy:type_name -> com.aerospike.daemon.BatchReadPolicy
-	37,  // 51: com.aerospike.daemon.BatchRead.ops:type_name -> com.aerospike.daemon.Operation
-	35,  // 52: com.aerospike.daemon.BatchDelete.batchRecord:type_name -> com.aerospike.daemon.BatchRecord
-	22,  // 53: com.aerospike.daemon.BatchDelete.policy:type_name -> com.aerospike.daemon.BatchDeletePolicy
-	35,  // 54: com.aerospike.daemon.BatchUDF.batchRecord:type_name -> com.aerospike.daemon.BatchRecord
-	23,  // 55: com.aerospike.daemon.BatchUDF.policy:type_name -> com.aerospike.daemon.BatchUDFPolicy
-	31,  // 56: com.aerospike.daemon.BatchUDF.functionArgs:type_name -> com.aerospike.daemon.Value
-	34,  // 57: com.aerospike.daemon.AerospikeSingleResponse.error:type_name -> com.aerospike.daemon.Error
-	33,  // 58: com.aerospike.daemon.AerospikeSingleResponse.record:type_name -> com.aerospike.daemon.Record
-	17,  // 59: com.aerospike.daemon.AerospikeGetRequest.policy:type_name -> com.aerospike.daemon.ReadPolicy
-	32,  // 60: com.aerospike.daemon.AerospikeGetRequest.key:type_name -> com.aerospike.daemon.Key
-	17,  // 61: com.aerospike.daemon.AerospikeGetHeaderRequest.policy:type_name -> com.aerospike.daemon.ReadPolicy
-	32,  // 62: com.aerospike.daemon.AerospikeGetHeaderRequest.key:type_name -> com.aerospike.daemon.Key
-	17,  // 63: com.aerospike.daemon.AerospikeExistsRequest.policy:type_name -> com.aerospike.daemon.ReadPolicy
-	32,  // 64: com.aerospike.daemon.AerospikeExistsRequest.key:type_name -> com.aerospike.daemon.Key
-	34,  // 65: com.aerospike.daemon.AerospikeExistsResponse.error:type_name -> com.aerospike.daemon.Error
-	18,  // 66: com.aerospike.daemon.AerospikeDeleteRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
-	32,  // 67: com.aerospike.daemon.AerospikeDeleteRequest.key:type_name -> com.aerospike.daemon.Key
-	34,  // 68: com.aerospike.daemon.AerospikeDeleteResponse.error:type_name -> com.aerospike.daemon.Error
-	18,  // 69: com.aerospike.daemon.AerospikeTouchRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
-	32,  // 70: com.aerospike.daemon.AerospikeTouchRequest.key:type_name -> com.aerospike.daemon.Key
-	18,  // 71: com.aerospike.daemon.AerospikePutRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
-	32,  // 72: com.aerospike.daemon.AerospikePutRequest.key:type_name -> com.aerospike.daemon.Key
-	25,  // 73: com.aerospike.daemon.AerospikePutRequest.Bins:type_name -> com.aerospike.daemon.Bin
-	39,  // 74: com.aerospike.daemon.BatchOperate.br:type_name -> com.aerospike.daemon.BatchRead
-	38,  // 75: com.aerospike.daemon.BatchOperate.bw:type_name -> com.aerospike.daemon.BatchWrite
-	40,  // 76: com.aerospike.daemon.BatchOperate.bd:type_name -> com.aerospike.daemon.BatchDelete
-	41,  // 77: com.aerospike.daemon.BatchOperate.bu:type_name -> com.aerospike.daemon.BatchUDF
-	24,  // 78: com.aerospike.daemon.AerospikeBatchOperateRequest.policy:type_name -> com.aerospike.daemon.BatchPolicy
-	51,  // 79: com.aerospike.daemon.AerospikeBatchOperateRequest.records:type_name -> com.aerospike.daemon.BatchOperate
-	34,  // 80: com.aerospike.daemon.AerospikeBatchOperateResponse.error:type_name -> com.aerospike.daemon.Error
-	35,  // 81: com.aerospike.daemon.AerospikeBatchOperateResponse.records:type_name -> com.aerospike.daemon.BatchRecord
-	18,  // 82: com.aerospike.daemon.AerospikeCreateIndexRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
-	7,   // 83: com.aerospike.daemon.AerospikeCreateIndexRequest.indexType:type_name -> com.aerospike.daemon.IndexType
-	8,   // 84: com.aerospike.daemon.AerospikeCreateIndexRequest.indexCollectionType:type_name -> com.aerospike.daemon.IndexCollectionType
-	36,  // 85: com.aerospike.daemon.AerospikeCreateIndexRequest.ctx:type_name -> com.aerospike.daemon.CDTContext
-	34,  // 86: com.aerospike.daemon.AerospikeCreateIndexResponse.error:type_name -> com.aerospike.daemon.Error
-	18,  // 87: com.aerospike.daemon.AerospikeDropIndexRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
-	34,  // 88: com.aerospike.daemon.AerospikeDropIndexResponse.error:type_name -> com.aerospike.daemon.Error
-	19,  // 89: com.aerospike.daemon.AerospikeTruncateRequest.policy:type_name -> com.aerospike.daemon.InfoPolicy
-	34,  // 90: com.aerospike.daemon.AerospikeTruncateResponse.error:type_name -> com.aerospike.daemon.Error
-	5,   // 91: com.aerospike.daemon.BackgroundExecutePolicy.replica:type_name -> com.aerospike.daemon.ReplicaPolicy
-	3,   // 92: com.aerospike.daemon.BackgroundExecutePolicy.readModeAP:type_name -> com.aerospike.daemon.ReadModeAP
-	4,   // 93: com.aerospike.daemon.BackgroundExecutePolicy.readModeSC:type_name -> com.aerospike.daemon.ReadModeSC
-	13,  // 94: com.aerospike.daemon.BackgroundExecutePolicy.recordExistsAction:type_name -> com.aerospike.daemon.RecordExistsAction
-	14,  // 95: com.aerospike.daemon.BackgroundExecutePolicy.generationPolicy:type_name -> com.aerospike.daemon.GenerationPolicy
-	15,  // 96: com.aerospike.daemon.BackgroundExecutePolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
-	31,  // 97: com.aerospike.daemon.Record.BinsEntry.value:type_name -> com.aerospike.daemon.Value
-	50,  // 98: com.aerospike.daemon.KVS.Put:input_type -> com.aerospike.daemon.AerospikePutRequest
-	50,  // 99: com.aerospike.daemon.KVS.Add:input_type -> com.aerospike.daemon.AerospikePutRequest
-	50,  // 100: com.aerospike.daemon.KVS.Append:input_type -> com.aerospike.daemon.AerospikePutRequest
-	50,  // 101: com.aerospike.daemon.KVS.Prepend:input_type -> com.aerospike.daemon.AerospikePutRequest
-	43,  // 102: com.aerospike.daemon.KVS.Get:input_type -> com.aerospike.daemon.AerospikeGetRequest
-	44,  // 103: com.aerospike.daemon.KVS.GetHeader:input_type -> com.aerospike.daemon.AerospikeGetHeaderRequest
-	45,  // 104: com.aerospike.daemon.KVS.Exists:input_type -> com.aerospike.daemon.AerospikeExistsRequest
-	47,  // 105: com.aerospike.daemon.KVS.Delete:input_type -> com.aerospike.daemon.AerospikeDeleteRequest
-	49,  // 106: com.aerospike.daemon.KVS.Touch:input_type -> com.aerospike.daemon.AerospikeTouchRequest
-	52,  // 107: com.aerospike.daemon.KVS.BatchOperate:input_type -> com.aerospike.daemon.AerospikeBatchOperateRequest
-	54,  // 108: com.aerospike.daemon.KVS.CreateIndex:input_type -> com.aerospike.daemon.AerospikeCreateIndexRequest
-	56,  // 109: com.aerospike.daemon.KVS.DropIndex:input_type -> com.aerospike.daemon.AerospikeDropIndexRequest
-	58,  // 110: com.aerospike.daemon.KVS.Truncate:input_type -> com.aerospike.daemon.AerospikeTruncateRequest
-	34,  // 111: com.aerospike.daemon.KVS.Put:output_type -> com.aerospike.daemon.Error
-	34,  // 112: com.aerospike.daemon.KVS.Add:output_type -> com.aerospike.daemon.Error
-	34,  // 113: com.aerospike.daemon.KVS.Append:output_type -> com.aerospike.daemon.Error
-	34,  // 114: com.aerospike.daemon.KVS.Prepend:output_type -> com.aerospike.daemon.Error
-	42,  // 115: com.aerospike.daemon.KVS.Get:output_type -> com.aerospike.daemon.AerospikeSingleResponse
-	42,  // 116: com.aerospike.daemon.KVS.GetHeader:output_type -> com.aerospike.daemon.AerospikeSingleResponse
-	46,  // 117: com.aerospike.daemon.KVS.Exists:output_type -> com.aerospike.daemon.AerospikeExistsResponse
-	48,  // 118: com.aerospike.daemon.KVS.Delete:output_type -> com.aerospike.daemon.AerospikeDeleteResponse
-	34,  // 119: com.aerospike.daemon.KVS.Touch:output_type -> com.aerospike.daemon.Error
-	53,  // 120: com.aerospike.daemon.KVS.BatchOperate:output_type -> com.aerospike.daemon.AerospikeBatchOperateResponse
-	55,  // 121: com.aerospike.daemon.KVS.CreateIndex:output_type -> com.aerospike.daemon.AerospikeCreateIndexResponse
-	57,  // 122: com.aerospike.daemon.KVS.DropIndex:output_type -> com.aerospike.daemon.AerospikeDropIndexResponse
-	59,  // 123: com.aerospike.daemon.KVS.Truncate:output_type -> com.aerospike.daemon.AerospikeTruncateResponse
-	111, // [111:124] is the sub-list for method output_type
-	98,  // [98:111] is the sub-list for method input_type
-	98,  // [98:98] is the sub-list for extension type_name
-	98,  // [98:98] is the sub-list for extension extendee
-	0,   // [0:98] is the sub-list for field type_name
+	17,  // 16: com.aerospike.daemon.BatchWritePolicy.filter_expression:type_name -> com.aerospike.daemon.Expression
+	14,  // 17: com.aerospike.daemon.BatchWritePolicy.RecordExistsAction:type_name -> com.aerospike.daemon.RecordExistsAction
+	16,  // 18: com.aerospike.daemon.BatchWritePolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
+	15,  // 19: com.aerospike.daemon.BatchWritePolicy.generationPolicy:type_name -> com.aerospike.daemon.GenerationPolicy
+	17,  // 20: com.aerospike.daemon.BatchDeletePolicy.filter_expression:type_name -> com.aerospike.daemon.Expression
+	16,  // 21: com.aerospike.daemon.BatchDeletePolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
+	15,  // 22: com.aerospike.daemon.BatchDeletePolicy.generationPolicy:type_name -> com.aerospike.daemon.GenerationPolicy
+	17,  // 23: com.aerospike.daemon.BatchUDFPolicy.filter_expression:type_name -> com.aerospike.daemon.Expression
+	16,  // 24: com.aerospike.daemon.BatchUDFPolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
+	18,  // 25: com.aerospike.daemon.BatchPolicy.policy:type_name -> com.aerospike.daemon.ReadPolicy
+	33,  // 26: com.aerospike.daemon.Bin.value:type_name -> com.aerospike.daemon.Value
+	33,  // 27: com.aerospike.daemon.List.l:type_name -> com.aerospike.daemon.Value
+	33,  // 28: com.aerospike.daemon.MapEntry.k:type_name -> com.aerospike.daemon.Value
+	33,  // 29: com.aerospike.daemon.MapEntry.v:type_name -> com.aerospike.daemon.Value
+	28,  // 30: com.aerospike.daemon.Map.m:type_name -> com.aerospike.daemon.MapEntry
+	33,  // 31: com.aerospike.daemon.JsonEntry.v:type_name -> com.aerospike.daemon.Value
+	30,  // 32: com.aerospike.daemon.Json.j:type_name -> com.aerospike.daemon.JsonEntry
+	10,  // 33: com.aerospike.daemon.UDFMeta.language:type_name -> com.aerospike.daemon.UDFLanguage
+	27,  // 34: com.aerospike.daemon.Value.l:type_name -> com.aerospike.daemon.List
+	29,  // 35: com.aerospike.daemon.Value.m:type_name -> com.aerospike.daemon.Map
+	31,  // 36: com.aerospike.daemon.Value.json:type_name -> com.aerospike.daemon.Json
+	33,  // 37: com.aerospike.daemon.Key.value:type_name -> com.aerospike.daemon.Value
+	34,  // 38: com.aerospike.daemon.Record.key:type_name -> com.aerospike.daemon.Key
+	71,  // 39: com.aerospike.daemon.Record.Bins:type_name -> com.aerospike.daemon.Record.BinsEntry
+	34,  // 40: com.aerospike.daemon.BatchRecord.key:type_name -> com.aerospike.daemon.Key
+	35,  // 41: com.aerospike.daemon.BatchRecord.record:type_name -> com.aerospike.daemon.Record
+	36,  // 42: com.aerospike.daemon.BatchRecord.error:type_name -> com.aerospike.daemon.Error
+	33,  // 43: com.aerospike.daemon.CDTContext.value:type_name -> com.aerospike.daemon.Value
+	13,  // 44: com.aerospike.daemon.Operation.opType:type_name -> com.aerospike.daemon.OperationType
+	38,  // 45: com.aerospike.daemon.Operation.ctx:type_name -> com.aerospike.daemon.CDTContext
+	33,  // 46: com.aerospike.daemon.Operation.binValue:type_name -> com.aerospike.daemon.Value
+	37,  // 47: com.aerospike.daemon.BatchWrite.batchRecord:type_name -> com.aerospike.daemon.BatchRecord
+	22,  // 48: com.aerospike.daemon.BatchWrite.policy:type_name -> com.aerospike.daemon.BatchWritePolicy
+	39,  // 49: com.aerospike.daemon.BatchWrite.ops:type_name -> com.aerospike.daemon.Operation
+	37,  // 50: com.aerospike.daemon.BatchRead.batchRecord:type_name -> com.aerospike.daemon.BatchRecord
+	21,  // 51: com.aerospike.daemon.BatchRead.policy:type_name -> com.aerospike.daemon.BatchReadPolicy
+	39,  // 52: com.aerospike.daemon.BatchRead.ops:type_name -> com.aerospike.daemon.Operation
+	37,  // 53: com.aerospike.daemon.BatchDelete.batchRecord:type_name -> com.aerospike.daemon.BatchRecord
+	23,  // 54: com.aerospike.daemon.BatchDelete.policy:type_name -> com.aerospike.daemon.BatchDeletePolicy
+	37,  // 55: com.aerospike.daemon.BatchUDF.batchRecord:type_name -> com.aerospike.daemon.BatchRecord
+	24,  // 56: com.aerospike.daemon.BatchUDF.policy:type_name -> com.aerospike.daemon.BatchUDFPolicy
+	33,  // 57: com.aerospike.daemon.BatchUDF.functionArgs:type_name -> com.aerospike.daemon.Value
+	36,  // 58: com.aerospike.daemon.AerospikeSingleResponse.error:type_name -> com.aerospike.daemon.Error
+	35,  // 59: com.aerospike.daemon.AerospikeSingleResponse.record:type_name -> com.aerospike.daemon.Record
+	18,  // 60: com.aerospike.daemon.AerospikeGetRequest.policy:type_name -> com.aerospike.daemon.ReadPolicy
+	34,  // 61: com.aerospike.daemon.AerospikeGetRequest.key:type_name -> com.aerospike.daemon.Key
+	18,  // 62: com.aerospike.daemon.AerospikeGetHeaderRequest.policy:type_name -> com.aerospike.daemon.ReadPolicy
+	34,  // 63: com.aerospike.daemon.AerospikeGetHeaderRequest.key:type_name -> com.aerospike.daemon.Key
+	18,  // 64: com.aerospike.daemon.AerospikeExistsRequest.policy:type_name -> com.aerospike.daemon.ReadPolicy
+	34,  // 65: com.aerospike.daemon.AerospikeExistsRequest.key:type_name -> com.aerospike.daemon.Key
+	36,  // 66: com.aerospike.daemon.AerospikeExistsResponse.error:type_name -> com.aerospike.daemon.Error
+	19,  // 67: com.aerospike.daemon.AerospikeDeleteRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
+	34,  // 68: com.aerospike.daemon.AerospikeDeleteRequest.key:type_name -> com.aerospike.daemon.Key
+	36,  // 69: com.aerospike.daemon.AerospikeDeleteResponse.error:type_name -> com.aerospike.daemon.Error
+	19,  // 70: com.aerospike.daemon.AerospikeTouchRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
+	34,  // 71: com.aerospike.daemon.AerospikeTouchRequest.key:type_name -> com.aerospike.daemon.Key
+	19,  // 72: com.aerospike.daemon.AerospikePutRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
+	34,  // 73: com.aerospike.daemon.AerospikePutRequest.key:type_name -> com.aerospike.daemon.Key
+	26,  // 74: com.aerospike.daemon.AerospikePutRequest.Bins:type_name -> com.aerospike.daemon.Bin
+	41,  // 75: com.aerospike.daemon.BatchOperate.br:type_name -> com.aerospike.daemon.BatchRead
+	40,  // 76: com.aerospike.daemon.BatchOperate.bw:type_name -> com.aerospike.daemon.BatchWrite
+	42,  // 77: com.aerospike.daemon.BatchOperate.bd:type_name -> com.aerospike.daemon.BatchDelete
+	43,  // 78: com.aerospike.daemon.BatchOperate.bu:type_name -> com.aerospike.daemon.BatchUDF
+	25,  // 79: com.aerospike.daemon.AerospikeBatchOperateRequest.policy:type_name -> com.aerospike.daemon.BatchPolicy
+	53,  // 80: com.aerospike.daemon.AerospikeBatchOperateRequest.records:type_name -> com.aerospike.daemon.BatchOperate
+	36,  // 81: com.aerospike.daemon.AerospikeBatchOperateResponse.error:type_name -> com.aerospike.daemon.Error
+	37,  // 82: com.aerospike.daemon.AerospikeBatchOperateResponse.records:type_name -> com.aerospike.daemon.BatchRecord
+	19,  // 83: com.aerospike.daemon.AerospikeCreateIndexRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
+	7,   // 84: com.aerospike.daemon.AerospikeCreateIndexRequest.indexType:type_name -> com.aerospike.daemon.IndexType
+	8,   // 85: com.aerospike.daemon.AerospikeCreateIndexRequest.indexCollectionType:type_name -> com.aerospike.daemon.IndexCollectionType
+	38,  // 86: com.aerospike.daemon.AerospikeCreateIndexRequest.ctx:type_name -> com.aerospike.daemon.CDTContext
+	36,  // 87: com.aerospike.daemon.AerospikeCreateIndexResponse.error:type_name -> com.aerospike.daemon.Error
+	19,  // 88: com.aerospike.daemon.AerospikeDropIndexRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
+	36,  // 89: com.aerospike.daemon.AerospikeDropIndexResponse.error:type_name -> com.aerospike.daemon.Error
+	20,  // 90: com.aerospike.daemon.AerospikeTruncateRequest.policy:type_name -> com.aerospike.daemon.InfoPolicy
+	36,  // 91: com.aerospike.daemon.AerospikeTruncateResponse.error:type_name -> com.aerospike.daemon.Error
+	19,  // 92: com.aerospike.daemon.AerospikeRegisterUDFRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
+	10,  // 93: com.aerospike.daemon.AerospikeRegisterUDFRequest.language:type_name -> com.aerospike.daemon.UDFLanguage
+	36,  // 94: com.aerospike.daemon.AerospikeRegisterUDFResponse.error:type_name -> com.aerospike.daemon.Error
+	19,  // 95: com.aerospike.daemon.AerospikeDropUDFRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
+	36,  // 96: com.aerospike.daemon.AerospikeDropUDFResponse.error:type_name -> com.aerospike.daemon.Error
+	18,  // 97: com.aerospike.daemon.AerospikeListUDFRequest.policy:type_name -> com.aerospike.daemon.ReadPolicy
+	36,  // 98: com.aerospike.daemon.AerospikeListUDFResponse.error:type_name -> com.aerospike.daemon.Error
+	32,  // 99: com.aerospike.daemon.AerospikeListUDFResponse.udfList:type_name -> com.aerospike.daemon.UDFMeta
+	19,  // 100: com.aerospike.daemon.AerospikeUDFExecuteRequest.policy:type_name -> com.aerospike.daemon.WritePolicy
+	34,  // 101: com.aerospike.daemon.AerospikeUDFExecuteRequest.key:type_name -> com.aerospike.daemon.Key
+	33,  // 102: com.aerospike.daemon.AerospikeUDFExecuteRequest.args:type_name -> com.aerospike.daemon.Value
+	36,  // 103: com.aerospike.daemon.AerospikeUDFExecuteResponse.error:type_name -> com.aerospike.daemon.Error
+	33,  // 104: com.aerospike.daemon.AerospikeUDFExecuteResponse.result:type_name -> com.aerospike.daemon.Value
+	5,   // 105: com.aerospike.daemon.BackgroundExecutePolicy.replica:type_name -> com.aerospike.daemon.ReplicaPolicy
+	3,   // 106: com.aerospike.daemon.BackgroundExecutePolicy.readModeAP:type_name -> com.aerospike.daemon.ReadModeAP
+	4,   // 107: com.aerospike.daemon.BackgroundExecutePolicy.readModeSC:type_name -> com.aerospike.daemon.ReadModeSC
+	14,  // 108: com.aerospike.daemon.BackgroundExecutePolicy.recordExistsAction:type_name -> com.aerospike.daemon.RecordExistsAction
+	15,  // 109: com.aerospike.daemon.BackgroundExecutePolicy.generationPolicy:type_name -> com.aerospike.daemon.GenerationPolicy
+	16,  // 110: com.aerospike.daemon.BackgroundExecutePolicy.commitLevel:type_name -> com.aerospike.daemon.CommitLevel
+	33,  // 111: com.aerospike.daemon.Record.BinsEntry.value:type_name -> com.aerospike.daemon.Value
+	52,  // 112: com.aerospike.daemon.KVS.Put:input_type -> com.aerospike.daemon.AerospikePutRequest
+	52,  // 113: com.aerospike.daemon.KVS.Add:input_type -> com.aerospike.daemon.AerospikePutRequest
+	52,  // 114: com.aerospike.daemon.KVS.Append:input_type -> com.aerospike.daemon.AerospikePutRequest
+	52,  // 115: com.aerospike.daemon.KVS.Prepend:input_type -> com.aerospike.daemon.AerospikePutRequest
+	45,  // 116: com.aerospike.daemon.KVS.Get:input_type -> com.aerospike.daemon.AerospikeGetRequest
+	46,  // 117: com.aerospike.daemon.KVS.GetHeader:input_type -> com.aerospike.daemon.AerospikeGetHeaderRequest
+	47,  // 118: com.aerospike.daemon.KVS.Exists:input_type -> com.aerospike.daemon.AerospikeExistsRequest
+	49,  // 119: com.aerospike.daemon.KVS.Delete:input_type -> com.aerospike.daemon.AerospikeDeleteRequest
+	51,  // 120: com.aerospike.daemon.KVS.Touch:input_type -> com.aerospike.daemon.AerospikeTouchRequest
+	54,  // 121: com.aerospike.daemon.KVS.BatchOperate:input_type -> com.aerospike.daemon.AerospikeBatchOperateRequest
+	56,  // 122: com.aerospike.daemon.KVS.CreateIndex:input_type -> com.aerospike.daemon.AerospikeCreateIndexRequest
+	58,  // 123: com.aerospike.daemon.KVS.DropIndex:input_type -> com.aerospike.daemon.AerospikeDropIndexRequest
+	60,  // 124: com.aerospike.daemon.KVS.Truncate:input_type -> com.aerospike.daemon.AerospikeTruncateRequest
+	62,  // 125: com.aerospike.daemon.KVS.RegisterUDF:input_type -> com.aerospike.daemon.AerospikeRegisterUDFRequest
+	64,  // 126: com.aerospike.daemon.KVS.DropUDF:input_type -> com.aerospike.daemon.AerospikeDropUDFRequest
+	66,  // 127: com.aerospike.daemon.KVS.ListUDF:input_type -> com.aerospike.daemon.AerospikeListUDFRequest
+	68,  // 128: com.aerospike.daemon.KVS.UDFExecute:input_type -> com.aerospike.daemon.AerospikeUDFExecuteRequest
+	36,  // 129: com.aerospike.daemon.KVS.Put:output_type -> com.aerospike.daemon.Error
+	36,  // 130: com.aerospike.daemon.KVS.Add:output_type -> com.aerospike.daemon.Error
+	36,  // 131: com.aerospike.daemon.KVS.Append:output_type -> com.aerospike.daemon.Error
+	36,  // 132: com.aerospike.daemon.KVS.Prepend:output_type -> com.aerospike.daemon.Error
+	44,  // 133: com.aerospike.daemon.KVS.Get:output_type -> com.aerospike.daemon.AerospikeSingleResponse
+	44,  // 134: com.aerospike.daemon.KVS.GetHeader:output_type -> com.aerospike.daemon.AerospikeSingleResponse
+	48,  // 135: com.aerospike.daemon.KVS.Exists:output_type -> com.aerospike.daemon.AerospikeExistsResponse
+	50,  // 136: com.aerospike.daemon.KVS.Delete:output_type -> com.aerospike.daemon.AerospikeDeleteResponse
+	36,  // 137: com.aerospike.daemon.KVS.Touch:output_type -> com.aerospike.daemon.Error
+	55,  // 138: com.aerospike.daemon.KVS.BatchOperate:output_type -> com.aerospike.daemon.AerospikeBatchOperateResponse
+	57,  // 139: com.aerospike.daemon.KVS.CreateIndex:output_type -> com.aerospike.daemon.AerospikeCreateIndexResponse
+	59,  // 140: com.aerospike.daemon.KVS.DropIndex:output_type -> com.aerospike.daemon.AerospikeDropIndexResponse
+	61,  // 141: com.aerospike.daemon.KVS.Truncate:output_type -> com.aerospike.daemon.AerospikeTruncateResponse
+	63,  // 142: com.aerospike.daemon.KVS.RegisterUDF:output_type -> com.aerospike.daemon.AerospikeRegisterUDFResponse
+	65,  // 143: com.aerospike.daemon.KVS.DropUDF:output_type -> com.aerospike.daemon.AerospikeDropUDFResponse
+	67,  // 144: com.aerospike.daemon.KVS.ListUDF:output_type -> com.aerospike.daemon.AerospikeListUDFResponse
+	69,  // 145: com.aerospike.daemon.KVS.UDFExecute:output_type -> com.aerospike.daemon.AerospikeUDFExecuteResponse
+	129, // [129:146] is the sub-list for method output_type
+	112, // [112:129] is the sub-list for method input_type
+	112, // [112:112] is the sub-list for extension type_name
+	112, // [112:112] is the sub-list for extension extendee
+	0,   // [0:112] is the sub-list for field type_name
 }
 
 func init() { file_asld_kvs_proto_init() }
@@ -6066,7 +6771,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Value); i {
+			switch v := v.(*UDFMeta); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6078,7 +6783,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Key); i {
+			switch v := v.(*Value); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6090,7 +6795,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Record); i {
+			switch v := v.(*Key); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6102,7 +6807,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Error); i {
+			switch v := v.(*Record); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6114,7 +6819,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BatchRecord); i {
+			switch v := v.(*Error); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6126,7 +6831,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CDTContext); i {
+			switch v := v.(*BatchRecord); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6138,7 +6843,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Operation); i {
+			switch v := v.(*CDTContext); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6150,7 +6855,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BatchWrite); i {
+			switch v := v.(*Operation); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6162,7 +6867,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BatchRead); i {
+			switch v := v.(*BatchWrite); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6174,7 +6879,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BatchDelete); i {
+			switch v := v.(*BatchRead); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6186,7 +6891,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BatchUDF); i {
+			switch v := v.(*BatchDelete); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6198,7 +6903,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeSingleResponse); i {
+			switch v := v.(*BatchUDF); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6210,7 +6915,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeGetRequest); i {
+			switch v := v.(*AerospikeSingleResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6222,7 +6927,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeGetHeaderRequest); i {
+			switch v := v.(*AerospikeGetRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6234,7 +6939,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeExistsRequest); i {
+			switch v := v.(*AerospikeGetHeaderRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6246,7 +6951,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeExistsResponse); i {
+			switch v := v.(*AerospikeExistsRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6258,7 +6963,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeDeleteRequest); i {
+			switch v := v.(*AerospikeExistsResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6270,7 +6975,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[32].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeDeleteResponse); i {
+			switch v := v.(*AerospikeDeleteRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6282,7 +6987,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[33].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeTouchRequest); i {
+			switch v := v.(*AerospikeDeleteResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6294,7 +6999,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikePutRequest); i {
+			switch v := v.(*AerospikeTouchRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6306,7 +7011,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BatchOperate); i {
+			switch v := v.(*AerospikePutRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6318,7 +7023,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeBatchOperateRequest); i {
+			switch v := v.(*BatchOperate); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6330,7 +7035,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeBatchOperateResponse); i {
+			switch v := v.(*AerospikeBatchOperateRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6342,7 +7047,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[38].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeCreateIndexRequest); i {
+			switch v := v.(*AerospikeBatchOperateResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6354,7 +7059,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[39].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeCreateIndexResponse); i {
+			switch v := v.(*AerospikeCreateIndexRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6366,7 +7071,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[40].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeDropIndexRequest); i {
+			switch v := v.(*AerospikeCreateIndexResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6378,7 +7083,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[41].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeDropIndexResponse); i {
+			switch v := v.(*AerospikeDropIndexRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6390,7 +7095,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[42].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeTruncateRequest); i {
+			switch v := v.(*AerospikeDropIndexResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6402,7 +7107,7 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[43].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AerospikeTruncateResponse); i {
+			switch v := v.(*AerospikeTruncateRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -6414,6 +7119,114 @@ func file_asld_kvs_proto_init() {
 			}
 		}
 		file_asld_kvs_proto_msgTypes[44].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AerospikeTruncateResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_asld_kvs_proto_msgTypes[45].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AerospikeRegisterUDFRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_asld_kvs_proto_msgTypes[46].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AerospikeRegisterUDFResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_asld_kvs_proto_msgTypes[47].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AerospikeDropUDFRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_asld_kvs_proto_msgTypes[48].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AerospikeDropUDFResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_asld_kvs_proto_msgTypes[49].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AerospikeListUDFRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_asld_kvs_proto_msgTypes[50].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AerospikeListUDFResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_asld_kvs_proto_msgTypes[51].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AerospikeUDFExecuteRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_asld_kvs_proto_msgTypes[52].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AerospikeUDFExecuteResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_asld_kvs_proto_msgTypes[53].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*BackgroundExecutePolicy); i {
 			case 0:
 				return &v.state
@@ -6433,7 +7246,7 @@ func file_asld_kvs_proto_init() {
 	file_asld_kvs_proto_msgTypes[6].OneofWrappers = []interface{}{}
 	file_asld_kvs_proto_msgTypes[7].OneofWrappers = []interface{}{}
 	file_asld_kvs_proto_msgTypes[8].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[15].OneofWrappers = []interface{}{
+	file_asld_kvs_proto_msgTypes[16].OneofWrappers = []interface{}{
 		(*Value_Nil)(nil),
 		(*Value_I)(nil),
 		(*Value_F)(nil),
@@ -6448,26 +7261,30 @@ func file_asld_kvs_proto_init() {
 		(*Value_Wildcard)(nil),
 		(*Value_Infinity)(nil),
 	}
-	file_asld_kvs_proto_msgTypes[16].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[19].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[21].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[26].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[30].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[32].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[35].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[37].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[39].OneofWrappers = []interface{}{}
-	file_asld_kvs_proto_msgTypes[41].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[17].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[20].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[22].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[27].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[31].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[33].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[36].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[38].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[40].OneofWrappers = []interface{}{}
 	file_asld_kvs_proto_msgTypes[42].OneofWrappers = []interface{}{}
 	file_asld_kvs_proto_msgTypes[43].OneofWrappers = []interface{}{}
 	file_asld_kvs_proto_msgTypes[44].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[46].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[48].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[50].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[52].OneofWrappers = []interface{}{}
+	file_asld_kvs_proto_msgTypes[53].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_asld_kvs_proto_rawDesc,
-			NumEnums:      16,
-			NumMessages:   46,
+			NumEnums:      17,
+			NumMessages:   55,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

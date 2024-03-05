@@ -21,6 +21,7 @@
 mod grpc;
 
 use grpc::proto::{self};
+use tonic::server;
 use std::fs::File;
 use std::io::Write;
 
@@ -4512,6 +4513,94 @@ impl BatchUdf {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+//  UdfLanguage
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+/// `UdfLanguage` determines how to handle record writes based on record generation.
+#[php_class(name = "Aerospike\\UdfLanguage")]
+pub struct UdfLanguage {
+    _as: proto::UdfLanguage,
+}
+
+impl FromZval<'_> for UdfLanguage {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &UdfLanguage = zval.extract()?;
+
+        Some(UdfLanguage { _as: f._as.clone() })
+    }
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl UdfLanguage {
+    /// lua language.
+    pub fn lua() -> Self {
+        UdfLanguage {
+            _as: proto::UdfLanguage::Lua,
+        }
+    }
+}
+
+impl From<proto::UdfLanguage> for UdfLanguage {
+    fn from(input: proto::UdfLanguage) -> Self {
+        UdfLanguage { _as: input.clone() }
+    }
+}
+
+
+impl From<i32> for UdfLanguage {
+    fn from(input: i32) -> Self {
+        match input {
+            0 => Self::lua(),
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl From<UdfLanguage> for i32 {
+    fn from(input: UdfLanguage) -> Self {
+        match input._as {
+            proto::UdfLanguage::Lua => 0,
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  UdfMeta
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\UdfMeta")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct UdfMeta {
+    _as: proto::UdfMeta,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl UdfMeta {
+    #[getter]
+    pub fn get_package_name(&self) -> String {
+            self._as.package_name.clone()
+    }
+
+    #[getter]
+    pub fn get_hash(&self) -> String {
+            self._as.hash.clone()
+    }
+
+    #[getter]
+    pub fn get_language(&self) -> UdfLanguage {
+            self._as.language.into()
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 //  Client
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -4560,34 +4649,34 @@ fn new_aerospike_client(socket: &str) -> PhpResult<grpc::BlockingClient> {
 #[php_class(name = "Aerospike\\Client")]
 pub struct Client {
     client: Arc<Mutex<grpc::BlockingClient>>,
-    hosts: String,
+    socket: String,
 }
 
 // This trivial implementation of `drop` adds a print to console.
 impl Drop for Client {
     fn drop(&mut self) {
-        trace!("Dropping client: {}, ptr: {:p}", self.hosts, &self);
+        trace!("Dropping client: {}, ptr: {:p}", self.socket, &self);
     }
 }
 
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Client {
-    pub fn connect(hosts: &str) -> PhpResult<Zval> {
-        match get_persisted_client(hosts) {
+    pub fn connect(socket: &str) -> PhpResult<Zval> {
+        match get_persisted_client(socket) {
             Some(c) => {
-                trace!("Found Aerospike Client object for {}", hosts);
+                trace!("Found Aerospike Client object for {}", socket);
                 return Ok(c);
             }
             None => (),
         }
 
-        trace!("Creating a new Aerospike Client object for {}", hosts);
+        trace!("Creating a new Aerospike Client object for {}", socket);
 
-        let c = Arc::new(Mutex::new(new_aerospike_client(&hosts)?));
-        persist_client(hosts, c)?;
+        let c = Arc::new(Mutex::new(new_aerospike_client(&socket)?));
+        persist_client(socket, c)?;
 
-        match get_persisted_client(hosts) {
+        match get_persisted_client(socket) {
             Some(c) => {
                 return Ok(c);
             }
@@ -4596,8 +4685,8 @@ impl Client {
     }
 
     #[getter]
-    pub fn hosts(&self) -> String {
-        self.hosts.clone()
+    pub fn socket(&self) -> String {
+        self.socket.clone()
     }
 
     /// Write record bin(s). The policy specifies the transaction timeout, record expiration and
@@ -5032,6 +5121,124 @@ impl Client {
             }
         }
     }
+
+    pub fn register_udf(
+        &self,
+        policy: &WritePolicy,
+        udf_body: &str,
+        package_name: &str,
+        language: Option<UdfLanguage>,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeRegisterUdfRequest {
+            policy: Some(policy._as.clone()),
+            udf_body: udf_body.into(),
+            package_name: package_name.into(),
+            language: language.unwrap_or(UdfLanguage::lua()).into(),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.register_udf(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeRegisterUdfResponse { error: None } => Ok(()),
+            proto::AerospikeRegisterUdfResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn drop_udf(
+        &self,
+        policy: &WritePolicy,
+        package_name: &str,
+    ) -> PhpResult<()> {
+        let request = tonic::Request::new(proto::AerospikeDropUdfRequest {
+            policy: Some(policy._as.clone()),
+            package_name: package_name.into(),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.drop_udf(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeDropUdfResponse { error: None } => Ok(()),
+            proto::AerospikeDropUdfResponse { error: Some(pe) } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(())
+            }
+        }
+    }
+
+    pub fn list_udf(
+        &self,
+        policy: &ReadPolicy,
+    ) -> PhpResult<Vec<UdfMeta>> {
+        let request = tonic::Request::new(proto::AerospikeListUdfRequest {
+            policy: Some(policy._as.clone()),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.list_udf(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeListUdfResponse {
+                error: None,
+                udf_list,
+            } => Ok(udf_list
+                .into_iter()
+                .map(|v| UdfMeta { _as: (*v).clone() })
+                .collect()),
+            proto::AerospikeListUdfResponse {
+                error: Some(pe), ..
+            } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(vec![])
+            }
+        }
+    }
+
+    pub fn udf_execute(
+        &self,
+        policy: &WritePolicy,
+        key: &Key,
+        package_name: String,
+        function_name: String,
+        args: Vec<PHPValue>,
+    ) -> PhpResult<PHPValue> {
+        let args: Vec<proto::Value> = args
+        .into_iter()                
+        .map(|v| v.into())
+        .collect();
+
+        let request = tonic::Request::new(proto::AerospikeUdfExecuteRequest {
+            policy: Some(policy._as.clone()),
+            key: Some(key._as.clone()),
+            package_name: package_name,
+            function_name: function_name,
+            args: args.into(),
+        });
+
+        let mut client = self.client.lock().unwrap();
+        let res = client.udf_execute(request).map_err(|e| e.to_string())?;
+        match res.get_ref() {
+            proto::AerospikeUdfExecuteResponse {
+                error: None,
+                result,
+            } => Ok(match result {
+                    Some(v) => v.clone().into(),
+                    None => PHPValue::Nil,
+                }),
+            proto::AerospikeUdfExecuteResponse {
+                error: Some(pe), ..
+            } => {
+                let error: AerospikeException = pe.into();
+                throw_object(error.into_zval(true)?)?;
+                Ok(Value::nil())
+            }
+        }
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -5835,7 +6042,7 @@ fn get_persisted_client(key: &str) -> Option<Zval> {
     let grpc_client = clients.get(key.into())?;
     let client = Client {
         client: grpc_client.clone(),
-        hosts: key.into(),
+        socket: key.into(),
     };
 
     let mut zval = Zval::new();

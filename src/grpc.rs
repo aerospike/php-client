@@ -136,4 +136,36 @@ impl BlockingClient {
         // return the task ID and handle the task
         self.rt.block_on(self.client.truncate(request))
     }
+
+    pub fn register_udf(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeRegisterUdfRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeRegisterUdfResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.register_udf(request))
+    }
+
+    pub fn drop_udf(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeDropUdfRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeDropUdfResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.drop_udf(request))
+    }
+
+    pub fn list_udf(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeListUdfRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeListUdfResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.list_udf(request))
+    }
+
+    pub fn udf_execute(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeUdfExecuteRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeUdfExecuteResponse>, tonic::Status> {
+        // return the task ID and handle the task
+        self.rt.block_on(self.client.udf_execute(request))
+    }
 }
