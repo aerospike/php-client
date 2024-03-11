@@ -71,6 +71,9 @@ func cleanUp(conf map[string]*client.AerospikeConfig) {
 
 func launchServer(name string, ac *client.AerospikeConfig) {
 	cp, err := ac.NewClientPolicy()
+	if cp.ConnectionQueueSize == 0 {
+		cp.ConnectionQueueSize = 32
+	}
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -81,6 +84,7 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	client.WarmUp(-1)
 
 	log.Printf("Server is Initializing for cluster `%s`. There will be cake...", name)
 	ln, err := net.Listen("unix", ac.Socket)

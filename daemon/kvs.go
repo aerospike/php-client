@@ -357,9 +357,156 @@ func (s *server) SetQuotas(ctx context.Context, in *pb.AerospikeSetQuotasRequest
 	}, nil
 }
 
-func toPrivilegeCode(in string) aero.Privilege {
+func (s *server) Scan(in *pb.AerospikeScanRequest, stream pb.KVS_ScanServer) error {
+	rs, err := s.client.ScanPartitions(toScanPolicy(in.Policy), toPartitionFilter(in.PartitionFilter), in.Namespace, in.SetName, in.BinNames...)
+	if err != nil {
+		stream.Send(&pb.AerospikeStreamResponse{
+			Error: fromError(err),
+		})
+		return err
+	}
 
-	panic(UNREACHABLE)
+	for res := range rs.Results() {
+		if res.Err != nil {
+			if err := stream.Send(&pb.AerospikeStreamResponse{Error: fromError(res.Err)}); err != nil {
+				rs.Close()
+				return err
+			}
+			continue
+		}
+
+		// send the record
+		resp := pb.AerospikeStreamResponse{Record: fromRecord(res.Record)}
+		resp.Bval = res.BVal
+
+		if err := stream.Send(&resp); err != nil {
+			rs.Close()
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *server) Query(in *pb.AerospikeQueryRequest, stream pb.KVS_QueryServer) error {
+	rs, err := s.client.QueryPartitions(toQueryPolicy(in.Policy), toStatement(in.Statement), toPartitionFilter(in.PartitionFilter))
+	if err != nil {
+		stream.Send(&pb.AerospikeStreamResponse{
+			Error: fromError(err),
+		})
+		return err
+	}
+
+	for res := range rs.Results() {
+		if res.Err != nil {
+			if err := stream.Send(&pb.AerospikeStreamResponse{Error: fromError(res.Err)}); err != nil {
+				rs.Close()
+				return err
+			}
+			continue
+		}
+
+		// send the record
+		resp := pb.AerospikeStreamResponse{Record: fromRecord(res.Record)}
+		resp.Bval = res.BVal
+
+		if err := stream.Send(&resp); err != nil {
+			rs.Close()
+			return err
+		}
+	}
+
+	return nil
+}
+
+func toStatement(in *pb.Statement) *aero.Statement {
+	if in != nil {
+		var idxName string
+		if in.IndexName != nil {
+			idxName = *in.IndexName
+		}
+		return &aero.Statement{
+			Namespace: in.Namespace,
+			SetName:   in.SetName,
+			IndexName: idxName,
+			BinNames:  in.BinNames,
+			Filter:    toFilter(in.Filter),
+			// packageName:,
+			// functionName:,
+			// functionArgs:,
+			TaskId:     in.TaskId,
+			ReturnData: in.ReturnData,
+		}
+	}
+	return nil
+}
+
+func toCDTContexts(in []*pb.CDTContext) []*aero.CDTContext {
+	res := make([]*aero.CDTContext, len(in))
+	for i := range in {
+		res[i] = toCDTContext(in[i])
+	}
+	return res
+}
+
+func toCDTContext(in *pb.CDTContext) *aero.CDTContext {
+	if in != nil {
+		return &aero.CDTContext{Id: int(in.Id), Value: toValue(in.Value)}
+	}
+	return nil
+}
+
+func toFilter(in *pb.QueryFilter) *aero.Filter {
+	if in != nil {
+		return aero.NewFilter(
+			in.Name,
+			toIndexCollectionType(in.IdxType),
+			int(in.ValueParticleType),
+			toValue(in.Begin),
+			toValue(in.End),
+			toCDTContexts(in.Ctx),
+		)
+	}
+	return nil
+}
+
+func toPartitionFilter(in *pb.PartitionFilter) *aero.PartitionFilter {
+	if in != nil {
+		return &aero.PartitionFilter{
+			Begin:      int(in.Begin),
+			Count:      int(in.Count),
+			Digest:     in.Digest,
+			Partitions: toPartitionStatuses(in.Partitions),
+			Done:       in.Done,
+			Retry:      in.Retry,
+		}
+	}
+	return nil
+}
+
+func toPartitionStatuses(in []*pb.PartitionStatus) []*aero.PartitionStatus {
+	res := make([]*aero.PartitionStatus, len(in))
+	for i := range in {
+		res[i] = toPartitionStatus(in[i])
+	}
+	return res
+}
+
+func toPartitionStatus(in *pb.PartitionStatus) *aero.PartitionStatus {
+	var bval int64 = 0
+	if in != nil {
+		bval = 0
+		if in.Bval != nil {
+			bval = *in.Bval
+		}
+		return &aero.PartitionStatus{
+			BVal:   bval,
+			Id:     int(in.Id),
+			Retry:  in.Retry,
+			Digest: in.Digest,
+		}
+	}
+	return nil
 }
 
 func toPrivileges(in []*proto.Privilege) []aero.Privilege {
@@ -561,6 +708,40 @@ func toWritePolicy(in *pb.WritePolicy) *aero.WritePolicy {
 			Expiration:         in.Expiration,
 			RespondPerEachOp:   in.RespondPerEachOp,
 			DurableDelete:      in.DurableDelete,
+		}
+	}
+	return nil
+}
+
+func toMultiPolicy(in *pb.MultiPolicy) *aero.MultiPolicy {
+	if in != nil {
+		return &aero.MultiPolicy{
+			BasePolicy:         *toReadPolicy(in.ReadPolicy),
+			MaxConcurrentNodes: int(in.MaxConcurrentNodes),
+
+			MaxRecords:       int64(in.MaxRecords),
+			RecordsPerSecond: int(in.RecordsPerSecond),
+			RecordQueueSize:  int(in.RecordQueueSize),
+			IncludeBinData:   in.IncludeBinData,
+		}
+	}
+	return nil
+}
+
+func toScanPolicy(in *pb.ScanPolicy) *aero.ScanPolicy {
+	if in != nil && in.MultiPolicy != nil {
+		return &aero.ScanPolicy{
+			MultiPolicy: *toMultiPolicy(in.MultiPolicy),
+		}
+	}
+	return nil
+}
+
+func toQueryPolicy(in *pb.QueryPolicy) *aero.QueryPolicy {
+	if in != nil && in.MultiPolicy != nil {
+		return &aero.QueryPolicy{
+			MultiPolicy: *toMultiPolicy(in.MultiPolicy),
+			ShortQuery:  in.ShortQuery,
 		}
 	}
 	return nil

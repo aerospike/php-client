@@ -9,6 +9,8 @@ require (
 	google.golang.org/protobuf v1.32.0
 )
 
+replace github.com/aerospike/aerospike-client-go/v7 v7.1.0 => /home/khosrow/virt/src/github.com/aerospike/aerospike-client-go
+
 require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect

@@ -21,18 +21,21 @@
 mod grpc;
 
 use grpc::proto::{self};
-use tonic::server;
-use std::fs::File;
-use std::io::Write;
-
-use ext_php_rs::prelude::*;
-
+// use std::fs::File;
+// use std::io::Write;
+use std::time::SystemTime;
+use std::io::Cursor;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 use std::sync::Mutex;
 
+use byteorder::{ByteOrder, NetworkEndian};
+use ripemd160::digest::Digest;
+use ripemd160::Ripemd160;
+
+use ext_php_rs::prelude::*;
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::convert::IntoZendObject;
 use ext_php_rs::convert::{FromZval, IntoZval};
@@ -48,9 +51,12 @@ use ext_php_rs::types::Zval;
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 
+use byteorder::{LittleEndian, ReadBytesExt};
+use rand::prelude::*;
+
 use lazy_static::lazy_static;
-use log::LevelFilter;
-use log::{debug, info, trace, warn};
+// use log::LevelFilter;
+use log::{trace};
 
 lazy_static! {
     static ref CLIENTS: Mutex<HashMap<String, Arc<Mutex<grpc::BlockingClient>>>> =
@@ -59,6 +65,9 @@ lazy_static! {
 
 // pub type AspResult<T = ()> = std::result::Result<T, AspException>;
 pub type AsResult<T = ()> = std::result::Result<T, AerospikeException>;
+
+const PARTITIONS: u16 = 4096;
+const CITRUSLEAF_EPOCH: u64 = 1262304000;
 
 #[allow(non_camel_case_types)]
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -991,18 +1000,26 @@ impl Expression {
     }
 
     /// Create Map bin PHPValue
-    /// Not Supported in pre-alpha release
-    // pub fn map_val(val: HashMap<PHPValue, PHPValue>) -> Self {
-    //  TODO(khosrow): Implement
-    //     Expression::new(
-    //         None,
-    //         Some(PHPValue::HashMap(val).into()),
-    //         None,
-    //         None,
-    //         None,
-    //         vec![],
-    //     )
-    // }
+    /// Value must be a map
+    pub fn map_val(val: PHPValue) -> Self {
+        match val {
+            PHPValue::HashMap(_) => (),
+            _ => {
+                let error = AerospikeException::new("Invalid type");
+                throw_object(error.into_zval(true).unwrap()).unwrap();
+                return Expression { _as: proto::Expression::default() };
+            }
+        };
+
+        Expression::new(
+            None,
+            Some(val.clone()),
+            None,
+            None,
+            None,
+            vec![],
+        )
+    }
 
     /// Create geospatial json string value.
     pub fn geo_val(val: String) -> Self {
@@ -2641,9 +2658,7 @@ pub struct AdminPolicy {
 #[derive(ZvalConvert)]
 impl AdminPolicy {
     pub fn __construct() -> Self {
-        AdminPolicy {
-            _as: proto::AdminPolicy::default(),
-        }
+        AdminPolicy::default()
     }
 
     #[getter]
@@ -2657,6 +2672,17 @@ impl AdminPolicy {
     }
 
 }
+
+impl Default for AdminPolicy {
+    fn default() -> Self {
+        AdminPolicy {
+            _as: proto::AdminPolicy {
+                timeout: 3000,
+            }
+        }
+    }
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2674,8 +2700,16 @@ pub struct InfoPolicy {
 #[derive(ZvalConvert)]
 impl InfoPolicy {
     pub fn __construct() -> Self {
+        InfoPolicy::default()
+    }
+}
+
+impl Default for InfoPolicy {
+    fn default() -> Self {
         InfoPolicy {
-            _as: proto::InfoPolicy::default(),
+            _as: proto::InfoPolicy {
+                timeout: 3000,
+            }
         }
     }
 }
@@ -2696,12 +2730,7 @@ pub struct WritePolicy {
 #[derive(ZvalConvert)]
 impl WritePolicy {
     pub fn __construct() -> Self {
-        WritePolicy {
-            _as: proto::WritePolicy {
-                policy: Some(proto::ReadPolicy::default()),
-                ..proto::WritePolicy::default()
-            },
-        }
+        WritePolicy::default()
     }
 
     #[getter]
@@ -2970,184 +2999,585 @@ impl WritePolicy {
     }
 }
 
-// ////////////////////////////////////////////////////////////////////////////////////////////
-// //
-// //  QueryPolicy
-// //
-// ////////////////////////////////////////////////////////////////////////////////////////////
+impl Default for WritePolicy {
+    fn default() -> Self {
+        WritePolicy {
+            _as: proto::WritePolicy {
+                policy: Some(proto::ReadPolicy::default()),
+                record_exists_action: proto::RecordExistsAction::Update.into(),
+                generation_policy:   proto::GenerationPolicy::None.into(),
+                commit_level:        proto::CommitLevel::CommitAll.into(),
+                generation:         0,
+                expiration:         0,
+                respond_per_each_op: false,
+                durable_delete: true,
+            }
+        }
+    }
+}
 
-// #[php_class(name = "Aerospike\\QueryPolicy")]
-// pub struct QueryPolicy {
-//     _as: aerospike_core::QueryPolicy,
-// }
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  MultiPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
 
-// /// `QueryPolicy` encapsulates parameters for query operations.
-// #[php_impl]
-// #[derive(ZvalConvert)]
-// impl QueryPolicy {
-//     pub fn __construct() -> Self {
-//         QueryPolicy {
-//             _as: aerospike_core::QueryPolicy::default(),
-//         }
-//     }
+pub struct MultiPolicy {
+    _as: proto::MultiPolicy,
+}
 
-//     #[getter]
-//     pub fn get_base_policy(&self) -> BasePolicy {
-//         BasePolicy {
-//             _as: self._as.base_policy.clone(),
-//         }
-//     }
+impl Default for MultiPolicy {
+    fn default() -> Self {
+        let rp = ReadPolicy::default();
+        MultiPolicy {
+            _as: proto::MultiPolicy {
+                read_policy: Some(rp._as),
+                max_concurrent_nodes: 0,
+                records_per_second: 0,
+                record_queue_size: 50,
+                include_bin_data: true,
+                max_records: 0,
+            }
+        }
+    }
+}
 
-//     #[setter]
-//     pub fn set_base_policy(&mut self, base_policy: BasePolicy) {
-//         self._as.base_policy = base_policy._as;
-//     }
-//     #[getter]
-//     pub fn get_max_concurrent_nodes(&self) -> usize {
-//         self._as.max_concurrent_nodes
-//     }
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  QueryPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
 
-//     #[setter]
-//     pub fn set_max_concurrent_nodes(&mut self, max_concurrent_nodes: usize) {
-//         self._as.max_concurrent_nodes = max_concurrent_nodes;
-//     }
+#[php_class(name = "Aerospike\\QueryPolicy")]
+pub struct QueryPolicy {
+    _as: proto::QueryPolicy,
+}
 
-//     #[getter]
-//     pub fn get_record_queue_size(&self) -> usize {
-//         self._as.record_queue_size
-//     }
+/// `QueryPolicy` encapsulates parameters for query operations.
+#[php_impl]
+#[derive(ZvalConvert)]
+impl QueryPolicy {
+    pub fn __construct() -> Self {
+        QueryPolicy::default()
+    }
 
-//     #[setter]
-//     pub fn set_record_queue_size(&mut self, record_queue_size: usize) {
-//         self._as.record_queue_size = record_queue_size;
-//     }
+    #[getter]
+    pub fn get_short_query(&self) -> bool {
+        self._as.short_query
+    }
 
-//     #[getter]
-//     pub fn get_fail_on_cluster_change(&self) -> bool {
-//         self._as.fail_on_cluster_change
-//     }
+    #[setter]
+    pub fn set_short_query(&mut self, short_query: bool) {
+        self._as.short_query = short_query;
+    }
 
-//     #[setter]
-//     pub fn set_fail_on_cluster_change(&mut self, fail_on_cluster_change: bool) {
-//         self._as.fail_on_cluster_change = fail_on_cluster_change;
-//     }
+    // ***************************************************************************
+    // MultiPolicy Attrs
+    // ***************************************************************************
 
-//     #[getter]
-//     pub fn get_filter_expression(&self) -> Option<Expression> {
-//         match &self._as.filter_expression {
-//             Some(fe) => Some(Expression { _as: fe.clone() }),
-//             None => None,
-//         }
-//     }
+    #[getter]
+    pub fn get_max_concurrent_nodes(&self) -> u32 {
+        self._as.multi_policy.as_ref().unwrap().max_concurrent_nodes
+    }
 
-//     #[setter]
-//     pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
-//         match filter_expression {
-//             Some(fe) => self._as.filter_expression = Some(fe._as),
-//             None => self._as.filter_expression = None,
-//         }
-//     }
-// }
+    #[setter]
+    pub fn set_max_concurrent_nodes(&mut self, max_concurrent_nodes: u32) {
+        self._as.multi_policy.as_mut().unwrap().max_concurrent_nodes = max_concurrent_nodes;
+    }
 
-// ////////////////////////////////////////////////////////////////////////////////////////////
-// //
-// //  ScanPolicy
-// //
-// ////////////////////////////////////////////////////////////////////////////////////////////
+    #[getter]
+    pub fn get_record_queue_size(&self) -> u32 {
+        self._as.multi_policy.as_ref().unwrap().record_queue_size
+    }
 
-// #[php_class(name = "Aerospike\\ScanPolicy")]
-// pub struct ScanPolicy {
-//     _as: aerospike_core::ScanPolicy,
-// }
+    #[setter]
+    pub fn set_record_queue_size(&mut self, record_queue_size: u32) {
+        self._as.multi_policy.as_mut().unwrap().record_queue_size = record_queue_size;
+    }
 
-// /// `ScanPolicy` encapsulates optional parameters used in scan operations.
-// #[php_impl]
-// #[derive(ZvalConvert)]
-// impl ScanPolicy {
-//     pub fn __construct() -> Self {
-//         ScanPolicy {
-//             _as: aerospike_core::ScanPolicy::default(),
-//         }
-//     }
+    // ***************************************************************************
+    // ReadPolicy Attrs
+    // ***************************************************************************
 
-//     #[getter]
-//     pub fn get_base_policy(&self) -> BasePolicy {
-//         BasePolicy {
-//             _as: self._as.base_policy.clone(),
-//         }
-//     }
+    #[getter]
+    pub fn get_max_retries(&self) -> u32 {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().max_retries
+    }
 
-//     #[setter]
-//     pub fn set_base_policy(&mut self, base_policy: BasePolicy) {
-//         self._as.base_policy = base_policy._as;
-//     }
+    #[setter]
+    pub fn set_max_retries(&mut self, max_retries: u32) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.max_retries = max_retries);
+    }
 
-//     #[getter]
-//     pub fn get_scan_percent(&self) -> u8 {
-//         self._as.scan_percent
-//     }
+    #[getter]
+    pub fn get_sleep_multiplier(&self) -> f64 {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().sleep_multiplier
+    }
 
-//     #[setter]
-//     pub fn set_scan_percent(&mut self, scan_percent: u8) {
-//         self._as.scan_percent = scan_percent;
-//     }
+    #[setter]
+    pub fn set_sleep_multiplier(&mut self, sleep_multiplier: f64) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.sleep_multiplier = sleep_multiplier);
+    }
 
-//     #[getter]
-//     pub fn get_max_concurrent_nodes(&self) -> usize {
-//         self._as.max_concurrent_nodes
-//     }
+    #[getter]
+    pub fn get_total_timeout(&self) -> u64 {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().total_timeout
+    }
 
-//     #[setter]
-//     pub fn set_max_concurrent_nodes(&mut self, max_concurrent_nodes: usize) {
-//         self._as.max_concurrent_nodes = max_concurrent_nodes;
-//     }
+    #[setter]
+    pub fn set_total_timeout(&mut self, timeout_millis: u64) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.total_timeout = timeout_millis);
+    }
 
-//     #[getter]
-//     pub fn get_record_queue_size(&self) -> usize {
-//         self._as.record_queue_size
-//     }
+    #[getter]
+    pub fn get_socket_timeout(&self) -> u64 {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().socket_timeout
+    }
 
-//     #[setter]
-//     pub fn set_record_queue_size(&mut self, record_queue_size: usize) {
-//         self._as.record_queue_size = record_queue_size;
-//     }
+    #[setter]
+    pub fn set_socket_timeout(&mut self, timeout_millis: u64) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.socket_timeout = timeout_millis);
+    }
 
-//     #[getter]
-//     pub fn get_fail_on_cluster_change(&self) -> bool {
-//         self._as.fail_on_cluster_change
-//     }
+    #[getter]
+    pub fn get_send_key(&self) -> bool {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().send_key
+    }
 
-//     #[setter]
-//     pub fn set_fail_on_cluster_change(&mut self, fail_on_cluster_change: bool) {
-//         self._as.fail_on_cluster_change = fail_on_cluster_change;
-//     }
+    #[setter]
+    pub fn set_send_key(&mut self, send_key: bool) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.send_key = send_key);
+    }
 
-//     #[getter]
-//     pub fn get_socket_timeout(&self) -> u32 {
-//         self._as.socket_timeout
-//     }
+    #[getter]
+    pub fn get_use_compression(&self) -> bool {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().use_compression
+    }
 
-//     #[setter]
-//     pub fn set_socket_timeout(&mut self, socket_timeout: u32) {
-//         self._as.socket_timeout = socket_timeout;
-//     }
+    #[setter]
+    pub fn set_use_compression(&mut self, use_compression: bool) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.use_compression = use_compression);
+    }
 
-//     #[getter]
-//     pub fn get_filter_expression(&self) -> Option<Expression> {
-//         match &self._as.filter_expression {
-//             Some(fe) => Some(Expression { _as: fe.clone() }),
-//             None => None,
-//         }
-//     }
+    #[getter]
+    pub fn get_exit_fast_on_exhausted_connection_pool(&self) -> bool {
+        self._as
+            .multi_policy
+            .as_ref()
+            .unwrap()
+            .read_policy
+            .as_ref()
+            .unwrap()
+            .exit_fast_on_exhausted_connection_pool
+    }
 
-//     #[setter]
-//     pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
-//         match filter_expression {
-//             Some(fe) => self._as.filter_expression = Some(fe._as),
-//             None => self._as.filter_expression = None,
-//         }
-//     }
-// }
+    #[setter]
+    pub fn set_exit_fast_on_exhausted_connection_pool(
+        &mut self,
+        exit_fast_on_exhausted_connection_pool: bool,
+    ) {
+        self._as.multi_policy.as_mut().unwrap().read_policy.as_mut().map(|ref mut p| {
+            p.exit_fast_on_exhausted_connection_pool = exit_fast_on_exhausted_connection_pool
+        });
+    }
+
+    #[getter]
+    pub fn get_read_mode_ap(&self) -> ReadModeAP {
+        ReadModeAP {
+            _as: match self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().read_mode_ap {
+                0 => proto::ReadModeAp::One,
+                1 => proto::ReadModeAp::All,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_ap(&mut self, read_mode_ap: ReadModeAP) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.read_mode_ap = read_mode_ap._as.into());
+    }
+
+    #[getter]
+    pub fn get_read_mode_sc(&self) -> ReadModeSC {
+        ReadModeSC {
+            _as: match self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().read_mode_ap {
+                0 => proto::ReadModeSc::Session,
+                1 => proto::ReadModeSc::Linearize,
+                2 => proto::ReadModeSc::AllowReplica,
+                3 => proto::ReadModeSc::AllowUnavailable,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_sc(&mut self, read_mode_sc: ReadModeSC) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.read_mode_sc = read_mode_sc._as.into());
+    }
+
+    #[getter]
+    pub fn get_filter_expression(&self) -> Option<Expression> {
+        self._as
+            .multi_policy
+            .as_ref()
+            .unwrap()
+            .read_policy
+            .as_ref()
+            .unwrap()
+            .filter_expression
+            .clone()
+            .map(|fe| Expression { _as: fe })
+    }
+
+    #[setter]
+    pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
+        match filter_expression {
+            Some(fe) => self
+                ._as
+                .multi_policy
+                .as_mut()
+                .unwrap()
+                .read_policy
+                .as_mut()
+                .map(|ref mut p| p.filter_expression = Some(fe._as)),
+            None => self
+                ._as
+                .multi_policy
+                .as_mut()
+                .unwrap()
+                .read_policy
+                .as_mut()
+                .map(|ref mut p| p.filter_expression = None),
+        };
+    }
+}
+
+impl Default for QueryPolicy {
+    fn default() -> Self {
+        QueryPolicy {
+            _as: proto::QueryPolicy {
+                multi_policy: Some(MultiPolicy::default()._as),
+                short_query: false,
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  ScanPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\ScanPolicy")]
+pub struct ScanPolicy {
+    _as: proto::ScanPolicy,
+}
+
+/// `ScanPolicy` encapsulates optional parameters used in scan operations.
+#[php_impl]
+#[derive(ZvalConvert)]
+impl ScanPolicy {
+    pub fn __construct() -> Self {
+        ScanPolicy::default()
+    }
+
+    // ***************************************************************************
+    // MultiPolicy Attrs
+    // ***************************************************************************
+
+    #[getter]
+    pub fn get_max_records(&self) -> u64 {
+        self._as.multi_policy.as_ref().unwrap().max_records
+    }
+
+    #[setter]
+    pub fn set_max_records(&mut self, max_records: u64) {
+        self._as.multi_policy.as_mut().unwrap().max_records = max_records;
+    }
+
+    #[getter]
+    pub fn get_max_concurrent_nodes(&self) -> u32 {
+        self._as.multi_policy.as_ref().unwrap().max_concurrent_nodes
+    }
+
+    #[setter]
+    pub fn set_max_concurrent_nodes(&mut self, max_concurrent_nodes: u32) {
+        self._as.multi_policy.as_mut().unwrap().max_concurrent_nodes = max_concurrent_nodes;
+    }
+
+    #[getter]
+    pub fn get_record_queue_size(&self) -> u32 {
+        self._as.multi_policy.as_ref().unwrap().record_queue_size
+    }
+
+    #[setter]
+    pub fn set_record_queue_size(&mut self, record_queue_size: u32) {
+        self._as.multi_policy.as_mut().unwrap().record_queue_size = record_queue_size;
+    }
+
+    // ***************************************************************************
+    // ReadPolicy Attrs
+    // ***************************************************************************
+
+    #[getter]
+    pub fn get_max_retries(&self) -> u32 {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().max_retries
+    }
+
+    #[setter]
+    pub fn set_max_retries(&mut self, max_retries: u32) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.max_retries = max_retries);
+    }
+
+    #[getter]
+    pub fn get_sleep_multiplier(&self) -> f64 {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().sleep_multiplier
+    }
+
+    #[setter]
+    pub fn set_sleep_multiplier(&mut self, sleep_multiplier: f64) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.sleep_multiplier = sleep_multiplier);
+    }
+
+    #[getter]
+    pub fn get_total_timeout(&self) -> u64 {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().total_timeout
+    }
+
+    #[setter]
+    pub fn set_total_timeout(&mut self, timeout_millis: u64) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.total_timeout = timeout_millis);
+    }
+
+    #[getter]
+    pub fn get_socket_timeout(&self) -> u64 {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().socket_timeout
+    }
+
+    #[setter]
+    pub fn set_socket_timeout(&mut self, timeout_millis: u64) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.socket_timeout = timeout_millis);
+    }
+
+    #[getter]
+    pub fn get_send_key(&self) -> bool {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().send_key
+    }
+
+    #[setter]
+    pub fn set_send_key(&mut self, send_key: bool) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.send_key = send_key);
+    }
+
+    #[getter]
+    pub fn get_use_compression(&self) -> bool {
+        self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().use_compression
+    }
+
+    #[setter]
+    pub fn set_use_compression(&mut self, use_compression: bool) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.use_compression = use_compression);
+    }
+
+    #[getter]
+    pub fn get_exit_fast_on_exhausted_connection_pool(&self) -> bool {
+        self._as
+            .multi_policy
+            .as_ref()
+            .unwrap()
+            .read_policy
+            .as_ref()
+            .unwrap()
+            .exit_fast_on_exhausted_connection_pool
+    }
+
+    #[setter]
+    pub fn set_exit_fast_on_exhausted_connection_pool(
+        &mut self,
+        exit_fast_on_exhausted_connection_pool: bool,
+    ) {
+        self._as.multi_policy.as_mut().unwrap().read_policy.as_mut().map(|ref mut p| {
+            p.exit_fast_on_exhausted_connection_pool = exit_fast_on_exhausted_connection_pool
+        });
+    }
+
+    #[getter]
+    pub fn get_read_mode_ap(&self) -> ReadModeAP {
+        ReadModeAP {
+            _as: match self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().read_mode_ap {
+                0 => proto::ReadModeAp::One,
+                1 => proto::ReadModeAp::All,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_ap(&mut self, read_mode_ap: ReadModeAP) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.read_mode_ap = read_mode_ap._as.into());
+    }
+
+    #[getter]
+    pub fn get_read_mode_sc(&self) -> ReadModeSC {
+        ReadModeSC {
+            _as: match self._as.multi_policy.as_ref().unwrap().read_policy.as_ref().unwrap().read_mode_ap {
+                0 => proto::ReadModeSc::Session,
+                1 => proto::ReadModeSc::Linearize,
+                2 => proto::ReadModeSc::AllowReplica,
+                3 => proto::ReadModeSc::AllowUnavailable,
+                _ => unreachable!(),
+            },
+        }
+    }
+
+    #[setter]
+    pub fn set_read_mode_sc(&mut self, read_mode_sc: ReadModeSC) {
+        self._as
+            .multi_policy
+            .as_mut()
+            .unwrap()
+            .read_policy
+            .as_mut()
+            .map(|ref mut p| p.read_mode_sc = read_mode_sc._as.into());
+    }
+
+    #[getter]
+    pub fn get_filter_expression(&self) -> Option<Expression> {
+        self._as
+            .multi_policy
+            .as_ref()
+            .unwrap()
+            .read_policy
+            .as_ref()
+            .unwrap()
+            .filter_expression
+            .clone()
+            .map(|fe| Expression { _as: fe })
+    }
+
+    #[setter]
+    pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
+        match filter_expression {
+            Some(fe) => self
+                ._as
+                .multi_policy
+                .as_mut()
+                .unwrap()
+                .read_policy
+                .as_mut()
+                .map(|ref mut p| p.filter_expression = Some(fe._as)),
+            None => self
+                ._as
+                .multi_policy
+                .as_mut()
+                .unwrap()
+                .read_policy
+                .as_mut()
+                .map(|ref mut p| p.filter_expression = None),
+        };
+    }
+}
+
+impl Default for ScanPolicy {
+    fn default() -> Self {
+        ScanPolicy {
+            _as: proto::ScanPolicy {
+                multi_policy: Some(MultiPolicy::default()._as),
+            }
+        }
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3335,219 +3765,472 @@ impl IndexType {
 //     }
 // }
 
-// ////////////////////////////////////////////////////////////////////////////////////////////
-// //
-// //  Filter
-// //
-// ////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Filter
+//
+////////////////////////////////////////////////////////////////////////////////////////////
 
-// /// Query filter definition. Currently, only one filter is allowed in a Statement, and must be on a
-// /// bin which has a secondary index defined.
-// ///
-// /// Filter instances should be instantiated using one of the provided macros:
-// ///
-// /// - `as_eq`
-// /// - `as_range`
-// /// - `as_contains`
-// /// - `as_contains_range`
-// /// - `as_within_region`
-// /// - `as_within_radius`
-// /// - `as_regions_containing_point`
+/// Query filter definition. Currently, only one filter is allowed in a Statement, and must be on a
+/// bin which has a secondary index defined.
+///
+/// Filter instances should be instantiated using one of the provided macros:
+#[php_class(name = "Aerospike\\Filter")]
+pub struct Filter {
+    _as: proto::QueryFilter,
+}
 
-// #[php_class(name = "Aerospike\\Filter")]
-// pub struct Filter {
-//     _as: aerospike_core::query::Filter,
-// }
+#[php_impl]
+#[derive(ZvalConvert)]
+impl Filter {
+    pub fn equal(bin_name: &str, value: PHPValue, ctx: Option<Vec<&CDTContext>>) -> Self {
+        Filter {
+            _as: proto::QueryFilter {
+                name: bin_name.into(),
+                idx_type: proto::IndexCollectionType::Default.into(),
+                value_particle_type: value.particle_type() as u32,
+                begin: Some(value.clone().into()),
+                end: Some(value.clone().into()),
+                ctx: ctx.map(|ctx| ctx.iter().map(|ctx| ctx._as.clone() ).collect()).unwrap_or(vec![]),
+            },
+        }
+    }
 
-// impl FromZval<'_> for Filter {
-//     const TYPE: DataType = DataType::Mixed;
+    pub fn range(bin_name: &str, begin: PHPValue, end: PHPValue, ctx: Option<Vec<&CDTContext>>) -> Self {
+        Filter {
+            _as: proto::QueryFilter {
+                name: bin_name.into(),
+                idx_type: proto::IndexCollectionType::Default.into(),
+                value_particle_type: begin.particle_type() as u32,
+                begin: Some(begin.clone().into()),
+                end: Some(end.clone().into()),
+                ctx: ctx.map(|ctx| ctx.iter().map(|ctx| ctx._as.clone() ).collect()).unwrap_or(vec![]),
+            },
+        }
+    }
 
-//     fn from_zval(zval: &Zval) -> Option<Self> {
-//         let f: &Filter = zval.extract()?;
+    pub fn contains(bin_name: &str, value: PHPValue, cit: Option<&IndexCollectionType>, ctx: Option<Vec<&CDTContext>>) -> Self {
+        let default = IndexCollectionType::Default();
+        let cit = cit.unwrap_or(&default);
+        Filter {
+            _as: proto::QueryFilter {
+                name: bin_name.into(),
+                idx_type: cit._as.into(),
+                value_particle_type: value.particle_type() as u32,
+                begin: Some(value.clone().into()),
+                end: Some(value.clone().into()),
+                ctx: ctx.map(|ctx| ctx.iter().map(|ctx| ctx._as.clone() ).collect()).unwrap_or(vec![]),
+            },
+        }
+    }
 
-//         Some(Filter { _as: f._as.clone() })
-//     }
-// }
+    pub fn contains_range(
+        bin_name: &str,
+        begin: PHPValue,
+        end: PHPValue,
+        cit: Option<&IndexCollectionType>,
+        ctx: Option<Vec<&CDTContext>>,
+        ) -> Self {
+        let default = IndexCollectionType::Default();
+        let cit = cit.unwrap_or(&default);
+        Filter {
+            _as: proto::QueryFilter {
+                name: bin_name.into(),
+                idx_type: cit._as.into(),
+                value_particle_type: begin.particle_type() as u32,
+                begin: Some(begin.clone().into()),
+                end: Some(end.clone().into()),
+                ctx: ctx.map(|ctx| ctx.iter().map(|ctx| ctx._as.clone() ).collect()).unwrap_or(vec![]),
+            },
+        }
+    }
 
-// #[php_impl]
-// #[derive(ZvalConvert)]
-// impl Filter {
-//     pub fn range(bin_name: &str, begin: PHPValue, end: PHPValue) -> Self {
-//         Filter {
-//             _as: aerospike_core::as_range!(
-//                 bin_name,
-//                 aerospike_core::Value::from(begin),
-//                 aerospike_core::Value::from(end)
-//             ),
-//         }
-//     }
+    // Example code :
+    // $pointString = '{"type":"AeroCircle","coordinates":[[-89.0000,23.0000], 1000]}'
+    // Filter::regionsContainingPoint("bin_name", $pointString)
+    pub fn within_region(
+        bin_name: &str, 
+        region: &str, 
+        cit: Option<&IndexCollectionType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Self {
+        let default = IndexCollectionType::Default();
+        let cit = cit.unwrap_or(&default);
+        let region = Value::string(region.into());
+        Filter {
+            _as: proto::QueryFilter {
+                name: bin_name.into(),
+                idx_type: cit._as.into(),
+                value_particle_type: PHPValue::GeoJSON("".into()).particle_type() as u32,
+                begin: Some(region.clone().into()),
+                end: Some(region.clone().into()),
+                ctx: ctx.map(|ctx| ctx.iter().map(|ctx| ctx._as.clone() ).collect()).unwrap_or(vec![]),
+            },
+        }
+    }
 
-//     pub fn contains(bin_name: &str, value: PHPValue, cit: Option<&IndexCollectionType>) -> Self {
-//         let default = IndexCollectionType::Default();
-//         let cit = cit.unwrap_or(&default);
-//         Filter {
-//             _as: aerospike_core::as_contains!(
-//                 bin_name,
-//                 aerospike_core::Value::from(value),
-//                 aerospike_core::query::IndexCollectionType::from(cit)
-//             ),
-//         }
-//     }
+    // Example code :
+    // $lat = 43.0004;
+    // $lng = -89.0005;
+    // $radius = 1000;
+    // $filter = Filter::regionsContainingPoint("bin_name", $lat, $lng, $radius);
+    pub fn within_radius(
+        bin_name: &str,
+        lat: f64,
+        lng: f64,
+        radius: f64,
+        cit: Option<&IndexCollectionType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Self {
+        let default = IndexCollectionType::Default();
+        let cit = cit.unwrap_or(&default);
+        let rgnStr = format!(r#"{{ "type": "AeroCircle", "coordinates": [[{:.8}, {:.8}], {}] }}"#, lng, lat, radius);
+        let value = Value::string(rgnStr);
+        Filter {
+            _as: proto::QueryFilter {
+                name: bin_name.into(),
+                idx_type: cit._as.into(),
+                value_particle_type: PHPValue::GeoJSON("".into()).particle_type() as u32,
+                begin: Some(value.clone().into()),
+                end: Some(value.clone().into()),
+                ctx: ctx.map(|ctx| ctx.iter().map(|ctx| ctx._as.clone() ).collect()).unwrap_or(vec![]),
+            },
+        }
+    }
 
-//     pub fn contains_range(
-//         bin_name: &str,
-//         begin: PHPValue,
-//         end: PHPValue,
-//         cit: Option<&IndexCollectionType>,
-//     ) -> Self {
-//         let default = IndexCollectionType::Default();
-//         let cit = cit.unwrap_or(&default);
-//         Filter {
-//             _as: aerospike_core::as_contains_range!(
-//                 bin_name,
-//                 aerospike_core::Value::from(begin),
-//                 aerospike_core::Value::from(end),
-//                 aerospike_core::query::IndexCollectionType::from(cit)
-//             ),
-//         }
-//     }
+    // Example code :
+    // $pointString = '{"type":"Point","coordinates":[-89.0000,23.0000]}'
+    // Filter::regionsContainingPoint("bin_name", $pointString)
+    pub fn regions_containing_point(
+        bin_name: &str,
+        lat: f64,
+        lng: f64,
+        cit: Option<&IndexCollectionType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Self {
+        let default = IndexCollectionType::Default();
+        let cit = cit.unwrap_or(&default);
+        let point = format!(r#"{{"type":"Point","coordinates":[{:.8},{:.8}]}}"#, lng, lat);
+        let value = Value::string(point);
+        Filter {
+            _as: proto::QueryFilter {
+                name: bin_name.into(),
+                idx_type: cit._as.into(),
+                value_particle_type: PHPValue::GeoJSON("".into()).particle_type() as u32,
+                begin: Some(value.clone().into()),
+                end: Some(value.clone().into()),
+                ctx: ctx.map(|ctx| ctx.iter().map(|ctx| ctx._as.clone() ).collect()).unwrap_or(vec![]),
+            },
+        }
+    }
+}
 
-//     // Example code :
-//     // $pointString = '{"type":"AeroCircle","coordinates":[[-89.0000,23.0000], 1000]}'
-//     // Filter::regionsContainingPoint("bin_name", $pointString)
-//     pub fn within_region(bin_name: &str, region: &str, cit: Option<&IndexCollectionType>) -> Self {
-//         let default = IndexCollectionType::Default();
-//         let cit = cit.unwrap_or(&default);
-//         Filter {
-//             _as: aerospike_core::as_within_region!(
-//                 bin_name,
-//                 region,
-//                 aerospike_core::query::IndexCollectionType::from(cit)
-//             ),
-//         }
-//     }
+impl FromZval<'_> for Filter {
+    const TYPE: DataType = DataType::Mixed;
 
-//     // Example code :
-//     // $lat = 43.0004;
-//     // $lng = -89.0005;
-//     // $radius = 1000;
-//     // $filter = Filter::regionsContainingPoint("bin_name", $lat, $lng, $radius);
-//     pub fn within_radius(
-//         bin_name: &str,
-//         lat: f64,
-//         lng: f64,
-//         radius: f64,
-//         cit: Option<&IndexCollectionType>,
-//     ) -> Self {
-//         let default = IndexCollectionType::Default();
-//         let cit = cit.unwrap_or(&default);
-//         Filter {
-//             _as: aerospike_core::as_within_radius!(
-//                 bin_name,
-//                 lat,
-//                 lng,
-//                 radius,
-//                 aerospike_core::query::IndexCollectionType::from(cit)
-//             ),
-//         }
-//     }
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &Filter = zval.extract()?;
 
-//     // Example code :
-//     // $pointString = '{"type":"Point","coordinates":[-89.0000,23.0000]}'
-//     // Filter::regionsContainingPoint("bin_name", $pointString)
-//     pub fn regions_containing_point(
-//         bin_name: &str,
-//         point: &str,
-//         cit: Option<&IndexCollectionType>,
-//     ) -> Self {
-//         let default = IndexCollectionType::Default();
-//         let cit = cit.unwrap_or(&default);
-//         Filter {
-//             _as: aerospike_core::as_regions_containing_point!(
-//                 bin_name,
-//                 point,
-//                 aerospike_core::query::IndexCollectionType::from(cit)
-//             ),
-//         }
-//     }
-// }
+        Some(Filter { _as: f._as.clone() })
+    }
+}
 
-// ////////////////////////////////////////////////////////////////////////////////////////////
-// //
-// //  Statement
-// //
-// ////////////////////////////////////////////////////////////////////////////////////////////
 
-// /// Query statement parameters.
-// #[php_class(name = "Aerospike\\Statement")]
-// pub struct Statement {
-//     _as: aerospike_core::Statement,
-// }
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Statement
+//
+////////////////////////////////////////////////////////////////////////////////////////////
 
-// #[php_impl]
-// #[derive(ZvalConvert)]
-// impl Statement {
-//     pub fn __construct(namespace: &str, set_name: &str, bins: Option<Vec<String>>) -> Self {
-//         Statement {
-//             _as: aerospike_core::Statement::new(namespace, set_name, bins_flag(bins)),
-//         }
-//     }
+/// Query statement parameters.
+#[php_class(name = "Aerospike\\Statement")]
+pub struct Statement {
+    _as: proto::Statement,
+}
 
-//     #[getter]
-//     pub fn get_filters(&self) -> Option<Vec<Filter>> {
-//         self._as
-//             .filters
-//             .as_ref()
-//             .map(|filters| filters.iter().map(|f| Filter { _as: f.clone() }).collect())
-//     }
+#[php_impl]
+#[derive(ZvalConvert)]
+impl Statement {
+    pub fn __construct(namespace: &str, set_name: &str, filter: &Filter, bin_names: Option<Vec<String>>) -> Self {
+        let mut rng = rand::thread_rng();
+        Statement {
+            _as: proto::Statement {
+                namespace: namespace.into(), 
+                set_name: set_name.into(), 
+                bin_names: bin_names.unwrap_or(vec![]),
+                return_data: true,
+                task_id: rng.gen(),
+                filter: Some(filter._as.clone()),
+                index_name: None,
+                udf_call: None,
+            },
+        }
+    }
 
-//     #[setter]
-//     pub fn set_filters(&mut self, filters: Option<Vec<Filter>>) {
-//         match filters {
-//             None => self._as.filters = None,
-//             Some(filters) => {
-//                 self._as.filters = Some(filters.iter().map(|qf| qf._as.clone()).collect());
-//             }
-//         };
-//         // Ok(())
-//     }
-// }
+    #[getter]
+    pub fn get_filter(&self) -> Option<Filter> {
+        self._as
+            .filter
+            .as_ref()
+            .map(|f| Filter { _as: f.clone() })
+    }
 
-// ////////////////////////////////////////////////////////////////////////////////////////////
-// //
-// //  Recordset
-// //
-// ////////////////////////////////////////////////////////////////////////////////////////////
+    #[setter]
+    pub fn set_filter(&mut self, filter: Option<Filter>) {
+        self._as.filter = filter.map(|f| f._as.clone());
+    }
 
-// /// Virtual collection of records retrieved through queries and scans. During a query/scan,
-// /// multiple threads will retrieve records from the server nodes and put these records on an
-// /// internal queue managed by the recordset. The single user thread consumes these records from the
-// /// queue.
-// #[php_class(name = "Aerospike\\Recordset")]
-// pub struct Recordset {
-//     _as: Arc<aerospike_core::Recordset>,
-// }
+    #[getter]
+    pub fn get_index_name(&self) -> Option<String> {
+        self._as.index_name.clone()
+    }
 
-// #[php_impl]
-// #[derive(ZvalConvert)]
-// impl Recordset {
-//     pub fn close(&self) {
-//         self._as.close();
-//     }
+    #[setter]
+    pub fn set_index_name(&mut self, index_name: Option<String>) {
+        self._as.index_name = index_name;
+    }
 
-//     #[getter]
-//     pub fn get_active(&self) -> bool {
-//         self._as.is_active()
-//     }
+    #[getter]
+    pub fn get_bin_names(&self) -> Vec<String> {
+        self._as.bin_names.clone()
+    }
 
-//     pub fn next(&self) -> Option<Result<Record>> {
-//         match self._as.next_record() {
-//             None => None,
-//             Some(Err(e)) => panic!("{}", e),
-//             Some(Ok(rec)) => Some(Ok(rec.into())),
-//         }
-//     }
-// }
+    #[setter]
+    pub fn set_bin_names(&mut self, bin_names: Vec<String>) {
+        self._as.bin_names = bin_names;
+    }
+
+    #[getter]
+    pub fn get_namespace(&self) -> String {
+        self._as.namespace.clone()
+    }
+
+    #[setter]
+    pub fn set_namespace(&mut self, namespace: String) {
+        self._as.namespace = namespace;
+    }
+
+    #[getter]
+    pub fn get_setname(&self) -> String {
+        self._as.set_name.clone()
+    }
+
+    #[setter]
+    pub fn set_setname(&mut self, set_name: String) {
+        self._as.set_name = set_name;
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  PartitionStatus
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+/// Virtual collection of records retrieved through queries and scans. During a query/scan,
+/// multiple threads will retrieve records from the server nodes and put these records on an
+/// internal queue managed by the recordset. The single user thread consumes these records from the
+/// queue.
+#[php_class(name = "Aerospike\\PartitionStatus")]
+pub struct PartitionStatus {
+    _as: proto::PartitionStatus,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl PartitionStatus {
+    pub fn __construct(id: u32) -> Self {
+        PartitionStatus {
+            _as: proto::PartitionStatus{
+                bval: None,
+                id: id,
+                retry: false,
+                digest: vec![],
+            },
+        }
+    }
+
+    #[getter]
+    pub fn get_bval(&self) -> Option<i64> {
+        self._as.bval
+    }
+
+    #[getter]
+    pub fn get_partition_id(&self) -> u32 {
+        self._as.id
+    }
+
+    #[getter]
+    pub fn get_digest(&self) -> Vec<u8> {
+        self._as.digest.clone()
+    }
+
+    #[getter]
+    pub fn get_retry(&self) -> bool {
+        self._as.retry
+    }
+}
+
+impl From<&proto::PartitionStatus> for PartitionStatus {
+    fn from(input: &proto::PartitionStatus) -> Self {
+        PartitionStatus { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for PartitionStatus {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &PartitionStatus = zval.extract()?;
+
+        Some(PartitionStatus { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  PartitionFilter
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+/// Virtual collection of records retrieved through queries and scans. During a query/scan,
+/// multiple threads will retrieve records from the server nodes and put these records on an
+/// internal queue managed by the recordset. The single user thread consumes these records from the
+/// queue.
+#[php_class(name = "Aerospike\\PartitionFilter")]
+pub struct PartitionFilter {
+    _as: Arc<Mutex<proto::PartitionFilter>>,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl PartitionFilter {
+    pub fn __construct() -> Self {
+        Self::all()
+    }
+
+    #[getter]
+    pub fn get_partition_status(&self) -> Vec<PartitionStatus> {
+        let p = self._as.lock().unwrap();
+        p.partitions.iter().map(|ps| ps.into()).collect()
+    }
+
+    pub fn all() -> Self {
+        PartitionFilter { _as: Arc::new(Mutex::new(proto::PartitionFilter { begin: 0, count: PARTITIONS as u32, digest: vec![], partitions: vec![], done: false, retry: false} ))}
+    }
+
+    pub fn partition(id: u32) -> Self {
+        PartitionFilter { _as: Arc::new(Mutex::new(proto::PartitionFilter { begin: id, count: 1, digest: vec![], partitions: vec![], done: false, retry: false} ))}
+    }
+
+    pub fn range(begin: u32, count: u32) -> Self {
+        PartitionFilter { _as: Arc::new(Mutex::new(proto::PartitionFilter { begin: begin, count: count, digest: vec![], partitions: vec![], done: false, retry: false} ))}
+    }
+
+    fn init_partition_status(&mut self) {
+        let mut p = self._as.lock().unwrap();
+        if p.partitions.len() > 0 {
+            return;
+        }
+
+        p.partitions = (0..PARTITIONS).map(|id| PartitionStatus::__construct(id as u32)._as).collect();
+    }
+}
+
+impl FromZval<'_> for PartitionFilter {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &PartitionFilter = zval.extract()?;
+
+        Some(PartitionFilter { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Recordset
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+/// Virtual collection of records retrieved through queries and scans. During a query/scan,
+/// multiple threads will retrieve records from the server nodes and put these records on an
+/// internal queue managed by the recordset. The single user thread consumes these records from the
+/// queue.
+#[php_class(name = "Aerospike\\Recordset")]
+pub struct Recordset {
+    _as: Option<tonic::Streaming<proto::AerospikeStreamResponse>>,
+    client: Arc<Mutex<grpc::BlockingClient>>,
+    partition_filter: PartitionFilter,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl Recordset {
+    pub fn close(&mut self) {
+        // Drop the stream, which will signal the server and close the recordset
+        self._as = None;
+    }
+
+    #[getter]
+    pub fn get_active(&self) -> bool {
+        self._as.is_some()
+    }
+
+    pub fn next(&mut self) -> Option<Result<Record>> {
+        let mut pid: Option<usize> = None;
+        let mut digest: Option<Vec<u8>> = None;
+        let mut bval: Option<i64> = None;
+        let mut close: Option<bool> = None;
+
+        let rec = self
+        ._as
+        .as_mut()
+        .map(|mut stream| {
+            let mut client = self.client.lock().unwrap();
+            let res = client.next_record(&mut stream);
+            match res {
+                None => {
+                    close = Some(true);
+                    None
+                },
+                Some(Err(pe)) => {
+                    let e = format!("{pe}");
+                    let error = AerospikeException::new(&e);
+                    let _ = throw_object(error.into_zval(true).unwrap());
+                    None
+                },
+                Some(Ok(proto::AerospikeStreamResponse { record: Some(ref rec), bval: bv, ..})) => {
+                    pid = rec.key.as_ref().map(|k| Key { _as: k.clone() }.partition_id())?; 
+                    digest = rec.key.as_ref().map(|k| k.digest.clone())?; 
+                    bval = bv;
+            
+                    Some(Ok(rec.into()))
+                },
+                Some(Ok(proto::AerospikeStreamResponse { error: Some(ref pe), ..})) => {
+                    let error: AerospikeException = pe.into();
+                    let _ = throw_object(error.into_zval(true).unwrap());
+                    None
+                },
+                _ => None,
+            }
+        })?;
+
+        // update partition_filter
+        pid.map(|pid| {
+            let mut p = self.partition_filter._as.lock().unwrap();
+            let begin = p.begin as usize;
+            let ps = &mut p.partitions[pid - begin];
+            ps.bval = bval;
+            digest.map(|digest| ps.digest = digest);
+        });
+
+        // close the recordset
+        close.map(|_| self.close());
+
+        rec
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3601,6 +4284,33 @@ impl Record {
     #[getter]
     pub fn get_generation(&self) -> Option<u32> {
         Some(self._as.generation)
+    }
+
+    #[getter]
+    pub fn get_expiration(&self) -> Expiration {
+        match self._as.expiration {
+            0 => NEVER_EXPIRE.into(),
+            secs => secs.into(),
+        }
+    }
+
+    #[getter]
+    pub fn get_ttl(&self) -> Option<u32> {
+        match self._as.expiration {
+            0 => NEVER_EXPIRE.into(),
+            secs => {
+                let expiration = CITRUSLEAF_EPOCH + (secs as u64);
+                let now = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+
+                // Record may not have expired on server, but delay or clock differences may
+                // cause it to look expired on client. Floor at 1, not 0, to avoid old
+                // "never expires" interpretation.
+                if expiration > now {
+                    return (((expiration as u64) - now) as u32).into();
+                }
+                return (1 as u32).into();
+            }
+        }
     }
 
     #[getter]
@@ -3865,10 +4575,9 @@ impl BatchPolicy {
 
 impl Default for BatchPolicy {
     fn default() -> Self {
-        let rp = ReadPolicy::default();
         BatchPolicy {
             _as: proto::BatchPolicy{
-                policy: Some(rp._as),
+                policy: Some(ReadPolicy::default()._as),
                 concurrent_nodes: Some(1), // Default concurrent nodes value
                 allow_inline: true, // Default allow inline value
                 allow_inline_ssd: false, // Default allow inline SSD value
@@ -3894,9 +4603,7 @@ pub struct BatchReadPolicy {
 #[derive(ZvalConvert)]
 impl BatchReadPolicy {
     pub fn __construct() -> Self {
-        BatchReadPolicy {
-            _as: proto::BatchReadPolicy::default(),
-        }
+        BatchReadPolicy::default()
     }
 
     #[getter]
@@ -3950,6 +4657,18 @@ impl BatchReadPolicy {
     }
 }
 
+impl Default for BatchReadPolicy {
+    fn default() -> Self {
+        BatchReadPolicy {
+            _as: proto::BatchReadPolicy{
+                filter_expression: None,
+                read_mode_ap: proto::ReadModeAp::One.into(),
+                read_mode_sc: proto::ReadModeSc::Session.into(),
+            }
+        }
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  BatchWritePolicy
@@ -3965,9 +4684,7 @@ pub struct BatchWritePolicy {
 #[derive(ZvalConvert)]
 impl BatchWritePolicy {
     pub fn __construct() -> Self {
-        BatchWritePolicy {
-            _as: proto::BatchWritePolicy::default(),
-        }
+        BatchWritePolicy::default()
     }
 
     #[getter]
@@ -4074,6 +4791,23 @@ impl BatchWritePolicy {
     }
 }
 
+impl Default for BatchWritePolicy {
+    fn default() -> Self {
+        BatchWritePolicy {
+            _as: proto::BatchWritePolicy{
+                filter_expression: None,
+                record_exists_action: proto::RecordExistsAction::Update.into(),
+                generation_policy:   proto::GenerationPolicy::None.into(),
+                commit_level:        proto::CommitLevel::CommitAll.into(),
+                generation:         0,
+                expiration:         0,
+                durable_delete: true,
+                send_key: false,
+            }
+        }
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  BatchDeletePolicy
@@ -4089,9 +4823,7 @@ pub struct BatchDeletePolicy {
 #[derive(ZvalConvert)]
 impl BatchDeletePolicy {
     pub fn __construct() -> Self {
-        BatchDeletePolicy {
-            _as: proto::BatchDeletePolicy::default(),
-        }
+        BatchDeletePolicy::default()
     }
 
     #[getter]
@@ -4157,6 +4889,21 @@ impl BatchDeletePolicy {
     }
 }
 
+impl Default for BatchDeletePolicy {
+    fn default() -> Self {
+        BatchDeletePolicy {
+            _as: proto::BatchDeletePolicy{
+                filter_expression: None,
+                generation_policy:   proto::GenerationPolicy::None.into(),
+                commit_level:        proto::CommitLevel::CommitAll.into(),
+                generation:         0,
+                durable_delete: true,
+                send_key: false,
+            }
+        }
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  BatchUdfPolicy
@@ -4172,9 +4919,7 @@ pub struct BatchUdfPolicy {
 #[derive(ZvalConvert)]
 impl BatchUdfPolicy {
     pub fn __construct() -> Self {
-        BatchUdfPolicy {
-            _as: proto::BatchUdfPolicy::default(),
-        }
+        BatchUdfPolicy::default()
     }
 
     #[getter]
@@ -4244,6 +4989,21 @@ impl BatchUdfPolicy {
         self._as.send_key = send_key;
     }
 }
+
+impl Default for BatchUdfPolicy {
+    fn default() -> Self {
+        BatchUdfPolicy {
+            _as: proto::BatchUdfPolicy{
+                filter_expression: None,
+                commit_level:        proto::CommitLevel::CommitAll.into(),
+                expiration:         0,
+                durable_delete: true,
+                send_key: false,
+            }
+        }
+    }
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -5240,8 +6000,6 @@ impl Client {
         set_name: &str,
         before_nanos: Option<i64>,
     ) -> PhpResult<()> {
-        // let before_nanos = before_nanos.unwrap_or_default();
-
         let request = tonic::Request::new(proto::AerospikeTruncateRequest {
             policy: Some(policy._as.clone()),
             namespace: namespace.into(),
@@ -5261,37 +6019,69 @@ impl Client {
         }
     }
 
-    // /// Read all records in the specified namespace and set and return a record iterator. The scan
-    // /// executor puts records on a queue in separate threads. The calling thread concurrently pops
-    // /// records off the queue through the record iterator. Up to `policy.max_concurrent_nodes`
-    // /// nodes are scanned in parallel. If concurrent nodes is set to zero, the server nodes are
-    // /// read in series.
-    // pub fn scan(
-    //     &self,
-    //     policy: &ScanPolicy,
-    //     namespace: &str,
-    //     set_name: &str,
-    //     bins: Option<Vec<String>>,
-    // ) -> PhpResult<Recordset> {
-    //     let res = self
-    //         ._as
-    //         .scan(&policy._as, namespace, set_name, bins_flag(bins))
-    //         .map_err(|e| e.to_string())?;
-    //     Ok(res.into())
-    // }
+    /// Read all records in the specified namespace and set and return a record iterator. The scan
+    /// executor puts records on a queue in separate threads. The calling thread concurrently pops
+    /// records off the queue through the record iterator. Up to `policy.max_concurrent_nodes`
+    /// nodes are scanned in parallel. If concurrent nodes is set to zero, the server nodes are
+    /// read in series.
+    pub fn scan(
+        &self,
+        policy: &ScanPolicy,
+        mut partition_filter: PartitionFilter,
+        namespace: &str,
+        set_name: &str,
+        bins: Option<Vec<String>>,
+    ) -> PhpResult<Recordset> {
+        let res = {
+            let pf = partition_filter._as.lock().unwrap();
+            let request = tonic::Request::new(proto::AerospikeScanRequest {
+                policy: Some(policy._as.clone()),
+                namespace: namespace.into(),
+                set_name: set_name.into(),
+                bin_names: bins.unwrap_or(vec![]),
+                partition_filter: Some(pf.clone()),
+            });
 
-    // /// Execute a query on all server nodes and return a record iterator. The query executor puts
-    // /// records on a queue in separate threads. The calling thread concurrently pops records off
-    // /// the queue through the record iterator.
-    // pub fn query(&self, policy: &QueryPolicy, statement: &Statement) -> PhpResult<Recordset> {
-    //     let stmt = statement._as.clone();
-    //     let res = self
-    //         ._as
-    //         .query(&policy._as, stmt)
-    //         .map_err(|e| e.to_string())
-    //         .map_err(|e| e.to_string())?;
-    //     Ok(res.into())
-    // }
+            let mut client = self.client.lock().unwrap();
+            client.scan(request).map_err(|e| e.to_string())?
+        };
+
+        // init the partition_status status
+        // we late init it to avoid sending it to the server when the value is default
+        // since it will be initialized there anyway
+        partition_filter.init_partition_status();
+
+        Ok(Recordset { _as: Some(res.into_inner()), client: self.client.clone(), partition_filter: partition_filter })
+    }
+
+    /// Execute a query on all server nodes and return a record iterator. The query executor puts
+    /// records on a queue in separate threads. The calling thread concurrently pops records off
+    /// the queue through the record iterator.
+    pub fn query(
+        &self,
+        policy: &QueryPolicy,
+        mut partition_filter: PartitionFilter,
+        statement: &mut Statement,
+    ) -> PhpResult<Recordset> {
+        let res = {
+            let pf = partition_filter._as.lock().unwrap();
+            let request = tonic::Request::new(proto::AerospikeQueryRequest {
+                policy: Some(policy._as.clone()),
+                partition_filter: Some(pf.clone()),
+                statement: statement._as.clone().into(),
+            });
+
+            let mut client = self.client.lock().unwrap();
+            client.query(request).map_err(|e| e.to_string())?
+        };
+
+        // init the partition_status status
+        // we late init it to avoid sending it to the server when the value is default
+        // since it will be initialized there anyway
+        partition_filter.init_partition_status();
+
+        Ok(Recordset { _as: Some(res.into_inner()), client: self.client.clone(), partition_filter: partition_filter })
+    }
 
     /// Create a secondary index on a bin containing scalar values. This asynchronous server call
     /// returns before the command is complete.
@@ -5303,9 +6093,11 @@ impl Client {
         bin_name: &str,
         index_name: &str,
         index_type: &IndexType,
-        cit: &IndexCollectionType,
-        ctx: Vec<&CDTContext>,
+        cit: Option<&IndexCollectionType>,
+        ctx: Option<Vec<&CDTContext>>,
     ) -> PhpResult<()> {
+        let ictDefault = &IndexCollectionType::Default();
+        let cit = cit.unwrap_or(ictDefault);
         let request = tonic::Request::new(proto::AerospikeCreateIndexRequest {
             policy: Some(policy._as.clone()),
             namespace: namespace.into(),
@@ -5314,7 +6106,7 @@ impl Client {
             bin_name: bin_name.into(),
             index_type: index_type._as.into(),
             index_collection_type: cit._as.into(),
-            ctx: ctx.into_iter().map(|ctx| ctx._as.clone()).collect(),
+            ctx: ctx.map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect()).unwrap_or(vec![]),
         });
 
         let mut client = self.client.lock().unwrap();
@@ -5819,7 +6611,7 @@ impl AerospikeException {
     pub fn new(message: &str) -> Self {
         AerospikeException {
             message: message.to_string(),
-            code: 0,
+            code: ResultCode::CommonError as i32,
             in_doubt: false,
         }
     }
@@ -5860,7 +6652,7 @@ pub struct Key {
 impl Key {
     pub fn __construct(namespace: &str, set: &str, key: PHPValue) -> Self {
         let _as = proto::Key {
-            digest: vec![].into(), // TODO(Khosrow): Implement
+            digest: Some(Self::compute_digest(set, key.clone())),
             namespace: Some(namespace.into()),
             set: Some(set.into()),
             value: Some(key.into()),
@@ -5883,10 +6675,39 @@ impl Key {
         self._as.value.clone().map(|v| v.into())
     }
 
-    // #[getter]
-    // pub fn get_digest(&self) -> Option<String> {
-    //     Some(hex::encode(self._as.digest))
-    // }
+    fn compute_digest(set: &str, user_key: PHPValue) -> Vec<u8> {
+        let mut hash = Ripemd160::new();
+        hash.input(set.as_bytes());
+        hash.input(&[user_key.particle_type() as u8]);
+        match user_key.write_key_bytes(&mut hash) {
+            Ok(()) => (),
+            Err(pe) => {
+                let msg = format!("{}", pe);
+                let error = AerospikeException::new(&msg);
+                throw_object(error.into_zval(true).unwrap()).unwrap();
+                return vec![];
+            },
+        };
+        let h: [u8; 20] = hash.result().into();
+        h.into()
+    }
+
+    #[getter]
+    pub fn get_digest(&self) -> Option<Vec<u8>> {
+        self._as.digest.clone().map(|digest| digest)
+    }
+
+    #[getter]
+    fn partition_id(&self) -> Option<usize> {
+        self
+        ._as
+        .digest
+        .as_ref()
+        .map(|ref digest| {
+            let mut rdr = Cursor::new(&digest[0..4]);
+            rdr.read_u32::<LittleEndian>().unwrap() as usize & (PARTITIONS as usize - 1)
+        })
+    }
 }
 
 impl FromZval<'_> for Key {
@@ -6187,6 +7008,48 @@ impl PHPValue {
             // PHPValue::OrderedMap(ref val) => format!("{:?}", val),
         }
     }
+
+    fn particle_type(&self) -> u32 {
+        match *self {
+            PHPValue::Nil => 0,
+            PHPValue::Int(_) => 1,
+            PHPValue::UInt(_) => 1,
+            PHPValue::Float(_) => 2,
+            PHPValue::String(_) => 3,
+            PHPValue::Blob(_) => 4,
+            PHPValue::Bool(_) => 17,
+            PHPValue::HLL(_) => 18,
+            PHPValue::HashMap(_) => 19,
+            PHPValue::Json(_) => 19,
+            PHPValue::List(_) => 20,
+            PHPValue::GeoJSON(_) => 23,
+            PHPValue::Infinity => unreachable!(),
+            PHPValue::Wildcard => unreachable!(),
+            // PHPValue::OrderedMap(_) => format!("{:?}", val),
+        }
+    }
+
+    /// Serialize the value as a record key.
+    /// For internal use only.
+    fn write_key_bytes(&self, h: &mut Ripemd160) -> Result<(), &str> {
+        match *self {
+           PHPValue::Int(ref val) => {
+                let mut buf = [0; 8];
+                NetworkEndian::write_i64(&mut buf, *val);
+                h.input(&buf);
+                Ok(())
+            }
+            PHPValue::String(ref val) => {
+                h.input(val.as_bytes());
+                Ok(())
+            }
+            PHPValue::Blob(ref val) => {
+                h.input(val);
+                Ok(())
+            }
+            _ => Err("Data type is not supported as Key value."),
+        }
+    }    
 }
 
 impl fmt::Display for PHPValue {
@@ -6491,6 +7354,10 @@ impl Value {
 
     pub fn uint(val: u64) -> PHPValue {
         PHPValue::UInt(val)
+    }
+
+    pub fn float(val: f64) -> PHPValue {
+        PHPValue::Float(ordered_float::OrderedFloat(val.into()))
     }
 
     pub fn bool(val: bool) -> PHPValue {

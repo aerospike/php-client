@@ -877,6 +877,33 @@ message Privilege {
 	string setName = 3;
 }
 
+// PartitionStatus encapsulates the pagination status in partitions.
+message PartitionStatus {
+	// BVal
+	optional int64 bval = 1;
+	// Id shows the partition Id.
+	uint32 id = 2;
+	// Retry signifies if the partition requires a retry.
+	bool retry = 3;
+	// Digest records the digest of the last key digest received from the server
+	// for this partition.
+	bytes digest = 4;
+}
+
+// PartitionFilter is used in scan/queries. This filter is also used as a cursor.
+//
+// If a previous scan/query returned all records specified by a PartitionFilter instance, a
+// future scan/query using the same PartitionFilter instance will only return new records added
+// after the last record read (in digest order) in each partition in the previous scan/query.
+message PartitionFilter {
+	uint32 begin = 1;
+	uint32 count = 2;
+	bytes digest = 3;
+	repeated PartitionStatus partitions = 4;
+	bool done = 5;
+	bool retry = 6;
+}
+
 // The response for KV commands.
 message AerospikeSingleResponse {
   // Error
@@ -1163,6 +1190,26 @@ message AerospikeSetQuotasResponse {
   optional Error error = 1;
 }
 
+message AerospikeScanRequest {
+	ScanPolicy policy = 1;
+	string namespace = 2;
+	string setName = 3;
+	repeated string binNames = 4;
+	optional PartitionFilter partitionFilter = 5;
+}
+
+message AerospikeStreamResponse {
+  Record record = 1;
+  Error error = 2;
+  optional int64 bval = 3;
+}
+
+message AerospikeQueryRequest {
+	QueryPolicy policy = 1;
+	Statement statement = 2;
+	optional PartitionFilter partitionFilter = 5;
+}
+
 // Aerospike KVS operations service
 service KVS {
 	// Put a single record
@@ -1301,6 +1348,12 @@ service KVS {
 	// Pass 0 for quota values for no limit.
 	rpc SetQuotas (AerospikeSetQuotasRequest) returns
 				(AerospikeSetQuotasResponse) {}
+
+	rpc Scan (AerospikeScanRequest) returns
+				(stream AerospikeStreamResponse) {}
+
+	rpc Query (AerospikeQueryRequest) returns
+				(stream AerospikeStreamResponse) {}
 
 }
 
@@ -1471,4 +1524,106 @@ message BackgroundExecutePolicy {
   //
   // Default: false.
   optional bool xdr = 15;
+}
+
+// MultiPolicy contains parameters for policy attributes used in
+// query and scan operations.
+message MultiPolicy {
+	ReadPolicy readPolicy = 1;
+
+	// Maximum number of concurrent requests to server nodes at any point in time.
+	// If there are 16 nodes in the cluster and maxConcurrentNodes is 8, then queries
+	// will be made to 8 nodes in parallel.  When a query completes, a new query will
+	// be issued until all 16 nodes have been queried.
+	// Default (0) is to issue requests to all server nodes in parallel.
+	// 1 will to issue requests to server nodes one by one avoiding parallel queries.
+	uint32 maxConcurrentNodes = 2;
+
+	// MaxRecords approximates the number of records to return to the client. This number is divided by the
+	// number of nodes involved in the query. The actual number of records returned
+	// may be less than MaxRecords if node record counts are small and unbalanced across
+	// nodes.
+	//
+	// This field is supported on server versions >= 4.9.
+	//
+	// Default: 0 (do not limit record count)
+	uint64 maxRecords = 3;
+
+	// RecordsPerSecond limits returned records per second (rps) rate for each server.
+	// Will not apply rps limit if recordsPerSecond is zero (default).
+	// Currently only applicable to a query without a defined filter.
+	uint64 recordsPerSecond = 4;
+
+	// Number of records to place in queue before blocking.
+	// Records received from multiple server nodes will be placed in a queue.
+	// A separate goroutine consumes these records in parallel.
+	// If the queue is full, the producer goroutines will block until records are consumed.
+	uint32 recordQueueSize = 5;
+
+	// Indicates if bin data is retrieved. If false, only record digests are retrieved.
+	bool includeBinData = 6;
+}
+
+// ScanPolicy encapsulates parameters used in scan operations.
+message ScanPolicy {
+	MultiPolicy multiPolicy = 1;
+}
+
+// QueryPolicy encapsulates parameters for policy attributes used in query operations.
+message QueryPolicy {
+	MultiPolicy multiPolicy = 1;
+	// ShortQuery detemines wether query expected to return less than 100 records.
+	// If true, the server will optimize the query for a small record set.
+	// This field is ignored for aggregation queries, background queries
+	// and server versions 6.0+.
+	//
+	// Default: false
+	bool ShortQuery = 2;
+}
+
+// Statement encapsulates query statement parameters.
+message UDFCall {
+	string packageName = 6;
+	string functionName = 7;
+	repeated Value functionArgs = 8;
+}
+
+// Statement encapsulates query statement parameters.
+message Statement {
+	// Namespace determines query Namespace
+	string Namespace = 1;
+
+	// SetName determines query Set name (Optional)
+	string SetName = 2;
+
+	// IndexName determines query index name (Optional)
+	// If not set, the server will determine the index from the filter's bin name.
+	optional string IndexName = 3;
+
+	// BinNames detemines bin names (optional)
+	repeated string BinNames = 4;
+
+	// Filter determines query index filter (Optional).
+	// This filter is applied to the secondary index on query.
+	// Query index filters must reference a bin which has a secondary index defined.
+	QueryFilter filter = 5;
+
+	// TaskId determines query task id. (Optional)
+	// This value is not used anymore and will be removed later.
+	uint64 taskId = 6;
+
+	// determines if the query should return data
+	bool returnData = 7;
+
+	optional UDFCall udfCall = 8;
+}
+
+// QueryFilter specifies a query filter definition.
+message QueryFilter {
+	string name = 1;
+	IndexCollectionType idxType = 2;
+	uint32 valueParticleType = 3;
+	Value begin = 4;
+	Value end = 5;
+	repeated CDTContext ctx = 6;
 }

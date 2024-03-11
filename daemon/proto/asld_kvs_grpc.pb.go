@@ -49,6 +49,8 @@ const (
 	KVS_RevokePrivileges_FullMethodName = "/com.aerospike.daemon.KVS/RevokePrivileges"
 	KVS_SetAllowlist_FullMethodName     = "/com.aerospike.daemon.KVS/SetAllowlist"
 	KVS_SetQuotas_FullMethodName        = "/com.aerospike.daemon.KVS/SetQuotas"
+	KVS_Scan_FullMethodName             = "/com.aerospike.daemon.KVS/Scan"
+	KVS_Query_FullMethodName            = "/com.aerospike.daemon.KVS/Query"
 )
 
 // KVSClient is the client API for KVS service.
@@ -131,6 +133,8 @@ type KVSClient interface {
 	// Quotas require server security configuration "enable-quotas" to be set to true.
 	// Pass 0 for quota values for no limit.
 	SetQuotas(ctx context.Context, in *AerospikeSetQuotasRequest, opts ...grpc.CallOption) (*AerospikeSetQuotasResponse, error)
+	Scan(ctx context.Context, in *AerospikeScanRequest, opts ...grpc.CallOption) (KVS_ScanClient, error)
+	Query(ctx context.Context, in *AerospikeQueryRequest, opts ...grpc.CallOption) (KVS_QueryClient, error)
 }
 
 type kVSClient struct {
@@ -411,6 +415,70 @@ func (c *kVSClient) SetQuotas(ctx context.Context, in *AerospikeSetQuotasRequest
 	return out, nil
 }
 
+func (c *kVSClient) Scan(ctx context.Context, in *AerospikeScanRequest, opts ...grpc.CallOption) (KVS_ScanClient, error) {
+	stream, err := c.cc.NewStream(ctx, &KVS_ServiceDesc.Streams[0], KVS_Scan_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &kVSScanClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type KVS_ScanClient interface {
+	Recv() (*AerospikeStreamResponse, error)
+	grpc.ClientStream
+}
+
+type kVSScanClient struct {
+	grpc.ClientStream
+}
+
+func (x *kVSScanClient) Recv() (*AerospikeStreamResponse, error) {
+	m := new(AerospikeStreamResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *kVSClient) Query(ctx context.Context, in *AerospikeQueryRequest, opts ...grpc.CallOption) (KVS_QueryClient, error) {
+	stream, err := c.cc.NewStream(ctx, &KVS_ServiceDesc.Streams[1], KVS_Query_FullMethodName, opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &kVSQueryClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type KVS_QueryClient interface {
+	Recv() (*AerospikeStreamResponse, error)
+	grpc.ClientStream
+}
+
+type kVSQueryClient struct {
+	grpc.ClientStream
+}
+
+func (x *kVSQueryClient) Recv() (*AerospikeStreamResponse, error) {
+	m := new(AerospikeStreamResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // KVSServer is the server API for KVS service.
 // All implementations must embed UnimplementedKVSServer
 // for forward compatibility
@@ -491,6 +559,8 @@ type KVSServer interface {
 	// Quotas require server security configuration "enable-quotas" to be set to true.
 	// Pass 0 for quota values for no limit.
 	SetQuotas(context.Context, *AerospikeSetQuotasRequest) (*AerospikeSetQuotasResponse, error)
+	Scan(*AerospikeScanRequest, KVS_ScanServer) error
+	Query(*AerospikeQueryRequest, KVS_QueryServer) error
 	mustEmbedUnimplementedKVSServer()
 }
 
@@ -587,6 +657,12 @@ func (UnimplementedKVSServer) SetAllowlist(context.Context, *AerospikeSetAllowli
 }
 func (UnimplementedKVSServer) SetQuotas(context.Context, *AerospikeSetQuotasRequest) (*AerospikeSetQuotasResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetQuotas not implemented")
+}
+func (UnimplementedKVSServer) Scan(*AerospikeScanRequest, KVS_ScanServer) error {
+	return status.Errorf(codes.Unimplemented, "method Scan not implemented")
+}
+func (UnimplementedKVSServer) Query(*AerospikeQueryRequest, KVS_QueryServer) error {
+	return status.Errorf(codes.Unimplemented, "method Query not implemented")
 }
 func (UnimplementedKVSServer) mustEmbedUnimplementedKVSServer() {}
 
@@ -1141,6 +1217,48 @@ func _KVS_SetQuotas_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _KVS_Scan_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(AerospikeScanRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(KVSServer).Scan(m, &kVSScanServer{stream})
+}
+
+type KVS_ScanServer interface {
+	Send(*AerospikeStreamResponse) error
+	grpc.ServerStream
+}
+
+type kVSScanServer struct {
+	grpc.ServerStream
+}
+
+func (x *kVSScanServer) Send(m *AerospikeStreamResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _KVS_Query_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(AerospikeQueryRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(KVSServer).Query(m, &kVSQueryServer{stream})
+}
+
+type KVS_QueryServer interface {
+	Send(*AerospikeStreamResponse) error
+	grpc.ServerStream
+}
+
+type kVSQueryServer struct {
+	grpc.ServerStream
+}
+
+func (x *kVSQueryServer) Send(m *AerospikeStreamResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // KVS_ServiceDesc is the grpc.ServiceDesc for KVS service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1269,6 +1387,17 @@ var KVS_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _KVS_SetQuotas_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Scan",
+			Handler:       _KVS_Scan_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Query",
+			Handler:       _KVS_Query_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "asld_kvs.proto",
 }
