@@ -19,6 +19,7 @@ class AerospikeBenchmark {
     }
 
     /**
+     * @Revs(1000)
      * @Iterations(5)
      * @BeforeMethods("makeDataForGetBenchString1")
      */
@@ -39,6 +40,7 @@ class AerospikeBenchmark {
     }
 
     /**
+     * @Revs(1000)
      * @Iterations(5)
      * @BeforeMethods("makeDataForGetBenchString10")
      */
@@ -58,6 +60,7 @@ class AerospikeBenchmark {
     }
 
     /**
+     * @Revs(1000)
      * @Iterations(5)
      * @BeforeMethods("makeDataForGetBenchString100")
      */
@@ -77,6 +80,7 @@ class AerospikeBenchmark {
     }
 
     /**
+     * @Revs(1000)
      * @Iterations(5)
      * @BeforeMethods("makeDataForGetBenchString1000")
      */
@@ -96,6 +100,7 @@ class AerospikeBenchmark {
     }
 
     /**
+     * @Revs(1000)
      * @Iterations(5)
      * @BeforeMethods("makeDataForGetBenchString10000")
      */
@@ -115,6 +120,7 @@ class AerospikeBenchmark {
     }
 
     /**
+     * @Revs(1000)
      * @Iterations(5)
      * @BeforeMethods("makeDataForGetBenchInt32")
      */
@@ -134,6 +140,7 @@ class AerospikeBenchmark {
     }
 
     /**
+     * @Revs(1000)
      * @Iterations(5)
      * @BeforeMethods("makeDataForGetBenchInt64")
      */
