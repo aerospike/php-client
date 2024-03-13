@@ -6,12 +6,16 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 
 	aero "github.com/aerospike/aerospike-client-go/v7"
 
@@ -100,7 +104,16 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 	// 	log.Fatal(err)
 	// }
 
-	srv := grpc.NewServer()
+	grpcPanicRecoveryHandler := func(p any) (err error) {
+		log.Println("recovered from panic", "panic", p, "stack", string(debug.Stack()))
+		return status.Errorf(codes.Internal, "%s", p)
+	}
+
+	srv := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))),
+		grpc.ChainStreamInterceptor(recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))),
+	)
+
 	grpc_health_v1.RegisterHealthServer(srv, health.NewServer())
 	pb.RegisterKVSServer(srv, &server{client: client})
 	reflection.Register(srv)
@@ -111,5 +124,5 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 	// }()
 
 	log.Printf("Cake is ready for unix socket protocol: %s", ac.Socket)
-	log.Fatal(srv.Serve(ln))
+	log.Println(srv.Serve(ln))
 }

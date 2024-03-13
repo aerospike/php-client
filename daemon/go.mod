@@ -4,6 +4,7 @@ go 1.21.3
 
 require (
 	github.com/aerospike/aerospike-client-go/v7 v7.1.1-0.20240311191100-933ff2d13fc2
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
 	github.com/pelletier/go-toml/v2 v2.1.1
 	google.golang.org/grpc v1.62.1
 	google.golang.org/protobuf v1.33.0
