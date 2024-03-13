@@ -6,7 +6,7 @@
 
 [cluster]
 socket = "/tmp/asld_grpc.sock"
-host = "127.0.0.1:3000"
+host = "10.128.0.2:3000"
 #user = "default-user"
 #password = "default-password"
 #auth = "EXTERNAL"
