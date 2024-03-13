@@ -1,0 +1,36 @@
+{
+    "$schema": "./phpbench.schema.json",
+    "$include-glob": "examples/Benchmark/*/*.json",
+    "runner.file_pattern": "*Bench.php",
+    "core.extensions": [
+        "PhpBench\\Extension\\DevelopmentExtension"
+    ],
+    "runner.bootstrap": "vendor/autoload.php",
+    "runner.path": "tests/Benchmark",
+    "runner.php_config": {
+        "memory_limit": "1G",
+        "xdebug.mode": "none"
+    },
+    "runner.iterations": 10,
+    "runner.retry_threshold": 5,
+    "runner.revs": 10,
+    "runner.assert": "mode(variant.time.avg) as ms <= mode(baseline.time.avg) as ms +/- 5%",
+    "expression.strip_tailing_zeros": true,
+    "report.generators": {
+        "examples": {
+            "generator": "composite",
+            "reports": [
+                "hashing",
+                "config_linters"
+            ]
+        }
+    },
+    "core.profiles": {
+        "examples": {
+            "core.extensions": [
+                "PhpBench\\Examples\\Extension\\AcmeExtension"
+            ],
+            "runner.path": "examples/Benchmark"
+        }
+    }
+}
