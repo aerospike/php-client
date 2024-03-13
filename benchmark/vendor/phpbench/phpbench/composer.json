@@ -1,0 +1,109 @@
+{
+    "name": "phpbench/phpbench",
+    "description": "PHP Benchmarking Framework",
+    "keywords": [
+        "benchmarking",
+        "optimization",
+        "performance",
+        "profiling",
+        "testing"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Daniel Leech",
+            "email": "daniel@dantleech.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.1",
+        "ext-dom": "*",
+        "ext-json": "*",
+        "ext-pcre": "*",
+        "ext-reflection": "*",
+        "ext-spl": "*",
+        "ext-tokenizer": "*",
+        "doctrine/annotations": "^2.0",
+        "phpbench/container": "^2.1",
+        "phpbench/dom": "~0.3.3",
+        "psr/log": "^1.1 || ^2.0 || ^3.0",
+        "seld/jsonlint": "^1.1",
+        "symfony/console": "^4.2 || ^5.0  || ^6.0 || ^7.0",
+        "symfony/filesystem": "^4.2 || ^5.0 || ^6.0 || ^7.0",
+        "symfony/finder": "^4.2 || ^5.0 || ^6.0 || ^7.0",
+        "symfony/options-resolver": "^4.2 || ^5.0 || ^6.0 || ^7.0",
+        "symfony/process": "^4.2 || ^5.0 || ^6.0 || ^7.0",
+        "webmozart/glob": "^4.6"
+    },
+    "require-dev": {
+        "rector/rector": "^0.18.10",
+        "dantleech/invoke": "^2.0",
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "phpspec/prophecy": "dev-master",
+        "phpstan/phpstan": "^1.0",
+        "phpstan/phpstan-phpunit": "^1.0",
+        "jangregor/phpstan-prophecy": "^1.0",
+        "phpstan/extension-installer": "^1.1",
+        "phpunit/phpunit": "^10.0",
+        "symfony/error-handler": "^5.2 || ^6.0 || ^7.0",
+        "symfony/var-dumper": "^4.0 || ^5.0 || ^6.0 || ^7.0"
+    },
+    "scripts": {
+        "integrate":[ 
+            "vendor/bin/php-cs-fixer fix",
+            "vendor/bin/phpstan analyse -c phpstan.neon.dist",
+            "vendor/bin/phpunit",
+            "bin/phpbench run --revs=1 --iterations=2",
+            "bin/phpbench run --profile=examples --revs=1 --iterations=1 --report=examples",
+            "@docs",
+            "@schema"
+        ],
+        "schema": [
+            "bin/phpbench doc:config-schema > phpbench.schema.json"
+        ],
+        "docs": [
+            "rm -Rf docs/build",
+            "bin/phpbench doc:config-reference > docs/configuration.rst",
+            "bin/phpbench doc:service-options docs/report-generators/options generator",
+            "bin/phpbench doc:service-options docs/report-renderers/options renderer",
+            "bin/phpbench doc:service-options docs/report-components/options component",
+            "bin/phpbench doc:service-options docs/executors/options executor",
+            "make -C docs html"
+        ]
+    },
+    "suggest": {
+        "ext-xdebug": "For Xdebug profiling extension."
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.2-dev"
+        }
+    },
+    "autoload": {
+        "files": [
+            "lib/Report/Func/functions.php"
+        ],
+        "psr-4": {
+            "PhpBench\\": "lib/",
+            "PhpBench\\Extensions\\XDebug\\": "extensions/xdebug/lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "PhpBench\\Tests\\": "tests/",
+            "PhpBench\\Examples\\": "examples/",
+            "PhpBench\\Extensions\\XDebug\\Tests\\": "extensions/xdebug/tests/"
+        }
+    },
+    "bin": [
+        "bin/phpbench"
+    ]
+}

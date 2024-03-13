@@ -1,0 +1,85 @@
+# Use Red Hat Linux 9 as the base image
+FROM --platform=linux/amd64 registry.access.redhat.com/ubi9/ubi:latest
+
+# Set environment variables
+ENV PHP_VERSION=8.1 \
+    PHP_INI_DIR=/opt/homebrew/etc/php/8.1 \
+    GO_VERSION=1.19 \
+    PROTOC_VERSION=3.19.1 \
+    RUST_VERSION=1.71 \
+    EXT_PHP_RS_VERSION=0.12.0 \
+    AEROSPIKE_VERSION=6.4.0
+
+# Install necessary packages
+RUN yum install -y --allowerasing \
+    wget \
+    curl \
+    make \
+    gcc \
+    gcc-c++ \
+    php \
+    php-devel \
+    php-pear \
+    php-xml \
+    php-mbstring \
+    php-json \
+    php-cli \
+    php-pear \
+    php-pecl-apcu \
+    unzip \
+    tar \
+    readline \
+    git \
+    llvm-toolset \
+    && \
+    yum clean all
+
+# Install Rust
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Install Go
+RUN wget -q https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz && \
+    rm go${GO_VERSION}.linux-amd64.tar.gz
+ENV PATH="/usr/local/go/bin:${PATH}"
+
+# Install Protobuf compiler and gRPC plugin
+RUN wget -q https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip && \
+    unzip protoc-${PROTOC_VERSION}-linux-x86_64.zip -d /usr/local && \
+    rm protoc-${PROTOC_VERSION}-linux-x86_64.zip && \
+    go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest 
+ENV PATH="${PATH}:/root/go/bin"
+RUN which protoc-gen-go-grpc
+
+# Install PHPUnit
+RUN wget -q https://phar.phpunit.de/phpunit-10.phar && \
+    chmod +x phpunit-10.phar && \
+    mv phpunit-10.phar /usr/local/bin/phpunit
+
+# # Install Aerospike Server
+RUN wget -O aerospike.tgz https://download.aerospike.com/artifacts/aerospike-server-enterprise/6.2.0.0/aerospike-server-enterprise_6.2.0.0_tools-8.0.2_el8_x86_64.tgz \
+    && tar -xvf aerospike.tgz \
+    && cd aerospike-server-* \
+    && ./asinstall
+
+# Install Aerospike PHP Client
+RUN export GO_PATH=~/go && \
+    export PATH=$PATH:/$GO_PATH/bin
+
+RUN git clone https://github.com/aerospike/php-client.git && \
+    cd /php-client/daemon && \
+    sed -i 's/go 1\.21\.3/go 1.21/' go.mod && \
+    make && \
+    cd .. && \
+    cargo build && php -d extension=./target/debug/libaerospike.so ./examples/localGoExample.php
+
+# Clean up
+RUN rm -rf /var/cache/yum/*
+
+# Expose necessary ports
+EXPOSE 3000
+
+# Run command to keep container running
+CMD ["tail", "-f", "/dev/null"]
