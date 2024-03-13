@@ -1,4 +1,4 @@
- Go parameters
+#Go parameters
 GOCMD=go
 GOBUILD=$(GOCMD) build
 GOGET=$(GOCMD) get -u
