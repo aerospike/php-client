@@ -865,41 +865,578 @@ func toOps(in []*pb.Operation) (res []*aero.Operation) {
 	return res
 }
 
-func toOp(in *pb.Operation) *aero.Operation {
+func toStdOp(in *pb.StdOperation) *aero.Operation {
 	if in != nil {
 		switch in.OpType {
-		case pb.OperationType_OperationTypeRead:
+		case pb.OperationType_OperationTypeGet:
 			if in.BinName != nil {
 				return aero.GetBinOp(*in.BinName)
 			}
 			return aero.GetOp()
-		case pb.OperationType_OperationTypeReadHeader:
+		case pb.OperationType_OperationTypeGetHeader:
 			return aero.GetHeaderOp()
-		case pb.OperationType_OperationTypeWrite:
+		case pb.OperationType_OperationTypePut:
 			return aero.PutOp(aero.NewBin(*in.BinName, toValue(in.BinValue)))
-		// case pb.OperationType_OperationTypeCdtRead:
-		// case pb.OperationType_OperationTypeCdtModify:
-		// case pb.OperationType_OperationTypeMapRead:
-		// case pb.OperationType_OperationTypeMapModify:
 		case pb.OperationType_OperationTypeAdd:
 			return aero.AddOp(aero.NewBin(*in.BinName, toValue(in.BinValue)))
-		// case pb.OperationType_OperationTypeExpRead:
-		// case pb.OperationType_OperationTypeExpModify:
 		case pb.OperationType_OperationTypeAppend:
 			return aero.AppendOp(aero.NewBin(*in.BinName, toValue(in.BinValue)))
 		case pb.OperationType_OperationTypePrepend:
 			return aero.PrependOp(aero.NewBin(*in.BinName, toValue(in.BinValue)))
 		case pb.OperationType_OperationTypeTouch:
 			return aero.TouchOp()
-		// case pb.OperationType_OperationTypeBitRead:
-		// case pb.OperationType_OperationTypeBitModify:
 		case pb.OperationType_OperationTypeDelete:
 			return aero.DeleteOp()
-			// case pb.OperationType_OperationTypeHllRead:
-			// case pb.OperationType_OperationTypeHllModify:
 		}
 	}
 
+	panic(UNREACHABLE)
+}
+
+func toMapOrderType(in int64) aero.MapOrderTypes {
+	switch in {
+	case int64(pb.MapOrderType_MapOrderTypeUnordered):
+		return aero.MapOrder.UNORDERED
+	case int64(pb.MapOrderType_MapOrderTypeKeyOrdered):
+		return aero.MapOrder.KEY_ORDERED
+	case int64(pb.MapOrderType_MapOrderTypeKeyValueOrdered):
+		return aero.MapOrder.KEY_VALUE_ORDERED
+	}
+	panic(UNREACHABLE)
+}
+
+func toCdtMapPolicy(in *pb.CdtMapPolicy) *aero.MapPolicy {
+	if in != nil {
+		if in.PersistedIndex {
+			return aero.NewMapPolicyWithFlagsAndPersistedIndex(toMapOrderType(int64(in.GetMapOrder())), int(in.GetFlags()))
+		}
+		return aero.NewMapPolicyWithFlags(toMapOrderType(int64(in.GetMapOrder())), int(in.GetFlags()))
+	}
+
+	return aero.DefaultMapPolicy()
+}
+
+func toCdtMapReturnType(in *pb.CdtMapReturnType) aero.MapReturnTypes {
+	if in != nil {
+		switch *in {
+		case pb.CdtMapReturnType_CdtMapReturnTypeNone:
+			return aero.MapReturnType.NONE
+		case pb.CdtMapReturnType_CdtMapReturnTypeIndex:
+			return aero.MapReturnType.INDEX
+		case pb.CdtMapReturnType_CdtMapReturnTypeReverseIndex:
+			return aero.MapReturnType.REVERSE_INDEX
+		case pb.CdtMapReturnType_CdtMapReturnTypeRank:
+			return aero.MapReturnType.RANK
+		case pb.CdtMapReturnType_CdtMapReturnTypeReverseRank:
+			return aero.MapReturnType.REVERSE_RANK
+		case pb.CdtMapReturnType_CdtMapReturnTypeCount:
+			return aero.MapReturnType.COUNT
+		case pb.CdtMapReturnType_CdtMapReturnTypeKey:
+			return aero.MapReturnType.KEY
+		case pb.CdtMapReturnType_CdtMapReturnTypeValue:
+			return aero.MapReturnType.VALUE
+		case pb.CdtMapReturnType_CdtMapReturnTypeKeyValue:
+			return aero.MapReturnType.KEY_VALUE
+		case pb.CdtMapReturnType_CdtMapReturnTypeExists:
+			return aero.MapReturnType.EXISTS
+		case pb.CdtMapReturnType_CdtMapReturnTypeUnorderedMap:
+			return aero.MapReturnType.UNORDERED_MAP
+		case pb.CdtMapReturnType_CdtMapReturnTypeOrderedMap:
+			return aero.MapReturnType.ORDERED_MAP
+		case pb.CdtMapReturnType_CdtMapReturnTypeInverted:
+			return aero.MapReturnType.INVERTED
+		}
+	}
+
+	return aero.MapReturnType.NONE
+}
+
+func toCdtMapOp(in *pb.CdtMapOperation) *aero.Operation {
+	if in != nil {
+		switch in.Op {
+		case pb.CdtMapCommandOp_CdtMapCommandOpCreate:
+			mapOrderType := toMapOrderType(in.Args[0].GetI())
+			return aero.MapCreateOp(in.BinName, mapOrderType, toCDTContexts(in.Ctx))
+		case pb.CdtMapCommandOp_CdtMapCommandOpSetPolicy:
+			return aero.MapSetPolicyOp(toCdtMapPolicy(in.Policy), in.BinName, toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpPutItems:
+			// implement ordered maps
+			m := map[interface{}]interface{}(toValue(in.Args[0]).(aero.MapValue))
+			return aero.MapPutItemsOp(toCdtMapPolicy(in.Policy), in.BinName, m, toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpIncrement:
+			key := toValue(in.Args[0])
+			incr := toValue(in.Args[1])
+			return aero.MapIncrementOp(toCdtMapPolicy(in.Policy), in.BinName, key, incr, toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpDecrement:
+			key := toValue(in.Args[0])
+			decr := toValue(in.Args[1])
+			return aero.MapDecrementOp(toCdtMapPolicy(in.Policy), in.BinName, key, decr, toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpClear:
+			return aero.MapClearOp(in.BinName, toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByKeyList:
+			keys := toListOfValueIfcs(in.Args[0])
+			if len(keys) == 1 {
+				return aero.MapRemoveByKeyOp(in.BinName, keys[0], toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+			}
+			return aero.MapRemoveByKeyListOp(in.BinName, keys, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByKeyRange:
+			begin := toValue(in.Args[0])
+			end := toValue(in.Args[1])
+			return aero.MapRemoveByKeyRangeOp(in.BinName, begin, end, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByValueList:
+			values := toListOfValueIfcs(in.Args[0])
+			if len(values) == 1 {
+				return aero.MapRemoveByValueOp(in.BinName, values[0], toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+			}
+			return aero.MapRemoveByValueListOp(in.BinName, values, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByValueRange:
+			begin := toValue(in.Args[0])
+			end := toValue(in.Args[1])
+			return aero.MapRemoveByValueRangeOp(in.BinName, begin, end, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByValueRelativeRankRange:
+			value := toValue(in.Args[0])
+			rank := int(in.Args[1].GetI())
+			return aero.MapRemoveByValueRelativeRankRangeOp(in.BinName, value, rank, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByValueRelativeRankRangeCount:
+			value := toValue(in.Args[0])
+			rank := int(in.Args[1].GetI())
+			count := int(in.Args[2].GetI())
+			return aero.MapRemoveByValueRelativeRankRangeCountOp(in.BinName, value, rank, count, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByIndex:
+			index := int(in.Args[0].GetI())
+			return aero.MapRemoveByIndexOp(in.BinName, index, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByIndexRange:
+			index := int(in.Args[0].GetI())
+			return aero.MapRemoveByIndexRangeOp(in.BinName, index, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByIndexRangeCount:
+			index := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.MapRemoveByIndexRangeCountOp(in.BinName, index, count, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByRank:
+			rank := int(in.Args[0].GetI())
+			return aero.MapRemoveByRankOp(in.BinName, rank, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByRankRange:
+			rank := int(in.Args[0].GetI())
+			return aero.MapRemoveByRankRangeOp(in.BinName, rank, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByRankRangeCount:
+			rank := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.MapRemoveByRankRangeCountOp(in.BinName, rank, count, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByKeyRelativeIndexRange:
+			key := toValue(in.Args[0])
+			index := int(in.Args[1].GetI())
+			return aero.MapRemoveByKeyRelativeIndexRangeOp(in.BinName, key, index, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpRemoveByKeyRelativeIndexRangeCount:
+			key := toValue(in.Args[0])
+			index := int(in.Args[1].GetI())
+			count := int(in.Args[2].GetI())
+			return aero.MapRemoveByKeyRelativeIndexRangeCountOp(in.BinName, key, index, count, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpSize:
+			return aero.MapSizeOp(in.BinName, toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByKeyList:
+			keys := toListOfValueIfcs(in.Args[0])
+			if len(keys) == 1 {
+				return aero.MapGetByKeyOp(in.BinName, keys[0], toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+			}
+			return aero.MapGetByKeyListOp(in.BinName, keys, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByKeyRange:
+			begin := toValue(in.Args[0])
+			end := toValue(in.Args[1])
+			return aero.MapGetByKeyRangeOp(in.BinName, begin, end, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByKeyRelativeIndexRange:
+			key := toValue(in.Args[0])
+			index := int(in.Args[1].GetI())
+			return aero.MapGetByKeyRelativeIndexRangeOp(in.BinName, key, index, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByKeyRelativeIndexRangeCount:
+			key := toValue(in.Args[0])
+			index := int(in.Args[1].GetI())
+			count := int(in.Args[2].GetI())
+			return aero.MapGetByKeyRelativeIndexRangeCountOp(in.BinName, key, index, count, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByValueList:
+			values := toListOfValueIfcs(in.Args[0])
+			if len(values) == 1 {
+				return aero.MapGetByValueOp(in.BinName, values[0], toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+			}
+			return aero.MapGetByValueListOp(in.BinName, values, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByValueRange:
+			begin := toValue(in.Args[0])
+			end := toValue(in.Args[1])
+			return aero.MapGetByValueRangeOp(in.BinName, begin, end, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByValueRelativeRankRange:
+			value := toValue(in.Args[0])
+			rank := int(in.Args[1].GetI())
+			return aero.MapGetByValueRelativeRankRangeOp(in.BinName, value, rank, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByValueRelativeRankRangeCount:
+			value := toValue(in.Args[0])
+			rank := int(in.Args[1].GetI())
+			count := int(in.Args[2].GetI())
+			return aero.MapGetByValueRelativeRankRangeCountOp(in.BinName, value, rank, count, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByIndex:
+			index := int(in.Args[0].GetI())
+			return aero.MapGetByIndexOp(in.BinName, index, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByIndexRange:
+			index := int(in.Args[0].GetI())
+			return aero.MapGetByIndexRangeOp(in.BinName, index, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByIndexRangeCount:
+			index := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.MapGetByIndexRangeCountOp(in.BinName, index, count, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByRank:
+			rank := int(in.Args[0].GetI())
+			return aero.MapGetByRankOp(in.BinName, rank, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByRankRange:
+			rank := int(in.Args[0].GetI())
+			return aero.MapGetByRankRangeOp(in.BinName, rank, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtMapCommandOp_CdtMapCommandOpGetByRankRangeCount:
+			rank := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.MapGetByRankRangeCountOp(in.BinName, rank, count, toCdtMapReturnType(in.ReturnType), toCDTContexts(in.Ctx)...)
+		}
+	}
+
+	return nil
+}
+
+func toCdtListPolicy(in *pb.CdtListPolicy) *aero.ListPolicy {
+	if in != nil {
+		return aero.NewListPolicy(aero.ListOrderType(in.GetOrder()), int(in.GetFlags()))
+	}
+
+	return aero.DefaultListPolicy()
+}
+
+func toCdtListOp(in *pb.CdtListOperation) *aero.Operation {
+	if in != nil {
+		switch in.Op {
+		case pb.CdtListCommandOp_CdtListCommandOpCreate:
+			listOrder := aero.ListOrderType(in.Args[0].GetI())
+			pad := in.Args[1].GetB()
+			return aero.ListCreateOp(in.BinName, listOrder, pad, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpSetOrder:
+			listOrder := aero.ListOrderType(in.Args[0].GetI())
+			return aero.ListSetOrderOp(in.BinName, listOrder, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpAppend:
+			values := toListOfValueIfcs(in.Args[0])
+			return aero.ListAppendWithPolicyContextOp(toCdtListPolicy(in.Policy), in.BinName, toCDTContexts(in.Ctx), values...)
+		case pb.CdtListCommandOp_CdtListCommandOpInsert:
+			index := int(in.Args[0].GetI())
+			values := toListOfValueIfcs(in.Args[1])
+			return aero.ListInsertWithPolicyContextOp(toCdtListPolicy(in.Policy), in.BinName, index, toCDTContexts(in.Ctx), values...)
+		case pb.CdtListCommandOp_CdtListCommandOpPop:
+			index := int(in.Args[0].GetI())
+			return aero.ListPopOp(in.BinName, index, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpPopRange:
+			index := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.ListPopRangeOp(in.BinName, index, count, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpPopRangeFrom:
+			index := int(in.Args[0].GetI())
+			return aero.ListPopRangeFromOp(in.BinName, index, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpSet:
+			index := int(in.Args[0].GetI())
+			value := toValue(in.Args[1])
+			return aero.ListSetWithPolicyOp(toCdtListPolicy(in.Policy), in.BinName, index, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpTrim:
+			index := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.ListTrimOp(in.BinName, index, count, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpClear:
+			return aero.ListClearOp(in.BinName, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpIncrement:
+			index := int(in.Args[0].GetI())
+			value := toValue(in.Args[1])
+			return aero.ListIncrementWithPolicyOp(toCdtListPolicy(in.Policy), in.BinName, index, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpSize:
+			return aero.ListSizeOp(in.BinName, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpSort:
+			sortFlags := aero.ListSortFlags(in.Args[0].GetI())
+			return aero.ListSortOp(in.BinName, sortFlags, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByValueList:
+			values := toListOfValueIfcs(in.Args[0])
+			if len(values) == 1 {
+				return aero.ListGetByValueOp(in.BinName, values[0], aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+			}
+			return aero.ListGetByValueListOp(in.BinName, values, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByValueRange:
+			begin := toValue(in.Args[0])
+			end := toValue(in.Args[1])
+			return aero.ListGetByValueRangeOp(in.BinName, begin, end, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByIndex:
+			index := int(in.Args[0].GetI())
+			return aero.ListGetByIndexOp(in.BinName, index, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByIndexRange:
+			index := int(in.Args[0].GetI())
+			return aero.ListGetByIndexRangeOp(in.BinName, index, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByIndexRangeCount:
+			index := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.ListGetByIndexRangeCountOp(in.BinName, index, count, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByRank:
+			rank := int(in.Args[0].GetI())
+			return aero.ListGetByRankOp(in.BinName, rank, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByRankRange:
+			rank := int(in.Args[0].GetI())
+			return aero.ListGetByRankRangeOp(in.BinName, rank, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByRankRangeCount:
+			rank := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.ListGetByRankRangeCountOp(in.BinName, rank, count, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByValueRelativeRankRange:
+			value := toValue(in.Args[0])
+			rank := int(in.Args[1].GetI())
+			return aero.ListGetByValueRelativeRankRangeOp(in.BinName, value, rank, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpGetByValueRelativeRankRangeCount:
+			value := toValue(in.Args[0])
+			rank := int(in.Args[1].GetI())
+			count := int(in.Args[2].GetI())
+			return aero.ListGetByValueRelativeRankRangeCountOp(in.BinName, value, rank, count, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByValueList:
+			values := toListOfValueIfcs(in.Args[0])
+			if len(values) == 1 {
+				return aero.ListRemoveByValueOp(in.BinName, values[0], aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+			}
+			return aero.ListRemoveByValueListOp(in.BinName, values, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByValueRange:
+			begin := toValue(in.Args[0])
+			end := toValue(in.Args[1])
+			return aero.ListRemoveByValueRangeOp(in.BinName, aero.ListReturnType(*in.ReturnType), begin, end, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByValueRelativeRankRange:
+			value := toValue(in.Args[0])
+			rank := int(in.Args[1].GetI())
+			return aero.ListRemoveByValueRelativeRankRangeOp(in.BinName, aero.ListReturnType(*in.ReturnType), value, rank, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByValueRelativeRankRangeCount:
+			value := toValue(in.Args[0])
+			rank := int(in.Args[1].GetI())
+			count := int(in.Args[2].GetI())
+			return aero.ListRemoveByValueRelativeRankRangeCountOp(in.BinName, aero.ListReturnType(*in.ReturnType), value, rank, count, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveRange:
+			index := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.ListRemoveRangeOp(in.BinName, index, count, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveRangeFrom:
+			index := int(in.Args[0].GetI())
+			return aero.ListRemoveRangeFromOp(in.BinName, index, toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByIndex:
+			index := int(in.Args[0].GetI())
+			return aero.ListRemoveByIndexOp(in.BinName, index, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByIndexRange:
+			index := int(in.Args[0].GetI())
+			return aero.ListRemoveByIndexRangeOp(in.BinName, index, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByIndexRangeCount:
+			index := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.ListRemoveByIndexRangeCountOp(in.BinName, index, count, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByRank:
+			rank := int(in.Args[0].GetI())
+			return aero.ListRemoveByRankOp(in.BinName, rank, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByRankRange:
+			rank := int(in.Args[0].GetI())
+			return aero.ListRemoveByRankRangeOp(in.BinName, rank, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		case pb.CdtListCommandOp_CdtListCommandOpRemoveByRankRangeCount:
+			rank := int(in.Args[0].GetI())
+			count := int(in.Args[1].GetI())
+			return aero.ListRemoveByRankRangeCountOp(in.BinName, rank, count, aero.ListReturnType(*in.ReturnType), toCDTContexts(in.Ctx)...)
+		}
+	}
+
+	return nil
+}
+
+func toHLLPolicy(in *pb.CdtHLLPolicy) *aero.HLLPolicy {
+	if in != nil {
+		return aero.NewHLLPolicy(int(in.Flags))
+	}
+
+	return aero.DefaultHLLPolicy()
+}
+
+func toListOfValueIfcs(in *pb.Value) []interface{} {
+	l := in.GetL().L
+	res := make([]interface{}, len(l))
+	for i := range l {
+		res[i] = toValue(l[i])
+	}
+	return res
+}
+
+func toListOfValues(in *pb.Value) []aero.Value {
+	l := in.GetL().L
+	res := make([]aero.Value, len(l))
+	for i := range l {
+		res[i] = toValue(l[i])
+	}
+	return res
+}
+
+func toListOfHLLValues(in *pb.Value) []aero.HLLValue {
+	l := in.GetL().L
+	res := make([]aero.HLLValue, len(l))
+	for i := range l {
+		res[i] = toValue(l[i]).(aero.HLLValue)
+	}
+	return res
+}
+
+func toCdtHLLOp(in *pb.CdtHLLOperation) *aero.Operation {
+	if in != nil {
+		switch in.Op {
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpInit:
+			indexBitCount := int(in.Args[0].GetI())
+			minHashBitCount := int(in.Args[1].GetI())
+			return aero.HLLInitOp(toHLLPolicy(in.Policy), in.BinName, indexBitCount, minHashBitCount)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpAdd:
+			list := toListOfValues(in.Args[0])
+			indexBitCount := int(in.Args[1].GetI())
+			minHashBitCount := int(in.Args[2].GetI())
+			return aero.HLLAddOp(toHLLPolicy(in.Policy), in.BinName, list, indexBitCount, minHashBitCount)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpSetUnion:
+			list := toListOfHLLValues(in.Args[0])
+			return aero.HLLSetUnionOp(toHLLPolicy(in.Policy), in.BinName, list)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpRefreshCount:
+			return aero.HLLRefreshCountOp(in.BinName)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpFold:
+			indexBitCount := int(in.Args[0].GetI())
+			return aero.HLLFoldOp(in.BinName, indexBitCount)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpGetCount:
+			return aero.HLLGetCountOp(in.BinName)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpGetUnion:
+			list := toListOfHLLValues(in.Args[0])
+			return aero.HLLGetUnionOp(in.BinName, list)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpGetUnionCount:
+			list := toListOfHLLValues(in.Args[0])
+			return aero.HLLGetUnionCountOp(in.BinName, list)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpGetIntersectCount:
+			list := toListOfHLLValues(in.Args[0])
+			return aero.HLLGetIntersectCountOp(in.BinName, list)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpGetSimilarity:
+			list := toListOfHLLValues(in.Args[0])
+			return aero.HLLGetSimilarityOp(in.BinName, list)
+		case pb.CdtHLLCommandOp_CdtHLLCommandOpDescribe:
+			return aero.HLLDescribeOp(in.BinName)
+		}
+	}
+
+	return nil
+}
+
+func toBitwisePolicy(in *pb.CdtBitwisePolicy) *aero.BitPolicy {
+	if in != nil {
+		return aero.NewBitPolicy(int(in.Flags))
+	}
+
+	return aero.DefaultBitPolicy()
+}
+
+func toCdtBitwiseOp(in *pb.CdtBitwiseOperation) *aero.Operation {
+	if in != nil {
+		switch in.Op {
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpResize:
+			byteSize := int(in.Args[0].GetI())
+			resizeFlags := aero.BitResizeFlags(in.Args[1].GetI())
+			return aero.BitResizeOp(toBitwisePolicy(in.Policy), in.BinName, byteSize, resizeFlags, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpInsert:
+			byteOffset := int(in.Args[0].GetI())
+			value := in.Args[1].GetBlob()
+			return aero.BitInsertOp(toBitwisePolicy(in.Policy), in.BinName, byteOffset, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpRemove:
+			byteOffset := int(in.Args[0].GetI())
+			byteSize := int(in.Args[1].GetI())
+			return aero.BitRemoveOp(toBitwisePolicy(in.Policy), in.BinName, byteOffset, byteSize, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpSet:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			value := in.Args[2].GetBlob()
+			return aero.BitSetOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpOr:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			value := in.Args[2].GetBlob()
+			return aero.BitOrOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpXor:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			value := in.Args[2].GetBlob()
+			return aero.BitXorOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpAnd:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			value := in.Args[2].GetBlob()
+			return aero.BitAndOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpNot:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			return aero.BitNotOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpLShift:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			shift := int(in.Args[2].GetI())
+			return aero.BitLShiftOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, shift, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpRShift:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			shift := int(in.Args[2].GetI())
+			return aero.BitRShiftOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, shift, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpAdd:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			value := in.Args[2].GetI()
+			signed := in.Args[3].GetB()
+			action := aero.BitOverflowAction(in.Args[3].GetI())
+			return aero.BitAddOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, value, signed, action, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpSubtract:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			value := in.Args[2].GetI()
+			signed := in.Args[3].GetB()
+			action := aero.BitOverflowAction(in.Args[3].GetI())
+			return aero.BitSubtractOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, value, signed, action, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpSetInt:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			value := in.Args[2].GetI()
+			return aero.BitSetIntOp(toBitwisePolicy(in.Policy), in.BinName, bitOffset, bitSize, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpGet:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			return aero.BitGetOp(in.BinName, bitOffset, bitSize, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpCount:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			return aero.BitCountOp(in.BinName, bitOffset, bitSize, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpLScan:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			value := in.Args[2].GetB()
+			return aero.BitLScanOp(in.BinName, bitOffset, bitSize, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpRScan:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			value := in.Args[2].GetB()
+			return aero.BitRScanOp(in.BinName, bitOffset, bitSize, value, toCDTContexts(in.Ctx)...)
+		case pb.CdtBitwiseCommandOp_CdtBitwiseCommandOpGetInt:
+			bitOffset := int(in.Args[0].GetI())
+			bitSize := int(in.Args[1].GetI())
+			signed := in.Args[2].GetB()
+			return aero.BitGetIntOp(in.BinName, bitOffset, bitSize, signed, toCDTContexts(in.Ctx)...)
+		}
+	}
+
+	return nil
+}
+
+func toOp(in *pb.Operation) *aero.Operation {
+	switch in := in.Op.(type) {
+	case *pb.Operation_Std:
+		return toStdOp(in.Std)
+	case *pb.Operation_Map:
+		return toCdtMapOp(in.Map)
+	case *pb.Operation_List:
+		return toCdtListOp(in.List)
+	case *pb.Operation_Hll:
+		return toCdtHLLOp(in.Hll)
+	case *pb.Operation_Bitwise:
+		return toCdtBitwiseOp(in.Bitwise)
+	}
 	panic(UNREACHABLE)
 }
 

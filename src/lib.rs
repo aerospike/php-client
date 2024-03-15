@@ -1001,19 +1001,19 @@ impl Expression {
 
     /// Create Map bin PHPValue
     /// Value must be a map
-    pub fn map_val(val: PHPValue) -> Self {
-        match val {
-            PHPValue::HashMap(_) => (),
-            _ => {
-                let error = AerospikeException::new("Invalid type");
-                throw_object(error.into_zval(true).unwrap()).unwrap();
-                return Expression {
-                    _as: proto::Expression::default(),
-                };
-            }
-        };
+    pub fn map_val(val: PHPValue) -> Option<Self> {
+        if !assert_map(&val) {
+            return None;
+        }
 
-        Expression::new(None, Some(val.clone()), None, None, None, vec![])
+        Some(Expression::new(
+            None,
+            Some(val.clone()),
+            None,
+            None,
+            None,
+            vec![],
+        ))
     }
 
     /// Create geospatial json string value.
@@ -5203,7 +5203,7 @@ impl Default for BatchUdfPolicy {
 
 #[php_class(name = "Aerospike\\Operation")]
 pub struct Operation {
-    _as: proto::Operation,
+    _as: proto::operation::Op,
 }
 
 #[php_impl]
@@ -5212,89 +5212,89 @@ impl Operation {
     // read bin database operation.
     pub fn get(bin_name: Option<String>) -> Self {
         Operation {
-            _as: proto::Operation {
-                op_type: proto::OperationType::Read.into(),
+            _as: proto::operation::Op::Std(proto::StdOperation {
+                op_type: proto::OperationType::Get.into(),
                 bin_name: bin_name,
-                ..proto::Operation::default()
-            },
+                ..proto::StdOperation::default()
+            }),
         }
     }
 
     // read record header database operation.
     pub fn get_header() -> Self {
         Operation {
-            _as: proto::Operation {
-                op_type: proto::OperationType::ReadHeader.into(),
-                ..proto::Operation::default()
-            },
+            _as: proto::operation::Op::Std(proto::StdOperation {
+                op_type: proto::OperationType::GetHeader.into(),
+                ..proto::StdOperation::default()
+            }),
         }
     }
 
     // set database operation.
     pub fn put(bin: &Bin) -> Self {
         Operation {
-            _as: proto::Operation {
-                op_type: proto::OperationType::Write.into(),
+            _as: proto::operation::Op::Std(proto::StdOperation {
+                op_type: proto::OperationType::Put.into(),
                 bin_name: Some(bin._as.name.clone()),
                 bin_value: bin._as.value.clone(),
-                ..proto::Operation::default()
-            },
+                ..proto::StdOperation::default()
+            }),
         }
     }
 
     // string append database operation.
     pub fn append(bin: &Bin) -> Self {
         Operation {
-            _as: proto::Operation {
+            _as: proto::operation::Op::Std(proto::StdOperation {
                 op_type: proto::OperationType::Append.into(),
                 bin_name: Some(bin._as.name.clone()),
                 bin_value: bin._as.value.clone(),
-                ..proto::Operation::default()
-            },
+                ..proto::StdOperation::default()
+            }),
         }
     }
 
     // string prepend database operation.
     pub fn prepend(bin: &Bin) -> Self {
         Operation {
-            _as: proto::Operation {
+            _as: proto::operation::Op::Std(proto::StdOperation {
                 op_type: proto::OperationType::Prepend.into(),
                 bin_name: Some(bin._as.name.clone()),
                 bin_value: bin._as.value.clone(),
-                ..proto::Operation::default()
-            },
+                ..proto::StdOperation::default()
+            }),
         }
     }
 
     // integer add database operation.
     pub fn add(bin: &Bin) -> Self {
         Operation {
-            _as: proto::Operation {
+            _as: proto::operation::Op::Std(proto::StdOperation {
                 op_type: proto::OperationType::Add.into(),
                 bin_name: Some(bin._as.name.clone()),
                 bin_value: bin._as.value.clone(),
-                ..proto::Operation::default()
-            },
+                ..proto::StdOperation::default()
+            }),
         }
     }
 
     // touch record database operation.
     pub fn touch() -> Self {
         Operation {
-            _as: proto::Operation {
+            _as: proto::operation::Op::Std(proto::StdOperation {
                 op_type: proto::OperationType::Touch.into(),
-                ..proto::Operation::default()
-            },
+                ..proto::StdOperation::default()
+            }),
         }
     }
 
     // delete record database operation.
     pub fn delete() -> Self {
         Operation {
-            _as: proto::Operation {
+            _as: proto::operation::Op::Std(proto::StdOperation {
                 op_type: proto::OperationType::Delete.into(),
-                ..proto::Operation::default()
-            },
+                ..proto::StdOperation::default()
+            }),
         }
     }
 }
@@ -5375,7 +5375,12 @@ impl BatchRead {
                 policy: Some(policy._as.clone()),
                 bin_names: vec![],
                 read_all_bins: false,
-                ops: ops.into_iter().map(|v| v._as.clone()).collect(),
+                ops: ops
+                    .into_iter()
+                    .map(|v| proto::Operation {
+                        op: Some(v._as.clone()),
+                    })
+                    .collect(),
             },
         }
     }
@@ -5421,7 +5426,12 @@ impl BatchWrite {
                     error: None,
                 }),
                 policy: Some(policy._as.clone()),
-                ops: ops.into_iter().map(|v| v._as.clone()).collect(),
+                ops: ops
+                    .into_iter()
+                    .map(|v| proto::Operation {
+                        op: Some(v._as.clone()),
+                    })
+                    .collect(),
             },
         }
     }
@@ -5684,6 +5694,7 @@ impl FromZval<'_> for Role {
         Some(Role { _as: f._as.clone() })
     }
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  Privilege
@@ -5783,6 +5794,3064 @@ impl FromZval<'_> for Privilege {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+//  CdtListReturnType
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtListReturnType")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtListReturnType {
+    // _as: proto::CdtListReturnType,
+    _as: i32,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtListReturnType {
+    pub fn none() -> Self {
+        Self {
+            _as: proto::CdtListReturnType::None.into(),
+        }
+    }
+
+    pub fn index() -> Self {
+        Self {
+            _as: proto::CdtListReturnType::Index.into(),
+        }
+    }
+
+    pub fn reverse_index() -> Self {
+        Self {
+            _as: proto::CdtListReturnType::ReverseIndex.into(),
+        }
+    }
+
+    pub fn rank() -> Self {
+        Self {
+            _as: proto::CdtListReturnType::Rank.into(),
+        }
+    }
+
+    pub fn reverse_rank() -> Self {
+        Self {
+            _as: proto::CdtListReturnType::ReverseRank.into(),
+        }
+    }
+
+    pub fn count() -> Self {
+        Self {
+            _as: proto::CdtListReturnType::Count.into(),
+        }
+    }
+
+    pub fn value() -> Self {
+        Self {
+            _as: proto::CdtListReturnType::Value.into(),
+        }
+    }
+
+    pub fn exists() -> Self {
+        Self {
+            _as: proto::CdtListReturnType::Exists.into(),
+        }
+    }
+
+    pub fn inverted(&self) -> Self {
+        Self {
+            _as: self._as | 0x10000,
+        }
+    }
+}
+
+impl From<&proto::CdtListReturnType> for CdtListReturnType {
+    fn from(input: &proto::CdtListReturnType) -> Self {
+        CdtListReturnType {
+            _as: (*input).into(),
+        }
+    }
+}
+
+impl FromZval<'_> for CdtListReturnType {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtListReturnType = zval.extract()?;
+
+        Some(CdtListReturnType { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtListWriteFlags
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtListWriteFlags")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtListWriteFlags {
+    _as: proto::CdtListWriteFlags,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtListWriteFlags {
+    pub fn default() -> Self {
+        Self {
+            _as: proto::CdtListWriteFlags::Default,
+        }
+    }
+
+    pub fn add_unique() -> Self {
+        Self {
+            _as: proto::CdtListWriteFlags::AddUnique,
+        }
+    }
+
+    pub fn insert_bounded() -> Self {
+        Self {
+            _as: proto::CdtListWriteFlags::InsertBounded,
+        }
+    }
+
+    pub fn no_fail() -> Self {
+        Self {
+            _as: proto::CdtListWriteFlags::NoFail,
+        }
+    }
+
+    pub fn partial() -> Self {
+        Self {
+            _as: proto::CdtListWriteFlags::Partial,
+        }
+    }
+}
+
+impl From<&proto::CdtListWriteFlags> for CdtListWriteFlags {
+    fn from(input: &proto::CdtListWriteFlags) -> Self {
+        CdtListWriteFlags { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtListWriteFlags {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtListWriteFlags = zval.extract()?;
+
+        Some(CdtListWriteFlags { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtListSortFlags
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+// TODO: Check the PHP enum system and see if the current system work for us
+// TODO: Add the additional expressions (HLL, BIT, etc.)
+// TODO: Add method comments
+
+#[php_class(name = "Aerospike\\CdtListSortFlags")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtListSortFlags {
+    _as: proto::CdtListSortFlags,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtListSortFlags {
+    pub fn default() -> Self {
+        Self {
+            _as: proto::CdtListSortFlags::Default,
+        }
+    }
+
+    pub fn descending() -> Self {
+        Self {
+            _as: proto::CdtListSortFlags::Descending,
+        }
+    }
+
+    pub fn drop_duplicates() -> Self {
+        Self {
+            _as: proto::CdtListSortFlags::DropDuplicates,
+        }
+    }
+}
+
+impl From<&proto::CdtListSortFlags> for CdtListSortFlags {
+    fn from(input: &proto::CdtListSortFlags) -> Self {
+        CdtListSortFlags { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtListSortFlags {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtListSortFlags = zval.extract()?;
+
+        Some(CdtListSortFlags { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtListPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtListPolicy")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtListPolicy {
+    _as: proto::CdtListPolicy,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtListPolicy {
+    pub fn __construct(order: ListOrderType, flags: Option<Vec<CdtListWriteFlags>>) -> Self {
+        let flags: i32 = flags
+            .map(|flags| {
+                flags.iter().fold(0 as i32, |acc, f| {
+                    let f: i32 = f._as.into();
+                    acc | f
+                })
+            })
+            .unwrap_or(0);
+
+        CdtListPolicy {
+            _as: proto::CdtListPolicy {
+                order: order._as.into(),
+                flags: flags,
+            },
+        }
+    }
+}
+
+impl From<&proto::CdtListPolicy> for CdtListPolicy {
+    fn from(input: &proto::CdtListPolicy) -> Self {
+        CdtListPolicy { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtListPolicy {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtListPolicy = zval.extract()?;
+
+        Some(CdtListPolicy { _as: f._as.clone() })
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtListOperation
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\List")]
+pub struct CdtListOperation {
+    _as: proto::CdtListOperation,
+}
+
+impl FromZval<'_> for CdtListOperation {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtListOperation = zval.extract()?;
+
+        Some(CdtListOperation { _as: f._as.clone() })
+    }
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtListOperation {
+    pub fn create(
+        bin_name: String,
+        order: ListOrderType,
+        pad: bool,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        let order: i32 = order._as.into();
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Create.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(order as i64).into(),
+                    PHPValue::Bool(pad).into(),
+                ],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn set_order(
+        bin_name: String,
+        order: ListOrderType,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        let order: i32 = order._as.into();
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::SetOrder.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(order as i64).into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn append(
+        policy: &CdtListPolicy,
+        bin_name: String,
+        values: Vec<PHPValue>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Append.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::List(values.iter().map(|v| (*v).clone().into()).collect()).into(),
+                ],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn insert(
+        policy: &CdtListPolicy,
+        bin_name: String,
+        index: i64,
+        values: Vec<PHPValue>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Insert.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(index).into(),
+                    PHPValue::List(values.iter().map(|v| (*v).clone().into()).collect()).into(),
+                ],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn pop(bin_name: String, index: i64, ctx: Option<Vec<&CDTContext>>) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Pop.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn pop_range(
+        bin_name: String,
+        index: i64,
+        count: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::PopRange.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn pop_range_from(
+        bin_name: String,
+        index: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::PopRangeFrom.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_values(
+        bin_name: String,
+        values: Vec<PHPValue>,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByValueList.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::List(values.iter().map(|v| (*v).clone().into()).collect()).into(),
+                ],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_value_range(
+        bin_name: String,
+        begin: PHPValue,
+        end: Option<PHPValue>,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        let args = if end.is_some() {
+            vec![begin.into(), end.unwrap().into()]
+        } else {
+            vec![begin.into()]
+        };
+
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByValueList.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: args,
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_value_relative_rank_range(
+        bin_name: String,
+        value: PHPValue,
+        rank: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByValueRelativeRankRange.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![value.into(), PHPValue::Int(rank).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_value_relative_rank_range_count(
+        bin_name: String,
+        value: PHPValue,
+        rank: i64,
+        count: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByValueRelativeRankRangeCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![
+                    value.into(),
+                    PHPValue::Int(rank).into(),
+                    PHPValue::Int(count).into(),
+                ],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_range(
+        bin_name: String,
+        index: i64,
+        count: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveRange.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_range_from(
+        bin_name: String,
+        index: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        // TODO: compare return_type signatures with the java client
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveRangeFrom.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn set(
+        bin_name: String,
+        index: i64,
+        value: PHPValue,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Set.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into(), value.into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn trim(
+        bin_name: String,
+        index: i64,
+        count: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Trim.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn clear(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Clear.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn increment(
+        bin_name: String,
+        index: i64,
+        value: PHPValue,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Increment.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into(), value.into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn size(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Size.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn sort(
+        bin_name: String,
+        sort_flags: &CdtListSortFlags,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        let sort_flags: i32 = sort_flags._as.into();
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::Sort.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(sort_flags as i64).into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_index(
+        bin_name: String,
+        index: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByIndex.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_index_range(
+        bin_name: String,
+        index: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByIndexRange.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_index_range_count(
+        bin_name: String,
+        index: i64,
+        count: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByIndexRangeCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_rank(
+        bin_name: String,
+        rank: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByRank.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_rank_range(
+        bin_name: String,
+        rank: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByRankRange.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_rank_range_count(
+        bin_name: String,
+        rank: i64,
+        count: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::RemoveByRankRangeCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into(), PHPValue::Int(count).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_values(
+        bin_name: String,
+        values: Vec<PHPValue>,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByValueList.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: values.iter().map(|v| v.clone().into()).collect(),
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_value_range(
+        bin_name: String,
+        begin: PHPValue,
+        end: Option<PHPValue>,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        let args = if end.is_some() {
+            vec![begin.into(), end.unwrap().into()]
+        } else {
+            vec![begin.into()]
+        };
+
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByValueRange.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: args,
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_index(
+        bin_name: String,
+        index: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByIndex.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_index_range(
+        bin_name: String,
+        index: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByIndexRange.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_index_range_count(
+        bin_name: String,
+        index: i64,
+        count: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByIndexRangeCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_rank(
+        bin_name: String,
+        rank: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByRank.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_rank_range(
+        bin_name: String,
+        rank: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByRankRange.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_rank_range_count(
+        bin_name: String,
+        rank: i64,
+        count: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByRankRangeCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into(), PHPValue::Int(count).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_value_relative_rank_range(
+        bin_name: String,
+        value: PHPValue,
+        rank: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByValueRelativeRankRange.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![value.into(), PHPValue::Int(rank).into()],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_value_relative_rank_range_count(
+        bin_name: String,
+        value: PHPValue,
+        rank: i64,
+        count: i64,
+        return_type: Option<CdtListReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::List(proto::CdtListOperation {
+                op: proto::CdtListCommandOp::GetByValueRelativeRankRangeCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![
+                    value.into(),
+                    PHPValue::Int(rank).into(),
+                    PHPValue::Int(count).into(),
+                ],
+                return_type: return_type.map(|rt| rt._as.into()),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtMapReturnType
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtMapReturnType")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtMapReturnType {
+    // _as: proto::CdtMapReturnType,
+    _as: i32,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtMapReturnType {
+    pub fn none() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::None.into(),
+        }
+    }
+
+    pub fn index() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::Index.into(),
+        }
+    }
+
+    pub fn reverse_index() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::ReverseIndex.into(),
+        }
+    }
+
+    pub fn rank() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::Rank.into(),
+        }
+    }
+
+    pub fn reverse_rank() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::ReverseRank.into(),
+        }
+    }
+
+    pub fn count() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::Count.into(),
+        }
+    }
+
+    pub fn key() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::Key.into(),
+        }
+    }
+
+    pub fn value() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::Value.into(),
+        }
+    }
+
+    pub fn key_value() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::KeyValue.into(),
+        }
+    }
+
+    pub fn exists() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::Exists.into(),
+        }
+    }
+
+    pub fn unordered_map() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::UnorderedMap.into(),
+        }
+    }
+
+    pub fn ordered_map() -> Self {
+        Self {
+            _as: proto::CdtMapReturnType::OrderedMap.into(),
+        }
+    }
+
+    pub fn inverted(&self) -> Self {
+        Self {
+            _as: self._as | 0x10000,
+        }
+    }
+}
+
+impl From<&proto::CdtMapReturnType> for CdtMapReturnType {
+    fn from(input: &proto::CdtMapReturnType) -> Self {
+        CdtMapReturnType {
+            _as: (*input).into(),
+        }
+    }
+}
+
+impl FromZval<'_> for CdtMapReturnType {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtMapReturnType = zval.extract()?;
+
+        Some(CdtMapReturnType { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtMapWriteMode
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtMapWriteMode")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtMapWriteMode {
+    _as: proto::CdtMapWriteMode,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtMapWriteMode {
+    pub fn update() -> Self {
+        Self {
+            _as: proto::CdtMapWriteMode::Update,
+        }
+    }
+
+    pub fn update_only() -> Self {
+        Self {
+            _as: proto::CdtMapWriteMode::UpdateOnly,
+        }
+    }
+
+    pub fn create_only() -> Self {
+        Self {
+            _as: proto::CdtMapWriteMode::CreateOnly,
+        }
+    }
+}
+
+impl From<&proto::CdtMapWriteMode> for CdtMapWriteMode {
+    fn from(input: &proto::CdtMapWriteMode) -> Self {
+        CdtMapWriteMode { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtMapWriteMode {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtMapWriteMode = zval.extract()?;
+
+        Some(CdtMapWriteMode { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtMapWriteFlags
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtMapWriteFlags")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtMapWriteFlags {
+    _as: proto::CdtMapWriteFlags,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtMapWriteFlags {
+    pub fn default() -> Self {
+        Self {
+            _as: proto::CdtMapWriteFlags::Default,
+        }
+    }
+
+    pub fn create_only() -> Self {
+        Self {
+            _as: proto::CdtMapWriteFlags::CreateOnly,
+        }
+    }
+
+    pub fn update_only() -> Self {
+        Self {
+            _as: proto::CdtMapWriteFlags::UpdateOnly,
+        }
+    }
+
+    pub fn no_fail() -> Self {
+        Self {
+            _as: proto::CdtMapWriteFlags::NoFail,
+        }
+    }
+
+    pub fn partial() -> Self {
+        Self {
+            _as: proto::CdtMapWriteFlags::Partial,
+        }
+    }
+}
+
+impl From<&proto::CdtMapWriteFlags> for CdtMapWriteFlags {
+    fn from(input: &proto::CdtMapWriteFlags) -> Self {
+        CdtMapWriteFlags { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtMapWriteFlags {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtMapWriteFlags = zval.extract()?;
+
+        Some(CdtMapWriteFlags { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtMapPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtMapPolicy")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtMapPolicy {
+    _as: proto::CdtMapPolicy,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtMapPolicy {
+    pub fn __construct(
+        order: &MapOrderType,
+        flags: Vec<&CdtMapWriteFlags>,
+        persisted_index: Option<bool>,
+    ) -> Self {
+        let flags: i32 = flags.into_iter().fold(0 as i32, |acc, f| {
+            let f: i32 = f._as.into();
+            acc | f
+        });
+
+        Self {
+            _as: proto::CdtMapPolicy {
+                map_order: order._as.into(),
+                flags: flags,
+                persisted_index: persisted_index.unwrap_or(false),
+            },
+        }
+    }
+}
+
+impl From<&proto::CdtMapPolicy> for CdtMapPolicy {
+    fn from(input: &proto::CdtMapPolicy) -> Self {
+        CdtMapPolicy { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtMapPolicy {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtMapPolicy = zval.extract()?;
+
+        Some(CdtMapPolicy { _as: f._as.clone() })
+    }
+}
+
+impl Default for CdtMapPolicy {
+    fn default() -> Self {
+        CdtMapPolicy {
+            _as: proto::CdtMapPolicy {
+                map_order: proto::MapOrderType::Unordered.into(),
+                flags: proto::CdtMapWriteFlags::Default.into(),
+                persisted_index: false,
+            },
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtMapOperation
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\Map")]
+pub struct CdtMapOperation {
+    _as: proto::CdtMapOperation,
+}
+
+impl FromZval<'_> for CdtMapOperation {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtMapOperation = zval.extract()?;
+
+        Some(CdtMapOperation { _as: f._as.clone() })
+    }
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtMapOperation {
+    pub fn create(
+        bin_name: String,
+        order: &MapOrderType,
+        with_index: Option<bool>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::Create.into(),
+                policy: Some(CdtMapPolicy::__construct(order, vec![], with_index)._as),
+                bin_name: bin_name,
+                args: vec![],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn set_policy(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::SetPolicy.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn size(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Self {
+        CdtMapOperation {
+            _as: proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::SetPolicy.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            },
+        }
+    }
+
+    pub fn put(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        map: PHPValue,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Option<Self> {
+        if !assert_map(&map) {
+            return None;
+        }
+
+        Some(CdtMapOperation {
+            _as: proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::PutItems.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![map.into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            },
+        })
+    }
+
+    pub fn increment(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        key: PHPValue,
+        incr: PHPValue,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::Increment.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![key.into(), incr.into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn decrement(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        key: PHPValue,
+        decr: PHPValue,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::Decrement.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![key.into(), decr.into()],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn clear(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Self {
+        CdtMapOperation {
+            _as: proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::Clear.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![],
+                return_type: None,
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            },
+        }
+    }
+
+    pub fn remove_by_keys(
+        bin_name: String,
+        keys: Vec<PHPValue>,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByKeyList.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: keys.iter().map(|k| k.clone().into()).collect(),
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_key_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        begin: PHPValue,
+        end: PHPValue,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByKeyRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![begin.into(), end.into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_values(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        values: Vec<PHPValue>,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByValueList.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: values.iter().map(|k| k.clone().into()).collect(),
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_value_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        begin: PHPValue,
+        end: PHPValue,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByValueRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![begin.into(), end.into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_value_relative_rank_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        value: PHPValue,
+        rank: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByValueRelativeRankRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![value.into(), PHPValue::Int(rank).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_value_relative_rank_range_count(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        value: PHPValue,
+        rank: i64,
+        count: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByValueRelativeRankRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    value.into(),
+                    PHPValue::Int(rank).into(),
+                    PHPValue::Int(count).into(),
+                ],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_index(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        index: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByIndex.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_index_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        index: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByIndexRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_index_range_count(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        index: i64,
+        count: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByIndexRangeCount.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_rank(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        rank: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByRank.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_rank_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        rank: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByRankRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_rank_range_count(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        rank: i64,
+        count: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByRankRangeCount.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into(), PHPValue::Int(count).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_key_relative_index_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        key: PHPValue,
+        index: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByKeyRelativeIndexRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![key.into(), PHPValue::Int(index).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove_by_key_relative_index_range_count(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        key: PHPValue,
+        index: i64,
+        count: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::RemoveByKeyRelativeIndexRangeCount.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    key.into(),
+                    PHPValue::Int(index).into(),
+                    PHPValue::Int(count).into(),
+                ],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_keys(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        keys: Vec<PHPValue>,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByKeyList.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: keys.iter().map(|key| key.clone().into()).collect(),
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_key_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        begin: PHPValue,
+        end: PHPValue,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByKeyRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![begin.into(), end.into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_key_relative_index_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        key: PHPValue,
+        index: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByKeyRelativeIndexRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![key.into(), PHPValue::Int(index).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_key_relative_index_range_count(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        key: PHPValue,
+        index: i64,
+        count: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByKeyRelativeIndexRangeCount.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    key.into(),
+                    PHPValue::Int(index).into(),
+                    PHPValue::Int(count).into(),
+                ],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_values(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        values: Vec<PHPValue>,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByValueList.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: values.iter().map(|v| v.clone().into()).collect(),
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_value_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        begin: PHPValue,
+        end: PHPValue,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByValueRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![begin.into(), end.into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_value_relative_rank_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        value: PHPValue,
+        rank: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByValueRelativeRankRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![value.into(), PHPValue::Int(rank).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_value_relative_rank_range_count(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        value: PHPValue,
+        rank: i64,
+        count: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByValueRelativeRankRangeCount.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    value.into(),
+                    PHPValue::Int(rank).into(),
+                    PHPValue::Int(count).into(),
+                ],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_index(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        index: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByIndex.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_index_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        begin: PHPValue,
+        end: PHPValue,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByIndexRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![begin.into(), end.into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_index_range_count(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        index: i64,
+        rank: i64,
+        count: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByIndexRangeCount.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(index).into(),
+                    PHPValue::Int(rank).into(),
+                    PHPValue::Int(count).into(),
+                ],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_rank(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        rank: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByRank.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(rank).into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_rank_range(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        begin: PHPValue,
+        end: PHPValue,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByRankRange.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![begin.into(), end.into()],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_by_rank_range_count(
+        policy: &CdtMapPolicy,
+        bin_name: String,
+        rank: i64,
+        range: i64,
+        count: i64,
+        return_type: Option<CdtMapReturnType>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
+                op: proto::CdtMapCommandOp::GetByRankRangeCount.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(rank).into(),
+                    PHPValue::Int(range).into(),
+                    PHPValue::Int(count).into(),
+                ],
+                return_type: return_type.map(|v| v._as),
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtHllWriteFlags
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtHllWriteFlags")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtHllWriteFlags {
+    _as: proto::CdtHllWriteFlags,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtHllWriteFlags {
+    pub fn default() -> Self {
+        Self {
+            _as: proto::CdtHllWriteFlags::Default,
+        }
+    }
+
+    pub fn create_only() -> Self {
+        Self {
+            _as: proto::CdtHllWriteFlags::CreateOnly,
+        }
+    }
+
+    pub fn update_only() -> Self {
+        Self {
+            _as: proto::CdtHllWriteFlags::UpdateOnly,
+        }
+    }
+
+    pub fn no_fail() -> Self {
+        Self {
+            _as: proto::CdtHllWriteFlags::NoFail,
+        }
+    }
+
+    pub fn allow_fold() -> Self {
+        Self {
+            _as: proto::CdtHllWriteFlags::AllowFold,
+        }
+    }
+}
+
+impl From<&proto::CdtHllWriteFlags> for CdtHllWriteFlags {
+    fn from(input: &proto::CdtHllWriteFlags) -> Self {
+        CdtHllWriteFlags { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtHllWriteFlags {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtHllWriteFlags = zval.extract()?;
+
+        Some(CdtHllWriteFlags { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtHllPolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtHllPolicy")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtHllPolicy {
+    _as: proto::CdtHllPolicy,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtHllPolicy {
+    pub fn __construct(flags: Option<CdtListWriteFlags>) -> Self {
+        let flags: i32 = flags.map(|f| f._as.into()).unwrap_or(0);
+
+        CdtHllPolicy {
+            _as: proto::CdtHllPolicy { flags: flags },
+        }
+    }
+}
+
+impl From<&proto::CdtHllPolicy> for CdtHllPolicy {
+    fn from(input: &proto::CdtHllPolicy) -> Self {
+        CdtHllPolicy { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtHllPolicy {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtHllPolicy = zval.extract()?;
+
+        Some(CdtHllPolicy { _as: f._as.clone() })
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtHllOperation
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\Map")]
+pub struct CdtHllOperation {
+    _as: proto::CdtHllOperation,
+}
+
+impl FromZval<'_> for CdtHllOperation {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtHllOperation = zval.extract()?;
+
+        Some(CdtHllOperation { _as: f._as.clone() })
+    }
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtHllOperation {
+    pub fn init(
+        policy: &CdtHllPolicy,
+        bin_name: String,
+        index_bit_count: i64,
+        min_hash_bit_count: i64,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::Init.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(index_bit_count).into(),
+                    PHPValue::Int(min_hash_bit_count).into(),
+                ],
+            }),
+        }
+    }
+
+    pub fn add(
+        policy: &CdtHllPolicy,
+        bin_name: String,
+        list: Vec<PHPValue>,
+        index_bit_count: i64,
+        min_hash_bit_count: i64,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::Add.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::List(list).into(),
+                    PHPValue::Int(index_bit_count).into(),
+                    PHPValue::Int(min_hash_bit_count).into(),
+                ],
+            }),
+        }
+    }
+
+    pub fn set_union(
+        policy: &CdtHllPolicy,
+        bin_name: String,
+        list: Vec<PHPValue>,
+    ) -> Option<Operation> {
+        if !assert_hll_list(&list) {
+            return None;
+        };
+
+        Some(Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::SetUnion.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![PHPValue::List(list).into()],
+            }),
+        })
+    }
+
+    pub fn refresh_count(bin_name: String) -> Option<Operation> {
+        Some(Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::RefreshCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![],
+            }),
+        })
+    }
+
+    pub fn fold(bin_name: String, index_bit_count: i64) -> Option<Operation> {
+        Some(Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::Fold.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::Int(index_bit_count).into()],
+            }),
+        })
+    }
+
+    pub fn get_count(bin_name: String) -> Option<Operation> {
+        Some(Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::GetCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![],
+            }),
+        })
+    }
+
+    pub fn get_union(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
+        if !assert_hll_list(&list) {
+            return None;
+        };
+
+        Some(Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::GetUnion.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::List(list).into()],
+            }),
+        })
+    }
+
+    pub fn get_union_count(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
+        if !assert_hll_list(&list) {
+            return None;
+        };
+
+        Some(Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::GetUnionCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::List(list).into()],
+            }),
+        })
+    }
+
+    pub fn get_intersect_count(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
+        if !assert_hll_list(&list) {
+            return None;
+        };
+
+        Some(Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::GetIntersectCount.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::List(list).into()],
+            }),
+        })
+    }
+
+    pub fn get_similarity(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
+        if !assert_hll_list(&list) {
+            return None;
+        };
+
+        Some(Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::GetSimilarity.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![PHPValue::List(list).into()],
+            }),
+        })
+    }
+
+    pub fn describe(bin_name: String) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Hll(proto::CdtHllOperation {
+                op: proto::CdtHllCommandOp::Describe.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![],
+            }),
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtBitwiseWriteFlags
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtBitwiseWriteFlags")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtBitwiseWriteFlags {
+    _as: proto::CdtBitwiseWriteFlags,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtBitwiseWriteFlags {
+    pub fn default() -> Self {
+        Self {
+            _as: proto::CdtBitwiseWriteFlags::Default,
+        }
+    }
+
+    pub fn create_only() -> Self {
+        Self {
+            _as: proto::CdtBitwiseWriteFlags::CreateOnly,
+        }
+    }
+
+    pub fn update_only() -> Self {
+        Self {
+            _as: proto::CdtBitwiseWriteFlags::UpdateOnly,
+        }
+    }
+
+    pub fn no_fail() -> Self {
+        Self {
+            _as: proto::CdtBitwiseWriteFlags::NoFail,
+        }
+    }
+
+    pub fn partial() -> Self {
+        Self {
+            _as: proto::CdtBitwiseWriteFlags::Partial,
+        }
+    }
+}
+
+impl From<&proto::CdtBitwiseWriteFlags> for CdtBitwiseWriteFlags {
+    fn from(input: &proto::CdtBitwiseWriteFlags) -> Self {
+        CdtBitwiseWriteFlags { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtBitwiseWriteFlags {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtBitwiseWriteFlags = zval.extract()?;
+
+        Some(CdtBitwiseWriteFlags { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtBitwiseResizeFlags
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtBitwiseResizeFlags")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtBitwiseResizeFlags {
+    _as: proto::CdtBitwiseResizeFlags,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtBitwiseResizeFlags {
+    pub fn default() -> Self {
+        Self {
+            _as: proto::CdtBitwiseResizeFlags::Default,
+        }
+    }
+
+    pub fn from_front() -> Self {
+        Self {
+            _as: proto::CdtBitwiseResizeFlags::FromFront,
+        }
+    }
+
+    pub fn grow_only() -> Self {
+        Self {
+            _as: proto::CdtBitwiseResizeFlags::GrowOnly,
+        }
+    }
+
+    pub fn shrink_only() -> Self {
+        Self {
+            _as: proto::CdtBitwiseResizeFlags::ShrinkOnly,
+        }
+    }
+}
+
+impl From<&proto::CdtBitwiseResizeFlags> for CdtBitwiseResizeFlags {
+    fn from(input: &proto::CdtBitwiseResizeFlags) -> Self {
+        CdtBitwiseResizeFlags { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtBitwiseResizeFlags {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtBitwiseResizeFlags = zval.extract()?;
+
+        Some(CdtBitwiseResizeFlags { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtBitwiseOverflowAction
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtBitwiseOverflowAction")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtBitwiseOverflowAction {
+    _as: proto::CdtBitwiseOverflowAction,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtBitwiseOverflowAction {
+    pub fn fail() -> Self {
+        Self {
+            _as: proto::CdtBitwiseOverflowAction::Fail,
+        }
+    }
+
+    pub fn saturate() -> Self {
+        Self {
+            _as: proto::CdtBitwiseOverflowAction::Saturate,
+        }
+    }
+
+    pub fn wrap() -> Self {
+        Self {
+            _as: proto::CdtBitwiseOverflowAction::Wrap,
+        }
+    }
+}
+
+impl From<&proto::CdtBitwiseOverflowAction> for CdtBitwiseOverflowAction {
+    fn from(input: &proto::CdtBitwiseOverflowAction) -> Self {
+        CdtBitwiseOverflowAction { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtBitwiseOverflowAction {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtBitwiseOverflowAction = zval.extract()?;
+
+        Some(CdtBitwiseOverflowAction { _as: f._as.clone() })
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtBitwisePolicy
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\CdtBitwisePolicy")]
+#[derive(Debug, PartialEq, Clone)]
+pub struct CdtBitwisePolicy {
+    _as: proto::CdtBitwisePolicy,
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtBitwisePolicy {
+    pub fn __construct(flags: Option<CdtListWriteFlags>) -> Self {
+        let flags: i32 = flags.map(|f| f._as.into()).unwrap_or(0);
+
+        CdtBitwisePolicy {
+            _as: proto::CdtBitwisePolicy { flags: flags },
+        }
+    }
+}
+
+impl From<&proto::CdtBitwisePolicy> for CdtBitwisePolicy {
+    fn from(input: &proto::CdtBitwisePolicy) -> Self {
+        CdtBitwisePolicy { _as: input.clone() }
+    }
+}
+
+impl FromZval<'_> for CdtBitwisePolicy {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtBitwisePolicy = zval.extract()?;
+
+        Some(CdtBitwisePolicy { _as: f._as.clone() })
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+//  CdtBitwiseOperation
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+#[php_class(name = "Aerospike\\Map")]
+pub struct CdtBitwiseOperation {
+    _as: proto::CdtBitwiseOperation,
+}
+
+impl FromZval<'_> for CdtBitwiseOperation {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &CdtBitwiseOperation = zval.extract()?;
+
+        Some(CdtBitwiseOperation { _as: f._as.clone() })
+    }
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl CdtBitwiseOperation {
+    pub fn resize(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        byte_size: i64,
+        resize_flags: Option<CdtBitwiseResizeFlags>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        let resize_flags: i32 = resize_flags.map(|rf| rf._as.into()).unwrap_or(0);
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Resize.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(byte_size).into(),
+                    PHPValue::Int(resize_flags as i64).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn insert(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        byte_offset: i64,
+        value: Vec<u8>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Insert.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(byte_offset).into(),
+                    PHPValue::Blob(value).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn remove(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        byte_offset: i64,
+        byte_size: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Remove.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(byte_offset).into(),
+                    PHPValue::Int(byte_size).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn set(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        value: Vec<u8>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Set.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Blob(value).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn or(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        value: Vec<u8>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Or.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Blob(value).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn xor(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        value: Vec<u8>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Xor.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Blob(value).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn and(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        value: Vec<u8>,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::And.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Blob(value).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn not(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Not.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn lshift(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        shift: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::LShift.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Int(shift).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn rshift(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        shift: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::RShift.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Int(shift).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn add(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        value: i64,
+        signed: bool,
+        action: CdtBitwiseOverflowAction,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        let action: i32 = action._as.into();
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Add.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Int(value).into(),
+                    PHPValue::Bool(signed).into(),
+                    PHPValue::Int(action as i64).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn subtract(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        value: i64,
+        signed: bool,
+        action: CdtBitwiseOverflowAction,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        let action: i32 = action._as.into();
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Subtract.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Int(value).into(),
+                    PHPValue::Bool(signed).into(),
+                    PHPValue::Int(action as i64).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn set_int(
+        policy: &CdtBitwisePolicy,
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        value: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::SetInt.into(),
+                policy: Some(policy._as.clone()),
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Int(value).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get(
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Get.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn count(
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::Count.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn lscan(
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        value: bool,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::LScan.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Bool(value).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn rscan(
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        value: bool,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::RScan.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Bool(value).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+
+    pub fn get_int(
+        bin_name: String,
+        bit_offset: i64,
+        bit_size: i64,
+        signed: bool,
+        ctx: Option<Vec<&CDTContext>>,
+    ) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Bitwise(proto::CdtBitwiseOperation {
+                op: proto::CdtBitwiseCommandOp::GetInt.into(),
+                policy: None,
+                bin_name: bin_name,
+                args: vec![
+                    PHPValue::Int(bit_offset).into(),
+                    PHPValue::Int(bit_size).into(),
+                    PHPValue::Bool(signed).into(),
+                ],
+                ctx: ctx
+                    .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
+                    .unwrap_or(vec![]),
+            }),
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 //  Client
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -5804,29 +8873,6 @@ fn new_aerospike_client(socket: &str) -> PhpResult<grpc::BlockingClient> {
     let client = grpc::BlockingClient::connect(socket.into()).map_err(|e| e.to_string())?;
     Ok(client)
 }
-
-// #[php_function]
-// pub fn Aerospike(hosts: &str) -> PhpResult<Zval> {
-//     match get_persisted_client(hosts) {
-//         Some(c) => {
-//             trace!("Found Aerospike Client object for {}", hosts);
-//             return Ok(c);
-//         }
-//         None => (),
-//     }
-
-//     trace!("Creating a new Aerospike Client object for {}", hosts);
-
-//     let c = Arc::new(Mutex::new(new_aerospike_client(&hosts)?));
-//     persist_client(hosts, c)?;
-
-//     match get_persisted_client(hosts) {
-//         Some(c) => {
-//             return Ok(c);
-//         }
-//         None => Err("Error connecting to the database".into()),
-//     }
-// }
 
 #[php_class(name = "Aerospike\\Client")]
 pub struct Client {
@@ -6836,7 +9882,7 @@ pub struct Key {
 impl Key {
     pub fn __construct(namespace: &str, set: &str, key: PHPValue) -> Self {
         let _as = proto::Key {
-            digest: Some(Self::compute_digest(set, key.clone())),
+            digest: None, //Some(Self::compute_digest(set, key.clone())),
             namespace: Some(namespace.into()),
             set: Some(set.into()),
             value: Some(key.into()),
@@ -6877,16 +9923,29 @@ impl Key {
     }
 
     #[getter]
-    pub fn get_digest(&self) -> Option<Vec<u8>> {
-        self._as.digest.clone().map(|digest| digest)
+    pub fn get_digest_bytes(&self) -> Vec<u8> {
+        self._as
+            .digest
+            .as_ref()
+            .map(|digest| digest.clone())
+            .unwrap_or({
+                Self::compute_digest(
+                    &self._as.set.clone().unwrap(),
+                    self._as.value.clone().unwrap().into(),
+                )
+            })
+    }
+
+    #[getter]
+    pub fn get_digest(&self) -> String {
+        hex::encode(self.get_digest_bytes())
     }
 
     #[getter]
     fn partition_id(&self) -> Option<usize> {
-        self._as.digest.as_ref().map(|ref digest| {
-            let mut rdr = Cursor::new(&digest[0..4]);
-            rdr.read_u32::<LittleEndian>().unwrap() as usize & (PARTITIONS as usize - 1)
-        })
+        let digest = self.get_digest_bytes();
+        let mut rdr = Cursor::new(&digest[0..4]);
+        Some(rdr.read_u32::<LittleEndian>().unwrap() as usize & (PARTITIONS as usize - 1))
     }
 }
 
@@ -7114,6 +10173,7 @@ pub enum PHPValue {
     /// Map data type is a collection of key-value pairs. Each key can only appear once in a
     /// collection and is associated with a value. Map keys and values can be any supported data
     /// type.
+    // TODO: Implement the ordered map and remove hashmap completely
     HashMap(HashMap<PHPValue, PHPValue>),
     /// Map data type is a collection of key-value pairs. Each key can only appear once in a
     /// collection and is associated with a value. Map keys and values can be any supported data
@@ -7632,6 +10692,31 @@ impl std::fmt::Display for AeroPHPError {
 //  utility methods
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
+
+fn assert_map(val: &PHPValue) -> bool {
+    match val {
+        PHPValue::HashMap(_) => true,
+        _ => {
+            let error = AerospikeException::new("Invalid type");
+            throw_object(error.into_zval(true).unwrap()).unwrap();
+            false
+        }
+    }
+}
+
+fn assert_hll_list(val: &Vec<PHPValue>) -> bool {
+    // try to find a non-hll value
+    val.iter()
+        .find(|val| match val {
+            PHPValue::HLL(_) => false,
+            _ => {
+                let error = AerospikeException::new("Invalid type");
+                throw_object(error.into_zval(true).unwrap()).unwrap();
+                return true;
+            }
+        })
+        .is_none()
+}
 
 fn persist_client(key: &str, c: Arc<Mutex<grpc::BlockingClient>>) -> Result<()> {
     trace!("Persisting Client pointer: {:p}", &c);

@@ -28,6 +28,9 @@ const (
 	version = "0.1.0"
 )
 
+// TODO: Add the version command to the KVS server
+// TODO: Finish logging and make sure logs have prefixes for different clusters
+
 func main() {
 	var (
 		configFile  = flag.String("config-file", "/etc/aerospike-local-daemon/asld.toml", "Config File")

@@ -719,7 +719,7 @@ enum MapOrderType {
 	MapOrderTypeKeyOrdered = 1;
 
 	// Order map by key, then value.
-	MapOrderTypeKeyValueOrdered = 3;
+	MapOrderTypeKeyValueOrdered = 2;
 }
 
 // CDTContext defines Nested CDT context. Identifies the location of nested list/map to apply the operation.
@@ -734,6 +734,18 @@ message CDTContext{
 // Operation contains operation definition.
 // This struct is used in client's operate() method.
 message Operation {
+	oneof op {
+		StdOperation std = 1;
+		CdtMapOperation map = 2;
+		CdtListOperation list = 3;
+		CdtHLLOperation hll = 4;
+		CdtBitwiseOperation bitwise = 5;
+	}
+}
+
+// Operation contains operation definition.
+// This struct is used in client's operate() method.
+message StdOperation {
 	// OpType determines type of operation.
 	OperationType opType = 1;
 
@@ -1358,24 +1370,14 @@ service KVS {
 }
 
 enum OperationType {
-  OperationTypeRead = 0;
-  OperationTypeReadHeader = 1;
-  OperationTypeWrite = 2;
-  OperationTypeCdtRead = 3;
-  OperationTypeCdtModify = 4;
-  OperationTypeMapRead = 5;
-  OperationTypeMapModify = 6;
-  OperationTypeAdd = 7;
-  OperationTypeExpRead = 8;
-  OperationTypeExpModify = 9;
-  OperationTypeAppend = 10;
-  OperationTypePrepend = 11;
-  OperationTypeTouch = 12;
-  OperationTypeBitRead = 13;
-  OperationTypeBitModify = 14;
-  OperationTypeDelete = 15;
-  OperationTypeHllRead = 16;
-  OperationTypeHllModify = 17;
+  OperationTypeGet = 0;
+  OperationTypeGetHeader = 1;
+  OperationTypePut = 2;
+  OperationTypeAdd = 3;
+  OperationTypeAppend = 4;
+  OperationTypePrepend = 5;
+  OperationTypeTouch = 6;
+  OperationTypeDelete = 7;
 }
 
 enum RecordExistsAction {
@@ -1625,5 +1627,399 @@ message QueryFilter {
 	uint32 valueParticleType = 3;
 	Value begin = 4;
 	Value end = 5;
+	repeated CDTContext ctx = 6;
+}
+
+enum CdtMapCommandOp {
+	CdtMapCommandOpCreate = 0;
+	CdtMapCommandOpCreateWithIndex = 1;
+	CdtMapCommandOpSetPolicy = 2;
+	CdtMapCommandOpPut = 3;
+	CdtMapCommandOpPutItems = 4;
+	CdtMapCommandOpIncrement = 5;
+	CdtMapCommandOpDecrement = 6;
+	CdtMapCommandOpClear = 7;
+	CdtMapCommandOpRemoveByKey = 8;
+	CdtMapCommandOpRemoveByKeyList = 9;
+	CdtMapCommandOpRemoveByKeyRange = 10;
+	CdtMapCommandOpRemoveByValue = 11;
+	CdtMapCommandOpRemoveByValueList = 12;
+	CdtMapCommandOpRemoveByValueRange = 13;
+	CdtMapCommandOpRemoveByValueRelativeRankRange = 14;
+	CdtMapCommandOpRemoveByValueRelativeRankRangeCount = 15;
+	CdtMapCommandOpRemoveByIndex = 16;
+	CdtMapCommandOpRemoveByIndexRange = 17;
+	CdtMapCommandOpRemoveByIndexRangeCount = 18;
+	CdtMapCommandOpRemoveByRank = 19;
+	CdtMapCommandOpRemoveByRankRange = 20;
+	CdtMapCommandOpRemoveByRankRangeCount = 21;
+	CdtMapCommandOpRemoveByKeyRelativeIndexRange = 22;
+	CdtMapCommandOpRemoveByKeyRelativeIndexRangeCount = 23;
+	CdtMapCommandOpSize = 24;
+	CdtMapCommandOpGetByKey = 25;
+	CdtMapCommandOpGetByKeyRange = 26;
+	CdtMapCommandOpGetByKeyRelativeIndexRange = 27;
+	CdtMapCommandOpGetByKeyRelativeIndexRangeCount =28 ;
+	CdtMapCommandOpGetByKeyList = 29;
+	CdtMapCommandOpGetByValue = 30;
+	CdtMapCommandOpGetByValueRange = 31;
+	CdtMapCommandOpGetByValueRelativeRankRange = 32;
+	CdtMapCommandOpGetByValueRelativeRankRangeCount = 33;
+	CdtMapCommandOpGetByValueList = 34;
+	CdtMapCommandOpGetByIndex = 35;
+	CdtMapCommandOpGetByIndexRange = 36;
+	CdtMapCommandOpGetByIndexRangeCount = 37;
+	CdtMapCommandOpGetByRank = 38;
+	CdtMapCommandOpGetByRankRange = 39;
+	CdtMapCommandOpGetByRankRangeCount = 40;
+}
+
+enum CdtMapReturnType {
+	// NONE will will not return a result.
+	CdtMapReturnTypeNone = 0;
+
+	// INDEX will return key index order.
+	//
+	// 0 = first key
+	// N = Nth key
+	// -1 = last key
+	CdtMapReturnTypeIndex = 1;
+
+	// REVERSE_INDEX will return reverse key order.
+	//
+	// 0 = last key
+	// -1 = first key
+	CdtMapReturnTypeReverseIndex = 2;
+
+	// RANK will return value order.
+	//
+	// 0 = smallest value
+	// N = Nth smallest value
+	// -1 = largest value
+	CdtMapReturnTypeRank = 3;
+
+	// REVERSE_RANK will return reverse value order.
+	//
+	// 0 = largest value
+	// N = Nth largest value
+	// -1 = smallest value
+	CdtMapReturnTypeReverseRank = 4;
+
+	// COUNT will return count of items selected.
+	CdtMapReturnTypeCount = 5;
+
+	// KEY will return key for single key read and key list for range read.
+	CdtMapReturnTypeKey = 6;
+
+	// VALUE will return value for single key read and value list for range read.
+	CdtMapReturnTypeValue = 7;
+
+	// KEY_VALUE will return key/value items. The possible return types are:
+	CdtMapReturnTypeKeyValue = 8;
+
+	// EXISTS returns true if count > 0.
+	CdtMapReturnTypeExists = 13;
+
+	// UNORDERED_MAP returns an unordered map.
+	CdtMapReturnTypeUnorderedMap = 16;
+
+	// ORDERED_MAP returns an ordered map.
+	CdtMapReturnTypeOrderedMap = 17;
+
+	// INVERTED will invert meaning of map command and return values.  For example:
+	// MapRemoveByKeyRange(binName, keyBegin, keyEnd, MapReturnType.KEY | MapReturnType.INVERTED)
+	// With the INVERTED flag enabled, the keys outside of the specified key range will be removed and returned.
+	CdtMapReturnTypeInverted = 12;
+}
+
+enum CdtMapWriteMode {
+	CdtMapWriteModeUpdate = 0;
+	CdtMapWriteModeUpdateOnly = 1;
+	CdtMapWriteModeCreateOnly = 2;
+}
+
+enum CdtMapWriteFlags {
+	// MapWriteFlagsDefault is the Default. Allow create or update.
+	CdtMapWriteFlagsDefault = 0;
+
+	// MapWriteFlagsCreateOnly means: If the key already exists, the item will be denied.
+	// If the key does not exist, a new item will be created.
+	CdtMapWriteFlagsCreateOnly = 1;
+
+	// MapWriteFlagsUpdateOnly means: If the key already exists, the item will be overwritten.
+	// If the key does not exist, the item will be denied.
+	CdtMapWriteFlagsUpdateOnly = 2;
+
+	// MapWriteFlagsNoFail means: Do not raise error if a map item is denied due to write flag constraints.
+	CdtMapWriteFlagsNoFail = 4;
+
+	// MapWriteFlagsNoFail means: Allow other valid map items to be committed if a map item is denied due to
+	// write flag constraints.
+	CdtMapWriteFlagsPartial = 8;
+}
+
+message CdtMapPolicy {
+	MapOrderType mapOrder = 1;
+	CdtMapWriteFlags flags = 3;
+	bool PersistedIndex = 4;
+}
+
+message CdtMapOperation {
+	CdtMapCommandOp op = 1;
+	CdtMapPolicy policy = 2;
+	string binName = 3;
+	repeated Value args = 4;
+	optional CdtMapReturnType returnType = 5;
+	repeated CDTContext ctx = 6;
+}
+
+enum CdtListCommandOp {
+	CdtListCommandOpCreate = 0;
+	CdtListCommandOpSetOrder = 1;
+	CdtListCommandOpAppend = 2;
+	CdtListCommandOpInsert = 3;
+	CdtListCommandOpPop = 4;
+	CdtListCommandOpPopRange = 5;
+	CdtListCommandOpPopRangeFrom = 6;
+	CdtListCommandOpSet = 7;
+	CdtListCommandOpTrim = 8;
+	CdtListCommandOpClear = 9;
+	CdtListCommandOpIncrement = 10;
+	CdtListCommandOpSize = 11;
+
+	CdtListCommandOpSort = 12;
+	CdtListCommandOpGetByValueList = 13;
+	CdtListCommandOpGetByValueRange = 14;
+	CdtListCommandOpGetByIndex = 15;
+	CdtListCommandOpGetByIndexRange = 16;
+	CdtListCommandOpGetByIndexRangeCount = 17;
+	CdtListCommandOpGetByRank = 18;
+	CdtListCommandOpGetByRankRange = 19;
+	CdtListCommandOpGetByRankRangeCount = 20;
+	CdtListCommandOpGetByValueRelativeRankRange = 21;
+	CdtListCommandOpGetByValueRelativeRankRangeCount = 22;
+
+	CdtListCommandOpRemoveByValueList = 23;
+	CdtListCommandOpRemoveByValueRange = 24;
+	CdtListCommandOpRemoveByValueRelativeRankRange = 25;
+	CdtListCommandOpRemoveByValueRelativeRankRangeCount = 26;
+	CdtListCommandOpRemoveRange = 27;
+	CdtListCommandOpRemoveRangeFrom = 28;
+	CdtListCommandOpRemoveByIndex = 29;
+	CdtListCommandOpRemoveByIndexRange = 30;
+	CdtListCommandOpRemoveByIndexRangeCount = 31;
+	CdtListCommandOpRemoveByRank = 32;
+	CdtListCommandOpRemoveByRankRange = 33;
+	CdtListCommandOpRemoveByRankRangeCount = 34;
+}
+
+
+enum CdtListReturnType {
+	// CdtListReturnTypeNone will not return a result.
+	CdtListReturnTypeNone = 0;
+
+	// CdtListReturnTypeIndex will return index offset order.
+	// 0 = first key
+	// N = Nth key
+	// -1 = last key
+	CdtListReturnTypeIndex = 1;
+
+	// CdtListReturnTypeReverseIndex will return reverse index offset order.
+	// 0 = last key
+	// -1 = first key
+	CdtListReturnTypeReverseIndex = 2;
+
+	// CdtListReturnTypeRank will return value order.
+	// 0 = smallest value
+	// N = Nth smallest value
+	// -1 = largest value
+	CdtListReturnTypeRank = 3;
+
+	// CdtListReturnTypeReverseRank will return reverse value order.
+	// 0 = largest value
+	// N = Nth largest value
+	// -1 = smallest value
+	CdtListReturnTypeReverseRank = 4;
+
+	// CdtListReturnTypeCount will return count of items selected.
+	CdtListReturnTypeCount = 5;
+
+	// CdtListReturnTypeValue will return value for single key read and value list for range read.
+	CdtListReturnTypeValue = 7;
+
+	// CdtListReturnTypeExists returns true if count > 0.
+	CdtListReturnTypeExists = 13;
+}
+
+enum CdtListSortFlags {
+	// CdtListSortFlagsDefault is the default sort flag for CDT lists, and sort in Ascending order.
+	CdtListSortFlagsDefault = 0;
+	// CdtListSortFlagsDescending will sort the contents of the list in descending order.
+	CdtListSortFlagsDescending = 1;
+	// CdtListSortFlagsDropDuplicates will drop duplicate values in the results of the CDT list operation.
+	CdtListSortFlagsDropDuplicates = 2;
+}
+
+enum CdtListWriteFlags {
+	// CdtListWriteFlagsDefault is the default behavior. It means:  Allow duplicate values and insertions at any index.
+	CdtListWriteFlagsDefault = 0;
+	// CdtListWriteFlagsAddUnique means: Only add unique values.
+	CdtListWriteFlagsAddUnique = 1;
+	// CdtListWriteFlagsInsertBounded means: Enforce list boundaries when inserting.  Do not allow values to be inserted
+	// at index outside current list boundaries.
+	CdtListWriteFlagsInsertBounded = 2;
+	// CdtListWriteFlagsNoFail means: do not raise error if a list item fails due to write flag constraints.
+	CdtListWriteFlagsNoFail = 4;
+	// CdtListWriteFlagsPartial means: allow other valid list items to be committed if a list item fails due to
+	// write flag constraints.
+	CdtListWriteFlagsPartial = 8;
+}
+
+message CdtListPolicy {
+	ListOrderType order = 1;
+	CdtListWriteFlags flags = 2;
+}
+
+message CdtListOperation {
+	CdtListCommandOp op = 1;
+	CdtListPolicy policy = 2;
+	string binName = 3;
+	repeated Value args = 4;
+	optional CdtListReturnType returnType = 5;
+	repeated CDTContext ctx = 6;
+}
+
+enum CdtHLLCommandOp {
+	CdtHLLCommandOpInit = 0;
+	CdtHLLCommandOpAdd = 1;
+	CdtHLLCommandOpSetUnion = 2;
+	CdtHLLCommandOpRefreshCount = 3;
+	CdtHLLCommandOpFold = 4;
+	CdtHLLCommandOpGetCount = 5;
+	CdtHLLCommandOpGetUnion = 6;
+	CdtHLLCommandOpGetUnionCount = 7;
+	CdtHLLCommandOpGetIntersectCount = 8;
+	CdtHLLCommandOpGetSimilarity = 9;
+	CdtHLLCommandOpDescribe = 10;
+}
+
+enum CdtHLLWriteFlags {
+	// CdtHLLWriteFlagsDefault is Default. Allow create or update.
+	CdtHLLWriteFlagsDefault = 0;
+
+	// CdtHLLWriteFlagsCreateOnly behaves like the following:
+	// If the bin already exists, the operation will be denied.
+	// If the bin does not exist, a new bin will be created.
+	CdtHLLWriteFlagsCreateOnly = 1;
+
+	// CdtHLLWriteFlagsUpdateOnly behaves like the following:
+	// If the bin already exists, the bin will be overwritten.
+	// If the bin does not exist, the operation will be denied.
+	CdtHLLWriteFlagsUpdateOnly = 2;
+
+	// CdtHLLWriteFlagsNoFail does not raise error if operation is denied.
+	CdtHLLWriteFlagsNoFail = 4;
+
+	// CdtHLLWriteFlagsAllowFold allows the resulting set to be the minimum of provided index bits.
+	// Also, allow the usage of less precise HLL algorithms when minHash bits
+	// of all participating sets do not match.
+	CdtHLLWriteFlagsAllowFold = 8;
+}
+
+// HLLPolicy determines the HyperLogLog operation policy.
+message CdtHLLPolicy {
+	CdtHLLWriteFlags flags = 1;
+}
+
+message CdtHLLOperation {
+	CdtHLLCommandOp op = 1;
+	CdtHLLPolicy policy = 2;
+	string binName = 3;
+	repeated Value args = 4;
+}
+
+///////////////////////////////////
+
+enum CdtBitwiseCommandOp {
+	CdtBitwiseCommandOpResize = 0;
+	CdtBitwiseCommandOpInsert = 1;
+	CdtBitwiseCommandOpRemove = 2;
+	CdtBitwiseCommandOpSet = 3;
+	CdtBitwiseCommandOpOr = 4;
+	CdtBitwiseCommandOpXor = 5;
+	CdtBitwiseCommandOpAnd = 6;
+	CdtBitwiseCommandOpNot = 7;
+	CdtBitwiseCommandOpLShift = 8;
+	CdtBitwiseCommandOpRShift = 9;
+	CdtBitwiseCommandOpAdd = 10;
+	CdtBitwiseCommandOpSubtract = 11;
+	CdtBitwiseCommandOpSetInt = 12;
+	CdtBitwiseCommandOpGet = 13;
+	CdtBitwiseCommandOpCount = 14;
+	CdtBitwiseCommandOpLScan = 15;
+	CdtBitwiseCommandOpRScan = 16;
+	CdtBitwiseCommandOpGetInt = 17;
+}
+
+enum CdtBitwiseWriteFlags {
+	// CdtBitwiseWriteFlagsDefault allows create or update.
+	CdtBitwiseWriteFlagsDefault = 0;
+
+	// CdtBitwiseWriteFlagsCreateOnly specifies that:
+	// If the bin already exists, the operation will be denied.
+	// If the bin does not exist, a new bin will be created.
+	CdtBitwiseWriteFlagsCreateOnly = 1;
+
+	// CdtBitwiseWriteFlagsUpdateOnly specifies that:
+	// If the bin already exists, the bin will be overwritten.
+	// If the bin does not exist, the operation will be denied.
+	CdtBitwiseWriteFlagsUpdateOnly = 2;
+
+	// CdtBitwiseWriteFlagsNoFail specifies not to raise error if operation is denied.
+	CdtBitwiseWriteFlagsNoFail = 4;
+
+	// CdtBitwiseWriteFlagsPartial allows other valid operations to be committed if this operations is
+	// denied due to flag constraints.
+	CdtBitwiseWriteFlagsPartial = 8;
+}
+
+enum CdtBitwiseResizeFlags {
+	// CdtBitwiseResizeFlagsDefault specifies the defalt flag.
+	CdtBitwiseResizeFlagsDefault = 0;
+
+	// CdtBitwiseResizeFlagsFromFront Adds/removes bytes from the beginning instead of the end.
+	CdtBitwiseResizeFlagsFromFront = 1;
+
+	// CdtBitwiseResizeFlagsGrowOnly will only allow the []byte size to increase.
+	CdtBitwiseResizeFlagsGrowOnly = 2;
+
+	// CdtBitwiseResizeFlagsShrinkOnly will only allow the []byte size to decrease.
+	CdtBitwiseResizeFlagsShrinkOnly = 4;
+}
+
+enum CdtBitwiseOverflowAction {
+	// CdtBitwiseOverflowActionFail specifies to fail operation with error.
+	CdtBitwiseOverflowActionFail = 0;
+
+	// CdtBitwiseOverflowActionSaturate specifies that in add/subtract overflows/underflows, set to max/min value.
+	// Example: MAXINT + 1 = MAXINT
+	CdtBitwiseOverflowActionSaturate = 2;
+
+	// CdtBitwiseOverflowActionWrap specifies that in add/subtract overflows/underflows, wrap the value.
+	// Example: MAXINT + 1 = -1
+	CdtBitwiseOverflowActionWrap = 4;
+}
+
+
+// BitwisePolicy determines the HyperLogLog operation policy.
+message CdtBitwisePolicy {
+	CdtBitwiseWriteFlags flags = 1;
+}
+
+message CdtBitwiseOperation {
+	CdtBitwiseCommandOp op = 1;
+	CdtBitwisePolicy policy = 2;
+	string binName = 3;
+	repeated Value args = 4;
 	repeated CDTContext ctx = 6;
 }
