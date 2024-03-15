@@ -2626,7 +2626,8 @@ pub struct MultiPolicy {
 
 impl Default for MultiPolicy {
     fn default() -> Self {
-        let rp = ReadPolicy::default();
+        let mut rp = ReadPolicy::default();
+        rp.set_total_timeout(0);
         MultiPolicy {
             _as: proto::MultiPolicy {
                 read_policy: Some(rp._as),
@@ -9521,10 +9522,7 @@ impl Key {
                 hash.input(&[value.particle_type() as u8]);
                 match value.write_key_bytes(&mut hash) {
                     Ok(()) => (),
-                    Err(pe) => {
-                        let msg = format!("{}", pe);
-                        let error = AerospikeException::new(&msg);
-                        throw_object(error.into_zval(true).unwrap()).unwrap();
+                    Err(_) => {
                         return vec![];
                     }
                 };
