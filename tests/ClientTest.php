@@ -1,6 +1,7 @@
-<?php 
+<?php
 
 namespace Aerospike;
+
 use PHPUnit\Framework\TestCase;
 
 final class ClientTest extends TestCase
@@ -23,7 +24,8 @@ final class ClientTest extends TestCase
         }
     }
 
-    public function testPutGetString(){
+    public function testPutGetString()
+    {
         $binString = new Bin("stringBin", "StringData");
         $newKey = new Key(self::$namespace, self::$set, 2);
         $wp = new WritePolicy();
@@ -62,25 +64,25 @@ final class ClientTest extends TestCase
         // Prepare a list (array) bin
         $listData = [1, 2, 3, 4, 5];
         $binList = new Bin("listBin", $listData);
-    
+
         // Create a new key for the test
         $newKey = new Key(self::$namespace, self::$set, 4);
-    
+
         // Write the list bin to the record
         $wp = new WritePolicy();
         self::$client->put($wp, $newKey, [$binList]);
-    
+
         // Read the list bin back from the record
         $rp = new ReadPolicy();
         $record = self::$client->get($rp, $newKey, ["listBin"]);
         $binGet = $record->getBins();
-    
+
         // Assert that the value associated with "listBin" is an array
         $this->assertIsArray($binGet["listBin"]);
-    
+
         $this->assertEquals($listData, $binGet["listBin"]);
     }
-    
+
 
     public function testPutGetMaps()
     {
@@ -91,26 +93,26 @@ final class ClientTest extends TestCase
             "key3" => "value3",
         ];
         $binMap = new Bin("mapBin", $mapData);
-    
+
         // Create a new key for the test
         $newKey = new Key(self::$namespace, self::$set, 5);
-    
+
         // Write the map bin to the record
         $wp = new WritePolicy();
         self::$client->put($wp, $newKey, [$binMap]);
-    
+
         // Read the map bin back from the record
         $rp = new ReadPolicy();
         $record = self::$client->get($rp, $newKey, ["mapBin"]);
         $binGet = $record->getBins();
-    
+
         // Assert that the value associated with "mapBin" is an array (map)
         $this->assertIsArray($binGet["mapBin"]);
-    
+
         // Optionally, you can assert that the content of the map matches
         $this->assertEquals($mapData, $binGet["mapBin"]);
     }
-    
+
     public function testAddIntegerBinsToExistingRecord()
     {
         // Prepare a record with an existing integer bin
@@ -157,7 +159,8 @@ final class ClientTest extends TestCase
         $this->assertEquals(5.5 + 10.1, $bins["newFloatBin"]);
     }
 
-    public function testPrependValue(){
+    public function testPrependValue()
+    {
         $newKey = new Key(self::$namespace, self::$set, 2);
         $wp = new WritePolicy();
         $prependVal = new Bin("stringBin", "newData_");
@@ -170,7 +173,8 @@ final class ClientTest extends TestCase
         $this->assertEquals("newData_StringData", $binGet["stringBin"]);
     }
 
-    public function testAppendValue(){
+    public function testAppendValue()
+    {
         $newKey = new Key(self::$namespace, self::$set, 2);
         $wp = new WritePolicy();
         $prependVal = new Bin("stringBin", "_oldData");
@@ -183,7 +187,8 @@ final class ClientTest extends TestCase
         $this->assertEquals("newData_StringData_oldData", $binGet["stringBin"]);
     }
 
-    public function testDeleteKeyAndExists(){
+    public function testDeleteKeyAndExists()
+    {
         $newKey = new Key(self::$namespace, self::$set, "key_e");
         $wp = new WritePolicy();
         self::$client->put($wp, $newKey, [new Bin("bini", 1)]);
@@ -196,7 +201,8 @@ final class ClientTest extends TestCase
         $this->assertFalse($exists);
     }
 
-    public function testTouchKey(){
+    public function testTouchKey()
+    {
         $newKey = new Key(self::$namespace, self::$set, "new_key");
         $wp = new WritePolicy();
         self::$client->put($wp, $newKey, [new Bin("bini", 1)]);
@@ -213,7 +219,7 @@ final class ClientTest extends TestCase
 
     public function testTruncate()
     {
-        
+
         $wp = new WritePolicy();
         for ($i = 1; $i <= 10; $i++) {
             $bin1 = new Bin("bin1", $i);
@@ -224,25 +230,27 @@ final class ClientTest extends TestCase
         $ip = new InfoPolicy();
         self::$client->truncate($ip, self::$namespace, self::$set);
         //wait for truncate to finish
-        usleep(200000);
+        sleep(5);
 
         $rp = new ReadPolicy();
-        $exists = self::$client->exists($rp, self::$key);
-        
+        for ($i = 1; $i <= 10; $i++) {
+            $exists = self::$client->exists($rp, self::$key);
+            $this->assertEquals($exists, false);
+        }
     }
 
-    public function testAppendException(){
-         
+    public function testAppendException()
+    {
+
         $stringKey = new Key(self::$namespace, self::$set, "string_key");
         $wp = new WritePolicy();
         self::$client->put($wp, $stringKey, [new Bin("sbin", "string_value")]);
         try {
-            $appendExcpVal = new Bin("stringBin", 23);
+            $appendExcpVal = new Bin("sbin", 23);
             self::$client->append($wp, $stringKey, [$appendExcpVal]);
             $this->fail("Expected exception AerospikeException not thrown");
         } catch (AerospikeException $e) {
-            $this->assertSame("Aerospike excpetion -> ", $e->getMessage());
+            $this->assertSame($e->code, ResultCode::BinTypeError());
         }
     }
-
 }

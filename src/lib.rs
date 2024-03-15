@@ -41,15 +41,16 @@ use ext_php_rs::convert::{FromZval, IntoZval};
 use ext_php_rs::error::Result;
 use ext_php_rs::exception::throw_object;
 use ext_php_rs::flags::DataType;
+use ext_php_rs::info_table_end;
+use ext_php_rs::info_table_row;
+use ext_php_rs::info_table_start;
 use ext_php_rs::php_class;
 use ext_php_rs::prelude::*;
 use ext_php_rs::types::ArrayKey;
 use ext_php_rs::types::ZendHashTable;
 use ext_php_rs::types::ZendObject;
 use ext_php_rs::types::Zval;
-
-use num_derive::FromPrimitive;
-use num_traits::FromPrimitive;
+use ext_php_rs::zend::ModuleEntry;
 
 use byteorder::{LittleEndian, ReadBytesExt};
 use rand::prelude::*;
@@ -68,398 +69,6 @@ pub type AsResult<T = ()> = std::result::Result<T, AerospikeException>;
 
 const PARTITIONS: u16 = 4096;
 const CITRUSLEAF_EPOCH: u64 = 1262304000;
-
-#[allow(non_camel_case_types)]
-////////////////////////////////////////////////////////////////////////////////////////////
-//
-// ResultCode
-//
-////////////////////////////////////////////////////////////////////////////////////////////
-#[derive(FromPrimitive)]
-enum ResultCode {
-    // GRPC_ERROR is wrapped and directly returned from the grpc library
-    GrpcError = -21,
-
-    // BATCH_FAILED means one or more keys failed in a batch.
-    BatchFailed = -20,
-
-    // NO_RESPONSE means no response was received from the server.
-    NoResponse = -19,
-
-    // NETWORK_ERROR defines a network error. Checked the wrapped error for detail.
-    NetworkError = -18,
-
-    // COMMON_ERROR defines a common, none-aerospike error. Checked the wrapped error for detail.
-    CommonError = -17,
-
-    // MAX_RETRIES_EXCEEDED defines max retries limit reached.
-    MaxRetriesExceeded = -16,
-
-    // MAX_ERROR_RATE defines max errors limit reached.
-    MaxErrorRate = -15,
-
-    // RACK_NOT_DEFINED defines requested Rack for node/namespace was not defined in the cluster.
-    RackNotDefined = -13,
-
-    // INVALID_CLUSTER_PARTITION_MAP defines cluster has an invalid partition map, usually due to bad configuration.
-    InvalidClusterPartitionMap = -12,
-
-    // SERVER_NOT_AVAILABLE defines server is not accepting requests.
-    ServerNotAvailable = -11,
-
-    // CLUSTER_NAME_MISMATCH_ERROR defines cluster Name does not match the ClientPolicy.ClusterName value.
-    ClusterNameMismatchError = -10,
-
-    // RECORDSET_CLOSED defines recordset has already been closed or cancelled
-    RecordsetClosed = -9,
-
-    // NO_AVAILABLE_CONNECTIONS_TO_NODE defines there were no connections available to the node in the pool, and the pool was limited
-    NoAvailableConnectionsToNode = -8,
-
-    // TYPE_NOT_SUPPORTED defines data type is not supported by aerospike server.
-    TypeNotSupported = -7,
-
-    // COMMAND_REJECTED defines info Command was rejected by the server.
-    CommandRejected = -6,
-
-    // QUERY_TERMINATED defines query was terminated by user.
-    QueryTerminated = -5,
-
-    // SCAN_TERMINATED defines scan was terminated by user.
-    ScanTerminated = -4,
-
-    // INVALID_NODE_ERROR defines chosen node is not currently active.
-    InvalidNodeError = -3,
-
-    // PARSE_ERROR defines client parse error.
-    ParseError = -2,
-
-    // SERIALIZE_ERROR defines client serialization error.
-    SerializeError = -1,
-
-    // OK defines operation was successful.
-    OK = 0,
-
-    // SERVER_ERROR defines unknown server failure.
-    ServerError = 1,
-
-    // KEY_NOT_FOUND_ERROR defines on retrieving, touching or replacing a record that doesn't exist.
-    KeyNotFoundError = 2,
-
-    // GENERATION_ERROR defines on modifying a record with unexpected generation.
-    GenerationError = 3,
-
-    // PARAMETER_ERROR defines bad parameter(s) were passed in database operation call.
-    ParameterError = 4,
-
-    // KEY_EXISTS_ERROR defines on create-only (write unique) operations on a record that already
-    // exists.
-    KeyExistsError = 5,
-
-    // BIN_EXISTS_ERROR defines bin already exists on a create-only operation.
-    BinExistsError = 6,
-
-    // CLUSTER_KEY_MISMATCH defines expected cluster ID was not received.
-    ClusterKeyMismatch = 7,
-
-    // SERVER_MEM_ERROR defines server has run out of memory.
-    ServerMemError = 8,
-
-    // TIMEOUT defines client or server has timed out.
-    Timeout = 9,
-
-    // ALWAYS_FORBIDDEN defines operation not allowed in current configuration.
-    AlwaysForbidden = 10,
-
-    // PARTITION_UNAVAILABLE defines partition is unavailable.
-    PartitionUnavailable = 11,
-
-    // BIN_TYPE_ERROR defines operation is not supported with configured bin type (single-bin or
-    // multi-bin).
-    BinTypeError = 12,
-
-    // RECORD_TOO_BIG defines record size exceeds limit.
-    RecordTooBig = 13,
-
-    // KEY_BUSY defines too many concurrent operations on the same record.
-    KeyBusy = 14,
-
-    // SCAN_ABORT defines scan aborted by server.
-    ScanAbort = 15,
-
-    // UNSUPPORTED_FEATURE defines unsupported Server Feature (e.g. Scan + UDF)
-    UnsupportedFeature = 16,
-
-    // BIN_NOT_FOUND defines bin not found on update-only operation.
-    BinNotFound = 17,
-
-    // DEVICE_OVERLOAD defines device not keeping up with writes.
-    DeviceOverload = 18,
-
-    // KEY_MISMATCH defines key type mismatch.
-    KeyMismatch = 19,
-
-    // INVALID_NAMESPACE defines invalid namespace.
-    InvalidNamespace = 20,
-
-    // BIN_NAME_TOO_LONG defines bin name length greater than 14 characters,
-    // or maximum number of unique bin names are exceeded.
-    BinNameTooLong = 21,
-
-    // FAIL_FORBIDDEN defines operation not allowed at this time.
-    FailForbidden = 22,
-
-    // FAIL_ELEMENT_NOT_FOUND defines element Not Found in CDT
-    FailElementNotFound = 23,
-
-    // FAIL_ELEMENT_EXISTS defines element Already Exists in CDT
-    FailElementExists = 24,
-
-    // ENTERPRISE_ONLY defines attempt to use an Enterprise feature on a Community server or a server
-    // without the applicable feature key.
-    EnterpriseOnly = 25,
-
-    // OP_NOT_APPLICABLE defines the operation cannot be applied to the current bin value on the server.
-    OpNotApplicable = 26,
-
-    // FILTERED_OUT defines the transaction was not performed because the filter was false.
-    FilteredOut = 27,
-
-    // LOST_CONFLICT defines write command loses conflict to XDR.
-    LostConflict = 28,
-
-    // QUERY_END defines there are no more records left for query.
-    QueryEnd = 50,
-
-    // SECURITY_NOT_SUPPORTED defines security type not supported by connected server.
-    SecurityNotSupported = 51,
-
-    // SECURITY_NOT_ENABLED defines administration command is invalid.
-    SecurityNotEnabled = 52,
-
-    // SECURITY_SCHEME_NOT_SUPPORTED defines administration field is invalid.
-    SecuritySchemeNotSupported = 53,
-
-    // INVALID_COMMAND defines administration command is invalid.
-    InvalidCommand = 54,
-
-    // INVALID_FIELD defines administration field is invalid.
-    InvalidField = 55,
-
-    // ILLEGAL_STATE defines security protocol not followed.
-    IllegalState = 56,
-
-    // INVALID_USER defines user name is invalid.
-    InvalidUser = 60,
-
-    // USER_ALREADY_EXISTS defines user was previously created.
-    UserAlreadyExists = 61,
-
-    // INVALID_PASSWORD defines password is invalid.
-    InvalidPassword = 62,
-
-    // EXPIRED_PASSWORD defines security credential is invalid.
-    ExpiredPassword = 63,
-
-    // FORBIDDEN_PASSWORD defines forbidden password (e.g. recently used)
-    ForbiddenPassword = 64,
-
-    // INVALID_CREDENTIAL defines security credential is invalid.
-    InvalidCredential = 65,
-
-    // EXPIRED_SESSION defines login session expired.
-    ExpiredSession = 66,
-
-    // INVALID_ROLE defines role name is invalid.
-    InvalidRole = 70,
-
-    // ROLE_ALREADY_EXISTS defines role already exists.
-    RoleAlreadyExists = 71,
-
-    // INVALID_PRIVILEGE defines privilege is invalid.
-    InvalidPrivilege = 72,
-
-    // INVALID_WHITELIST defines invalid IP address whiltelist
-    InvalidWhitelist = 73,
-
-    // QUOTAS_NOT_ENABLED defines Quotas not enabled on server.
-    QuotasNotEnabled = 74,
-
-    // INVALID_QUOTA defines invalid quota value.
-    InvalidQuota = 75,
-
-    // NOT_AUTHENTICATED defines user must be authentication before performing database operations.
-    NotAuthenticated = 80,
-
-    // ROLE_VIOLATION defines user does not posses the required role to perform the database operation.
-    RoleViolation = 81,
-
-    // NOT_WHITELISTED defines command not allowed because sender IP address not whitelisted.
-    NotWhitelisted = 82,
-
-    // QUOTA_EXCEEDED defines Quota exceeded.
-    QuotaExceeded = 83,
-
-    // UDF_BAD_RESPONSE defines a user defined function returned an error code.
-    UdfBadResponse = 100,
-
-    // BATCH_DISABLED defines batch functionality has been disabled.
-    BatchDisabled = 150,
-
-    // BATCH_MAX_REQUESTS_EXCEEDED defines batch max requests have been exceeded.
-    BatchMaxRequestsExceeded = 151,
-
-    // BATCH_QUEUES_FULL defines all batch queues are full.
-    BatchQueuesFull = 152,
-
-    // GEO_INVALID_GEOJSON defines invalid GeoJSON on insert/update
-    GeoInvalidGeojson = 160,
-
-    // INDEX_FOUND defines secondary index already exists.
-    IndexFound = 200,
-
-    // INDEX_NOTFOUND defines requested secondary index does not exist.
-    IndexNotFound = 201,
-
-    // INDEX_OOM defines secondary index memory space exceeded.
-    IndexOom = 202,
-
-    // INDEX_NOTREADABLE defines secondary index not available.
-    IndexNotReadable = 203,
-
-    // INDEX_GENERIC defines generic secondary index error.
-    IndexGeneric = 204,
-
-    // INDEX_NAME_MAXLEN defines index name maximum length exceeded.
-    IndexNameMaxLen = 205,
-
-    // INDEX_MAXCOUNT defines maximum number of indexes exceeded.
-    IndexMaxCount = 206,
-
-    // QUERY_ABORTED defines secondary index query aborted.
-    QueryAborted = 210,
-
-    // QUERY_QUEUEFULL defines secondary index queue full.
-    QueryQueueFull = 211,
-
-    // QUERY_TIMEOUT defines secondary index query timed out on server.
-    QueryTimeout = 212,
-
-    // QUERY_GENERIC defines generic query error.
-    QueryGeneric = 213,
-
-    // QUERY_NETIO_ERR defines query NetIO error on server
-    QueryNetIoErr = 214,
-
-    // QUERY_DUPLICATE defines duplicate TaskId sent for the statement
-    QueryDuplicate = 215,
-
-    // AEROSPIKE_ERR_UDF_NOT_FOUND defines UDF does not exist.
-    AerospikeErrUdfNotFound = 1301,
-
-    // AEROSPIKE_ERR_LUA_FILE_NOT_FOUND defines LUA file does not exist.
-    AerospikeErrLuaFileNotFound = 1302,
-}
-
-impl From<ResultCode> for String {
-    fn from(input: ResultCode) -> Self {
-        match input {
-    ResultCode::GrpcError => "wrapped and directly returned from the grpc library".into(),
-    ResultCode::BatchFailed => "one or more keys failed in a batch".into(),
-    ResultCode::NoResponse => "no response was received from the server".into(),
-    ResultCode::NetworkError => "a network error. Checked the wrapped error for detail".into(),
-    ResultCode::CommonError => "a common, none-aerospike error. Checked the wrapped error for detail".into(),
-    ResultCode::MaxRetriesExceeded => "max retries limit reached".into(),
-    ResultCode::MaxErrorRate => "max errors limit reached".into(),
-    ResultCode::RackNotDefined => "requested Rack for node/namespace was not defined in the cluster".into(),
-    ResultCode::InvalidClusterPartitionMap => "cluster has an invalid partition map, usually due to bad configuration".into(),
-    ResultCode::ServerNotAvailable => "server is not accepting requests".into(),
-    ResultCode::ClusterNameMismatchError => "cluster Name does not match the ClientPolicy.ClusterName value".into(),
-    ResultCode::RecordsetClosed => "recordset has already been closed or cancelled".into(),
-    ResultCode::NoAvailableConnectionsToNode => "there were no connections available to the node in the pool, and the pool was limited".into(),
-    ResultCode::TypeNotSupported => "data type is not supported by aerospike server".into(),
-    ResultCode::CommandRejected => "info Command was rejected by the server".into(),
-    ResultCode::QueryTerminated => "query was terminated by user".into(),
-    ResultCode::ScanTerminated => "scan was terminated by user".into(),
-    ResultCode::InvalidNodeError => "chosen node is not currently active".into(),
-    ResultCode::ParseError => "client parse error".into(),
-    ResultCode::SerializeError => "client serialization error".into(),
-    ResultCode::OK => "operation was successful".into(),
-    ResultCode::ServerError => "unknown server failure".into(),
-    ResultCode::KeyNotFoundError => "on retrieving, touching or replacing a record that doesn't exist".into(),
-    ResultCode::GenerationError => "on modifying a record with unexpected generation".into(),
-    ResultCode::ParameterError => "bad parameter(s) were passed in database operation call".into(),
-    ResultCode::KeyExistsError => "on create-only (write unique) operations on a record that already exists".into(),
-    ResultCode::BinExistsError => "bin already exists on a create-only operation".into(),
-    ResultCode::ClusterKeyMismatch => "expected cluster ID was not received".into(),
-    ResultCode::ServerMemError => "server has run out of memory".into(),
-    ResultCode::Timeout => "client or server has timed out".into(),
-    ResultCode::AlwaysForbidden => "operation not allowed in current configuration".into(),
-    ResultCode::PartitionUnavailable => "partition is unavailable".into(),
-    ResultCode::BinTypeError => "operation is not supported with configured bin type (single-bin or multi-bin)".into(),
-    ResultCode::RecordTooBig => "record size exceeds limit".into(),
-    ResultCode::KeyBusy => "too many concurrent operations on the same record".into(),
-    ResultCode::ScanAbort => "scan aborted by server".into(),
-    ResultCode::UnsupportedFeature => "unsupported Server Feature (e.g. Scan + UDF)".into(),
-    ResultCode::BinNotFound => "bin not found on update-only operation".into(),
-    ResultCode::DeviceOverload => "device not keeping up with writes".into(),
-    ResultCode::KeyMismatch => "key type mismatch".into(),
-    ResultCode::InvalidNamespace => "invalid namespace".into(),
-    ResultCode::BinNameTooLong => "bin name length greater than 14 characters, or maximum number of unique bin names are exceeded".into(),
-    ResultCode::FailForbidden => "operation not allowed at this time".into(),
-    ResultCode::FailElementNotFound => "element Not Found in CDT".into(),
-    ResultCode::FailElementExists => "element Already Exists in CDT".into(),
-    ResultCode::EnterpriseOnly => "attempt to use an Enterprise feature on a Community server or a server without the applicable feature key".into(),
-    ResultCode::OpNotApplicable => "the operation cannot be applied to the current bin value on the server".into(),
-    ResultCode::FilteredOut => "the transaction was not performed because the filter was false".into(),
-    ResultCode::LostConflict => "write command loses conflict to XDR".into(),
-    ResultCode::QueryEnd => "there are no more records left for query".into(),
-    ResultCode::SecurityNotSupported => "security type not supported by connected server".into(),
-    ResultCode::SecurityNotEnabled => "administration command is invalid".into(),
-    ResultCode::SecuritySchemeNotSupported => "administration field is invalid".into(),
-    ResultCode::InvalidCommand => "administration command is invalid".into(),
-    ResultCode::InvalidField => "administration field is invalid".into(),
-    ResultCode::IllegalState => "security protocol not followed".into(),
-    ResultCode::InvalidUser => "user name is invalid".into(),
-    ResultCode::UserAlreadyExists => "user was previously created".into(),
-    ResultCode::InvalidPassword => "password is invalid".into(),
-    ResultCode::ExpiredPassword => "security credential is invalid".into(),
-    ResultCode::ForbiddenPassword => "forbidden password (e.g. recently used)".into(),
-    ResultCode::InvalidCredential => "security credential is invalid".into(),
-    ResultCode::ExpiredSession => "login session expired".into(),
-    ResultCode::InvalidRole => "role name is invalid".into(),
-    ResultCode::RoleAlreadyExists => "role already exists".into(),
-    ResultCode::InvalidPrivilege => "privilege is invalid".into(),
-    ResultCode::InvalidWhitelist => "invalid IP address whiltelist".into(),
-    ResultCode::QuotasNotEnabled => "Quotas not enabled on server".into(),
-    ResultCode::InvalidQuota => "invalid quota value".into(),
-    ResultCode::NotAuthenticated => "user must be authentication before performing database operations".into(),
-    ResultCode::RoleViolation => "user does not posses the required role to perform the database operation".into(),
-    ResultCode::NotWhitelisted => "command not allowed because sender IP address not whitelisted".into(),
-    ResultCode::QuotaExceeded => "Quota exceeded".into(),
-    ResultCode::UdfBadResponse => "a user defined function returned an error code".into(),
-    ResultCode::BatchDisabled => "batch functionality has been disabled".into(),
-    ResultCode::BatchMaxRequestsExceeded => "batch max requests have been exceeded".into(),
-    ResultCode::BatchQueuesFull => "all batch queues are full".into(),
-    ResultCode::GeoInvalidGeojson => "invalid GeoJSON on insert/update".into(),
-    ResultCode::IndexFound => "secondary index already exists".into(),
-    ResultCode::IndexNotFound => "requested secondary index does not exist".into(),
-    ResultCode::IndexOom => "secondary index memory space exceeded".into(),
-    ResultCode::IndexNotReadable => "secondary index not available".into(),
-    ResultCode::IndexGeneric => "generic secondary index error".into(),
-    ResultCode::IndexNameMaxLen => "index name maximum length exceeded".into(),
-    ResultCode::IndexMaxCount => "maximum number of indexes exceeded".into(),
-    ResultCode::QueryAborted => "secondary index query aborted".into(),
-    ResultCode::QueryQueueFull => "secondary index queue full".into(),
-    ResultCode::QueryTimeout => "secondary index query timed out on server".into(),
-    ResultCode::QueryGeneric => "generic query error".into(),
-    ResultCode::QueryNetIoErr => "query NetIO error on server".into(),
-    ResultCode::QueryDuplicate => "duplicate TaskId sent for the statement".into(),
-    ResultCode::AerospikeErrUdfNotFound => "UDF does not exist".into(),
-    ResultCode::AerospikeErrLuaFileNotFound => "LUA file does not exist".into(),
-    }
-    }
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -2333,7 +1942,7 @@ enum CDTContextType {
     MapValue = 0x23,
 }
 
-#[php_class(name = "Aerospike\\CDTContext")]
+#[php_class(name = "Aerospike\\Context")]
 pub struct CDTContext {
     _as: proto::CdtContext,
 }
@@ -5798,7 +5407,7 @@ impl FromZval<'_> for Privilege {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtListReturnType")]
+#[php_class(name = "Aerospike\\ListReturnType")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtListReturnType {
     // _as: proto::CdtListReturnType,
@@ -5887,7 +5496,7 @@ impl FromZval<'_> for CdtListReturnType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtListWriteFlags")]
+#[php_class(name = "Aerospike\\ListWriteFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtListWriteFlags {
     _as: proto::CdtListWriteFlags,
@@ -5953,7 +5562,7 @@ impl FromZval<'_> for CdtListWriteFlags {
 // TODO: Add the additional expressions (HLL, BIT, etc.)
 // TODO: Add method comments
 
-#[php_class(name = "Aerospike\\CdtListSortFlags")]
+#[php_class(name = "Aerospike\\ListSortFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtListSortFlags {
     _as: proto::CdtListSortFlags,
@@ -6003,7 +5612,7 @@ impl FromZval<'_> for CdtListSortFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtListPolicy")]
+#[php_class(name = "Aerospike\\ListPolicy")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtListPolicy {
     _as: proto::CdtListPolicy,
@@ -6806,7 +6415,7 @@ impl CdtListOperation {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtMapReturnType")]
+#[php_class(name = "Aerospike\\MapReturnType")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtMapReturnType {
     // _as: proto::CdtMapReturnType,
@@ -6919,7 +6528,7 @@ impl FromZval<'_> for CdtMapReturnType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtMapWriteMode")]
+#[php_class(name = "Aerospike\\MapWriteMode")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtMapWriteMode {
     _as: proto::CdtMapWriteMode,
@@ -6969,7 +6578,7 @@ impl FromZval<'_> for CdtMapWriteMode {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtMapWriteFlags")]
+#[php_class(name = "Aerospike\\MapWriteFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtMapWriteFlags {
     _as: proto::CdtMapWriteFlags,
@@ -7031,7 +6640,7 @@ impl FromZval<'_> for CdtMapWriteFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtMapPolicy")]
+#[php_class(name = "Aerospike\\MapPolicy")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtMapPolicy {
     _as: proto::CdtMapPolicy,
@@ -7889,7 +7498,7 @@ impl CdtMapOperation {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtHllWriteFlags")]
+#[php_class(name = "Aerospike\\HllWriteFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtHllWriteFlags {
     _as: proto::CdtHllWriteFlags,
@@ -7951,7 +7560,7 @@ impl FromZval<'_> for CdtHllWriteFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtHllPolicy")]
+#[php_class(name = "Aerospike\\HllPolicy")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtHllPolicy {
     _as: proto::CdtHllPolicy,
@@ -8179,7 +7788,7 @@ impl CdtHllOperation {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtBitwiseWriteFlags")]
+#[php_class(name = "Aerospike\\BitwiseWriteFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtBitwiseWriteFlags {
     _as: proto::CdtBitwiseWriteFlags,
@@ -8241,7 +7850,7 @@ impl FromZval<'_> for CdtBitwiseWriteFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtBitwiseResizeFlags")]
+#[php_class(name = "Aerospike\\BitwiseResizeFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtBitwiseResizeFlags {
     _as: proto::CdtBitwiseResizeFlags,
@@ -8297,7 +7906,7 @@ impl FromZval<'_> for CdtBitwiseResizeFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtBitwiseOverflowAction")]
+#[php_class(name = "Aerospike\\BitwiseOverflowAction")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtBitwiseOverflowAction {
     _as: proto::CdtBitwiseOverflowAction,
@@ -8347,7 +7956,7 @@ impl FromZval<'_> for CdtBitwiseOverflowAction {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\CdtBitwisePolicy")]
+#[php_class(name = "Aerospike\\BitwisePolicy")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtBitwisePolicy {
     _as: proto::CdtBitwisePolicy,
@@ -8971,7 +8580,7 @@ impl Client {
             proto::AerospikeSingleResponse {
                 error:
                     Some(proto::Error {
-                        result_code: 2, // ResultCode::KeyNotFoundError
+                        result_code: ResultCode::KEY_NOT_FOUND_ERROR,
                         in_doubt: false,
                     }),
                 record: None,
@@ -9010,7 +8619,7 @@ impl Client {
             proto::AerospikeSingleResponse {
                 error:
                     Some(proto::Error {
-                        result_code: 2, //ResultCode::KeyNotFoundError,
+                        result_code: ResultCode::KEY_NOT_FOUND_ERROR,
                         in_doubt: false,
                     }),
                 record: None,
@@ -9841,7 +9450,7 @@ impl AerospikeException {
     pub fn new(message: &str) -> Self {
         AerospikeException {
             message: message.to_string(),
-            code: ResultCode::CommonError as i32,
+            code: ResultCode::COMMON_ERROR,
             in_doubt: false,
         }
     }
@@ -9849,9 +9458,7 @@ impl AerospikeException {
 
 impl From<&proto::Error> for AerospikeException {
     fn from(error: &proto::Error) -> AerospikeException {
-        let msg: String = FromPrimitive::from_i32(error.result_code)
-            .map(|rc: ResultCode| rc.into())
-            .unwrap_or("unknown error".into());
+        let msg: String = ResultCode::to_string(error.result_code);
         AerospikeException {
             message: msg,
             code: error.result_code,
@@ -9905,21 +9512,27 @@ impl Key {
         self._as.value.clone().map(|v| v.into())
     }
 
-    fn compute_digest(set: &str, user_key: PHPValue) -> Vec<u8> {
+    fn compute_digest(&self) -> Vec<u8> {
         let mut hash = Ripemd160::new();
-        hash.input(set.as_bytes());
-        hash.input(&[user_key.particle_type() as u8]);
-        match user_key.write_key_bytes(&mut hash) {
-            Ok(()) => (),
-            Err(pe) => {
-                let msg = format!("{}", pe);
-                let error = AerospikeException::new(&msg);
-                throw_object(error.into_zval(true).unwrap()).unwrap();
-                return vec![];
+        match (self._as.set.as_ref(), self._as.value.as_ref()) {
+            (Some(set), Some(value)) => {
+                hash.input(set.as_bytes());
+                let value: PHPValue = value.clone().into();
+                hash.input(&[value.particle_type() as u8]);
+                match value.write_key_bytes(&mut hash) {
+                    Ok(()) => (),
+                    Err(pe) => {
+                        let msg = format!("{}", pe);
+                        let error = AerospikeException::new(&msg);
+                        throw_object(error.into_zval(true).unwrap()).unwrap();
+                        return vec![];
+                    }
+                };
+                let h: [u8; 20] = hash.result().into();
+                h.into()
             }
-        };
-        let h: [u8; 20] = hash.result().into();
-        h.into()
+            _ => vec![],
+        }
     }
 
     #[getter]
@@ -9928,12 +9541,7 @@ impl Key {
             .digest
             .as_ref()
             .map(|digest| digest.clone())
-            .unwrap_or({
-                Self::compute_digest(
-                    &self._as.set.clone().unwrap(),
-                    self._as.value.clone().unwrap().into(),
-                )
-            })
+            .unwrap_or(self.compute_digest())
     }
 
     #[getter]
@@ -10271,8 +9879,8 @@ impl PHPValue {
 
     /// Serialize the value as a record key.
     /// For internal use only.
-    fn write_key_bytes(&self, h: &mut Ripemd160) -> Result<(), &str> {
-        match *self {
+    fn write_key_bytes(self, h: &mut Ripemd160) -> Result<(), String> {
+        match self {
             PHPValue::Int(ref val) => {
                 let mut buf = [0; 8];
                 NetworkEndian::write_i64(&mut buf, *val);
@@ -10287,7 +9895,7 @@ impl PHPValue {
                 h.input(val);
                 Ok(())
             }
-            _ => Err("Data type is not supported as Key value."),
+            _ => Err(format!("Data type is not supported as Key value: {}", self)),
         }
     }
 }
@@ -10687,6 +10295,397 @@ impl std::fmt::Display for AeroPHPError {
     }
 }
 
+#[allow(non_camel_case_types)]
+////////////////////////////////////////////////////////////////////////////////////////////
+//
+// ResultCode
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+#[php_class(name = "Aerospike\\ResultCode")]
+struct ResultCode {}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl ResultCode {
+    // GRPC_ERROR is wrapped and directly returned from the grpc library
+    const GRPC_ERROR: i32 = -21;
+
+    // BATCH_FAILED means one or more keys failed in a batch.
+    const BATCH_FAILED: i32 = -20;
+
+    // NO_RESPONSE means no response was received from the server.
+    const NO_RESPONSE: i32 = -19;
+
+    // NETWORK_ERROR defines a network error. Checked the wrapped error for detail.
+    const NETWORK_ERROR: i32 = -18;
+
+    // COMMON_ERROR defines a common, none-aerospike error. Checked the wrapped error for detail.
+    const COMMON_ERROR: i32 = -17;
+
+    // MAX_RETRIES_EXCEEDED defines max retries limit reached.
+    const MAX_RETRIES_EXCEEDED: i32 = -16;
+
+    // MAX_ERROR_RATE defines max errors limit reached.
+    const MAX_ERROR_RATE: i32 = -15;
+
+    // RACK_NOT_DEFINED defines requested Rack for node/namespace was not defined in the cluster.
+    const RACK_NOT_DEFINED: i32 = -13;
+
+    // INVALID_CLUSTER_PARTITION_MAP defines cluster has an invalid partition map, usually due to bad configuration.
+    const INVALID_CLUSTER_PARTITION_MAP: i32 = -12;
+
+    // SERVER_NOT_AVAILABLE defines server is not accepting requests.
+    const SERVER_NOT_AVAILABLE: i32 = -11;
+
+    // CLUSTER_NAME_MISMATCH_ERROR defines cluster Name does not match the ClientPolicy.ClusterName value.
+    const CLUSTER_NAME_MISMATCH_ERROR: i32 = -10;
+
+    // RECORDSET_CLOSED defines recordset has already been closed or cancelled
+    const RECORDSET_CLOSED: i32 = -9;
+
+    // NO_AVAILABLE_CONNECTIONS_TO_NODE defines there were no connections available to the node in the pool, and the pool was limited
+    const NO_AVAILABLE_CONNECTIONS_TO_NODE: i32 = -8;
+
+    // TYPE_NOT_SUPPORTED defines data type is not supported by aerospike server.
+    const TYPE_NOT_SUPPORTED: i32 = -7;
+
+    // COMMAND_REJECTED defines info Command was rejected by the server.
+    const COMMAND_REJECTED: i32 = -6;
+
+    // QUERY_TERMINATED defines query was terminated by user.
+    const QUERY_TERMINATED: i32 = -5;
+
+    // SCAN_TERMINATED defines scan was terminated by user.
+    const SCAN_TERMINATED: i32 = -4;
+
+    // INVALID_NODE_ERROR defines chosen node is not currently active.
+    const INVALID_NODE_ERROR: i32 = -3;
+
+    // PARSE_ERROR defines client parse error.
+    const PARSE_ERROR: i32 = -2;
+
+    // SERIALIZE_ERROR defines client serialization error.
+    const SERIALIZE_ERROR: i32 = -1;
+
+    // OK defines operation was successful.
+    const OK: i32 = 0;
+
+    // SERVER_ERROR defines unknown server failure.
+    const SERVER_ERROR: i32 = 1;
+
+    // KEY_NOT_FOUND_ERROR defines on retrieving, touching or replacing a record that doesn't exist.
+    const KEY_NOT_FOUND_ERROR: i32 = 2;
+
+    // GENERATION_ERROR defines on modifying a record with unexpected generation.
+    const GENERATION_ERROR: i32 = 3;
+
+    // PARAMETER_ERROR defines bad parameter(s) were passed in database operation call.
+    const PARAMETER_ERROR: i32 = 4;
+
+    // KEY_EXISTS_ERROR defines on create-only (write unique) operations on a record that already exists.
+    const KEY_EXISTS_ERROR: i32 = 5;
+
+    // BIN_EXISTS_ERROR defines bin already exists on a create-only operation.
+    const BIN_EXISTS_ERROR: i32 = 6;
+
+    // CLUSTER_KEY_MISMATCH defines expected cluster ID was not received.
+    const CLUSTER_KEY_MISMATCH: i32 = 7;
+
+    // SERVER_MEM_ERROR defines server has run out of memory.
+    const SERVER_MEM_ERROR: i32 = 8;
+
+    // TIMEOUT defines client or server has timed out.
+    const TIMEOUT: i32 = 9;
+
+    // ALWAYS_FORBIDDEN defines operation not allowed in current configuration.
+    const ALWAYS_FORBIDDEN: i32 = 10;
+
+    // PARTITION_UNAVAILABLE defines partition is unavailable.
+    const PARTITION_UNAVAILABLE: i32 = 11;
+
+    // BIN_TYPE_ERROR defines operation is not supported with configured bin type (single-bin or multi-bin);
+    const BIN_TYPE_ERROR: i32 = 12;
+
+    // RECORD_TOO_BIG defines record size exceeds limit.
+    const RECORD_TOO_BIG: i32 = 13;
+
+    // KEY_BUSY defines too many concurrent operations on the same record.
+    const KEY_BUSY: i32 = 14;
+
+    // SCAN_ABORT defines scan aborted by server.
+    const SCAN_ABORT: i32 = 15;
+
+    // UNSUPPORTED_FEATURE defines unsupported Server Feature (e.g. Scan + UDF)
+    const UNSUPPORTED_FEATURE: i32 = 16;
+
+    // BIN_NOT_FOUND defines bin not found on update-only operation.
+    const BIN_NOT_FOUND: i32 = 17;
+
+    // DEVICE_OVERLOAD defines device not keeping up with writes.
+    const DEVICE_OVERLOAD: i32 = 18;
+
+    // KEY_MISMATCH defines key type mismatch.
+    const KEY_MISMATCH: i32 = 19;
+
+    // INVALID_NAMESPACE defines invalid namespace.
+    const INVALID_NAMESPACE: i32 = 20;
+
+    // BIN_NAME_TOO_LONG defines bin name length greater than 14 characters, or maximum number of unique bin names are exceeded;
+    const BIN_NAME_TOO_LONG: i32 = 21;
+
+    // FAIL_FORBIDDEN defines operation not allowed at this time.
+    const FAIL_FORBIDDEN: i32 = 22;
+
+    // FAIL_ELEMENT_NOT_FOUND defines element Not Found in CDT
+    const FAIL_ELEMENT_NOT_FOUND: i32 = 23;
+
+    // FAIL_ELEMENT_EXISTS defines element Already Exists in CDT
+    const FAIL_ELEMENT_EXISTS: i32 = 24;
+
+    // ENTERPRISE_ONLY defines attempt to use an Enterprise feature on a Community server or a server without the applicable feature key;
+    const ENTERPRISE_ONLY: i32 = 25;
+
+    // OP_NOT_APPLICABLE defines the operation cannot be applied to the current bin value on the server.
+    const OP_NOT_APPLICABLE: i32 = 26;
+
+    // FILTERED_OUT defines the transaction was not performed because the filter was false.
+    const FILTERED_OUT: i32 = 27;
+
+    // LOST_CONFLICT defines write command loses conflict to XDR.
+    const LOST_CONFLICT: i32 = 28;
+
+    // QUERY_END defines there are no more records left for query.
+    const QUERY_END: i32 = 50;
+
+    // SECURITY_NOT_SUPPORTED defines security type not supported by connected server.
+    const SECURITY_NOT_SUPPORTED: i32 = 51;
+
+    // SECURITY_NOT_ENABLED defines administration command is invalid.
+    const SECURITY_NOT_ENABLED: i32 = 52;
+
+    // SECURITY_SCHEME_NOT_SUPPORTED defines administration field is invalid.
+    const SECURITY_SCHEME_NOT_SUPPORTED: i32 = 53;
+
+    // INVALID_COMMAND defines administration command is invalid.
+    const INVALID_COMMAND: i32 = 54;
+
+    // INVALID_FIELD defines administration field is invalid.
+    const INVALID_FIELD: i32 = 55;
+
+    // ILLEGAL_STATE defines security protocol not followed.
+    const ILLEGAL_STATE: i32 = 56;
+
+    // INVALID_USER defines user name is invalid.
+    const INVALID_USER: i32 = 60;
+
+    // USER_ALREADY_EXISTS defines user was previously created.
+    const USER_ALREADY_EXISTS: i32 = 61;
+
+    // INVALID_PASSWORD defines password is invalid.
+    const INVALID_PASSWORD: i32 = 62;
+
+    // EXPIRED_PASSWORD defines security credential is invalid.
+    const EXPIRED_PASSWORD: i32 = 63;
+
+    // FORBIDDEN_PASSWORD defines forbidden password (e.g. recently used)
+    const FORBIDDEN_PASSWORD: i32 = 64;
+
+    // INVALID_CREDENTIAL defines security credential is invalid.
+    const INVALID_CREDENTIAL: i32 = 65;
+
+    // EXPIRED_SESSION defines login session expired.
+    const EXPIRED_SESSION: i32 = 66;
+
+    // INVALID_ROLE defines role name is invalid.
+    const INVALID_ROLE: i32 = 70;
+
+    // ROLE_ALREADY_EXISTS defines role already exists.
+    const ROLE_ALREADY_EXISTS: i32 = 71;
+
+    // INVALID_PRIVILEGE defines privilege is invalid.
+    const INVALID_PRIVILEGE: i32 = 72;
+
+    // INVALID_WHITELIST defines invalid IP address whiltelist
+    const INVALID_WHITELIST: i32 = 73;
+
+    // QUOTAS_NOT_ENABLED defines Quotas not enabled on server.
+    const QUOTAS_NOT_ENABLED: i32 = 74;
+
+    // INVALID_QUOTA defines invalid quota value.
+    const INVALID_QUOTA: i32 = 75;
+
+    // NOT_AUTHENTICATED defines user must be authentication before performing database operations.
+    const NOT_AUTHENTICATED: i32 = 80;
+
+    // ROLE_VIOLATION defines user does not posses the required role to perform the database operation.
+    const ROLE_VIOLATION: i32 = 81;
+
+    // NOT_WHITELISTED defines command not allowed because sender IP address not whitelisted.
+    const NOT_WHITELISTED: i32 = 82;
+
+    // QUOTA_EXCEEDED defines Quota exceeded.
+    const QUOTA_EXCEEDED: i32 = 83;
+
+    // UDF_BAD_RESPONSE defines a user defined function returned an error code.
+    const UDF_BAD_RESPONSE: i32 = 100;
+
+    // BATCH_DISABLED defines batch functionality has been disabled.
+    const BATCH_DISABLED: i32 = 150;
+
+    // BATCH_MAX_REQUESTS_EXCEEDED defines batch max requests have been exceeded.
+    const BATCH_MAX_REQUESTS_EXCEEDED: i32 = 151;
+
+    // BATCH_QUEUES_FULL defines all batch queues are full.
+    const BATCH_QUEUES_FULL: i32 = 152;
+
+    // GEO_INVALID_GEOJSON defines invalid GeoJSON on insert/update
+    const GEO_INVALID_GEOJSON: i32 = 160;
+
+    // INDEX_FOUND defines secondary index already exists.
+    const INDEX_FOUND: i32 = 200;
+
+    // INDEX_NOTFOUND defines requested secondary index does not exist.
+    const INDEX_NOT_FOUND: i32 = 201;
+
+    // INDEX_OOM defines secondary index memory space exceeded.
+    const INDEX_OOM: i32 = 202;
+
+    // INDEX_NOTREADABLE defines secondary index not available.
+    const INDEX_NOT_READABLE: i32 = 203;
+
+    // INDEX_GENERIC defines generic secondary index error.
+    const INDEX_GENERIC: i32 = 204;
+
+    // INDEX_NAME_MAXLEN defines index name maximum length exceeded.
+    const INDEX_NAME_MAX_LEN: i32 = 205;
+
+    // INDEX_MAXCOUNT defines maximum number of indexes exceeded.
+    const INDEX_MAX_COUNT: i32 = 206;
+
+    // QUERY_ABORTED defines secondary index query aborted.
+    const QUERY_ABORTED: i32 = 210;
+
+    // QUERY_QUEUEFULL defines secondary index queue full.
+    const QUERY_QUEUE_FULL: i32 = 211;
+
+    // QUERY_TIMEOUT defines secondary index query timed out on server.
+    const QUERY_TIMEOUT: i32 = 212;
+
+    // QUERY_GENERIC defines generic query error.
+    const QUERY_GENERIC: i32 = 213;
+
+    // QUERY_NETIO_ERR defines query NetIO error on server
+    const QUERY_NET_IO_ERR: i32 = 214;
+
+    // QUERY_DUPLICATE defines duplicate TaskId sent for the statement
+    const QUERY_DUPLICATE: i32 = 215;
+
+    // AEROSPIKE_ERR_UDF_NOT_FOUND defines UDF does not exist.
+    const AEROSPIKE_ERR_UDF_NOT_FOUND: i32 = 1301;
+
+    // AEROSPIKE_ERR_LUA_FILE_NOT_FOUND defines LUA file does not exist.
+    const AEROSPIKE_ERR_LUA_FILE_NOT_FOUND: i32 = 1302;
+
+    pub fn to_string(code: i32) -> String {
+        match code {
+            ResultCode::GRPC_ERROR => "wrapped and directly returned from the grpc library".into(),
+            ResultCode::BATCH_FAILED => "one or more keys failed in a batch".into(),
+            ResultCode::NO_RESPONSE => "no response was received from the server".into(),
+            ResultCode::NETWORK_ERROR => "a network error. Checked the wrapped error for detail".into(),
+            ResultCode::COMMON_ERROR => "a common, none-aerospike error. Checked the wrapped error for detail".into(),
+            ResultCode::MAX_RETRIES_EXCEEDED => "max retries limit reached".into(),
+            ResultCode::MAX_ERROR_RATE => "max errors limit reached".into(),
+            ResultCode::RACK_NOT_DEFINED => "requested Rack for node/namespace was not defined in the cluster".into(),
+            ResultCode::INVALID_CLUSTER_PARTITION_MAP => "cluster has an invalid partition map, usually due to bad configuration".into(),
+            ResultCode::SERVER_NOT_AVAILABLE => "server is not accepting requests".into(),
+            ResultCode::CLUSTER_NAME_MISMATCH_ERROR => "cluster Name does not match the ClientPolicy.ClusterName value".into(),
+            ResultCode::RECORDSET_CLOSED=> "recordset has already been closed or cancelled".into(),
+            ResultCode::NO_AVAILABLE_CONNECTIONS_TO_NODE=> "there were no connections available to the node in the pool, and the pool was limited".into(),
+            ResultCode::TYPE_NOT_SUPPORTED=> "data type is not supported by aerospike server".into(),
+            ResultCode::COMMAND_REJECTED=> "info Command was rejected by the server".into(),
+            ResultCode::QUERY_TERMINATED=> "query was terminated by user".into(),
+            ResultCode::SCAN_TERMINATED=> "scan was terminated by user".into(),
+            ResultCode::INVALID_NODE_ERROR=> "chosen node is not currently active".into(),
+            ResultCode::PARSE_ERROR=> "client parse error".into(),
+            ResultCode::SERIALIZE_ERROR=> "client serialization error".into(),
+            ResultCode::OK=> "operation was successful".into(),
+            ResultCode::SERVER_ERROR=> "unknown server failure".into(),
+            ResultCode::KEY_NOT_FOUND_ERROR=> "on retrieving, touching or replacing a record that doesn't exist".into(),
+            ResultCode::GENERATION_ERROR=> "on modifying a record with unexpected generation".into(),
+            ResultCode::PARAMETER_ERROR=> "bad parameter(s) were passed in database operation call".into(),
+            ResultCode::KEY_EXISTS_ERROR=> "on create-only (write unique) operations on a record that already exists".into(),
+            ResultCode::BIN_EXISTS_ERROR=> "bin already exists on a create-only operation".into(),
+            ResultCode::CLUSTER_KEY_MISMATCH=> "expected cluster ID was not received".into(),
+            ResultCode::SERVER_MEM_ERROR=> "server has run out of memory".into(),
+            ResultCode::TIMEOUT=> "client or server has timed out".into(),
+            ResultCode::ALWAYS_FORBIDDEN=> "operation not allowed in current configuration".into(),
+            ResultCode::PARTITION_UNAVAILABLE=> "partition is unavailable".into(),
+            ResultCode::BIN_TYPE_ERROR=> "operation is not supported with configured bin type (single-bin or multi-bin)".into(),
+            ResultCode::RECORD_TOO_BIG=> "record size exceeds limit".into(),
+            ResultCode::KEY_BUSY=> "too many concurrent operations on the same record".into(),
+            ResultCode::SCAN_ABORT=> "scan aborted by server".into(),
+            ResultCode::UNSUPPORTED_FEATURE=> "unsupported Server Feature (e.g. Scan + UDF)".into(),
+            ResultCode::BIN_NOT_FOUND=> "bin not found on update-only operation".into(),
+            ResultCode::DEVICE_OVERLOAD=> "device not keeping up with writes".into(),
+            ResultCode::KEY_MISMATCH=> "key type mismatch".into(),
+            ResultCode::INVALID_NAMESPACE=> "invalid namespace".into(),
+            ResultCode::BIN_NAME_TOO_LONG=> "bin name length greater than 14 characters, or maximum number of unique bin names are exceeded".into(),
+            ResultCode::FAIL_FORBIDDEN=> "operation not allowed at this time".into(),
+            ResultCode::FAIL_ELEMENT_NOT_FOUND=> "element Not Found in CDT".into(),
+            ResultCode::FAIL_ELEMENT_EXISTS=> "element Already Exists in CDT".into(),
+            ResultCode::ENTERPRISE_ONLY=> "attempt to use an Enterprise feature on a Community server or a server without the applicable feature key".into(),
+            ResultCode::OP_NOT_APPLICABLE=> "the operation cannot be applied to the current bin value on the server".into(),
+            ResultCode::FILTERED_OUT=> "the transaction was not performed because the filter was false".into(),
+            ResultCode::LOST_CONFLICT=> "write command loses conflict to XDR".into(),
+            ResultCode::QUERY_END=> "there are no more records left for query".into(),
+            ResultCode::SECURITY_NOT_SUPPORTED=> "security type not supported by connected server".into(),
+            ResultCode::SECURITY_NOT_ENABLED=> "administration command is invalid".into(),
+            ResultCode::SECURITY_SCHEME_NOT_SUPPORTED=> "administration field is invalid".into(),
+            ResultCode::INVALID_COMMAND=> "administration command is invalid".into(),
+            ResultCode::INVALID_FIELD=> "administration field is invalid".into(),
+            ResultCode::ILLEGAL_STATE=> "security protocol not followed".into(),
+            ResultCode::INVALID_USER=> "user name is invalid".into(),
+            ResultCode::USER_ALREADY_EXISTS=> "user was previously created".into(),
+            ResultCode::INVALID_PASSWORD=> "password is invalid".into(),
+            ResultCode::EXPIRED_PASSWORD=> "security credential is invalid".into(),
+            ResultCode::FORBIDDEN_PASSWORD=> "forbidden password (e.g. recently used)".into(),
+            ResultCode::INVALID_CREDENTIAL=> "security credential is invalid".into(),
+            ResultCode::EXPIRED_SESSION=> "login session expired".into(),
+            ResultCode::INVALID_ROLE=> "role name is invalid".into(),
+            ResultCode::ROLE_ALREADY_EXISTS=> "role already exists".into(),
+            ResultCode::INVALID_PRIVILEGE=> "privilege is invalid".into(),
+            ResultCode::INVALID_WHITELIST=> "invalid IP address whiltelist".into(),
+            ResultCode::QUOTAS_NOT_ENABLED=> "Quotas not enabled on server".into(),
+            ResultCode::INVALID_QUOTA=> "invalid quota value".into(),
+            ResultCode::NOT_AUTHENTICATED=> "user must be authentication before performing database operations".into(),
+            ResultCode::ROLE_VIOLATION=> "user does not posses the required role to perform the database operation".into(),
+            ResultCode::NOT_WHITELISTED=> "command not allowed because sender IP address not whitelisted".into(),
+            ResultCode::QUOTA_EXCEEDED=> "Quota exceeded".into(),
+            ResultCode::UDF_BAD_RESPONSE => "a user defined function returned an error code".into(),
+            ResultCode::BATCH_DISABLED => "batch functionality has been disabled".into(),
+            ResultCode::BATCH_MAX_REQUESTS_EXCEEDED => "batch max requests have been exceeded".into(),
+            ResultCode::BATCH_QUEUES_FULL => "all batch queues are full".into(),
+            ResultCode::GEO_INVALID_GEOJSON => "invalid GeoJSON on insert/update".into(),
+            ResultCode::INDEX_FOUND => "secondary index already exists".into(),
+            ResultCode::INDEX_NOT_FOUND => "requested secondary index does not exist".into(),
+            ResultCode::INDEX_OOM => "secondary index memory space exceeded".into(),
+            ResultCode::INDEX_NOT_READABLE => "secondary index not available".into(),
+            ResultCode::INDEX_GENERIC => "generic secondary index error".into(),
+            ResultCode::INDEX_NAME_MAX_LEN => "index name maximum length exceeded".into(),
+            ResultCode::INDEX_MAX_COUNT => "maximum number of indexes exceeded".into(),
+            ResultCode::QUERY_ABORTED => "secondary index query aborted".into(),
+            ResultCode::QUERY_QUEUE_FULL => "secondary index queue full".into(),
+            ResultCode::QUERY_TIMEOUT => "secondary index query timed out on server".into(),
+            ResultCode::QUERY_GENERIC => "generic query error".into(),
+            ResultCode::QUERY_NET_IO_ERR => "query NetIO error on server".into(),
+            ResultCode::QUERY_DUPLICATE => "duplicate TaskId sent for the statement".into(),
+            ResultCode::AEROSPIKE_ERR_UDF_NOT_FOUND => "UDF does not exist".into(),
+            ResultCode::AEROSPIKE_ERR_LUA_FILE_NOT_FOUND => "LUA file does not exist".into(),
+            _ => "Unknown Error".into()
+            }
+    }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  utility methods
@@ -10737,6 +10736,14 @@ fn get_persisted_client(key: &str) -> Option<Zval> {
     let zo: ZBox<ZendObject> = client.into_zend_object().ok()?;
     zval.set_object(zo.into_raw());
     Some(zval)
+}
+
+/// Used by the `phpinfo()` function and when you run `php -i`.
+/// This will probably be simplified with another macro eventually!
+pub extern "C" fn php_module_info(_module: *mut ModuleEntry) {
+    info_table_start!();
+    info_table_row!("Aerospike Client PHP (IPC)", "enabled");
+    info_table_end!();
 }
 
 #[php_module]

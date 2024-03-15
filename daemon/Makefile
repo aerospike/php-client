@@ -24,7 +24,7 @@ build:
 
 run: clean proto
 	$(GOBUILD) -o $(BINARY_NAME) -v .
-	./$(BINARY_NAME) -config-file asld.toml &
+	./$(BINARY_NAME) -config-file asld.toml
 
 daemonize: clean proto
 	$(GOBUILD) -o $(BINARY_NAME) -v .

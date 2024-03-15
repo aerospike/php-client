@@ -1,6 +1,7 @@
-<?php 
+<?php
 
 namespace Aerospike;
+
 use PHPUnit\Framework\TestCase;
 
 final class KeyTest extends TestCase
@@ -31,5 +32,41 @@ final class KeyTest extends TestCase
         $key = new Key("namespace", "set", "someValue");
         $digest = $key->getDigest();
         $this->assertEquals("fd70ae4e48c2cfa71b37cfcf05d0ae75f46796c7", $digest);
+    }
+
+    public function testMatrixKey()
+    {
+        $matrix = [
+            -2147483648 => "d635a867b755f8f54cdc6275e6fb437df82a728c",
+            2147483647 => "fa8c47b8b898af1bbcb20af0d729ca68359a2645",
+            -32768 => "7f41e9dd1f3fe3694be0430e04c8bfc7d51ec2af",
+            32767 => "309fc9c2619c4f65ff7f4cd82085c3ee7a31fc7c",
+            -128 => "93191e549f8f3548d7e2cfc958ddc8c65bcbe4c6",
+            127 => "a58f7d98bf60e10fe369c82030b1c9dee053def9",
+            -1 => "22116d253745e29fc63fdf760b6e26f7e197e01d",
+            0 => "93d943aae37b017ad7e011b0c1d2e2143c2fb37d",
+
+            "" => "2819b1ff6e346a43b4f5f6b77a88bc3eaac22a83",
+            str_repeat("s", 1) => "607cddba7cd111745ef0a3d783d57f0e83c8f311",
+            str_repeat("a", 10) => "5979fb32a80da070ff356f7695455592272e36c2",
+            str_repeat("m", 100) => "f00ad7dbcb4bd8122d9681bca49b8c2ffd4beeed",
+            str_repeat("t", 1000) => "07ac412d4c33b8628ab147b8db244ce44ae527f8",
+            str_repeat("-", 10000) => "b42e64afbfccb05912a609179228d9249ea1c1a0",
+            str_repeat("+", 100000) => "0a3e888c20bb8958537ddd4ba835e4070bd51740",
+
+            Value::Blob(array_values(unpack('C*', ""))) => "2819b1ff6e346a43b4f5f6b77a88bc3eaac22a83",
+            Value::Blob(array_values(unpack('C*', str_repeat("s", 1)))) => "607cddba7cd111745ef0a3d783d57f0e83c8f311",
+            Value::Blob(array_values(unpack('C*', str_repeat("a", 10)))) => "5979fb32a80da070ff356f7695455592272e36c2",
+            Value::Blob(array_values(unpack('C*', str_repeat("m", 100)))) => "f00ad7dbcb4bd8122d9681bca49b8c2ffd4beeed",
+            Value::Blob(array_values(unpack('C*', str_repeat("t", 1000)))) => "07ac412d4c33b8628ab147b8db244ce44ae527f8",
+            Value::Blob(array_values(unpack('C*', str_repeat("-", 10000)))) => "b42e64afbfccb05912a609179228d9249ea1c1a0",
+            Value::Blob(array_values(unpack('C*', str_repeat("+", 100000)))) => "0a3e888c20bb8958537ddd4ba835e4070bd51740",
+        ];
+
+
+        foreach ($matrix as $key_val => $digest) {
+            $key = new Key("namespace", "set", $key_val);
+            $this->assertEquals($digest, $key->getDigest());
+        }
     }
 }
