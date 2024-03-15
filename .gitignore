@@ -8,3 +8,4 @@ aerospike-rust-client.sublime-workspace
 .DS_Store
 src/com.aerospike.daemon.rs
 daemon/asld
+/vendor
