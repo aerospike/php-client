@@ -6652,13 +6652,16 @@ pub struct CdtMapPolicy {
 impl CdtMapPolicy {
     pub fn __construct(
         order: &MapOrderType,
-        flags: Vec<&CdtMapWriteFlags>,
+        flags: Option<Vec<&CdtMapWriteFlags>>,
         persisted_index: Option<bool>,
     ) -> Self {
-        let flags: i32 = flags.into_iter().fold(0 as i32, |acc, f| {
-            let f: i32 = f._as.into();
-            acc | f
-        });
+        let flags: i32 = flags
+            .unwrap_or(vec![])
+            .into_iter()
+            .fold(0 as i32, |acc, f| {
+                let f: i32 = f._as.into();
+                acc | f
+            });
 
         Self {
             _as: proto::CdtMapPolicy {
@@ -6731,7 +6734,7 @@ impl CdtMapOperation {
         Operation {
             _as: proto::operation::Op::Map(proto::CdtMapOperation {
                 op: proto::CdtMapCommandOp::Create.into(),
-                policy: Some(CdtMapPolicy::__construct(order, vec![], with_index)._as),
+                policy: Some(CdtMapPolicy::__construct(order, None, with_index)._as),
                 bin_name: bin_name,
                 args: vec![],
                 return_type: None,
@@ -6761,9 +6764,9 @@ impl CdtMapOperation {
         }
     }
 
-    pub fn size(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Self {
-        CdtMapOperation {
-            _as: proto::CdtMapOperation {
+    pub fn size(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
                 op: proto::CdtMapCommandOp::SetPolicy.into(),
                 policy: None,
                 bin_name: bin_name,
@@ -6772,7 +6775,7 @@ impl CdtMapOperation {
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
-            },
+            }),
         }
     }
 
@@ -6781,13 +6784,13 @@ impl CdtMapOperation {
         bin_name: String,
         map: PHPValue,
         ctx: Option<Vec<&CDTContext>>,
-    ) -> Option<Self> {
+    ) -> Option<Operation> {
         if !assert_map(&map) {
             return None;
         }
 
-        Some(CdtMapOperation {
-            _as: proto::CdtMapOperation {
+        Some(Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
                 op: proto::CdtMapCommandOp::PutItems.into(),
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
@@ -6796,7 +6799,7 @@ impl CdtMapOperation {
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
-            },
+            }),
         })
     }
 
@@ -6842,9 +6845,9 @@ impl CdtMapOperation {
         }
     }
 
-    pub fn clear(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Self {
-        CdtMapOperation {
-            _as: proto::CdtMapOperation {
+    pub fn clear(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
+        Operation {
+            _as: proto::operation::Op::Map(proto::CdtMapOperation {
                 op: proto::CdtMapCommandOp::Clear.into(),
                 policy: None,
                 bin_name: bin_name,
@@ -6853,7 +6856,7 @@ impl CdtMapOperation {
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
-            },
+            }),
         }
     }
 
@@ -7601,7 +7604,7 @@ impl FromZval<'_> for CdtHllPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\Map")]
+#[php_class(name = "Aerospike\\HllOp")]
 pub struct CdtHllOperation {
     _as: proto::CdtHllOperation,
 }
@@ -7997,7 +8000,7 @@ impl FromZval<'_> for CdtBitwisePolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-#[php_class(name = "Aerospike\\Map")]
+#[php_class(name = "Aerospike\\BitwiseOp")]
 pub struct CdtBitwiseOperation {
     _as: proto::CdtBitwiseOperation,
 }
