@@ -30,7 +30,7 @@ class CDTBitwiseOpTest extends TestCase{
         $randomString = preg_replace('/[^a-zA-Z0-9]/', '', $randomString);
         $randomString = substr($randomString, 0, $length);
         
-        return $randomString;
+        return $randomString; 
     }
 
     protected function setUp(): void
