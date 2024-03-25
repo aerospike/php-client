@@ -1686,6 +1686,12 @@ func fromValue(in any) *pb.Value {
 			m = append(m, &proto.MapEntry{K: fromValue(k), V: fromValue(v)})
 		}
 		return &pb.Value{V: &pb.Value_M{M: &pb.Map{M: m}}}
+	case []aero.MapPair:
+		m := make([]*pb.MapEntry, len(v))
+		for _, mp := range v {
+			m = append(m, &proto.MapEntry{K: fromValue(mp.Key), V: fromValue(mp.Value)})
+		}
+		return &pb.Value{V: &pb.Value_M{M: &pb.Map{M: m}}}
 	case aero.NullValue:
 		return &pb.Value{V: &pb.Value_Nil{Nil: true}}
 	case aero.IntegerValue:
