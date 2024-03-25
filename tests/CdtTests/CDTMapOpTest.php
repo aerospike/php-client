@@ -82,9 +82,4 @@ class CDTMapOpTest extends TestCase{
         
     }
 
-    public function testShouldReturnOrderedCDTMap(){
-        
-    }
-
-
 }

@@ -68,5 +68,28 @@ final class SecurityTest extends TestCase
         $client->changePassword($ap, "user1", "newPassword");
     }
 
+    public function testChangePasswordOfUnknownUser()
+    {  
+        if(!$this->isSecurityEnabled()){
+            $this->markTestSkipped("Enable Secuirty in Aerospike.conf");
+        }
+        
+        $ap = new AdminPolicy();
+        $client->createUser($ap, "userDoesNotExist", "password", ["read-write"]);
+
+        $client->changePassword($ap, "user1", "newPassword");
+    }
+
+    public function testQueryUsers()
+    {  
+        if(!$this->isSecurityEnabled()){
+            $this->markTestSkipped("Enable Secuirty in Aerospike.conf");
+        }
+        $this->expectNotToPerformAssertions();
+        $ap = new AdminPolicy();
+        $client->createUser($ap, "user1", "password", ["read-write"]);
+
+        $client->changePassword($ap, "user1", "newPassword");
+    }
     
 }
