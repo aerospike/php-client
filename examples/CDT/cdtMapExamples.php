@@ -23,7 +23,7 @@ $recs = $client->batch($bp, [$bw]);
 // var_dump($recs[0]->record->bins);
 
 $brp = new BatchReadPolicy();
-$ops = [MapOp::getByValueRange($mp, "map", 1, 3)];
+$ops = [MapOp::getByValues($mp, "map", [1, 3])];
 $br = BatchRead::ops($brp, $key, $ops);
 $recs = $client->batch($bp, [$br]);
 var_dump($recs[0]->record->bins);

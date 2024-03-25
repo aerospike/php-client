@@ -1170,7 +1170,7 @@ impl ReadModeAP {
     }
 
     // ReadModeAPAll indicates that all duplicates should be consulted in
-	// the read operation.
+    // the read operation.
     pub fn All() -> Self {
         ReadModeAP {
             _as: proto::ReadModeAp::All,
@@ -1228,7 +1228,7 @@ pub struct ReadModeSC {
 #[derive(ZvalConvert)]
 impl ReadModeSC {
     // ReadModeSCSession ensures this client will only see an increasing sequence of record versions.
-	// Server only reads from master.  This is the default.
+    // Server only reads from master.  This is the default.
     pub fn Session() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::Session,
@@ -1236,7 +1236,7 @@ impl ReadModeSC {
     }
 
     // ReadModeSCLinearize ensures ALL clients will only see an increasing sequence of record versions.
-	// Server only reads from master.
+    // Server only reads from master.
     pub fn Linearize() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::Linearize,
@@ -1244,7 +1244,7 @@ impl ReadModeSC {
     }
 
     // ReadModeSCAllowReplica indicates that the server may read from master or any full (non-migrating) replica.
-	// Increasing sequence of record versions is not guaranteed.
+    // Increasing sequence of record versions is not guaranteed.
     pub fn AllowReplica() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::AllowReplica,
@@ -1252,7 +1252,7 @@ impl ReadModeSC {
     }
 
     // ReadModeSCAllowUnavailable indicates that the server may read from master or any full (non-migrating) replica or from unavailable
-	// partitions.  Increasing sequence of record versions is not guaranteed.
+    // partitions.  Increasing sequence of record versions is not guaranteed.
     pub fn AllowUnavailable() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::AllowUnavailable,
@@ -1823,7 +1823,6 @@ impl MapOrderType {
         }
     }
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -7952,6 +7951,11 @@ impl FromZval<'_> for CdtHllPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// HyperLogLog (HLL) operations.
+// Requires server versions >= 4.9.
+//
+// HyperLogLog operations on HLL items nested in lists/maps are not currently
+// supported by the server.
 #[php_class(name = "Aerospike\\HllOp")]
 pub struct CdtHllOperation {
     _as: proto::CdtHllOperation,
@@ -7970,6 +7974,15 @@ impl FromZval<'_> for CdtHllOperation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtHllOperation {
+    // HLLInitOp creates HLL init operation with minhash bits.
+    // Server creates a new HLL or resets an existing HLL.
+    // Server does not return a value.
+    //
+    // policy			write policy, use DefaultHLLPolicy for default
+    // binName			name of bin
+    // indexBitCount	number of index bits. Must be between 4 and 16 inclusive. Pass -1 for default.
+    // minHashBitCount  number of min hash bits. Must be between 4 and 58 inclusive. Pass -1 for default.
+    // indexBitCount + minHashBitCount must be <= 64.
     pub fn init(
         policy: &CdtHllPolicy,
         bin_name: String,
@@ -7989,6 +8002,16 @@ impl CdtHllOperation {
         }
     }
 
+    // HLLAddOp creates HLL add operation with minhash bits.
+    // Server adds values to HLL set. If HLL bin does not exist, use indexBitCount and minHashBitCount
+    // to create HLL bin. Server returns number of entries that caused HLL to update a register.
+    //
+    // policy			write policy, use DefaultHLLPolicy for default
+    // binName			name of bin
+    // list				list of values to be added
+    // indexBitCount	number of index bits. Must be between 4 and 16 inclusive. Pass -1 for default.
+    // minHashBitCount  number of min hash bits. Must be between 4 and 58 inclusive. Pass -1 for default.
+    // indexBitCount + minHashBitCount must be <= 64.
     pub fn add(
         policy: &CdtHllPolicy,
         bin_name: String,
@@ -8010,6 +8033,13 @@ impl CdtHllOperation {
         }
     }
 
+    // HLLSetUnionOp creates HLL set union operation.
+    // Server sets union of specified HLL objects with HLL bin.
+    // Server does not return a value.
+    //
+    // policy			write policy, use DefaultHLLPolicy for default
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn set_union(
         policy: &CdtHllPolicy,
         bin_name: String,
@@ -8029,6 +8059,10 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLRefreshCountOp creates HLL refresh operation.
+    // Server updates the cached count (if stale) and returns the count.
+    //
+    // binName			name of bin
     pub fn refresh_count(bin_name: String) -> Option<Operation> {
         Some(Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -8040,6 +8074,13 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLFoldOp creates HLL fold operation.
+    // Servers folds indexBitCount to the specified value.
+    // This can only be applied when minHashBitCount on the HLL bin is 0.
+    // Server does not return a value.
+    //
+    // binName			name of bin
+    // indexBitCount		number of index bits. Must be between 4 and 16 inclusive.
     pub fn fold(bin_name: String, index_bit_count: i64) -> Option<Operation> {
         Some(Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -8051,6 +8092,10 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetCountOp creates HLL getCount operation.
+    // Server returns estimated number of elements in the HLL bin.
+    //
+    // binName			name of bin
     pub fn get_count(bin_name: String) -> Option<Operation> {
         Some(Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -8062,6 +8107,12 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetUnionOp creates HLL getUnion operation.
+    // Server returns an HLL object that is the union of all specified HLL objects in the list
+    // with the HLL bin.
+    //
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn get_union(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -8077,6 +8128,12 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetUnionCountOp creates HLL getUnionCount operation.
+    // Server returns estimated number of elements that would be contained by the union of these
+    // HLL objects.
+    //
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn get_union_count(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -8092,6 +8149,12 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetIntersectCountOp creates HLL getIntersectCount operation.
+    // Server returns estimated number of elements that would be contained by the intersection of
+    // these HLL objects.
+    //
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn get_intersect_count(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -8107,6 +8170,11 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetSimilarityOp creates HLL getSimilarity operation.
+    // Server returns estimated similarity of these HLL objects. Return type is a double.
+    //
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn get_similarity(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -8122,6 +8190,11 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLDescribeOp creates HLL describe operation.
+    // Server returns indexBitCount and minHashBitCount used to create HLL bin in a list of longs.
+    // The list size is 2.
+    //
+    // binName			name of bin
     pub fn describe(bin_name: String) -> Operation {
         Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
