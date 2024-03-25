@@ -52,7 +52,7 @@ restart: install
 	$(RESTART_COMMAND)
 
 test-dev: install-dev
-	./vendor/phpunit/phpunit/phpunit tests/
+	sudo ./vendor/phpunit/phpunit/phpunit tests/
 
 test: install
 	phpunit tests/

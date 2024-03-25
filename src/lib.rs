@@ -1151,6 +1151,9 @@ impl Expression {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// ReadModeAP is the read policy in AP (availability) mode namespaces.
+// It indicates how duplicates should be consulted in a read operation.
+// Only makes a difference during migrations and only applicable in AP mode.
 #[php_class(name = "Aerospike\\ReadModeAP")]
 pub struct ReadModeAP {
     _as: proto::ReadModeAp,
@@ -1159,12 +1162,15 @@ pub struct ReadModeAP {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ReadModeAP {
+    // ReadModeAPOne indicates that a single node should be involved in the read operation.
     pub fn One() -> Self {
         ReadModeAP {
             _as: proto::ReadModeAp::One,
         }
     }
 
+    // ReadModeAPAll indicates that all duplicates should be consulted in
+    // the read operation.
     pub fn All() -> Self {
         ReadModeAP {
             _as: proto::ReadModeAp::All,
@@ -1211,6 +1217,8 @@ impl FromZval<'_> for ReadModeAP {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// ReadModeSC is the read policy in SC (strong consistency) mode namespaces.
+// Determines SC read consistency options.
 #[php_class(name = "Aerospike\\ReadModeSC")]
 pub struct ReadModeSC {
     _as: proto::ReadModeSc,
@@ -1219,24 +1227,32 @@ pub struct ReadModeSC {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ReadModeSC {
+    // ReadModeSCSession ensures this client will only see an increasing sequence of record versions.
+    // Server only reads from master.  This is the default.
     pub fn Session() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::Session,
         }
     }
 
+    // ReadModeSCLinearize ensures ALL clients will only see an increasing sequence of record versions.
+    // Server only reads from master.
     pub fn Linearize() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::Linearize,
         }
     }
 
+    // ReadModeSCAllowReplica indicates that the server may read from master or any full (non-migrating) replica.
+    // Increasing sequence of record versions is not guaranteed.
     pub fn AllowReplica() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::AllowReplica,
         }
     }
 
+    // ReadModeSCAllowUnavailable indicates that the server may read from master or any full (non-migrating) replica or from unavailable
+    // partitions.  Increasing sequence of record versions is not guaranteed.
     pub fn AllowUnavailable() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::AllowUnavailable,
@@ -1810,128 +1826,14 @@ impl MapOrderType {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
-//  BasePolicy
-//
-////////////////////////////////////////////////////////////////////////////////////////////
-
-// #[php_class(name = "Aerospike\\BasePolicy")]
-// pub struct BasePolicy {
-//     _as: proto::BasePolicy,
-// }
-
-// impl FromZval<'_> for BasePolicy {
-//     const TYPE: DataType = DataType::Mixed;
-
-//     fn from_zval(zval: &Zval) -> Option<Self> {
-//         let f: &BasePolicy = zval.extract()?;
-
-//         Some(BasePolicy { _as: f._as.clone() })
-//     }
-// }
-
-// /// Trait implemented by most policy types; policies that implement this trait typically encompass
-// /// an instance of `BasePolicy`.
-// #[php_impl]
-// #[derive(ZvalConvert)]
-// impl BasePolicy {
-//     #[getter]
-//     pub fn get_priority(&self) -> Priority {
-//         Priority {
-//             v: match &self._as.priority {
-//                 aerospike_core::Priority::Default => _Priority::Default,
-//                 aerospike_core::Priority::Low => _Priority::Low,
-//                 aerospike_core::Priority::Medium => _Priority::Medium,
-//                 aerospike_core::Priority::High => _Priority::High,
-//             },
-//         }
-//     }
-
-//     #[setter]
-//     pub fn set_priority(&mut self, priority: Priority) {
-//         self._as.priority = priority._as;
-//     }
-
-//     #[getter]
-//     pub fn get_consistency_level(&self) -> ConsistencyLevel {
-//         ConsistencyLevel {
-//             _as: self._as.consistency_level.clone(),
-//             v: match &self._as.consistency_level {
-//                 aerospike_core::ConsistencyLevel::ConsistencyOne => {
-//                     _ConsistencyLevel::ConsistencyOne
-//                 }
-//                 aerospike_core::ConsistencyLevel::ConsistencyAll => {
-//                     _ConsistencyLevel::ConsistencyAll
-//                 }
-//             },
-//         }
-//     }
-
-//     #[setter]
-//     pub fn set_consistency_level(&mut self, consistency_level: ConsistencyLevel) {
-//         self._as.consistency_level = consistency_level._as;
-//     }
-
-//     #[getter]
-//     pub fn get_timeout(&self) -> u64 {
-//         self._as
-//             .timeout
-//             .map(|duration| duration.as_millis() as u64)
-//             .unwrap_or_default()
-//     }
-
-//     #[setter]
-//     pub fn set_timeout(&mut self, timeout_millis: u64) {
-//         let timeout = Duration::from_millis(timeout_millis);
-//         self._as.timeout = Some(timeout);
-//     }
-
-//     #[getter]
-//     pub fn get_max_retries(&self) -> Option<usize> {
-//         self._as.max_retries
-//     }
-
-//     #[setter]
-//     pub fn set_max_retries(&mut self, max_retries: Option<usize>) {
-//         self._as.max_retries = max_retries;
-//     }
-
-//     #[getter]
-//     pub fn get_sleep_between_retries(&self) -> u64 {
-//         self._as
-//             .sleep_between_retries
-//             .map(|duration| duration.as_millis() as u64)
-//             .unwrap_or_default()
-//     }
-
-//     #[setter]
-//     pub fn set_sleep_between_retries(&mut self, sleep_between_retries_millis: u64) {
-//         let sleep_between_retries = Duration::from_millis(sleep_between_retries_millis);
-//         self._as.timeout = Some(sleep_between_retries);
-//     }
-
-//     #[getter]
-//     pub fn get_filter_expression(&self) -> Option<Expression> {
-//         match &self._as.filter_expression {
-//             Some(fe) => Some(Expression { _as: fe.clone() }),
-//             None => None,
-//         }
-//     }
-
-//     #[setter]
-//     pub fn set_filter_expression(&mut self, filter_expression: Option<Expression>) {
-//         match filter_expression {
-//             Some(fe) => self._as.filter_expression = Some(fe._as),
-//             None => self._as.filter_expression = None,
-//         }
-//     }
-// }
-
-////////////////////////////////////////////////////////////////////////////////////////////
-//
 //  CDTContext
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// CDTContext defines Nested CDT context. Identifies the location of nested list/map to apply the operation.
+// for the current level.
+// An array of CTX identifies location of the list/map on multiple
+// levels on nesting.
 enum CDTContextType {
     ListIndex = 0x10,
     ListRank = 0x11,
@@ -3714,18 +3616,19 @@ impl Statement {
     pub fn __construct(
         namespace: &str,
         set_name: &str,
-        filter: &Filter,
+        filter: Option<Filter>,
         bin_names: Option<Vec<String>>,
     ) -> Self {
         let mut rng = rand::thread_rng();
+        let filter_proto = filter.map(|f| f._as.clone());
         Statement {
             _as: proto::Statement {
                 namespace: namespace.into(),
                 set_name: set_name.into(),
-                bin_names: bin_names.unwrap_or(vec![]),
+                bin_names: bin_names.unwrap_or_default(),
                 return_data: true,
                 task_id: rng.gen(),
-                filter: Some(filter._as.clone()),
+                filter: filter_proto,
                 index_name: None,
                 udf_call: None,
             },
@@ -5418,54 +5321,79 @@ pub struct CdtListReturnType {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtListReturnType {
+    // ListReturnTypeNone will not return a result.
     pub fn none() -> Self {
         Self {
             _as: proto::CdtListReturnType::None.into(),
         }
     }
 
+    // ListReturnTypeIndex will return index offset order.
+    // 0 = first key
+    // N = Nth key
+    // -1 = last key
     pub fn index() -> Self {
         Self {
             _as: proto::CdtListReturnType::Index.into(),
         }
     }
 
+    // ListReturnTypeReverseIndex will return reverse index offset order.
+    // 0 = last key
+    // -1 = first key
     pub fn reverse_index() -> Self {
         Self {
             _as: proto::CdtListReturnType::ReverseIndex.into(),
         }
     }
 
+    // ListReturnTypeRank will return value order.
+    // 0 = smallest value
+    // N = Nth smallest value
+    // -1 = largest value
     pub fn rank() -> Self {
         Self {
             _as: proto::CdtListReturnType::Rank.into(),
         }
     }
 
+    // ListReturnTypeReverseRank will return reverse value order.
+    // 0 = largest value
+    // N = Nth largest value
+    // -1 = smallest value
     pub fn reverse_rank() -> Self {
         Self {
             _as: proto::CdtListReturnType::ReverseRank.into(),
         }
     }
 
+    // ListReturnTypeCount will return count of items selected.
     pub fn count() -> Self {
         Self {
             _as: proto::CdtListReturnType::Count.into(),
         }
     }
 
+    // ListReturnTypeValue will return value for single key read and value list for range read.
     pub fn value() -> Self {
         Self {
             _as: proto::CdtListReturnType::Value.into(),
         }
     }
 
+    // ListReturnTypeExists returns true if count > 0.
     pub fn exists() -> Self {
         Self {
             _as: proto::CdtListReturnType::Exists.into(),
         }
     }
 
+    // ListReturnTypeInverted will invert meaning of list command and return values.  For example:
+    // ListOperation.getByIndexRange(binName, index, count, ListReturnType.INDEX | ListReturnType.INVERTED)
+    // With the INVERTED flag enabled, the items outside of the specified index range will be returned.
+    // The meaning of the list command can also be inverted.  For example:
+    // ListOperation.removeByIndexRange(binName, index, count, ListReturnType.INDEX | ListReturnType.INVERTED);
+    // With the INVERTED flag enabled, the items outside of the specified index range will be removed and returned.
     pub fn inverted(&self) -> Self {
         Self {
             _as: self._as | 0x10000,
@@ -5506,30 +5434,37 @@ pub struct CdtListWriteFlags {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtListWriteFlags {
+    // ListWriteFlagsDefault is the default behavior. It means:  Allow duplicate values and insertions at any index.
     pub fn default() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::Default,
         }
     }
 
+    // ListWriteFlagsAddUnique means: Only add unique values.
     pub fn add_unique() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::AddUnique,
         }
     }
 
+    // ListWriteFlagsInsertBounded means: Enforce list boundaries when inserting.  Do not allow values to be inserted
+    // at index outside current list boundaries.
     pub fn insert_bounded() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::InsertBounded,
         }
     }
 
+    // ListWriteFlagsNoFail means: do not raise error if a list item fails due to write flag constraints.
     pub fn no_fail() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::NoFail,
         }
     }
 
+    // ListWriteFlagsPartial means: allow other valid list items to be committed if a list item fails due to
+    // write flag constraints.
     pub fn partial() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::Partial,
@@ -5572,18 +5507,21 @@ pub struct CdtListSortFlags {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtListSortFlags {
+    // ListSortFlagsDefault is the default sort flag for CDT lists, and sort in Ascending order.
     pub fn default() -> Self {
         Self {
             _as: proto::CdtListSortFlags::Default,
         }
     }
 
+    // ListSortFlagsDescending will sort the contents of the list in descending order.
     pub fn descending() -> Self {
         Self {
             _as: proto::CdtListSortFlags::Descending,
         }
     }
 
+    // ListSortFlagsDropDuplicates will drop duplicate values in the results of the CDT list operation.
     pub fn drop_duplicates() -> Self {
         Self {
             _as: proto::CdtListSortFlags::DropDuplicates,
@@ -5663,6 +5601,21 @@ impl FromZval<'_> for CdtListPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// List operations support negative indexing.  If the index is negative, the
+// resolved index starts backwards from end of list. If an index is out of bounds,
+// a parameter error will be returned. If a range is partially out of bounds, the
+// valid part of the range will be returned. Index/Range examples:
+//
+// Index/Range examples:
+//
+//    Index 0: First item in list.
+//    Index 4: Fifth item in list.
+//    Index -1: Last item in list.
+//    Index -3: Third to last item in list.
+//    Index 1 Count 2: Second and third items in list.
+//    Index -3 Count 3: Last three items in list.
+//    Index -5 Count 4: Range between fifth to last item to second to last item inclusive.
+//
 #[php_class(name = "Aerospike\\ListOp")]
 pub struct CdtListOperation {
     _as: proto::CdtListOperation,
@@ -5681,6 +5634,10 @@ impl FromZval<'_> for CdtListOperation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtListOperation {
+    // ListCreateOp creates list create operation.
+    // Server creates list at given context level. The context is allowed to be beyond list
+    // boundaries only if pad is set to true.  In that case, nil list entries will be inserted to
+    // satisfy the context position.
     pub fn create(
         bin_name: String,
         order: ListOrderType,
@@ -5705,6 +5662,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListSetOrderOp creates a set list order operation.
+    // Server sets list order.  Server returns nil.
     pub fn set_order(
         bin_name: String,
         order: ListOrderType,
@@ -5725,6 +5684,10 @@ impl CdtListOperation {
         }
     }
 
+    // ListAppendOp creates a list append operation.
+    // Server appends values to end of list bin.
+    // Server returns list size on bin name.
+    // It will panic is no values have been passed.
     pub fn append(
         policy: &CdtListPolicy,
         bin_name: String,
@@ -5747,6 +5710,10 @@ impl CdtListOperation {
         }
     }
 
+    // ListInsertOp creates a list insert operation.
+    // Server inserts value to specified index of list bin.
+    // Server returns list size on bin name.
+    // It will panic is no values have been passed.
     pub fn insert(
         policy: &CdtListPolicy,
         bin_name: String,
@@ -5771,6 +5738,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListPopOp creates list pop operation.
+    // Server returns item at specified index and removes item from list bin.
     pub fn pop(bin_name: String, index: i64, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::List(proto::CdtListOperation {
@@ -5786,6 +5755,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListPopRangeOp creates a list pop range operation.
+    // Server returns items starting at specified index and removes items from list bin.
     pub fn pop_range(
         bin_name: String,
         index: i64,
@@ -5806,6 +5777,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListPopRangeFromOp creates a list pop range operation.
+    // Server returns items starting at specified index to the end of list and removes items from list bin.
     pub fn pop_range_from(
         bin_name: String,
         index: i64,
@@ -5825,6 +5798,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByValueOp creates list remove by value operation.
+    // Server removes the item identified by value and returns removed data specified by returnType.
     pub fn remove_values(
         bin_name: String,
         values: Vec<PHPValue>,
@@ -5849,6 +5824,11 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByValueRangeOp creates a list remove operation.
+    // Server removes list items identified by value range (valueBegin inclusive, valueEnd exclusive).
+    // If valueBegin is nil, the range is less than valueEnd.
+    // If valueEnd is nil, the range is greater than equal to valueBegin.
+    // Server returns removed data specified by returnType
     pub fn remove_by_value_range(
         bin_name: String,
         begin: PHPValue,
@@ -5878,6 +5858,19 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByValueRelativeRankRangeOp creates a list remove by value relative to rank range operation.
+    // Server removes list items nearest to value and greater by relative rank.
+    // Server returns removed data specified by returnType.
+    //
+    // Examples for ordered list [0,4,5,9,11,15]:
+    //
+    //	(value,rank) = [removed items]
+    //	(5,0) = [5,9,11,15]
+    //	(5,1) = [9,11,15]
+    //	(5,-1) = [4,5,9,11,15]
+    //	(3,0) = [4,5,9,11,15]
+    //	(3,3) = [11,15]
+    //	(3,-3) = [0,4,5,9,11,15]
     pub fn remove_by_value_relative_rank_range(
         bin_name: String,
         value: PHPValue,
@@ -5901,6 +5894,18 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByValueRelativeRankRangeCountOp creates a list remove by value relative to rank range operation.
+    // Server removes list items nearest to value and greater by relative rank with a count limit.
+    // Server returns removed data specified by returnType.
+    // Examples for ordered list [0,4,5,9,11,15]:
+    //
+    //	(value,rank,count) = [removed items]
+    //	(5,0,2) = [5,9]
+    //	(5,1,1) = [9]
+    //	(5,-1,2) = [4,5]
+    //	(3,0,1) = [4]
+    //	(3,3,7) = [11,15]
+    //	(3,-3,2) = []
     pub fn remove_by_value_relative_rank_range_count(
         bin_name: String,
         value: PHPValue,
@@ -5929,6 +5934,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveRangeOp creates a list remove range operation.
+    // Server removes "count" items starting at specified index from list bin.
+    // Server returns number of items removed.
     pub fn remove_range(
         bin_name: String,
         index: i64,
@@ -5949,6 +5957,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveRangeFromOp creates a list remove range operation.
+    // Server removes all items starting at specified index to the end of list.
+    // Server returns number of items removed.
     pub fn remove_range_from(
         bin_name: String,
         index: i64,
@@ -5969,6 +5980,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListSetOp creates a list set operation.
+    // Server sets item value at specified index in list bin.
+    // Server does not return a result by default.
     pub fn set(
         bin_name: String,
         index: i64,
@@ -5989,6 +6003,10 @@ impl CdtListOperation {
         }
     }
 
+    // ListTrimOp creates a list trim operation.
+    // Server removes items in list bin that do not fall into range specified by index
+    // and count range. If the range is out of bounds, then all items will be removed.
+    // Server returns number of elements that were removed.
     pub fn trim(
         bin_name: String,
         index: i64,
@@ -6009,6 +6027,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListClearOp creates a list clear operation.
+    // Server removes all items in list bin.
+    // Server does not return a result by default.
     pub fn clear(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::List(proto::CdtListOperation {
@@ -6024,6 +6045,10 @@ impl CdtListOperation {
         }
     }
 
+    // ListIncrementOp creates a list increment operation.
+    // Server increments list[index] by value.
+    // Value should be integer(IntegerValue, LongValue) or float(FloatValue).
+    // Server returns list[index] after incrementing.
     pub fn increment(
         bin_name: String,
         index: i64,
@@ -6044,6 +6069,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListSizeOp creates a list size operation.
+    // Server returns size of list on bin name.
     pub fn size(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::List(proto::CdtListOperation {
@@ -6059,6 +6086,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListSortOp creates list sort operation.
+    // Server sorts list according to sortFlags.
+    // Server does not return a result by default.
     pub fn sort(
         bin_name: String,
         sort_flags: &CdtListSortFlags,
@@ -6079,6 +6109,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByIndexOp creates a list remove operation.
+    // Server removes list item identified by index and returns removed data specified by returnType.
     pub fn remove_by_index(
         bin_name: String,
         index: i64,
@@ -6101,6 +6133,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByIndexRangeOp creates a list remove operation.
+    // Server removes list items starting at specified index to the end of list and returns removed
+    // data specified by returnType.
     pub fn remove_by_index_range(
         bin_name: String,
         index: i64,
@@ -6123,6 +6158,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByIndexRangeCountOp creates a list remove operation.
+    // Server removes "count" list items starting at specified index and returns removed data specified by returnType.
     pub fn remove_by_index_range_count(
         bin_name: String,
         index: i64,
@@ -6146,6 +6183,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByRankOp creates a list remove operation.
+    // Server removes list item identified by rank and returns removed data specified by returnType.
     pub fn remove_by_rank(
         bin_name: String,
         rank: i64,
@@ -6168,6 +6207,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByRankRangeOp creates a list remove operation.
+    // Server removes list items starting at specified rank to the last ranked item and returns removed
+    // data specified by returnType.
     pub fn remove_by_rank_range(
         bin_name: String,
         rank: i64,
@@ -6190,6 +6232,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListRemoveByRankRangeCountOp creates a list remove operation.
+    // Server removes "count" list items starting at specified rank and returns removed data specified by returnType.
     pub fn remove_by_rank_range_count(
         bin_name: String,
         rank: i64,
@@ -6213,6 +6257,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByValueOp creates a list get by value operation.
+    // Server selects list items identified by value and returns selected data specified by returnType.
     pub fn get_by_values(
         bin_name: String,
         values: Vec<PHPValue>,
@@ -6237,6 +6283,11 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByValueRangeOp creates a list get by value range operation.
+    // Server selects list items identified by value range (valueBegin inclusive, valueEnd exclusive)
+    // If valueBegin is nil, the range is less than valueEnd.
+    // If valueEnd is nil, the range is greater than equal to valueBegin.
+    // Server returns selected data specified by returnType.
     pub fn get_by_value_range(
         bin_name: String,
         begin: PHPValue,
@@ -6266,6 +6317,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByIndexOp creates list get by index operation.
+    // Server selects list item identified by index and returns selected data specified by returnType
     pub fn get_by_index(
         bin_name: String,
         index: i64,
@@ -6288,6 +6341,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByIndexRangeOp creates list get by index range operation.
+    // Server selects list items starting at specified index to the end of list and returns selected
+    // data specified by returnType.
     pub fn get_by_index_range(
         bin_name: String,
         index: i64,
@@ -6310,6 +6366,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByIndexRangeCountOp creates list get by index range operation.
+    // Server selects "count" list items starting at specified index and returns selected data specified
+    // by returnType.
     pub fn get_by_index_range_count(
         bin_name: String,
         index: i64,
@@ -6333,6 +6392,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByRankOp creates a list get by rank operation.
+    // Server selects list item identified by rank and returns selected data specified by returnType.
     pub fn get_by_rank(
         bin_name: String,
         rank: i64,
@@ -6355,6 +6416,9 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByRankRangeOp creates a list get by rank range operation.
+    // Server selects list items starting at specified rank to the last ranked item and returns selected
+    // data specified by returnType
     pub fn get_by_rank_range(
         bin_name: String,
         rank: i64,
@@ -6377,6 +6441,8 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByRankRangeCountOp creates a list get by rank range operation.
+    // Server selects "count" list items starting at specified rank and returns selected data specified by returnType.
     pub fn get_by_rank_range_count(
         bin_name: String,
         rank: i64,
@@ -6400,6 +6466,19 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByValueRelativeRankRangeOp creates a list get by value relative to rank range operation.
+    // Server selects list items nearest to value and greater by relative rank.
+    // Server returns selected data specified by returnType.
+    //
+    // Examples for ordered list [0,4,5,9,11,15]:
+    //
+    //	(value,rank) = [selected items]
+    //	(5,0) = [5,9,11,15]
+    //	(5,1) = [9,11,15]
+    //	(5,-1) = [4,5,9,11,15]
+    //	(3,0) = [4,5,9,11,15]
+    //	(3,3) = [11,15]
+    //	(3,-3) = [0,4,5,9,11,15]
     pub fn get_by_value_relative_rank_range(
         bin_name: String,
         value: PHPValue,
@@ -6423,6 +6502,19 @@ impl CdtListOperation {
         }
     }
 
+    // ListGetByValueRelativeRankRangeCountOp creates a list get by value relative to rank range operation.
+    // Server selects list items nearest to value and greater by relative rank with a count limit.
+    // Server returns selected data specified by returnType.
+    //
+    // Examples for ordered list [0,4,5,9,11,15]:
+    //
+    //	(value,rank,count) = [selected items]
+    //	(5,0,2) = [5,9]
+    //	(5,1,1) = [9]
+    //	(5,-1,2) = [4,5]
+    //	(3,0,1) = [4]
+    //	(3,3,7) = [11,15]
+    //	(3,-3,2) = []
     pub fn get_by_value_relative_rank_range_count(
         bin_name: String,
         value: PHPValue,
@@ -6468,78 +6560,111 @@ pub struct CdtMapReturnType {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapReturnType {
+    // NONE will will not return a result.
     pub fn none() -> Self {
         Self {
             _as: proto::CdtMapReturnType::None.into(),
         }
     }
 
+    // INDEX will return key index order.
+    //
+    // 0 = first key
+    // N = Nth key
+    // -1 = last key
     pub fn index() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Index.into(),
         }
     }
 
+    // REVERSE_INDEX will return reverse key order.
+    //
+    // 0 = last key
+    // -1 = first key
     pub fn reverse_index() -> Self {
         Self {
             _as: proto::CdtMapReturnType::ReverseIndex.into(),
         }
     }
 
+    // RANK will return value order.
+    //
+    // 0 = smallest value
+    // N = Nth smallest value
+    // -1 = largest value
     pub fn rank() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Rank.into(),
         }
     }
 
+    // REVERSE_RANK will return reverse value order.
+    //
+    // 0 = largest value
+    // N = Nth largest value
+    // -1 = smallest value
     pub fn reverse_rank() -> Self {
         Self {
             _as: proto::CdtMapReturnType::ReverseRank.into(),
         }
     }
 
+    // COUNT will return count of items selected.
     pub fn count() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Count.into(),
         }
     }
 
+    // KEY will return key for single key read and key list for range read.
     pub fn key() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Key.into(),
         }
     }
 
+    // VALUE will return value for single key read and value list for range read.
     pub fn value() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Value.into(),
         }
     }
 
+    // KEY_VALUE will return key/value items. The possible return types are:
+    //
+    // map[interface{}]interface{} : Returned for unordered maps
+    // []MapPair : Returned for range results where range order needs to be preserved.
     pub fn key_value() -> Self {
         Self {
             _as: proto::CdtMapReturnType::KeyValue.into(),
         }
     }
 
+    // EXISTS returns true if count > 0.
     pub fn exists() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Exists.into(),
         }
     }
 
+    // UNORDERED_MAP returns an unordered map.
     pub fn unordered_map() -> Self {
         Self {
             _as: proto::CdtMapReturnType::UnorderedMap.into(),
         }
     }
 
+    // ORDERED_MAP returns an ordered map.
     pub fn ordered_map() -> Self {
         Self {
             _as: proto::CdtMapReturnType::OrderedMap.into(),
         }
     }
 
+    // INVERTED will invert meaning of map command and return values.  For example:
+    // MapRemoveByKeyRange(binName, keyBegin, keyEnd, MapReturnType.KEY | MapReturnType.INVERTED)
+    // With the INVERTED flag enabled, the keys outside of the specified key range will be removed and returned.
     pub fn inverted(&self) -> Self {
         Self {
             _as: self._as | 0x10000,
@@ -6580,18 +6705,24 @@ pub struct CdtMapWriteMode {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapWriteMode {
+    // If the key already exists, the item will be overwritten.
+    // If the key does not exist, a new item will be created.
     pub fn update() -> Self {
         Self {
             _as: proto::CdtMapWriteMode::Update,
         }
     }
 
+    // If the key already exists, the item will be overwritten.
+    // If the key does not exist, the write will fail.
     pub fn update_only() -> Self {
         Self {
             _as: proto::CdtMapWriteMode::UpdateOnly,
         }
     }
 
+    // If the key already exists, the write will fail.
+    // If the key does not exist, a new item will be created.
     pub fn create_only() -> Self {
         Self {
             _as: proto::CdtMapWriteMode::CreateOnly,
@@ -6630,30 +6761,38 @@ pub struct CdtMapWriteFlags {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapWriteFlags {
+    // MapWriteFlagsDefault is the Default. Allow create or update.
     pub fn default() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::Default,
         }
     }
 
+    // MapWriteFlagsCreateOnly means: If the key already exists, the item will be denied.
+    // If the key does not exist, a new item will be created.
     pub fn create_only() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::CreateOnly,
         }
     }
 
+    // MapWriteFlagsUpdateOnly means: If the key already exists, the item will be overwritten.
+    // If the key does not exist, the item will be denied.
     pub fn update_only() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::UpdateOnly,
         }
     }
 
+    // MapWriteFlagsNoFail means: Do not raise error if a map item is denied due to write flag constraints.
     pub fn no_fail() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::NoFail,
         }
     }
 
+    // MapWriteFlagsNoFail means: Allow other valid map items to be committed if a map item is denied due to
+    // write flag constraints.
     pub fn partial() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::Partial,
@@ -6692,6 +6831,7 @@ pub struct CdtMapPolicy {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapPolicy {
+    // NewMapPolicy creates a MapPolicy with WriteMode. Use with servers before v4.3.
     pub fn __construct(
         order: &MapOrderType,
         flags: Option<Vec<&CdtMapWriteFlags>>,
@@ -6749,6 +6889,46 @@ impl Default for CdtMapPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// Unique key map bin operations. Create map operations used by the client operate command.
+// The default unique key map is unordered.
+//
+// All maps maintain an index and a rank.  The index is the item offset from the start of the map,
+// for both unordered and ordered maps.  The rank is the sorted index of the value component.
+// Map supports negative indexing for index and rank.
+//
+// Index examples:
+//
+//  Index 0: First item in map.
+//  Index 4: Fifth item in map.
+//  Index -1: Last item in map.
+//  Index -3: Third to last item in map.
+//  Index 1 Count 2: Second and third items in map.
+//  Index -3 Count 3: Last three items in map.
+//  Index -5 Count 4: Range between fifth to last item to second to last item inclusive.
+//
+//
+// Rank examples:
+//
+//  Rank 0: Item with lowest value rank in map.
+//  Rank 4: Fifth lowest ranked item in map.
+//  Rank -1: Item with highest ranked value in map.
+//  Rank -3: Item with third highest ranked value in map.
+//  Rank 1 Count 2: Second and third lowest ranked items in map.
+//  Rank -3 Count 3: Top three ranked items in map.
+//
+//
+// Nested CDT operations are supported by optional CTX context arguments.  Examples:
+//
+//  bin = {key1:{key11:9,key12:4}, key2:{key21:3,key22:5}}
+//  Set map value to 11 for map key "key21" inside of map key "key2".
+//  MapOperation.put(MapPolicy.Default, "bin", StringValue("key21"), IntegerValue(11), CtxMapKey(StringValue("key2")))
+//  bin result = {key1:{key11:9,key12:4},key2:{key21:11,key22:5}}
+//
+//  bin : {key1:{key11:{key111:1},key12:{key121:5}}, key2:{key21:{"key211":7}}}
+//  Set map value to 11 in map key "key121" for highest ranked map ("key12") inside of map key "key1".
+//  MapPutOp(DefaultMapPolicy(), "bin", StringValue("key121"), IntegerValue(11), CtxMapKey(StringValue("key1")), CtxMapRank(-1))
+//  bin result = {key1:{key11:{key111:1},key12:{key121:11}}, key2:{key21:{"key211":7}}}
+
 #[php_class(name = "Aerospike\\MapOp")]
 pub struct CdtMapOperation {
     _as: proto::CdtMapOperation,
@@ -6767,6 +6947,8 @@ impl FromZval<'_> for CdtMapOperation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapOperation {
+    // MapCreateOp creates a map create operation.
+    // Server creates map at given context level.
     pub fn create(
         bin_name: String,
         order: &MapOrderType,
@@ -6787,6 +6969,10 @@ impl CdtMapOperation {
         }
     }
 
+    // MapSetPolicyOp creates set map policy operation.
+    // Server sets map policy attributes.  Server returns nil.
+    //
+    // The required map policy attributes can be changed after the map is created.
     pub fn set_policy(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -6806,6 +6992,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapSizeOp creates map size operation.
+    // Server returns size of map.
     pub fn size(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::Map(proto::CdtMapOperation {
@@ -6821,6 +7009,11 @@ impl CdtMapOperation {
         }
     }
 
+    // MapPutOp creates map put operation.
+    // Server writes key/value item to map bin and returns map size.
+    //
+    // The required map policy dictates the type of map to create when it does not exist.
+    // The map policy also specifies the mode used when writing items to the map.
     pub fn put(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -6845,6 +7038,12 @@ impl CdtMapOperation {
         })
     }
 
+    // MapIncrementOp creates map increment operation.
+    // Server increments values by incr for all items identified by key and returns final result.
+    // Valid only for numbers.
+    //
+    // The required map policy dictates the type of map to create when it does not exist.
+    // The map policy also specifies the mode used when writing items to the map.
     pub fn increment(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -6866,6 +7065,12 @@ impl CdtMapOperation {
         }
     }
 
+    // MapDecrementOp creates map decrement operation.
+    // Server decrements values by decr for all items identified by key and returns final result.
+    // Valid only for numbers.
+    //
+    // The required map policy dictates the type of map to create when it does not exist.
+    // The map policy also specifies the mode used when writing items to the map.
     pub fn decrement(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -6887,6 +7092,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapClearOp creates map clear operation.
+    // Server removes all items in map.  Server returns nil.
     pub fn clear(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::Map(proto::CdtMapOperation {
@@ -6902,6 +7109,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByKeyOp creates map remove operation.
+    // Server removes map item identified by key and returns removed data specified by returnType.
     pub fn remove_by_keys(
         bin_name: String,
         keys: Vec<PHPValue>,
@@ -6924,6 +7133,12 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByKeyRangeOp creates map remove operation.
+    // Server removes map items identified by key range (keyBegin inclusive, keyEnd exclusive).
+    // If keyBegin is nil, the range is less than keyEnd.
+    // If keyEnd is nil, the range is greater than equal to keyBegin.
+    //
+    // Server returns removed data specified by returnType.
     pub fn remove_by_key_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -6948,6 +7163,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByValueOp creates map remove operation.
+    // Server removes map items identified by value and returns removed data specified by returnType.
     pub fn remove_by_values(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -6973,6 +7190,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByValueListOp creates map remove operation.
+    // Server removes map items identified by values and returns removed data specified by returnType.
     pub fn remove_by_value_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -6997,6 +7216,15 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByValueRelativeRankRangeOp creates a map remove by value relative to rank range operation.
+    // Server removes map items nearest to value and greater by relative rank.
+    // Server returns removed data specified by returnType.
+    //
+    // Examples for map [{4=2},{9=10},{5=15},{0=17}]:
+    //
+    //	(value,rank) = [removed items]
+    //	(11,1) = [{0=17}]
+    //	(11,-1) = [{9=10},{5=15},{0=17}]
     pub fn remove_by_value_relative_rank_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7021,6 +7249,15 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByValueRelativeRankRangeCountOp creates a map remove by value relative to rank range operation.
+    // Server removes map items nearest to value and greater by relative rank with a count limit.
+    // Server returns removed data specified by returnType (See MapReturnType).
+    //
+    // Examples for map [{4=2},{9=10},{5=15},{0=17}]:
+    //
+    //	(value,rank,count) = [removed items]
+    //	(11,1,1) = [{0=17}]
+    //	(11,-1,1) = [{9=10}]
     pub fn remove_by_value_relative_rank_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7050,6 +7287,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByIndexOp creates map remove operation.
+    // Server removes map item identified by index and returns removed data specified by returnType.
     pub fn remove_by_index(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7073,6 +7312,9 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByIndexRangeOp creates map remove operation.
+    // Server removes map items starting at specified index to the end of map and returns removed
+    // data specified by returnTyp
     pub fn remove_by_index_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7096,6 +7338,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByIndexRangeCountOp creates map remove operation.
+    // Server removes "count" map items starting at specified index and returns removed data specified by returnType.
     pub fn remove_by_index_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7120,6 +7364,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByRankOp creates map remove operation.
+    // Server removes map item identified by rank and returns removed data specified by returnType.
     pub fn remove_by_rank(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7143,6 +7389,9 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByRankRangeOp creates map remove operation.
+    // Server removes map items starting at specified rank to the last ranked item and returns removed
+    // data specified by returnType.
     pub fn remove_by_rank_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7166,6 +7415,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByRankRangeCountOp creates map remove operation.
+    // Server removes "count" map items starting at specified rank and returns removed data specified by returnType.
     pub fn remove_by_rank_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7190,6 +7441,18 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByKeyRelativeIndexRangeOp creates a map remove by key relative to index range operation.
+    // Server removes map items nearest to key and greater by index.
+    // Server returns removed data specified by returnType.
+    //
+    // Examples for map [{0=17},{4=2},{5=15},{9=10}]:
+    //
+    //	(value,index) = [removed items]
+    //	(5,0) = [{5=15},{9=10}]
+    //	(5,1) = [{9=10}]
+    //	(5,-1) = [{4=2},{5=15},{9=10}]
+    //	(3,2) = [{9=10}]
+    //	(3,-2) = [{0=17},{4=2},{5=15},{9=10}]
     pub fn remove_by_key_relative_index_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7214,6 +7477,18 @@ impl CdtMapOperation {
         }
     }
 
+    // MapRemoveByKeyRelativeIndexRangeCountOp creates map remove by key relative to index range operation.
+    // Server removes map items nearest to key and greater by index with a count limit.
+    // Server returns removed data specified by returnType.
+    //
+    // Examples for map [{0=17},{4=2},{5=15},{9=10}]:
+    //
+    //	(value,index,count) = [removed items]
+    //	(5,0,1) = [{5=15}]
+    //	(5,1,2) = [{9=10}]
+    //	(5,-1,1) = [{4=2}]
+    //	(3,2,1) = [{9=10}]
+    //	(3,-2,2) = [{0=17}]
     pub fn remove_by_key_relative_index_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7243,6 +7518,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByKeyOp creates map get by key operation.
+    // Server selects map item identified by key and returns selected data specified by returnType.
     pub fn get_by_keys(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7266,6 +7543,12 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByKeyRangeOp creates map get by key range operation.
+    // Server selects map items identified by key range (keyBegin inclusive, keyEnd exclusive).
+    // If keyBegin is nil, the range is less than keyEnd.
+    // If keyEnd is nil, the range is greater than equal to keyBegin.
+    //
+    // Server returns selected data specified by returnType.
     pub fn get_by_key_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7290,6 +7573,18 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByKeyRelativeIndexRangeOp creates a map get by key relative to index range operation.
+    // Server selects map items nearest to key and greater by index.
+    // Server returns selected data specified by returnType.
+    //
+    // Examples for ordered map [{0=17},{4=2},{5=15},{9=10}]:
+    //
+    //	(value,index) = [selected items]
+    //	(5,0) = [{5=15},{9=10}]
+    //	(5,1) = [{9=10}]
+    //	(5,-1) = [{4=2},{5=15},{9=10}]
+    //	(3,2) = [{9=10}]
+    //	(3,-2) = [{0=17},{4=2},{5=15},{9=10}]
     pub fn get_by_key_relative_index_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7314,6 +7609,18 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByKeyRelativeIndexRangeCountOp creates a map get by key relative to index range operation.
+    // Server selects map items nearest to key and greater by index with a count limit.
+    // Server returns selected data specified by returnType (See MapReturnType).
+    //
+    // Examples for ordered map [{0=17},{4=2},{5=15},{9=10}]:
+    //
+    //	(value,index,count) = [selected items]
+    //	(5,0,1) = [{5=15}]
+    //	(5,1,2) = [{9=10}]
+    //	(5,-1,1) = [{4=2}]
+    //	(3,2,1) = [{9=10}]
+    //	(3,-2,2) = [{0=17}]
     pub fn get_by_key_relative_index_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7343,6 +7650,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByKeyListOp creates a map get by key list operation.
+    // Server selects map items identified by keys and returns selected data specified by returnType.
     pub fn get_by_values(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7368,6 +7677,12 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByValueRangeOp creates map get by value range operation.
+    // Server selects map items identified by value range (valueBegin inclusive, valueEnd exclusive)
+    // If valueBegin is nil, the range is less than valueEnd.
+    // If valueEnd is nil, the range is greater than equal to valueBegin.
+    //
+    // Server returns selected data specified by returnType.
     pub fn get_by_value_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7392,6 +7707,15 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByValueRelativeRankRangeOp creates a map get by value relative to rank range operation.
+    // Server selects map items nearest to value and greater by relative rank.
+    // Server returns selected data specified by returnType.
+    //
+    // Examples for map [{4=2},{9=10},{5=15},{0=17}]:
+    //
+    //	(value,rank) = [selected items]
+    //	(11,1) = [{0=17}]
+    //	(11,-1) = [{9=10},{5=15},{0=17}]
     pub fn get_by_value_relative_rank_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7416,6 +7740,15 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByValueRelativeRankRangeCountOp creates a map get by value relative to rank range operation.
+    // Server selects map items nearest to value and greater by relative rank with a count limit.
+    // Server returns selected data specified by returnType.
+    //
+    // Examples for map [{4=2},{9=10},{5=15},{0=17}]:
+    //
+    //	(value,rank,count) = [selected items]
+    //	(11,1,1) = [{0=17}]
+    //	(11,-1,1) = [{9=10}]
     pub fn get_by_value_relative_rank_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7445,6 +7778,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByIndexOp creates map get by index operation.
+    // Server selects map item identified by index and returns selected data specified by returnType.
     pub fn get_by_index(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7468,6 +7803,9 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByIndexRangeOp creates map get by index range operation.
+    // Server selects map items starting at specified index to the end of map and returns selected
+    // data specified by returnType.
     pub fn get_by_index_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7492,6 +7830,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByIndexRangeCountOp creates map get by index range operation.
+    // Server selects "count" map items starting at specified index and returns selected data specified by returnType.
     pub fn get_by_index_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7521,6 +7861,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByRankOp creates map get by rank operation.
+    // Server selects map item identified by rank and returns selected data specified by returnType.
     pub fn get_by_rank(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7544,6 +7886,9 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByRankRangeOp creates map get by rank range operation.
+    // Server selects map items starting at specified rank to the last ranked item and returns selected
+    // data specified by returnType.
     pub fn get_by_rank_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7568,6 +7913,8 @@ impl CdtMapOperation {
         }
     }
 
+    // MapGetByRankRangeCountOp creates map get by rank range operation.
+    // Server selects "count" map items starting at specified rank and returns selected data specified by returnType.
     pub fn get_by_rank_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7706,6 +8053,11 @@ impl FromZval<'_> for CdtHllPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// HyperLogLog (HLL) operations.
+// Requires server versions >= 4.9.
+//
+// HyperLogLog operations on HLL items nested in lists/maps are not currently
+// supported by the server.
 #[php_class(name = "Aerospike\\HllOp")]
 pub struct CdtHllOperation {
     _as: proto::CdtHllOperation,
@@ -7724,6 +8076,15 @@ impl FromZval<'_> for CdtHllOperation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtHllOperation {
+    // HLLInitOp creates HLL init operation with minhash bits.
+    // Server creates a new HLL or resets an existing HLL.
+    // Server does not return a value.
+    //
+    // policy			write policy, use DefaultHLLPolicy for default
+    // binName			name of bin
+    // indexBitCount	number of index bits. Must be between 4 and 16 inclusive. Pass -1 for default.
+    // minHashBitCount  number of min hash bits. Must be between 4 and 58 inclusive. Pass -1 for default.
+    // indexBitCount + minHashBitCount must be <= 64.
     pub fn init(
         policy: &CdtHllPolicy,
         bin_name: String,
@@ -7743,6 +8104,16 @@ impl CdtHllOperation {
         }
     }
 
+    // HLLAddOp creates HLL add operation with minhash bits.
+    // Server adds values to HLL set. If HLL bin does not exist, use indexBitCount and minHashBitCount
+    // to create HLL bin. Server returns number of entries that caused HLL to update a register.
+    //
+    // policy			write policy, use DefaultHLLPolicy for default
+    // binName			name of bin
+    // list				list of values to be added
+    // indexBitCount	number of index bits. Must be between 4 and 16 inclusive. Pass -1 for default.
+    // minHashBitCount  number of min hash bits. Must be between 4 and 58 inclusive. Pass -1 for default.
+    // indexBitCount + minHashBitCount must be <= 64.
     pub fn add(
         policy: &CdtHllPolicy,
         bin_name: String,
@@ -7764,6 +8135,13 @@ impl CdtHllOperation {
         }
     }
 
+    // HLLSetUnionOp creates HLL set union operation.
+    // Server sets union of specified HLL objects with HLL bin.
+    // Server does not return a value.
+    //
+    // policy			write policy, use DefaultHLLPolicy for default
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn set_union(
         policy: &CdtHllPolicy,
         bin_name: String,
@@ -7783,6 +8161,10 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLRefreshCountOp creates HLL refresh operation.
+    // Server updates the cached count (if stale) and returns the count.
+    //
+    // binName			name of bin
     pub fn refresh_count(bin_name: String) -> Option<Operation> {
         Some(Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -7794,6 +8176,13 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLFoldOp creates HLL fold operation.
+    // Servers folds indexBitCount to the specified value.
+    // This can only be applied when minHashBitCount on the HLL bin is 0.
+    // Server does not return a value.
+    //
+    // binName			name of bin
+    // indexBitCount		number of index bits. Must be between 4 and 16 inclusive.
     pub fn fold(bin_name: String, index_bit_count: i64) -> Option<Operation> {
         Some(Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -7805,6 +8194,10 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetCountOp creates HLL getCount operation.
+    // Server returns estimated number of elements in the HLL bin.
+    //
+    // binName			name of bin
     pub fn get_count(bin_name: String) -> Option<Operation> {
         Some(Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -7816,6 +8209,12 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetUnionOp creates HLL getUnion operation.
+    // Server returns an HLL object that is the union of all specified HLL objects in the list
+    // with the HLL bin.
+    //
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn get_union(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -7831,6 +8230,12 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetUnionCountOp creates HLL getUnionCount operation.
+    // Server returns estimated number of elements that would be contained by the union of these
+    // HLL objects.
+    //
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn get_union_count(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -7846,6 +8251,12 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetIntersectCountOp creates HLL getIntersectCount operation.
+    // Server returns estimated number of elements that would be contained by the intersection of
+    // these HLL objects.
+    //
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn get_intersect_count(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -7861,6 +8272,11 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLGetSimilarityOp creates HLL getSimilarity operation.
+    // Server returns estimated similarity of these HLL objects. Return type is a double.
+    //
+    // binName			name of bin
+    // list				list of HLL objects
     pub fn get_similarity(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -7876,6 +8292,11 @@ impl CdtHllOperation {
         })
     }
 
+    // HLLDescribeOp creates HLL describe operation.
+    // Server returns indexBitCount and minHashBitCount used to create HLL bin in a list of longs.
+    // The list size is 2.
+    //
+    // binName			name of bin
     pub fn describe(bin_name: String) -> Operation {
         Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -8071,7 +8492,7 @@ pub struct CdtBitwisePolicy {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtBitwisePolicy {
-    pub fn __construct(flags: Option<CdtListWriteFlags>) -> Self {
+    pub fn __construct(flags: Option<CdtBitwiseWriteFlags>) -> Self {
         let flags: i32 = flags.map(|f| f._as.into()).unwrap_or(0);
 
         CdtBitwisePolicy {
@@ -8102,6 +8523,10 @@ impl FromZval<'_> for CdtBitwisePolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// Bit operations. Create bit operations used by client operate command.
+// Offset orientation is left-to-right.  Negative offsets are supported.
+// If the offset is negative, the offset starts backwards from end of the bitmap.
+// If an offset is out of bounds, a parameter error will be returned.
 #[php_class(name = "Aerospike\\BitwiseOp")]
 pub struct CdtBitwiseOperation {
     _as: proto::CdtBitwiseOperation,
@@ -8120,6 +8545,15 @@ impl FromZval<'_> for CdtBitwiseOperation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtBitwiseOperation {
+    // BitResizeOp creates byte "resize" operation.
+    // Server resizes []byte to byteSize according to resizeFlags (See BitResizeFlags).
+    // Server does not return a value.
+    // Example:
+    //
+    //	$bin = [0b00000001, 0b01000010]
+    //	$byteSize = 4
+    //	$resizeFlags = 0
+    //	$bin result = [0b00000001, 0b01000010, 0b00000000, 0b00000000]
     pub fn resize(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8144,6 +8578,15 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitInsertOp creates byte "insert" operation.
+    // Server inserts value bytes into []byte bin at byteOffset.
+    // Server does not return a value.
+    // Example:
+    //
+    //	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	$byteOffset = 1
+    //	$value = [0b11111111, 0b11000111]
+    //	$bin result = [0b00000001, 0b11111111, 0b11000111, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
     pub fn insert(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8167,6 +8610,15 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitRemoveOp creates byte "remove" operation.
+    // Server removes bytes from []byte bin at byteOffset for byteSize.
+    // Server does not return a value.
+    // Example:
+    //
+    //	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	$byteOffset = 2
+    //	$byteSize = 3
+    //	$bin result = [0b00000001, 0b01000010]
     pub fn remove(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8190,6 +8642,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitSetOp creates bit "set" operation.
+    // Server sets value on []byte bin at bitOffset for bitSize.
+    // Server does not return a value.
+    // Example:
+    //
+    //	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	$bitOffset = 13
+    //	$bitSize = 3
+    //	$value = [0b11100000]
+    //	$bin result = [0b00000001, 0b01000111, 0b00000011, 0b00000100, 0b00000101]
     pub fn set(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8215,6 +8677,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitOrOp creates bit "or" operation.
+    // Server performs bitwise "or" on value and []byte bin at bitOffset for bitSize.
+    // Server does not return a value.
+    // Example:
+    //
+    //	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	$bitOffset = 17
+    //	$bitSize = 6
+    //	$value = [0b10101000]
+    //	bin result = [0b00000001, 0b01000010, 0b01010111, 0b00000100, 0b00000101]
     pub fn or(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8240,6 +8712,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitXorOp creates bit "exclusive or" operation.
+    // Server performs bitwise "xor" on value and []byte bin at bitOffset for bitSize.
+    // Server does not return a value.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 17
+    //	bitSize = 6
+    //	value = [0b10101100]
+    //	bin result = [0b00000001, 0b01000010, 0b01010101, 0b00000100, 0b00000101]
     pub fn xor(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8265,6 +8747,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitAndOp creates bit "and" operation.
+    // Server performs bitwise "and" on value and []byte bin at bitOffset for bitSize.
+    // Server does not return a value.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 23
+    //	bitSize = 9
+    //	value = [0b00111100, 0b10000000]
+    //	bin result = [0b00000001, 0b01000010, 0b00000010, 0b00000000, 0b00000101]
     pub fn and(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8290,6 +8782,15 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitNotOp creates bit "not" operation.
+    // Server negates []byte bin starting at bitOffset for bitSize.
+    // Server does not return a value.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 25
+    //	bitSize = 6
+    //	bin result = [0b00000001, 0b01000010, 0b00000011, 0b01111010, 0b00000101]
     pub fn not(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8313,6 +8814,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitLShiftOp creates bit "left shift" operation.
+    // Server shifts left []byte bin starting at bitOffset for bitSize.
+    // Server does not return a value.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 32
+    //	bitSize = 8
+    //	shift = 3
+    //	bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00101000]
     pub fn lshift(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8338,6 +8849,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitRShiftOp creates bit "right shift" operation.
+    // Server shifts right []byte bin starting at bitOffset for bitSize.
+    // Server does not return a value.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 0
+    //	bitSize = 9
+    //	shift = 1
+    //	bin result = [0b00000000, 0b11000010, 0b00000011, 0b00000100, 0b00000101]
     pub fn rshift(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8363,6 +8884,19 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitAddOp creates bit "add" operation.
+    // Server adds value to []byte bin starting at bitOffset for bitSize. BitSize must be <= 64.
+    // Signed indicates if bits should be treated as a signed number.
+    // If add overflows/underflows, BitOverflowAction is used.
+    // Server does not return a value.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 24
+    //	bitSize = 16
+    //	value = 128
+    //	signed = false
+    //	bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b10000101]
     pub fn add(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8393,6 +8927,19 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitSubtractOp creates bit "subtract" operation.
+    // Server subtracts value from []byte bin starting at bitOffset for bitSize. BitSize must be <= 64.
+    // Signed indicates if bits should be treated as a signed number.
+    // If add overflows/underflows, BitOverflowAction is used.
+    // Server does not return a value.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 24
+    //	bitSize = 16
+    //	value = 128
+    //	signed = false
+    //	bin result = [0b00000001, 0b01000010, 0b00000011, 0b0000011, 0b10000101]
     pub fn subtract(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8423,6 +8970,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitSetIntOp creates bit "setInt" operation.
+    // Server sets value to []byte bin starting at bitOffset for bitSize. Size must be <= 64.
+    // Server does not return a value.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 1
+    //	bitSize = 8
+    //	value = 127
+    //	bin result = [0b00111111, 0b11000010, 0b00000011, 0b0000100, 0b00000101]
     pub fn set_int(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8448,6 +9005,14 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitGetOp creates bit "get" operation.
+    // Server returns bits from []byte bin starting at bitOffset for bitSize.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 9
+    //	bitSize = 5
+    //	returns [0b1000000]
     pub fn get(
         bin_name: String,
         bit_offset: i64,
@@ -8470,6 +9035,14 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitCountOp creates bit "count" operation.
+    // Server returns integer count of set bits from []byte bin starting at bitOffset for bitSize.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 20
+    //	bitSize = 4
+    //	returns 2
     pub fn count(
         bin_name: String,
         bit_offset: i64,
@@ -8492,6 +9065,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitLScanOp creates bit "left scan" operation.
+    // Server returns integer bit offset of the first specified value bit in []byte bin
+    // starting at bitOffset for bitSize.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 24
+    //	bitSize = 8
+    //	value = true
+    //	returns 5
     pub fn lscan(
         bin_name: String,
         bit_offset: i64,
@@ -8516,6 +9099,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitRScanOp creates bit "right scan" operation.
+    // Server returns integer bit offset of the last specified value bit in []byte bin
+    // starting at bitOffset for bitSize.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 32
+    //	bitSize = 8
+    //	value = true
+    //	returns 7
     pub fn rscan(
         bin_name: String,
         bit_offset: i64,
@@ -8540,6 +9133,16 @@ impl CdtBitwiseOperation {
         }
     }
 
+    // BitGetIntOp creates bit "get integer" operation.
+    // Server returns integer from []byte bin starting at bitOffset for bitSize.
+    // Signed indicates if bits should be treated as a signed number.
+    // Example:
+    //
+    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    //	bitOffset = 8
+    //	bitSize = 16
+    //	signed = false
+    //	returns 16899
     pub fn get_int(
         bin_name: String,
         bit_offset: i64,
@@ -8888,6 +9491,13 @@ impl Client {
         }
     }
 
+    // BatchExecute will read/write multiple records for specified batch keys in one batch call.
+    // This method allows different namespaces/bins for each key in the batch.
+    // The returned records are located in the same list.
+    //
+    // BatchRecord can be *BatchRead, *BatchWrite, *BatchDelete or *BatchUDF.
+    //
+    // Requires server version 6.0+
     pub fn batch(&self, policy: &BatchPolicy, cmds: Vec<&Zval>) -> PhpResult<Vec<BatchRecord>> {
         let mut res = Vec::<proto::BatchOperate>::with_capacity(cmds.len());
         cmds.into_iter().for_each(|v| {
@@ -9041,8 +9651,12 @@ impl Client {
         })
     }
 
-    /// Create a secondary index on a bin containing scalar values. This asynchronous server call
-    /// returns before the command is complete.
+    // CreateIndex creates a secondary index.
+    // This asynchronous server call will return before the command is complete.
+    // The user can optionally wait for command completion by using the returned
+    // IndexTask instance.
+    // This method is only supported by Aerospike 3+ servers.
+    // If the policy is nil, the default relevant policy will be used.
     pub fn create_index(
         &self,
         policy: &WritePolicy,
@@ -9081,6 +9695,9 @@ impl Client {
         }
     }
 
+    // DropIndex deletes a secondary index. It will block until index is dropped on all nodes.
+    // This method is only supported by Aerospike 3+ servers.
+    // If the policy is nil, the default relevant policy will be used.
     pub fn drop_index(
         &self,
         policy: &WritePolicy,
@@ -9107,6 +9724,13 @@ impl Client {
         }
     }
 
+    // RegisterUDF registers a package containing user defined functions with server.
+    // This asynchronous server call will return before command is complete.
+    // The user can optionally wait for command completion by using the returned
+    // RegisterTask instance.
+    //
+    // This method is only supported by Aerospike 3+ servers.
+    // If the policy is nil, the default relevant policy will be used.
     pub fn register_udf(
         &self,
         policy: &WritePolicy,
@@ -9133,6 +9757,13 @@ impl Client {
         }
     }
 
+    // DropUDF removes a package containing user defined functions in the server.
+    // This asynchronous server call will return before command is complete.
+    // The user can optionally wait for command completion by using the returned
+    // RemoveTask instance.
+    //
+    // This method is only supported by Aerospike 3+ servers.
+    // If the policy is nil, the default relevant policy will be used.
     pub fn drop_udf(&self, policy: &WritePolicy, package_name: &str) -> PhpResult<()> {
         let request = tonic::Request::new(proto::AerospikeDropUdfRequest {
             policy: Some(policy._as.clone()),
@@ -9151,6 +9782,9 @@ impl Client {
         }
     }
 
+    // ListUDF lists all packages containing user defined functions in the server.
+    // This method is only supported by Aerospike 3+ servers.
+    // If the policy is nil, the default relevant policy will be used.
     pub fn list_udf(&self, policy: &ReadPolicy) -> PhpResult<Vec<UdfMeta>> {
         let request = tonic::Request::new(proto::AerospikeListUdfRequest {
             policy: Some(policy._as.clone()),
@@ -9176,6 +9810,14 @@ impl Client {
         }
     }
 
+    // Execute executes a user defined function on server and return results.
+    // The function operates on a single record.
+    // The package name is used to locate the udf file location:
+    //
+    // udf file = <server udf dir>/<package name>.lua
+    //
+    // This method is only supported by Aerospike 3+ servers.
+    // If the policy is nil, the default relevant policy will be used.
     pub fn udf_execute(
         &self,
         policy: &WritePolicy,
@@ -9214,6 +9856,12 @@ impl Client {
         }
     }
 
+    //-------------------------------------------------------
+    // User administration
+    //-------------------------------------------------------
+
+    // CreateUser creates a new user with password and roles. Clear-text password will be hashed using bcrypt
+    // before sending to server.
     pub fn create_user(
         &self,
         policy: &AdminPolicy,
@@ -9240,6 +9888,7 @@ impl Client {
         }
     }
 
+    // DropUser removes a user from the cluster.
     pub fn drop_user(&self, policy: &AdminPolicy, user: String) -> PhpResult<()> {
         let request = tonic::Request::new(proto::AerospikeDropUserRequest {
             policy: Some(policy._as.clone()),
@@ -9258,6 +9907,7 @@ impl Client {
         }
     }
 
+    // ChangePassword changes a user's password. Clear-text password will be hashed using bcrypt before sending to server.
     pub fn change_password(
         &self,
         policy: &AdminPolicy,
@@ -9282,6 +9932,7 @@ impl Client {
         }
     }
 
+    // GrantRoles adds roles to user's list of roles.
     pub fn grant_roles(
         &self,
         policy: &AdminPolicy,
@@ -9306,6 +9957,7 @@ impl Client {
         }
     }
 
+    // RevokeRoles removes roles from user's list of roles.
     pub fn revoke_roles(
         &self,
         policy: &AdminPolicy,
@@ -9330,6 +9982,7 @@ impl Client {
         }
     }
 
+    // QueryUser retrieves roles for a given user.
     pub fn query_users(
         &self,
         policy: &AdminPolicy,
@@ -9357,6 +10010,7 @@ impl Client {
         }
     }
 
+    // QueryRole retrieves privileges for a given role.
     pub fn query_roles(
         &self,
         policy: &AdminPolicy,
@@ -9383,6 +10037,9 @@ impl Client {
         }
     }
 
+    // CreateRole creates a user-defined role.
+    // Quotas require server security configuration "enable-quotas" to be set to true.
+    // Pass 0 for quota values for no limit.
     pub fn create_role(
         &self,
         policy: &AdminPolicy,
@@ -9413,6 +10070,7 @@ impl Client {
         }
     }
 
+    // DropRole removes a user-defined role.
     pub fn drop_role(&self, policy: &AdminPolicy, role_name: String) -> PhpResult<()> {
         let request = tonic::Request::new(proto::AerospikeDropRoleRequest {
             policy: Some(policy._as.clone()),
@@ -9431,6 +10089,7 @@ impl Client {
         }
     }
 
+    // GrantPrivileges grant privileges to a user-defined role.
     pub fn grant_privileges(
         &self,
         policy: &AdminPolicy,
@@ -9457,6 +10116,7 @@ impl Client {
         }
     }
 
+    // RevokePrivileges revokes privileges from a user-defined role.
     pub fn revoke_privileges(
         &self,
         policy: &AdminPolicy,
@@ -9483,6 +10143,7 @@ impl Client {
         }
     }
 
+    // SetAllowlist sets IP address whitelist for a role. If whitelist is nil or empty, it removes existing whitelist from role.
     pub fn set_allowlist(
         &self,
         policy: &AdminPolicy,
@@ -9507,6 +10168,9 @@ impl Client {
         }
     }
 
+    // SetQuotas sets maximum reads/writes per second limits for a role.  If a quota is zero, the limit is removed.
+    // Quotas require server security configuration "enable-quotas" to be set to true.
+    // Pass 0 for quota values for no limit.
     pub fn set_quotas(
         &self,
         policy: &AdminPolicy,
@@ -9585,6 +10249,10 @@ impl From<AerospikeException> for PhpException {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// Key is the unique record identifier. Records can be identified using a specified namespace,
+// an optional set name, and a user defined key which must be unique within a set.
+// Records can also be identified by namespace/digest which is the combination used
+// on the server.
 #[php_class(name = "Aerospike\\Key")]
 pub struct Key {
     _as: proto::Key,
