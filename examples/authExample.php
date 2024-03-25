@@ -2,27 +2,12 @@
 
 namespace Aerospike;
 
-/* This example needs to have security enbaled in aerospike.conf.
-For more info please visit  - "https://docs.aerospike.com/server/operations/configure/security/access-control"
-*/
+$namespace = "test";
+$set = "test";
+$socket = "/tmp/asld_grpc.sock";
 
-$iterations = 1;
-$startTime = microtime(true);
-$cp = new ClientPolicy();
+$client = Client::connect($socket);
+echo "* Connected to the local daemon: $client->socket \n";
 
-for ($i = 0; $i < $iterations; $i++) {
-
-    $cp->setUser("admin");
-    $cp->setPassword("admin");
-}
-
-$endTime = microtime(true);
-
-$duration = $endTime - $startTime;
-
-echo "Duration for setting user and password {$iterations} times: {$duration} seconds\n";
-
-// $client = Aerospike($cp, "127.0.0.1:3000");
-// $connected = $client->isConnected();
-
-// var_dump($connected);
+$ap = new AdminPolicy();
+$client->createUser($ap, "user1", "password", ["read-write"]);
