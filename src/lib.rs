@@ -8317,7 +8317,7 @@ pub struct CdtBitwisePolicy {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtBitwisePolicy {
-    pub fn __construct(flags: Option<CdtListWriteFlags>) -> Self {
+    pub fn __construct(flags: Option<CdtBitwiseWriteFlags>) -> Self {
         let flags: i32 = flags.map(|f| f._as.into()).unwrap_or(0);
 
         CdtBitwisePolicy {
