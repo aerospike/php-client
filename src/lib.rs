@@ -5839,7 +5839,9 @@ impl CdtListOperation {
                 args: vec![
                     PHPValue::List(values.iter().map(|v| (*v).clone().into()).collect()).into(),
                 ],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -5866,7 +5868,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: args,
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -5887,7 +5891,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![value.into(), PHPValue::Int(rank).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -5913,7 +5919,9 @@ impl CdtListOperation {
                     PHPValue::Int(rank).into(),
                     PHPValue::Int(count).into(),
                 ],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6083,7 +6091,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6103,7 +6113,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6124,7 +6136,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6144,7 +6158,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6164,7 +6180,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6185,7 +6203,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into(), PHPValue::Int(count).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6204,8 +6224,12 @@ impl CdtListOperation {
                 op: proto::CdtListCommandOp::GetByValueList.into(),
                 policy: None,
                 bin_name: bin_name,
-                args: values.iter().map(|v| v.clone().into()).collect(),
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                args: vec![
+                    PHPValue::List(values.iter().map(|v| (*v).clone().into()).collect()).into(),
+                ],
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6232,7 +6256,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: args,
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6252,7 +6278,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6272,7 +6300,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6293,7 +6323,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6313,7 +6345,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6333,7 +6367,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6354,7 +6390,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into(), PHPValue::Int(count).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6375,7 +6413,9 @@ impl CdtListOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: vec![value.into(), PHPValue::Int(rank).into()],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6401,7 +6441,9 @@ impl CdtListOperation {
                     PHPValue::Int(rank).into(),
                     PHPValue::Int(count).into(),
                 ],
-                return_type: return_type.map(|rt| rt._as.into()).unwrap_or(Some(0)),
+                return_type: return_type
+                    .map(|rt| rt._as.into())
+                    .unwrap_or(Some(proto::CdtListReturnType::Value.into())),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6872,7 +6914,9 @@ impl CdtMapOperation {
                 policy: None,
                 bin_name: bin_name,
                 args: keys.iter().map(|k| k.clone().into()).collect(),
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6894,7 +6938,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![begin.into(), end.into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6914,8 +6960,12 @@ impl CdtMapOperation {
                 op: proto::CdtMapCommandOp::RemoveByValueList.into(),
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
-                args: values.iter().map(|k| k.clone().into()).collect(),
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                args: vec![
+                    PHPValue::List(values.iter().map(|v| (*v).clone().into()).collect()).into(),
+                ],
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6937,7 +6987,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![begin.into(), end.into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6959,7 +7011,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![value.into(), PHPValue::Int(rank).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -6986,7 +7040,9 @@ impl CdtMapOperation {
                     PHPValue::Int(rank).into(),
                     PHPValue::Int(count).into(),
                 ],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7007,7 +7063,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7028,7 +7086,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7050,7 +7110,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7071,7 +7133,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7092,7 +7156,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7114,7 +7180,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into(), PHPValue::Int(count).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7136,7 +7204,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![key.into(), PHPValue::Int(index).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7163,7 +7233,9 @@ impl CdtMapOperation {
                     PHPValue::Int(index).into(),
                     PHPValue::Int(count).into(),
                 ],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7184,7 +7256,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: keys.iter().map(|key| key.clone().into()).collect(),
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7206,7 +7280,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![begin.into(), end.into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7228,7 +7304,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![key.into(), PHPValue::Int(index).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7255,7 +7333,9 @@ impl CdtMapOperation {
                     PHPValue::Int(index).into(),
                     PHPValue::Int(count).into(),
                 ],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7275,8 +7355,12 @@ impl CdtMapOperation {
                 op: proto::CdtMapCommandOp::GetByValueList.into(),
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
-                args: values.iter().map(|v| v.clone().into()).collect(),
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                args: vec![
+                    PHPValue::List(values.iter().map(|v| (*v).clone().into()).collect()).into(),
+                ],
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7298,7 +7382,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![begin.into(), end.into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7320,7 +7406,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![value.into(), PHPValue::Int(rank).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7347,7 +7435,9 @@ impl CdtMapOperation {
                     PHPValue::Int(rank).into(),
                     PHPValue::Int(count).into(),
                 ],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7368,7 +7458,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(index).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7390,7 +7482,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![begin.into(), end.into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7417,7 +7511,9 @@ impl CdtMapOperation {
                     PHPValue::Int(rank).into(),
                     PHPValue::Int(count).into(),
                 ],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7438,7 +7534,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![PHPValue::Int(rank).into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7460,7 +7558,9 @@ impl CdtMapOperation {
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
                 args: vec![begin.into(), end.into()],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7487,7 +7587,9 @@ impl CdtMapOperation {
                     PHPValue::Int(range).into(),
                     PHPValue::Int(count).into(),
                 ],
-                return_type: return_type.map(|v| v._as).or(Some(0)),
+                return_type: return_type
+                    .map(|v| v._as)
+                    .or(Some(CdtMapReturnType::key_value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -9536,7 +9638,6 @@ impl Key {
         }
     }
 
-    #[getter]
     pub fn get_digest_bytes(&self) -> Vec<u8> {
         self._as
             .digest
