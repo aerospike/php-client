@@ -7122,7 +7122,7 @@ impl CdtMapOperation {
                 op: proto::CdtMapCommandOp::RemoveByKeyList.into(),
                 policy: None,
                 bin_name: bin_name,
-                args: keys.iter().map(|k| k.clone().into()).collect(),
+                args: vec![PHPValue::List(keys.iter().map(|k| k.clone().into()).collect()).into()],
                 return_type: return_type
                     .map(|v| v._as)
                     .or(Some(CdtMapReturnType::key_value()._as)),
@@ -7532,7 +7532,9 @@ impl CdtMapOperation {
                 op: proto::CdtMapCommandOp::GetByKeyList.into(),
                 policy: Some(policy._as.clone()),
                 bin_name: bin_name,
-                args: keys.iter().map(|key| key.clone().into()).collect(),
+                args: vec![
+                    PHPValue::List(keys.iter().map(|key| key.clone().into()).collect()).into(),
+                ],
                 return_type: return_type
                     .map(|v| v._as)
                     .or(Some(CdtMapReturnType::key_value()._as)),
