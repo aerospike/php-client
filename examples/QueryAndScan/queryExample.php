@@ -120,7 +120,4 @@ class AerospikeHelper
 }
 
 AerospikeHelper::connect();
-// AerospikeHelper::setUp();
-// AerospikeHelper::queryAllPartitionRecordsWithFilter();
-// AerospikeHelper::printAllKeys();
 AerospikeHelper::tearDown();

@@ -15,7 +15,7 @@ final class SecurityTest extends TestCase
     protected static $client;
 
     //Change this to TRUE when you enable security and want to test connections.
-    protected static $authRequired = TRUE;
+    protected static $authRequired = FALSE;
 
     protected function isSecurityEnabled()
     {

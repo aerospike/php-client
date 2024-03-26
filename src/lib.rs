@@ -94,61 +94,61 @@ impl FromZval<'_> for ExpType {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ExpType {
-    pub fn nil() -> Self {
+    pub fn Nil() -> Self {
         ExpType {
             _as: proto::ExpType::Nil,
         }
     }
 
-    pub fn bool() -> Self {
+    pub fn Bool() -> Self {
         ExpType {
             _as: proto::ExpType::Bool,
         }
     }
 
-    pub fn int() -> Self {
+    pub fn Int() -> Self {
         ExpType {
             _as: proto::ExpType::Int,
         }
     }
 
-    pub fn string() -> Self {
+    pub fn String() -> Self {
         ExpType {
             _as: proto::ExpType::String,
         }
     }
 
-    pub fn list() -> Self {
+    pub fn List() -> Self {
         ExpType {
             _as: proto::ExpType::List,
         }
     }
 
-    pub fn map() -> Self {
+    pub fn Map() -> Self {
         ExpType {
             _as: proto::ExpType::Map,
         }
     }
 
-    pub fn blob() -> Self {
+    pub fn Blob() -> Self {
         ExpType {
             _as: proto::ExpType::Blob,
         }
     }
 
-    pub fn float() -> Self {
+    pub fn Float() -> Self {
         ExpType {
             _as: proto::ExpType::Float,
         }
     }
 
-    pub fn geo() -> Self {
+    pub fn Geo() -> Self {
         ExpType {
             _as: proto::ExpType::Geo,
         }
     }
 
-    pub fn hll() -> Self {
+    pub fn Hll() -> Self {
         ExpType {
             _as: proto::ExpType::Hll,
         }
@@ -171,23 +171,6 @@ impl From<ExpType> for i32 {
         }
     }
 }
-
-// impl From<&ExpType> for aerospike_core::expressions::ExpType {
-//     fn from(input: &ExpType) -> Self {
-//         match &input.v {
-//             _ExpType::NIL => aerospike_core::expressions::ExpType::NIL,
-//             _ExpType::BOOL => aerospike_core::expressions::ExpType::BOOL,
-//             _ExpType::INT => aerospike_core::expressions::ExpType::INT,
-//             _ExpType::STRING => aerospike_core::expressions::ExpType::STRING,
-//             _ExpType::LIST => aerospike_core::expressions::ExpType::LIST,
-//             _ExpType::MAP => aerospike_core::expressions::ExpType::MAP,
-//             _ExpType::BLOB => aerospike_core::expressions::ExpType::BLOB,
-//             _ExpType::FLOAT => aerospike_core::expressions::ExpType::FLOAT,
-//             _ExpType::GEO => aerospike_core::expressions::ExpType::GEO,
-//             _ExpType::HLL => aerospike_core::expressions::ExpType::HLL,
-//         }
-//     }
-// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -268,7 +251,7 @@ impl Expression {
             Some(PHPValue::String(name).into()),
             None,
             None,
-            Some(ExpType::int()),
+            Some(ExpType::Int()),
             vec![],
         )
     }
@@ -280,7 +263,7 @@ impl Expression {
             Some(PHPValue::String(name).into()),
             None,
             None,
-            Some(ExpType::string()),
+            Some(ExpType::String()),
             vec![],
         )
     }
@@ -292,7 +275,7 @@ impl Expression {
             Some(PHPValue::String(name).into()),
             None,
             None,
-            Some(ExpType::blob()),
+            Some(ExpType::Blob()),
             vec![],
         )
     }
@@ -304,7 +287,7 @@ impl Expression {
             Some(PHPValue::String(name).into()),
             None,
             None,
-            Some(ExpType::float()),
+            Some(ExpType::Float()),
             vec![],
         )
     }
@@ -316,7 +299,7 @@ impl Expression {
             Some(PHPValue::String(name).into()),
             None,
             None,
-            Some(ExpType::geo()),
+            Some(ExpType::Geo()),
             vec![],
         )
     }
@@ -328,7 +311,7 @@ impl Expression {
             Some(PHPValue::String(name).into()),
             None,
             None,
-            Some(ExpType::list()),
+            Some(ExpType::List()),
             vec![],
         )
     }
@@ -340,7 +323,7 @@ impl Expression {
             Some(PHPValue::String(name).into()),
             None,
             None,
-            Some(ExpType::map()),
+            Some(ExpType::Map()),
             vec![],
         )
     }
@@ -352,7 +335,7 @@ impl Expression {
             Some(PHPValue::String(name).into()),
             None,
             None,
-            Some(ExpType::hll()),
+            Some(ExpType::Hll()),
             vec![],
         )
     }
@@ -361,7 +344,7 @@ impl Expression {
     pub fn bin_exists(name: String) -> Self {
         Expression::ne(
             &Expression::bin_type(name),
-            &Expression::int_val(ParticleType::null().into()),
+            &Expression::int_val(ParticleType::Null().into()),
         )
     }
 
@@ -1327,7 +1310,7 @@ impl FromZval<'_> for RecordExistsAction {
 impl RecordExistsAction {
     /// Update means: Create or update record.
     /// Merge write command bins with existing bins.
-    pub fn update() -> Self {
+    pub fn Update() -> Self {
         RecordExistsAction {
             _as: proto::RecordExistsAction::Update,
         }
@@ -1335,7 +1318,7 @@ impl RecordExistsAction {
 
     /// UpdateOnly means: Update record only. Fail if record does not exist.
     /// Merge write command bins with existing bins.
-    pub fn update_only() -> Self {
+    pub fn Update_Only() -> Self {
         RecordExistsAction {
             _as: proto::RecordExistsAction::UpdateOnly,
         }
@@ -1345,7 +1328,7 @@ impl RecordExistsAction {
     /// Delete existing bins not referenced by write command bins.
     /// Supported by Aerospike 2 server versions >= 2.7.5 and
     /// Aerospike 3 server versions >= 3.1.6.
-    pub fn replace() -> Self {
+    pub fn Replace() -> Self {
         RecordExistsAction {
             _as: proto::RecordExistsAction::Replace,
         }
@@ -1355,31 +1338,20 @@ impl RecordExistsAction {
     /// Delete existing bins not referenced by write command bins.
     /// Supported by Aerospike 2 server versions >= 2.7.5 and
     /// Aerospike 3 server versions >= 3.1.6.
-    pub fn replace_only() -> Self {
+    pub fn Replace_Only() -> Self {
         RecordExistsAction {
             _as: proto::RecordExistsAction::ReplaceOnly,
         }
     }
 
     /// CreateOnly means: Create only. Fail if record exists.
-    pub fn create_only() -> Self {
+    pub fn Create_Only() -> Self {
         RecordExistsAction {
             _as: proto::RecordExistsAction::CreateOnly,
         }
     }
 }
 
-// impl From<&RecordExistsAction> for proto::RecordExistsAction {
-//     fn from(input: &RecordExistsAction) -> Self {
-//         match &input._as {
-//             proto::RecordExistsAction::Update => proto::RecordExistsAction::Update,
-//             proto::RecordExistsAction::UpdateOnly => proto::RecordExistsAction::UpdateOnly,
-//             proto::RecordExistsAction::Replace => proto::RecordExistsAction::Replace,
-//             proto::RecordExistsAction::ReplaceOnly => proto::RecordExistsAction::ReplaceOnly,
-//             proto::RecordExistsAction::CreateOnly => proto::RecordExistsAction::CreateOnly,
-//         }
-//     }
-// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1407,28 +1379,19 @@ impl FromZval<'_> for CommitLevel {
 impl CommitLevel {
     /// CommitAll indicates the server should wait until successfully committing master and all
     /// replicas.
-    pub fn commit_all() -> Self {
+    pub fn Commit_All() -> Self {
         CommitLevel {
             _as: proto::CommitLevel::CommitAll,
         }
     }
 
     /// CommitMaster indicates the server should wait until successfully committing master only.
-    pub fn commit_master() -> Self {
+    pub fn Commit_Master() -> Self {
         CommitLevel {
             _as: proto::CommitLevel::CommitMaster,
         }
     }
 }
-
-// impl From<&CommitLevel> for proto::CommitLevel {
-//     fn from(input: &CommitLevel) -> Self {
-//         match &input.v {
-//             _CommitLevel::CommitAll => proto::CommitLevel::CommitAll,
-//             _CommitLevel::CommitMaster => proto::CommitLevel::CommitMaster,
-//         }
-//     }
-// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1463,7 +1426,7 @@ impl FromZval<'_> for ConsistencyLevel {
 impl ConsistencyLevel {
     /// ConsistencyOne indicates only a single replica should be consulted in
     /// the read operation.
-    pub fn consistency_one() -> Self {
+    pub fn Consistency_One() -> Self {
         ConsistencyLevel {
             v: _ConsistencyLevel::ConsistencyOne,
         }
@@ -1471,7 +1434,7 @@ impl ConsistencyLevel {
 
     /// ConsistencyAll indicates that all replicas should be consulted in
     /// the read operation.
-    pub fn consistency_all() -> Self {
+    pub fn Consistency_All() -> Self {
         ConsistencyLevel {
             v: _ConsistencyLevel::ConsistencyAll,
         }
@@ -1513,7 +1476,7 @@ impl FromZval<'_> for GenerationPolicy {
 #[derive(ZvalConvert)]
 impl GenerationPolicy {
     /// None means: Do not use record generation to restrict writes.
-    pub fn none() -> Self {
+    pub fn None() -> Self {
         GenerationPolicy {
             _as: proto::GenerationPolicy::None,
         }
@@ -1521,7 +1484,7 @@ impl GenerationPolicy {
 
     /// ExpectGenEqual means: Update/delete record if expected generation is equal to server
     /// generation. Otherwise, fail.
-    pub fn expect_gen_equal() -> Self {
+    pub fn Expect_Gen_Equal() -> Self {
         GenerationPolicy {
             _as: proto::GenerationPolicy::ExpectGenEqual,
         }
@@ -1529,22 +1492,13 @@ impl GenerationPolicy {
 
     /// ExpectGenGreater means: Update/delete record if expected generation greater than the server
     /// generation. Otherwise, fail. This is useful for restore after backup.
-    pub fn expect_gen_greater() -> Self {
+    pub fn Expect_Gen_Greater() -> Self {
         GenerationPolicy {
             _as: proto::GenerationPolicy::ExpectGenGt,
         }
     }
 }
 
-// impl From<&GenerationPolicy> for proto::GenerationPolicy {
-//     fn from(input: &GenerationPolicy) -> Self {
-//         match &input.v {
-//             _GenerationPolicy::None => proto::GenerationPolicy::None,
-//             _GenerationPolicy::ExpectGenEqual => proto::GenerationPolicy::ExpectGenEqual,
-//             _GenerationPolicy::ExpectGenGreater => proto::GenerationPolicy::ExpectGenGt,
-//         }
-//     }
-// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1584,14 +1538,14 @@ impl FromZval<'_> for Expiration {
 #[derive(ZvalConvert)]
 impl Expiration {
     /// Set the record to expire X seconds from now
-    pub fn seconds(seconds: u32) -> Self {
+    pub fn Seconds(seconds: u32) -> Self {
         Expiration {
             _as: _Expiration::Seconds(seconds),
         }
     }
 
     /// Set the record's expiry time using the default time-to-live (TTL) value for the namespace
-    pub fn namespace_default() -> Self {
+    pub fn Namespace_Default() -> Self {
         Expiration {
             _as: _Expiration::NamespaceDefault,
         }
@@ -1599,7 +1553,7 @@ impl Expiration {
 
     /// Set the record to never expire. Requires Aerospike 2 server version 2.7.2 or later or
     /// Aerospike 3 server version 3.1.4 or later. Do not use with older servers.
-    pub fn never() -> Self {
+    pub fn Never() -> Self {
         Expiration {
             _as: _Expiration::Never,
         }
@@ -1607,7 +1561,7 @@ impl Expiration {
 
     /// Do not change the record's expiry time when updating the record; requires Aerospike server
     /// version 3.10.1 or later.
-    pub fn dont_update() -> Self {
+    pub fn Dont_Update() -> Self {
         Expiration {
             _as: _Expiration::DontUpdate,
         }
@@ -1628,10 +1582,10 @@ impl From<&Expiration> for u32 {
 impl From<u32> for Expiration {
     fn from(exp: u32) -> Expiration {
         match exp {
-            NAMESPACE_DEFAULT => Expiration::namespace_default(),
-            NEVER_EXPIRE => Expiration::never(),
-            DONT_UPDATE => Expiration::dont_update(),
-            secs => Expiration::seconds(secs),
+            NAMESPACE_DEFAULT => Expiration::Namespace_Default(),
+            NEVER_EXPIRE => Expiration::Never(),
+            DONT_UPDATE => Expiration::Dont_Update(),
+            secs => Expiration::Seconds(secs),
         }
     }
 }
@@ -1673,7 +1627,7 @@ impl Concurrency {
     /// Issue commands sequentially. This mode has a performance advantage for small to
     /// medium sized batch sizes because requests can be issued in the main transaction thread.
     /// This is the default.
-    pub fn sequential() -> Self {
+    pub fn Sequential() -> Self {
         Concurrency {
             v: _Concurrency::Sequential,
         }
@@ -1682,7 +1636,7 @@ impl Concurrency {
     /// Issue all commands in parallel threads. This mode has a performance advantage for
     /// extremely large batch sizes because each node can process the request immediately. The
     /// downside is extra threads will need to be created (or takedn from a thread pool).
-    pub fn parallel() -> Self {
+    pub fn Parallel() -> Self {
         Concurrency {
             v: _Concurrency::Parallel,
         }
@@ -1697,7 +1651,7 @@ impl Concurrency {
     /// `MaxThreads(8)`, then batch requests will be made for 8 node/namespace combinations in
     /// parallel threads. When a request completes, a new request will be issued until all 16
     /// requests are complete.
-    pub fn max_threads(threads: u32) -> Self {
+    pub fn Max_Threads(threads: u32) -> Self {
         Concurrency {
             v: _Concurrency::MaxThreads(threads),
         }
@@ -1749,13 +1703,15 @@ impl ListOrderType {
         }
     }
 
-    pub fn ordered() -> Self {
+    // ListOrderOrdered signifies that list is Ordered.
+    pub fn Ordered() -> Self {
         ListOrderType {
-            _as: proto::ListOrderType::Unordered,
+            _as: proto::ListOrderType::Ordered,
         }
     }
 
-    pub fn unordered() -> Self {
+    // ListOrderUnordered signifies that list is not ordered. This is the default.
+    pub fn Unordered() -> Self {
         ListOrderType {
             _as: proto::ListOrderType::Unordered,
         }
@@ -1805,19 +1761,22 @@ impl MapOrderType {
         }
     }
 
-    pub fn unordered() -> Self {
+    // Map is not ordered. This is the default.
+    pub fn Unordered() -> Self {
         MapOrderType {
             _as: proto::MapOrderType::Unordered,
         }
     }
 
-    pub fn key_ordered() -> Self {
+    // Order map by key.
+    pub fn Key_Ordered() -> Self {
         MapOrderType {
             _as: proto::MapOrderType::KeyOrdered,
         }
     }
 
-    pub fn key_value_ordered() -> Self {
+    // Order map by key, then value.
+    pub fn Key_Value_Ordered() -> Self {
         MapOrderType {
             _as: proto::MapOrderType::KeyValueOrdered,
         }
@@ -2233,6 +2192,7 @@ impl WritePolicy {
         WritePolicy::default()
     }
 
+    // RecordExistsAction qualifies how to handle writes where the record already exists.
     #[getter]
     pub fn get_record_exists_action(&self) -> RecordExistsAction {
         RecordExistsAction {
@@ -2252,6 +2212,8 @@ impl WritePolicy {
         self._as.record_exists_action = record_exists_action._as.into();
     }
 
+    // GenerationPolicy qualifies how to handle record writes based on record generation. The default (NONE)
+	// indicates that the generation is not used to restrict writes.
     #[getter]
     pub fn get_generation_policy(&self) -> GenerationPolicy {
         GenerationPolicy {
@@ -2269,6 +2231,9 @@ impl WritePolicy {
         self._as.generation_policy = generation_policy._as.into();
     }
 
+    // Desired consistency guarantee when committing a transaction on the server. The default
+	// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
+	// be successful before returning success to the client.
     #[getter]
     pub fn get_commit_level(&self) -> CommitLevel {
         CommitLevel {
@@ -2285,6 +2250,10 @@ impl WritePolicy {
         self._as.commit_level = commit_level._as.into();
     }
 
+    // Generation determines expected generation.
+	// Generation is the number of times a record has been
+	// modified (including creation) on the server.
+	// If a write operation is creating a record, the expected generation would be 0.
     #[getter]
     pub fn get_generation(&self) -> u32 {
         self._as.generation
@@ -2295,13 +2264,20 @@ impl WritePolicy {
         self._as.generation = generation;
     }
 
+	// Expiration determines record expiration in seconds. Also known as TTL (Time-To-Live).
+	// Seconds record will live before being removed by the server.
+	// Expiration values:
+	// TTLServerDefault (0): Default to namespace configuration variable "default-ttl" on the server.
+	// TTLDontExpire (MaxUint32): Never expire for Aerospike 2 server versions >= 2.7.2 and Aerospike 3+ server
+	// TTLDontUpdate (MaxUint32 - 1): Do not change ttl when record is written. Supported by Aerospike server versions >= 3.10.1
+	// > 0: Actual expiration in seconds.
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
-            NAMESPACE_DEFAULT => Expiration::namespace_default(),
-            NEVER_EXPIRE => Expiration::never(),
-            DONT_UPDATE => Expiration::dont_update(),
-            secs => Expiration::seconds(secs),
+            NAMESPACE_DEFAULT => Expiration::Namespace_Default(),
+            NEVER_EXPIRE => Expiration::Never(),
+            DONT_UPDATE => Expiration::Dont_Update(),
+            secs => Expiration::Seconds(secs),
         }
     }
 
@@ -2310,6 +2286,15 @@ impl WritePolicy {
         self._as.expiration = (&expiration).into();
     }
 
+    // RespondPerEachOp defines for client.Operate() method, return a result for every operation.
+	// Some list operations do not return results by default (ListClearOp() for example).
+	// This can sometimes make it difficult to determine the desired result offset in the returned
+	// bin's result list.
+	//
+	// Setting RespondPerEachOp to true makes it easier to identify the desired result offset
+	// (result offset equals bin's operate sequence). This only makes sense when multiple list
+	// operations are used in one operate call and some of those operations do not return results
+	// by default.
     #[getter]
     pub fn get_respond_per_each_op(&self) -> bool {
         self._as.respond_per_each_op
@@ -2320,6 +2305,9 @@ impl WritePolicy {
         self._as.respond_per_each_op = respond_per_each_op;
     }
 
+    // DurableDelete leaves a tombstone for the record if the transaction results in a record deletion.
+	// This prevents deleted records from reappearing after node failures.
+	// Valid for Aerospike Server Enterprise Edition 3.10+ only.
     #[getter]
     pub fn get_durable_delete(&self) -> bool {
         self._as.respond_per_each_op
@@ -2522,6 +2510,8 @@ impl Default for WritePolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// MultiPolicy contains parameters for policy attributes used in
+// query and scan operations.
 pub struct MultiPolicy {
     _as: proto::MultiPolicy,
 }
@@ -2549,12 +2539,12 @@ impl Default for MultiPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// QueryPolicy encapsulates parameters for policy attributes used in query operations.
 #[php_class(name = "Aerospike\\QueryPolicy")]
 pub struct QueryPolicy {
     _as: proto::QueryPolicy,
 }
 
-/// `QueryPolicy` encapsulates parameters for query operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl QueryPolicy {
@@ -2562,6 +2552,12 @@ impl QueryPolicy {
         QueryPolicy::default()
     }
 
+    // ShortQuery detemines wether query expected to return less than 100 records.
+	// If true, the server will optimize the query for a small record set.
+	// This field is ignored for aggregation queries, background queries
+	// and server versions 6.0+.
+	//
+	// Default: false
     #[getter]
     pub fn get_short_query(&self) -> bool {
         self._as.short_query
@@ -3218,6 +3214,7 @@ impl Default for ScanPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// IndexCollectionType is the secondary index collection type.
 #[php_class(name = "Aerospike\\IndexCollectionType")]
 pub struct IndexCollectionType {
     _as: proto::IndexCollectionType,
@@ -3226,21 +3223,29 @@ pub struct IndexCollectionType {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl IndexCollectionType {
+
+    // ICT_DEFAULT is the Normal scalar index.
     pub fn Default() -> Self {
         IndexCollectionType {
             _as: proto::IndexCollectionType::Default,
         }
     }
+
+    // ICT_LIST is Index list elements.
     pub fn List() -> Self {
         IndexCollectionType {
             _as: proto::IndexCollectionType::List,
         }
     }
+
+    // ICT_MAPKEYS is Index map keys.
     pub fn MapKeys() -> Self {
         IndexCollectionType {
             _as: proto::IndexCollectionType::MapKeys,
         }
     }
+
+    // ICT_MAPVALUES is Index map values.
     pub fn MapValues() -> Self {
         IndexCollectionType {
             _as: proto::IndexCollectionType::MapValues,
@@ -3254,6 +3259,7 @@ impl IndexCollectionType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// Server particle types. Unsupported types are commented out.
 #[php_class(name = "Aerospike\\ParticleType")]
 pub struct ParticleType {
     _as: proto::ParticleType,
@@ -3262,67 +3268,67 @@ pub struct ParticleType {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ParticleType {
-    pub fn null() -> Self {
+    pub fn Null() -> Self {
         ParticleType {
             _as: proto::ParticleType::Null,
         }
     }
 
-    pub fn integer() -> Self {
+    pub fn Integer() -> Self {
         ParticleType {
             _as: proto::ParticleType::Integer,
         }
     }
 
-    pub fn float() -> Self {
+    pub fn Float() -> Self {
         ParticleType {
             _as: proto::ParticleType::Float,
         }
     }
 
-    pub fn string() -> Self {
+    pub fn String() -> Self {
         ParticleType {
             _as: proto::ParticleType::String,
         }
     }
 
-    pub fn blob() -> Self {
+    pub fn Blob() -> Self {
         ParticleType {
             _as: proto::ParticleType::Blob,
         }
     }
 
-    pub fn digest() -> Self {
+    pub fn Digest() -> Self {
         ParticleType {
             _as: proto::ParticleType::Digest,
         }
     }
 
-    pub fn bool() -> Self {
+    pub fn Bool() -> Self {
         ParticleType {
             _as: proto::ParticleType::Bool,
         }
     }
 
-    pub fn hll() -> Self {
+    pub fn Hll() -> Self {
         ParticleType {
             _as: proto::ParticleType::Hll,
         }
     }
 
-    pub fn map() -> Self {
+    pub fn Map() -> Self {
         ParticleType {
             _as: proto::ParticleType::Map,
         }
     }
 
-    pub fn list() -> Self {
+    pub fn List() -> Self {
         ParticleType {
             _as: proto::ParticleType::List,
         }
     }
 
-    pub fn geo_json() -> Self {
+    pub fn Geo_Json() -> Self {
         ParticleType {
             _as: proto::ParticleType::GeoJson,
         }
@@ -3354,6 +3360,7 @@ impl From<ParticleType> for i64 {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// IndexType the type of the secondary index.
 #[php_class(name = "Aerospike\\IndexType")]
 pub struct IndexType {
     _as: proto::IndexType,
@@ -3362,24 +3369,28 @@ pub struct IndexType {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl IndexType {
+    // NUMERIC specifies an index on numeric values.
     pub fn Numeric() -> Self {
         IndexType {
             _as: proto::IndexType::Numeric,
         }
     }
 
+    // STRING specifies an index on string values.
     pub fn String() -> Self {
         IndexType {
             _as: proto::IndexType::String,
         }
     }
 
+    // BLOB specifies a []byte index. Requires server version 7.0+.
     pub fn Blob() -> Self {
         IndexType {
             _as: proto::IndexType::Blob,
         }
     }
 
+    // GEO2DSPHERE specifies 2-dimensional spherical geospatial index.
     pub fn Geo2DSphere() -> Self {
         IndexType {
             _as: proto::IndexType::Geo2DSphere,
@@ -3387,16 +3398,6 @@ impl IndexType {
     }
 }
 
-// impl From<&IndexType> for String {
-//     fn from(input: &IndexType) -> String {
-//         match &input._as {
-//             proto::IndexType::Numeric => "NUMERIC".into(),
-//             proto::IndexType::String => "STRING".into(),
-//             proto::IndexType::Blob => "BLOB".into(),
-//             proto::IndexType::Geo2DSphere => "GEO2DSPHERE".into(),
-//         }
-//     }
-// }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3406,7 +3407,6 @@ impl IndexType {
 
 /// Query filter definition. Currently, only one filter is allowed in a Statement, and must be on a
 /// bin which has a secondary index defined.
-///
 /// Filter instances should be instantiated using one of the provided macros:
 #[php_class(name = "Aerospike\\Filter")]
 pub struct Filter {
@@ -3416,6 +3416,9 @@ pub struct Filter {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Filter {
+
+    // NewEqualFilter creates a new equality filter instance for query.
+    // Value can be an integer, string or a blob (byte array). Byte arrays are only supported on server v7+.
     pub fn equal(bin_name: &str, value: PHPValue, ctx: Option<Vec<&CDTContext>>) -> Self {
         Filter {
             _as: proto::QueryFilter {
@@ -3431,6 +3434,9 @@ impl Filter {
         }
     }
 
+    // NewRangeFilter creates a range filter for query.
+    // Range arguments must be int64 values.
+    // String ranges are not supported.
     pub fn range(
         bin_name: &str,
         begin: PHPValue,
@@ -3451,6 +3457,8 @@ impl Filter {
         }
     }
 
+    // NewContainsFilter creates a contains filter for query on collection index.
+    // Value can be an integer, string or a blob (byte array). Byte arrays are only supported on server v7+.
     pub fn contains(
         bin_name: &str,
         value: PHPValue,
@@ -3473,6 +3481,7 @@ impl Filter {
         }
     }
 
+    // NewContainsRangeFilter creates a contains filter for query on ranges of data in a collection index.
     pub fn contains_range(
         bin_name: &str,
         begin: PHPValue,
@@ -3496,9 +3505,8 @@ impl Filter {
         }
     }
 
-    // Example code :
-    // $pointString = '{"type":"AeroCircle","coordinates":[[-89.0000,23.0000], 1000]}'
-    // Filter::regionsContainingPoint("bin_name", $pointString)
+    // NewGeoWithinRegionFilter creates a geospatial "within region" filter for query.
+    // Argument must be a valid GeoJSON region.
     pub fn within_region(
         bin_name: &str,
         region: &str,
@@ -3522,11 +3530,8 @@ impl Filter {
         }
     }
 
-    // Example code :
-    // $lat = 43.0004;
-    // $lng = -89.0005;
-    // $radius = 1000;
-    // $filter = Filter::regionsContainingPoint("bin_name", $lat, $lng, $radius);
+    // NewGeoWithinRegionForCollectionFilter creates a geospatial "within region" filter for query on collection index.
+    // Argument must be a valid GeoJSON region.
     pub fn within_radius(
         bin_name: &str,
         lat: f64,
@@ -3556,9 +3561,8 @@ impl Filter {
         }
     }
 
-    // Example code :
-    // $pointString = '{"type":"Point","coordinates":[-89.0000,23.0000]}'
-    // Filter::regionsContainingPoint("bin_name", $pointString)
+    // NewGeoRegionsContainingPointFilter creates a geospatial "containing point" filter for query.
+    // Argument must be a valid GeoJSON point.
     pub fn regions_containing_point(
         bin_name: &str,
         lat: f64,
@@ -3604,7 +3608,7 @@ impl FromZval<'_> for Filter {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-/// Query statement parameters.
+// Statement encapsulates query statement parameters.
 #[php_class(name = "Aerospike\\Statement")]
 pub struct Statement {
     _as: proto::Statement,
@@ -3635,6 +3639,9 @@ impl Statement {
         }
     }
 
+    // Filter determines query index filter (Optional).
+	// This filter is applied to the secondary index on query.
+	// Query index filters must reference a bin which has a secondary index defined.
     #[getter]
     pub fn get_filter(&self) -> Option<Filter> {
         self._as.filter.as_ref().map(|f| Filter { _as: f.clone() })
@@ -3645,6 +3652,8 @@ impl Statement {
         self._as.filter = filter.map(|f| f._as.clone());
     }
 
+    // IndexName determines query index name (Optional)
+	// If not set, the server will determine the index from the filter's bin name.
     #[getter]
     pub fn get_index_name(&self) -> Option<String> {
         self._as.index_name.clone()
@@ -3655,6 +3664,7 @@ impl Statement {
         self._as.index_name = index_name;
     }
 
+    // BinNames detemines bin names (optional)
     #[getter]
     pub fn get_bin_names(&self) -> Vec<String> {
         self._as.bin_names.clone()
@@ -3665,6 +3675,7 @@ impl Statement {
         self._as.bin_names = bin_names;
     }
 
+    // Namespace determines query Namespace
     #[getter]
     pub fn get_namespace(&self) -> String {
         self._as.namespace.clone()
@@ -3675,6 +3686,7 @@ impl Statement {
         self._as.namespace = namespace;
     }
 
+	// SetName determines query Set name (Optional)
     #[getter]
     pub fn get_setname(&self) -> String {
         self._as.set_name.clone()
@@ -3715,21 +3727,26 @@ impl PartitionStatus {
         }
     }
 
+    // BVal
     #[getter]
     pub fn get_bval(&self) -> Option<i64> {
         self._as.bval
     }
 
+    // Id shows the partition Id.
     #[getter]
     pub fn get_partition_id(&self) -> u32 {
         self._as.id
     }
 
+    // Digest records the digest of the last key digest received from the server
+	// for this partition.
     #[getter]
     pub fn get_digest(&self) -> Vec<u8> {
         self._as.digest.clone()
     }
 
+    // Retry signifies if the partition requires a retry.
     #[getter]
     pub fn get_retry(&self) -> bool {
         self._as.retry
@@ -3780,6 +3797,8 @@ impl PartitionFilter {
         p.partitions.iter().map(|ps| ps.into()).collect()
     }
 
+    // NewPartitionFilterAll creates a partition filter that
+    // reads all the partitions.
     pub fn all() -> Self {
         PartitionFilter {
             _as: Arc::new(Mutex::new(proto::PartitionFilter {
@@ -3793,6 +3812,8 @@ impl PartitionFilter {
         }
     }
 
+    // NewPartitionFilterById creates a partition filter by partition id.
+    // Partition id is between 0 - 4095
     pub fn partition(id: u32) -> Self {
         PartitionFilter {
             _as: Arc::new(Mutex::new(proto::PartitionFilter {
@@ -3806,6 +3827,9 @@ impl PartitionFilter {
         }
     }
 
+    // NewPartitionFilterByRange creates a partition filter by partition range.
+    // begin partition id is between 0 - 4095
+    // count is the number of partitions, in the range of 1 - 4096 inclusive.
     pub fn range(begin: u32, count: u32) -> Self {
         PartitionFilter {
             _as: Arc::new(Mutex::new(proto::PartitionFilter {
@@ -3866,11 +3890,13 @@ impl Recordset {
         self._as = None;
     }
 
+    // IsActive returns true if the operation hasn't been finished or cancelled.
     #[getter]
     pub fn get_active(&self) -> bool {
         self._as.is_some()
     }
 
+    // Records is a channel on which the resulting records will be sent back.
     pub fn next(&mut self) -> Option<Result<Record>> {
         let mut pid: Option<usize> = None;
         let mut digest: Option<Vec<u8>> = None;
@@ -4472,10 +4498,10 @@ impl BatchWritePolicy {
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
-            NAMESPACE_DEFAULT => Expiration::namespace_default(),
-            NEVER_EXPIRE => Expiration::never(),
-            DONT_UPDATE => Expiration::dont_update(),
-            secs => Expiration::seconds(secs),
+            NAMESPACE_DEFAULT => Expiration::Namespace_Default(),
+            NEVER_EXPIRE => Expiration::Never(),
+            DONT_UPDATE => Expiration::Dont_Update(),
+            secs => Expiration::Seconds(secs),
         }
     }
 
@@ -4661,10 +4687,10 @@ impl BatchUdfPolicy {
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
-            NAMESPACE_DEFAULT => Expiration::namespace_default(),
-            NEVER_EXPIRE => Expiration::never(),
-            DONT_UPDATE => Expiration::dont_update(),
-            secs => Expiration::seconds(secs),
+            NAMESPACE_DEFAULT => Expiration::Namespace_Default(),
+            NEVER_EXPIRE => Expiration::Never(),
+            DONT_UPDATE => Expiration::Dont_Update(),
+            secs => Expiration::Seconds(secs),
         }
     }
 
@@ -5043,7 +5069,7 @@ impl FromZval<'_> for UdfLanguage {
 #[derive(ZvalConvert)]
 impl UdfLanguage {
     /// lua language.
-    pub fn lua() -> Self {
+    pub fn Lua() -> Self {
         UdfLanguage {
             _as: proto::UdfLanguage::Lua,
         }
@@ -5059,7 +5085,7 @@ impl From<proto::UdfLanguage> for UdfLanguage {
 impl From<i32> for UdfLanguage {
     fn from(input: i32) -> Self {
         match input {
-            0 => Self::lua(),
+            0 => Self::Lua(),
             _ => unreachable!(),
         }
     }
@@ -9744,7 +9770,7 @@ impl Client {
             policy: Some(policy._as.clone()),
             udf_body: udf_body.into(),
             package_name: package_name.into(),
-            language: language.unwrap_or(UdfLanguage::lua()).into(),
+            language: language.unwrap_or(UdfLanguage::Lua()).into(),
         });
 
         let mut client = self.client.lock().unwrap();
@@ -10345,6 +10371,7 @@ impl FromZval<'_> for Key {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+// Define `GeoJSON` Value.
 #[php_class(name = "Aerospike\\GeoJSON")]
 pub struct GeoJSON {
     v: String,

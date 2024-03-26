@@ -91,10 +91,6 @@ class CDTBitwiseOpTest extends TestCase{
 
         $rp = new ReadPolicy();
         $record = self::$client->get($rp, self::$key);
-        echo "Record Before: ";
-        var_dump($record->bins[self::$cdtBinName]);
-        echo "\n";
-
         $bwp = new BatchWritePolicy();
         $bp = new BatchPolicy();
 
@@ -104,10 +100,6 @@ class CDTBitwiseOpTest extends TestCase{
         $batchWrite = new BatchWrite($bwp, self::$key, $full_ops);
         self::$client->batch($bp, [$batchWrite]);
         $record = self::$client->get($rp, self::$key);
-        echo "Record After: ";
-        var_dump($record->bins[self::$cdtBinName]);
-        echo "\n";
-
         $this->assertEquals($record->bins[self::$cdtBinName], $expected);
     }
 
