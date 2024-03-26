@@ -57,10 +57,6 @@ class CDTMapOpTest extends TestCase{
         $this->assertEquals($record->bins[self::$cdtBinName], ["a" => 1, "b" => 2, "c" => 3, "d" => 4, "e" => 5, "f" => 6]);
     }
 
-    public function testShouldUnpackUnOrderedCDTMap(){
-        
-    }
-
     public function testShouldUnpackOrderedCDTMap(){
         $bwp = new BatchWritePolicy(); 
         $bp = new BatchPolicy();
@@ -77,9 +73,8 @@ class CDTMapOpTest extends TestCase{
         $ops = [MapOp::getByKeys($mp, self::$cdtBinName, ["mk1"], MapReturnType::value())];
         $br = BatchRead::ops($brp, self::$key, $ops);
         $recs = self::$client->batch($bp, [$br]);
-        var_dump($recs);
-
-        
+        $this->assertEquals($recs[0]->record->bins[self::$cdtBinName][0], "v1.0");
+        $this->assertEquals($recs[0]->record->bins[self::$cdtBinName][1], "v1.1");
     }
 
 }

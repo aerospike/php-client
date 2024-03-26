@@ -44,10 +44,9 @@ class ScanTest extends TestCase
 
         for ($i = 0; $i < self::$keyCount; $i++) {
             $key = new Key(self::$namespace, self::$set, self::randomString(random_int(1, 50)+$i));
-            self::$client->put($wp, $key, self::$bins);
-            $keyDigest = implode("", $key->computeDigest());
-            $keyString = base64_encode($keyDigest);
+            $keyString = $key->digest;
             self::$keys[$keyString] = $key;
+            self::$client->put($wp, $key, self::$bins);
         }
     }
 

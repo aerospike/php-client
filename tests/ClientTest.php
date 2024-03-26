@@ -241,7 +241,6 @@ final class ClientTest extends TestCase
 
     public function testAppendException()
     {
-
         $stringKey = new Key(self::$namespace, self::$set, "string_key");
         $wp = new WritePolicy();
         self::$client->put($wp, $stringKey, [new Bin("sbin", "string_value")]);
@@ -250,7 +249,7 @@ final class ClientTest extends TestCase
             self::$client->append($wp, $stringKey, [$appendExcpVal]);
             $this->fail("Expected exception AerospikeException not thrown");
         } catch (AerospikeException $e) {
-            $this->assertSame($e->code, ResultCode::BinTypeError());
+            $this->assertSame($e->code, ResultCode::BIN_TYPE_ERROR);
         }
     }
 }
