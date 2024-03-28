@@ -2,8 +2,6 @@
 
 namespace Aerospike;
 
-$cp = new ClientPolicy();
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Creating Client, persisting in permanent storage, retriving from there

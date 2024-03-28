@@ -375,6 +375,12 @@ message WritePolicy {
 	bool durableDelete = 8;
 }
 
+// AdminPolicy contains attributes used for Admin commands.
+message AdminPolicy {
+	// Admin command socket timeout.
+	uint32 timeout = 1;
+}
+
 // InfoPolicy contains attributes used for info commands.
 message InfoPolicy {
 	// Info command socket timeout.
@@ -624,6 +630,16 @@ message Json {
 	repeated JsonEntry j = 1;
 }
 
+enum UDFLanguage {
+	LUA = 0;
+}
+
+message UDFMeta {
+	string packageName = 1;
+	string hash = 2;
+	UDFLanguage language = 3;
+}
+
 message Value {
   oneof v {
 	bool nil  = 1;
@@ -703,7 +719,7 @@ enum MapOrderType {
 	MapOrderTypeKeyOrdered = 1;
 
 	// Order map by key, then value.
-	MapOrderTypeKeyValueOrdered = 3;
+	MapOrderTypeKeyValueOrdered = 2;
 }
 
 // CDTContext defines Nested CDT context. Identifies the location of nested list/map to apply the operation.
@@ -718,6 +734,18 @@ message CDTContext{
 // Operation contains operation definition.
 // This struct is used in client's operate() method.
 message Operation {
+	oneof op {
+		StdOperation std = 1;
+		CdtMapOperation map = 2;
+		CdtListOperation list = 3;
+		CdtHLLOperation hll = 4;
+		CdtBitwiseOperation bitwise = 5;
+	}
+}
+
+// Operation contains operation definition.
+// This struct is used in client's operate() method.
+message StdOperation {
 	// OpType determines type of operation.
 	OperationType opType = 1;
 
@@ -795,6 +823,98 @@ message BatchUDF {
 	repeated Value functionArgs = 5;
 }
 
+// UserRoles contains information about a user.
+message UserRole {
+	// User name.
+	string user = 1;
+
+	// Roles is a list of assigned roles.
+	repeated string roles = 2;
+
+	// ReadInfo is the list of read statistics. List may be nil.
+	// Current statistics by offset are:
+	//
+	// 0: read quota in records per second
+	// 1: single record read transaction rate (TPS)
+	// 2: read scan/query record per second rate (RPS)
+	// 3: number of limitless read scans/queries
+	//
+	// Future server releases may add additional statistics.
+	repeated uint64 readInfo = 3;
+
+	// WriteInfo is the list of write statistics. List may be nil.
+	// Current statistics by offset are:
+	//
+	// 0: write quota in records per second
+	// 1: single record write transaction rate (TPS)
+	// 2: write scan/query record per second rate (RPS)
+	// 3: number of limitless write scans/queries
+	//
+	// Future server releases may add additional statistics.
+	repeated uint64 writeInfo = 4;
+
+	// ConnsInUse is the number of currently open connections for the user
+	uint64 connsInUse = 5;
+}
+
+// Role allows granular access to database entities for users.
+message Role {
+	// Name is role name
+	string name = 1;
+
+	// Privilege is the list of assigned privileges
+	repeated Privilege privileges = 2;
+
+	// While is the list of allowable IP addresses
+	repeated string allowlist = 3;
+
+	// ReadQuota is the maximum reads per second limit for the role
+	uint32 ReadQuota = 4;
+
+	// WriteQuota is the maximum writes per second limit for the role
+	uint32 writeQuota = 5;
+}
+
+// Privilege determines user access granularity.
+message Privilege {
+	// Role
+	string Name = 1;
+
+	// Namespace determines namespace scope. Apply permission to this namespace only.
+	// If namespace is zero value, the privilege applies to all namespaces.
+	string namespace = 2;
+
+	// Set name scope. Apply permission to this set within namespace only.
+	// If set is zero value, the privilege applies to all sets within namespace.
+	string setName = 3;
+}
+
+// PartitionStatus encapsulates the pagination status in partitions.
+message PartitionStatus {
+	// BVal
+	optional int64 bval = 1;
+	// Id shows the partition Id.
+	uint32 id = 2;
+	// Retry signifies if the partition requires a retry.
+	bool retry = 3;
+	// Digest records the digest of the last key digest received from the server
+	// for this partition.
+	bytes digest = 4;
+}
+
+// PartitionFilter is used in scan/queries. This filter is also used as a cursor.
+//
+// If a previous scan/query returned all records specified by a PartitionFilter instance, a
+// future scan/query using the same PartitionFilter instance will only return new records added
+// after the last record read (in digest order) in each partition in the previous scan/query.
+message PartitionFilter {
+	uint32 begin = 1;
+	uint32 count = 2;
+	bytes digest = 3;
+	repeated PartitionStatus partitions = 4;
+	bool done = 5;
+	bool retry = 6;
+}
 
 // The response for KV commands.
 message AerospikeSingleResponse {
@@ -907,84 +1027,357 @@ message AerospikeTruncateResponse {
   optional Error error = 1;
 }
 
+message AerospikeRegisterUDFRequest {
+	WritePolicy policy = 1;
+	string packageName = 2;
+	bytes udfBody = 3;
+	UDFLanguage language = 4;
+}
+
+message AerospikeRegisterUDFResponse {
+  optional Error error = 1;
+}
+
+message AerospikeDropUDFRequest {
+	WritePolicy policy = 1;
+	string packageName = 2;
+}
+
+message AerospikeDropUDFResponse {
+  optional Error error = 1;
+}
+
+message AerospikeListUDFRequest {
+	ReadPolicy policy = 1;
+}
+
+message AerospikeListUDFResponse {
+  optional Error error = 1;
+  repeated UDFMeta udfList = 2;
+}
+
+message AerospikeUDFExecuteRequest {
+	WritePolicy policy = 1;
+	Key key = 2;
+	string packageName = 3;
+	string functionName = 4;
+	repeated Value args = 5;
+}
+
+message AerospikeUDFExecuteResponse {
+  optional Error error = 1;
+  Value result = 2;
+}
+
+message AerospikeCreateUserRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+	string password = 3;
+	repeated string roles = 4;
+}
+
+message AerospikeCreateUserResponse {
+  optional Error error = 1;
+}
+
+message AerospikeDropUserRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+}
+
+message AerospikeDropUserResponse {
+  optional Error error = 1;
+}
+
+message AerospikeChangePasswordRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+	string password = 3;
+}
+
+message AerospikeChangePasswordResponse {
+  optional Error error = 1;
+}
+
+message AerospikeGrantRolesRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+	repeated string roles = 3;
+}
+
+message AerospikeGrantRolesResponse {
+  optional Error error = 1;
+}
+
+message AerospikeRevokeRolesRequest {
+	AdminPolicy policy = 1;
+	string user = 2;
+	repeated string roles = 3;
+}
+
+message AerospikeRevokeRolesResponse {
+  optional Error error = 1;
+}
+
+message AerospikeQueryUsersRequest {
+	AdminPolicy policy = 1;
+	optional string user = 2;
+}
+
+message AerospikeQueryUsersResponse {
+  optional Error error = 1;
+  repeated UserRole userRoles = 2;
+}
+
+message AerospikeQueryRolesRequest {
+	AdminPolicy policy = 1;
+	optional string roleName = 2;
+}
+
+message AerospikeQueryRolesResponse {
+  optional Error error = 1;
+  repeated Role roles = 2;
+}
+
+message AerospikeCreateRoleRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	repeated Privilege privileges = 3;
+	repeated string allowlist = 4;
+	uint32 readQuota = 5;
+	uint32 writeQuota = 6;
+}
+
+message AerospikeCreateRoleResponse {
+  optional Error error = 1;
+}
+
+message AerospikeDropRoleRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+}
+
+message AerospikeDropRoleResponse {
+  optional Error error = 1;
+}
+
+message AerospikeGrantPrivilegesRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	repeated Privilege privileges = 3;
+}
+
+message AerospikeGrantPrivilegesResponse {
+  optional Error error = 1;
+}
+
+message AerospikeRevokePrivilegesRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	repeated Privilege privileges = 3;
+}
+
+message AerospikeRevokePrivilegesResponse {
+  optional Error error = 1;
+}
+
+message AerospikeSetAllowlistRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	repeated string allowlist = 3;
+}
+
+message AerospikeSetAllowlistResponse {
+  optional Error error = 1;
+}
+
+message AerospikeSetQuotasRequest {
+	AdminPolicy policy = 1;
+	string roleName = 2;
+	uint32 readQuota = 3;
+	uint32 writeQuota = 4;
+}
+
+message AerospikeSetQuotasResponse {
+  optional Error error = 1;
+}
+
+message AerospikeScanRequest {
+	ScanPolicy policy = 1;
+	string namespace = 2;
+	string setName = 3;
+	repeated string binNames = 4;
+	optional PartitionFilter partitionFilter = 5;
+}
+
+message AerospikeStreamResponse {
+  Record record = 1;
+  Error error = 2;
+  optional int64 bval = 3;
+}
+
+message AerospikeQueryRequest {
+	QueryPolicy policy = 1;
+	Statement statement = 2;
+	optional PartitionFilter partitionFilter = 5;
+}
+
 // Aerospike KVS operations service
 service KVS {
-  // Put a single record
-  rpc Put (AerospikePutRequest) returns
-      (Error) {}
+	// Put a single record
+	rpc Put (AerospikePutRequest) returns
+		(Error) {}
 
-  // Add a single record
-  rpc Add (AerospikePutRequest) returns
-      (Error) {}
+	// Add a single record
+	rpc Add (AerospikePutRequest) returns
+		(Error) {}
 
-  // Append a single record
-  rpc Append (AerospikePutRequest) returns
-      (Error) {}
+	// Append a single record
+	rpc Append (AerospikePutRequest) returns
+		(Error) {}
 
-  // Prepend a single record
-  rpc Prepend (AerospikePutRequest) returns
-      (Error) {}
+	// Prepend a single record
+	rpc Prepend (AerospikePutRequest) returns
+		(Error) {}
 
-  // Read a single record
-  rpc Get(AerospikeGetRequest) returns
-      (AerospikeSingleResponse) {}
+	// Read a single record
+	rpc Get(AerospikeGetRequest) returns
+		(AerospikeSingleResponse) {}
 
-  // Get a single record header containing metadata like generation, expiration
-  rpc GetHeader (AerospikeGetHeaderRequest) returns
-      (AerospikeSingleResponse) {}
+	// Get a single record header containing metadata like generation, expiration
+	rpc GetHeader (AerospikeGetHeaderRequest) returns
+		(AerospikeSingleResponse) {}
 
-  // Check if a record exists.
-  rpc Exists (AerospikeExistsRequest) returns
-      (AerospikeExistsResponse) {}
+	// Check if a record exists.
+	rpc Exists (AerospikeExistsRequest) returns
+		(AerospikeExistsResponse) {}
 
-  // Delete a single record.
-  rpc Delete (AerospikeDeleteRequest) returns
-      (AerospikeDeleteResponse) {}
+	// Delete a single record.
+	rpc Delete (AerospikeDeleteRequest) returns
+		(AerospikeDeleteResponse) {}
 
-  // Reset single record's time to expiration using the write policy's expiration.
-  rpc Touch (AerospikeTouchRequest) returns
-      (Error) {}
+	// Reset single record's time to expiration using the write policy's expiration.
+	rpc Touch (AerospikeTouchRequest) returns
+		(Error) {}
 
-  // Process batch requests.
-  rpc BatchOperate (AerospikeBatchOperateRequest) returns
-      (AerospikeBatchOperateResponse) {}
+	// Process batch requests.
+	rpc BatchOperate (AerospikeBatchOperateRequest) returns
+		(AerospikeBatchOperateResponse) {}
 
-  // Process batch requests.
-  rpc CreateIndex (AerospikeCreateIndexRequest) returns
-      (AerospikeCreateIndexResponse) {}
+	// Process batch requests.
+	rpc CreateIndex (AerospikeCreateIndexRequest) returns
+		(AerospikeCreateIndexResponse) {}
 
-  // Process batch requests.
-  rpc DropIndex (AerospikeDropIndexRequest) returns
-      (AerospikeDropIndexResponse) {}
+	// Process batch requests.
+	rpc DropIndex (AerospikeDropIndexRequest) returns
+		(AerospikeDropIndexResponse) {}
 
-  // Truncate removes records in specified namespace/set efficiently.
-  rpc Truncate (AerospikeTruncateRequest) returns
-      (AerospikeTruncateResponse) {}
+	// Truncate removes records in specified namespace/set efficiently.
+	rpc Truncate (AerospikeTruncateRequest) returns
+		(AerospikeTruncateResponse) {}
 
-// // ExecuteUDF single key user defined function on server and return results.
-//   rpc ExecuteUDF (AerospikeExecuteUDFRequest) returns
-//       (AerospikeRExecuteUDFesponse) {}
+	// Registers a package containing user defined functions with server.
+	// This asynchronous server call will return before command is complete.
+	// The user can optionally wait for command completion by using the returned
+	// RegisterTask instance.
+	//
+	// This method is only supported by Aerospike 3+ servers.
+	rpc RegisterUDF (AerospikeRegisterUDFRequest) returns
+		(AerospikeRegisterUDFResponse) {}
+
+	// Removes a package containing user defined functions in the server.
+	// This asynchronous server call will return before command is complete.
+	// The user can optionally wait for command completion by using the returned
+	// RemoveTask instance.
+	//
+	// This method is only supported by Aerospike 3+ servers.
+	rpc DropUDF (AerospikeDropUDFRequest) returns
+		(AerospikeDropUDFResponse) {}
+
+	// Lists all packages containing user defined functions in the server.
+	// This method is only supported by Aerospike 3+ servers.
+	rpc ListUDF (AerospikeListUDFRequest) returns
+		(AerospikeListUDFResponse) {}
+
+	// Lists all packages containing user defined functions in the server.
+	// This method is only supported by Aerospike 3+ servers.
+	rpc UDFExecute (AerospikeUDFExecuteRequest) returns
+		(AerospikeUDFExecuteResponse) {}
+
+	// CreateUser creates a new user with password and roles.
+	rpc CreateUser (AerospikeCreateUserRequest) returns
+		(AerospikeCreateUserResponse) {}
+
+
+	// DropUser removes a user from the cluster.
+	rpc DropUser (AerospikeDropUserRequest) returns
+		(AerospikeDropUserResponse) {}
+
+	// ChangePassword changes a user's password. Clear-text password will be hashed using bcrypt before sending to server.
+	rpc ChangePassword (AerospikeChangePasswordRequest) returns
+		(AerospikeChangePasswordResponse) {}
+
+	// GrantRoles adds roles to user's list of roles.
+	rpc GrantRoles (AerospikeGrantRolesRequest) returns
+			(AerospikeGrantRolesResponse) {}
+
+	// RevokeRoles removes roles from user's list of roles.
+	rpc RevokeRoles (AerospikeRevokeRolesRequest) returns
+			(AerospikeRevokeRolesResponse) {}
+
+	// QueryUsers retrieves all users and their roles.
+	rpc QueryUsers (AerospikeQueryUsersRequest) returns
+				(AerospikeQueryUsersResponse) {}
+
+	// QueryRoles retrieves all roles and their privileges.
+	rpc QueryRoles (AerospikeQueryRolesRequest) returns
+				(AerospikeQueryRolesResponse) {}
+
+	// CreateRole creates a user-defined role.
+	// Quotas require server security configuration "enable-quotas" to be set to true.
+	// Pass 0 for quota values for no limit.
+	rpc CreateRole (AerospikeCreateRoleRequest) returns
+				(AerospikeCreateRoleResponse) {}
+
+	// DropRole removes a user-defined role.
+	rpc DropRole (AerospikeDropRoleRequest) returns
+				(AerospikeDropRoleResponse) {}
+
+	// GrantPrivileges grant privileges to a user-defined role.
+	rpc GrantPrivileges (AerospikeGrantPrivilegesRequest) returns
+				(AerospikeGrantPrivilegesResponse) {}
+
+	// RevokePrivileges revokes privileges from a user-defined role.
+	rpc RevokePrivileges (AerospikeRevokePrivilegesRequest) returns
+				(AerospikeRevokePrivilegesResponse) {}
+
+	// SetAllowlist sets IP address whitelist for a role. If whitelist is nil or empty, it removes existing whitelist from role.
+	rpc SetAllowlist (AerospikeSetAllowlistRequest) returns
+				(AerospikeSetAllowlistResponse) {}
+
+	// SetQuotas sets maximum reads/writes per second limits for a role.  If a quota is zero, the limit is removed.
+	// Quotas require server security configuration "enable-quotas" to be set to true.
+	// Pass 0 for quota values for no limit.
+	rpc SetQuotas (AerospikeSetQuotasRequest) returns
+				(AerospikeSetQuotasResponse) {}
+
+	rpc Scan (AerospikeScanRequest) returns
+				(stream AerospikeStreamResponse) {}
+
+	rpc Query (AerospikeQueryRequest) returns
+				(stream AerospikeStreamResponse) {}
+
 }
 
 enum OperationType {
-  OperationTypeRead = 0;
-  OperationTypeReadHeader = 1;
-  OperationTypeWrite = 2;
-  OperationTypeCdtRead = 3;
-  OperationTypeCdtModify = 4;
-  OperationTypeMapRead = 5;
-  OperationTypeMapModify = 6;
-  OperationTypeAdd = 7;
-  OperationTypeExpRead = 8;
-  OperationTypeExpModify = 9;
-  OperationTypeAppend = 10;
-  OperationTypePrepend = 11;
-  OperationTypeTouch = 12;
-  OperationTypeBitRead = 13;
-  OperationTypeBitModify = 14;
-  OperationTypeDelete = 15;
-  OperationTypeHllRead = 16;
-  OperationTypeHllModify = 17;
+  OperationTypeGet = 0;
+  OperationTypeGetHeader = 1;
+  OperationTypePut = 2;
+  OperationTypeAdd = 3;
+  OperationTypeAppend = 4;
+  OperationTypePrepend = 5;
+  OperationTypeTouch = 6;
+  OperationTypeDelete = 7;
 }
 
 enum RecordExistsAction {
@@ -1133,4 +1526,500 @@ message BackgroundExecutePolicy {
   //
   // Default: false.
   optional bool xdr = 15;
+}
+
+// MultiPolicy contains parameters for policy attributes used in
+// query and scan operations.
+message MultiPolicy {
+	ReadPolicy readPolicy = 1;
+
+	// Maximum number of concurrent requests to server nodes at any point in time.
+	// If there are 16 nodes in the cluster and maxConcurrentNodes is 8, then queries
+	// will be made to 8 nodes in parallel.  When a query completes, a new query will
+	// be issued until all 16 nodes have been queried.
+	// Default (0) is to issue requests to all server nodes in parallel.
+	// 1 will to issue requests to server nodes one by one avoiding parallel queries.
+	uint32 maxConcurrentNodes = 2;
+
+	// MaxRecords approximates the number of records to return to the client. This number is divided by the
+	// number of nodes involved in the query. The actual number of records returned
+	// may be less than MaxRecords if node record counts are small and unbalanced across
+	// nodes.
+	//
+	// This field is supported on server versions >= 4.9.
+	//
+	// Default: 0 (do not limit record count)
+	uint64 maxRecords = 3;
+
+	// RecordsPerSecond limits returned records per second (rps) rate for each server.
+	// Will not apply rps limit if recordsPerSecond is zero (default).
+	// Currently only applicable to a query without a defined filter.
+	uint64 recordsPerSecond = 4;
+
+	// Number of records to place in queue before blocking.
+	// Records received from multiple server nodes will be placed in a queue.
+	// A separate goroutine consumes these records in parallel.
+	// If the queue is full, the producer goroutines will block until records are consumed.
+	uint32 recordQueueSize = 5;
+
+	// Indicates if bin data is retrieved. If false, only record digests are retrieved.
+	bool includeBinData = 6;
+}
+
+// ScanPolicy encapsulates parameters used in scan operations.
+message ScanPolicy {
+	MultiPolicy multiPolicy = 1;
+}
+
+// QueryPolicy encapsulates parameters for policy attributes used in query operations.
+message QueryPolicy {
+	MultiPolicy multiPolicy = 1;
+	// ShortQuery detemines wether query expected to return less than 100 records.
+	// If true, the server will optimize the query for a small record set.
+	// This field is ignored for aggregation queries, background queries
+	// and server versions 6.0+.
+	//
+	// Default: false
+	bool ShortQuery = 2;
+}
+
+// Statement encapsulates query statement parameters.
+message UDFCall {
+	string packageName = 6;
+	string functionName = 7;
+	repeated Value functionArgs = 8;
+}
+
+// Statement encapsulates query statement parameters.
+message Statement {
+	// Namespace determines query Namespace
+	string Namespace = 1;
+
+	// SetName determines query Set name (Optional)
+	string SetName = 2;
+
+	// IndexName determines query index name (Optional)
+	// If not set, the server will determine the index from the filter's bin name.
+	optional string IndexName = 3;
+
+	// BinNames detemines bin names (optional)
+	repeated string BinNames = 4;
+
+	// Filter determines query index filter (Optional).
+	// This filter is applied to the secondary index on query.
+	// Query index filters must reference a bin which has a secondary index defined.
+	QueryFilter filter = 5;
+
+	// TaskId determines query task id. (Optional)
+	// This value is not used anymore and will be removed later.
+	uint64 taskId = 6;
+
+	// determines if the query should return data
+	bool returnData = 7;
+
+	optional UDFCall udfCall = 8;
+}
+
+// QueryFilter specifies a query filter definition.
+message QueryFilter {
+	string name = 1;
+	IndexCollectionType idxType = 2;
+	uint32 valueParticleType = 3;
+	Value begin = 4;
+	Value end = 5;
+	repeated CDTContext ctx = 6;
+}
+
+enum CdtMapCommandOp {
+	CdtMapCommandOpCreate = 0;
+	CdtMapCommandOpCreateWithIndex = 1;
+	CdtMapCommandOpSetPolicy = 2;
+	CdtMapCommandOpPut = 3;
+	CdtMapCommandOpPutItems = 4;
+	CdtMapCommandOpIncrement = 5;
+	CdtMapCommandOpDecrement = 6;
+	CdtMapCommandOpClear = 7;
+	CdtMapCommandOpRemoveByKey = 8;
+	CdtMapCommandOpRemoveByKeyList = 9;
+	CdtMapCommandOpRemoveByKeyRange = 10;
+	CdtMapCommandOpRemoveByValue = 11;
+	CdtMapCommandOpRemoveByValueList = 12;
+	CdtMapCommandOpRemoveByValueRange = 13;
+	CdtMapCommandOpRemoveByValueRelativeRankRange = 14;
+	CdtMapCommandOpRemoveByValueRelativeRankRangeCount = 15;
+	CdtMapCommandOpRemoveByIndex = 16;
+	CdtMapCommandOpRemoveByIndexRange = 17;
+	CdtMapCommandOpRemoveByIndexRangeCount = 18;
+	CdtMapCommandOpRemoveByRank = 19;
+	CdtMapCommandOpRemoveByRankRange = 20;
+	CdtMapCommandOpRemoveByRankRangeCount = 21;
+	CdtMapCommandOpRemoveByKeyRelativeIndexRange = 22;
+	CdtMapCommandOpRemoveByKeyRelativeIndexRangeCount = 23;
+	CdtMapCommandOpSize = 24;
+	CdtMapCommandOpGetByKey = 25;
+	CdtMapCommandOpGetByKeyRange = 26;
+	CdtMapCommandOpGetByKeyRelativeIndexRange = 27;
+	CdtMapCommandOpGetByKeyRelativeIndexRangeCount =28 ;
+	CdtMapCommandOpGetByKeyList = 29;
+	CdtMapCommandOpGetByValue = 30;
+	CdtMapCommandOpGetByValueRange = 31;
+	CdtMapCommandOpGetByValueRelativeRankRange = 32;
+	CdtMapCommandOpGetByValueRelativeRankRangeCount = 33;
+	CdtMapCommandOpGetByValueList = 34;
+	CdtMapCommandOpGetByIndex = 35;
+	CdtMapCommandOpGetByIndexRange = 36;
+	CdtMapCommandOpGetByIndexRangeCount = 37;
+	CdtMapCommandOpGetByRank = 38;
+	CdtMapCommandOpGetByRankRange = 39;
+	CdtMapCommandOpGetByRankRangeCount = 40;
+}
+
+enum CdtMapReturnType {
+	// NONE will will not return a result.
+	CdtMapReturnTypeNone = 0;
+
+	// INDEX will return key index order.
+	//
+	// 0 = first key
+	// N = Nth key
+	// -1 = last key
+	CdtMapReturnTypeIndex = 1;
+
+	// REVERSE_INDEX will return reverse key order.
+	//
+	// 0 = last key
+	// -1 = first key
+	CdtMapReturnTypeReverseIndex = 2;
+
+	// RANK will return value order.
+	//
+	// 0 = smallest value
+	// N = Nth smallest value
+	// -1 = largest value
+	CdtMapReturnTypeRank = 3;
+
+	// REVERSE_RANK will return reverse value order.
+	//
+	// 0 = largest value
+	// N = Nth largest value
+	// -1 = smallest value
+	CdtMapReturnTypeReverseRank = 4;
+
+	// COUNT will return count of items selected.
+	CdtMapReturnTypeCount = 5;
+
+	// KEY will return key for single key read and key list for range read.
+	CdtMapReturnTypeKey = 6;
+
+	// VALUE will return value for single key read and value list for range read.
+	CdtMapReturnTypeValue = 7;
+
+	// KEY_VALUE will return key/value items. The possible return types are:
+	CdtMapReturnTypeKeyValue = 8;
+
+	// EXISTS returns true if count > 0.
+	CdtMapReturnTypeExists = 13;
+
+	// UNORDERED_MAP returns an unordered map.
+	CdtMapReturnTypeUnorderedMap = 16;
+
+	// ORDERED_MAP returns an ordered map.
+	CdtMapReturnTypeOrderedMap = 17;
+
+	// INVERTED will invert meaning of map command and return values.  For example:
+	// MapRemoveByKeyRange(binName, keyBegin, keyEnd, MapReturnType.KEY | MapReturnType.INVERTED)
+	// With the INVERTED flag enabled, the keys outside of the specified key range will be removed and returned.
+	CdtMapReturnTypeInverted = 12;
+}
+
+enum CdtMapWriteMode {
+	CdtMapWriteModeUpdate = 0;
+	CdtMapWriteModeUpdateOnly = 1;
+	CdtMapWriteModeCreateOnly = 2;
+}
+
+enum CdtMapWriteFlags {
+	// MapWriteFlagsDefault is the Default. Allow create or update.
+	CdtMapWriteFlagsDefault = 0;
+
+	// MapWriteFlagsCreateOnly means: If the key already exists, the item will be denied.
+	// If the key does not exist, a new item will be created.
+	CdtMapWriteFlagsCreateOnly = 1;
+
+	// MapWriteFlagsUpdateOnly means: If the key already exists, the item will be overwritten.
+	// If the key does not exist, the item will be denied.
+	CdtMapWriteFlagsUpdateOnly = 2;
+
+	// MapWriteFlagsNoFail means: Do not raise error if a map item is denied due to write flag constraints.
+	CdtMapWriteFlagsNoFail = 4;
+
+	// MapWriteFlagsNoFail means: Allow other valid map items to be committed if a map item is denied due to
+	// write flag constraints.
+	CdtMapWriteFlagsPartial = 8;
+}
+
+message CdtMapPolicy {
+	MapOrderType mapOrder = 1;
+	CdtMapWriteFlags flags = 3;
+	bool PersistedIndex = 4;
+}
+
+message CdtMapOperation {
+	CdtMapCommandOp op = 1;
+	CdtMapPolicy policy = 2;
+	string binName = 3;
+	repeated Value args = 4;
+	optional CdtMapReturnType returnType = 5;
+	repeated CDTContext ctx = 6;
+}
+
+enum CdtListCommandOp {
+	CdtListCommandOpCreate = 0;
+	CdtListCommandOpSetOrder = 1;
+	CdtListCommandOpAppend = 2;
+	CdtListCommandOpInsert = 3;
+	CdtListCommandOpPop = 4;
+	CdtListCommandOpPopRange = 5;
+	CdtListCommandOpPopRangeFrom = 6;
+	CdtListCommandOpSet = 7;
+	CdtListCommandOpTrim = 8;
+	CdtListCommandOpClear = 9;
+	CdtListCommandOpIncrement = 10;
+	CdtListCommandOpSize = 11;
+
+	CdtListCommandOpSort = 12;
+	CdtListCommandOpGetByValueList = 13;
+	CdtListCommandOpGetByValueRange = 14;
+	CdtListCommandOpGetByIndex = 15;
+	CdtListCommandOpGetByIndexRange = 16;
+	CdtListCommandOpGetByIndexRangeCount = 17;
+	CdtListCommandOpGetByRank = 18;
+	CdtListCommandOpGetByRankRange = 19;
+	CdtListCommandOpGetByRankRangeCount = 20;
+	CdtListCommandOpGetByValueRelativeRankRange = 21;
+	CdtListCommandOpGetByValueRelativeRankRangeCount = 22;
+
+	CdtListCommandOpRemoveByValueList = 23;
+	CdtListCommandOpRemoveByValueRange = 24;
+	CdtListCommandOpRemoveByValueRelativeRankRange = 25;
+	CdtListCommandOpRemoveByValueRelativeRankRangeCount = 26;
+	CdtListCommandOpRemoveRange = 27;
+	CdtListCommandOpRemoveRangeFrom = 28;
+	CdtListCommandOpRemoveByIndex = 29;
+	CdtListCommandOpRemoveByIndexRange = 30;
+	CdtListCommandOpRemoveByIndexRangeCount = 31;
+	CdtListCommandOpRemoveByRank = 32;
+	CdtListCommandOpRemoveByRankRange = 33;
+	CdtListCommandOpRemoveByRankRangeCount = 34;
+}
+
+
+enum CdtListReturnType {
+	// CdtListReturnTypeNone will not return a result.
+	CdtListReturnTypeNone = 0;
+
+	// CdtListReturnTypeIndex will return index offset order.
+	// 0 = first key
+	// N = Nth key
+	// -1 = last key
+	CdtListReturnTypeIndex = 1;
+
+	// CdtListReturnTypeReverseIndex will return reverse index offset order.
+	// 0 = last key
+	// -1 = first key
+	CdtListReturnTypeReverseIndex = 2;
+
+	// CdtListReturnTypeRank will return value order.
+	// 0 = smallest value
+	// N = Nth smallest value
+	// -1 = largest value
+	CdtListReturnTypeRank = 3;
+
+	// CdtListReturnTypeReverseRank will return reverse value order.
+	// 0 = largest value
+	// N = Nth largest value
+	// -1 = smallest value
+	CdtListReturnTypeReverseRank = 4;
+
+	// CdtListReturnTypeCount will return count of items selected.
+	CdtListReturnTypeCount = 5;
+
+	// CdtListReturnTypeValue will return value for single key read and value list for range read.
+	CdtListReturnTypeValue = 7;
+
+	// CdtListReturnTypeExists returns true if count > 0.
+	CdtListReturnTypeExists = 13;
+}
+
+enum CdtListSortFlags {
+	// CdtListSortFlagsDefault is the default sort flag for CDT lists, and sort in Ascending order.
+	CdtListSortFlagsDefault = 0;
+	// CdtListSortFlagsDescending will sort the contents of the list in descending order.
+	CdtListSortFlagsDescending = 1;
+	// CdtListSortFlagsDropDuplicates will drop duplicate values in the results of the CDT list operation.
+	CdtListSortFlagsDropDuplicates = 2;
+}
+
+enum CdtListWriteFlags {
+	// CdtListWriteFlagsDefault is the default behavior. It means:  Allow duplicate values and insertions at any index.
+	CdtListWriteFlagsDefault = 0;
+	// CdtListWriteFlagsAddUnique means: Only add unique values.
+	CdtListWriteFlagsAddUnique = 1;
+	// CdtListWriteFlagsInsertBounded means: Enforce list boundaries when inserting.  Do not allow values to be inserted
+	// at index outside current list boundaries.
+	CdtListWriteFlagsInsertBounded = 2;
+	// CdtListWriteFlagsNoFail means: do not raise error if a list item fails due to write flag constraints.
+	CdtListWriteFlagsNoFail = 4;
+	// CdtListWriteFlagsPartial means: allow other valid list items to be committed if a list item fails due to
+	// write flag constraints.
+	CdtListWriteFlagsPartial = 8;
+}
+
+message CdtListPolicy {
+	ListOrderType order = 1;
+	CdtListWriteFlags flags = 2;
+}
+
+message CdtListOperation {
+	CdtListCommandOp op = 1;
+	CdtListPolicy policy = 2;
+	string binName = 3;
+	repeated Value args = 4;
+	optional CdtListReturnType returnType = 5;
+	repeated CDTContext ctx = 6;
+}
+
+enum CdtHLLCommandOp {
+	CdtHLLCommandOpInit = 0;
+	CdtHLLCommandOpAdd = 1;
+	CdtHLLCommandOpSetUnion = 2;
+	CdtHLLCommandOpRefreshCount = 3;
+	CdtHLLCommandOpFold = 4;
+	CdtHLLCommandOpGetCount = 5;
+	CdtHLLCommandOpGetUnion = 6;
+	CdtHLLCommandOpGetUnionCount = 7;
+	CdtHLLCommandOpGetIntersectCount = 8;
+	CdtHLLCommandOpGetSimilarity = 9;
+	CdtHLLCommandOpDescribe = 10;
+}
+
+enum CdtHLLWriteFlags {
+	// CdtHLLWriteFlagsDefault is Default. Allow create or update.
+	CdtHLLWriteFlagsDefault = 0;
+
+	// CdtHLLWriteFlagsCreateOnly behaves like the following:
+	// If the bin already exists, the operation will be denied.
+	// If the bin does not exist, a new bin will be created.
+	CdtHLLWriteFlagsCreateOnly = 1;
+
+	// CdtHLLWriteFlagsUpdateOnly behaves like the following:
+	// If the bin already exists, the bin will be overwritten.
+	// If the bin does not exist, the operation will be denied.
+	CdtHLLWriteFlagsUpdateOnly = 2;
+
+	// CdtHLLWriteFlagsNoFail does not raise error if operation is denied.
+	CdtHLLWriteFlagsNoFail = 4;
+
+	// CdtHLLWriteFlagsAllowFold allows the resulting set to be the minimum of provided index bits.
+	// Also, allow the usage of less precise HLL algorithms when minHash bits
+	// of all participating sets do not match.
+	CdtHLLWriteFlagsAllowFold = 8;
+}
+
+// HLLPolicy determines the HyperLogLog operation policy.
+message CdtHLLPolicy {
+	CdtHLLWriteFlags flags = 1;
+}
+
+message CdtHLLOperation {
+	CdtHLLCommandOp op = 1;
+	CdtHLLPolicy policy = 2;
+	string binName = 3;
+	repeated Value args = 4;
+}
+
+///////////////////////////////////
+
+enum CdtBitwiseCommandOp {
+	CdtBitwiseCommandOpResize = 0;
+	CdtBitwiseCommandOpInsert = 1;
+	CdtBitwiseCommandOpRemove = 2;
+	CdtBitwiseCommandOpSet = 3;
+	CdtBitwiseCommandOpOr = 4;
+	CdtBitwiseCommandOpXor = 5;
+	CdtBitwiseCommandOpAnd = 6;
+	CdtBitwiseCommandOpNot = 7;
+	CdtBitwiseCommandOpLShift = 8;
+	CdtBitwiseCommandOpRShift = 9;
+	CdtBitwiseCommandOpAdd = 10;
+	CdtBitwiseCommandOpSubtract = 11;
+	CdtBitwiseCommandOpSetInt = 12;
+	CdtBitwiseCommandOpGet = 13;
+	CdtBitwiseCommandOpCount = 14;
+	CdtBitwiseCommandOpLScan = 15;
+	CdtBitwiseCommandOpRScan = 16;
+	CdtBitwiseCommandOpGetInt = 17;
+}
+
+enum CdtBitwiseWriteFlags {
+	// CdtBitwiseWriteFlagsDefault allows create or update.
+	CdtBitwiseWriteFlagsDefault = 0;
+
+	// CdtBitwiseWriteFlagsCreateOnly specifies that:
+	// If the bin already exists, the operation will be denied.
+	// If the bin does not exist, a new bin will be created.
+	CdtBitwiseWriteFlagsCreateOnly = 1;
+
+	// CdtBitwiseWriteFlagsUpdateOnly specifies that:
+	// If the bin already exists, the bin will be overwritten.
+	// If the bin does not exist, the operation will be denied.
+	CdtBitwiseWriteFlagsUpdateOnly = 2;
+
+	// CdtBitwiseWriteFlagsNoFail specifies not to raise error if operation is denied.
+	CdtBitwiseWriteFlagsNoFail = 4;
+
+	// CdtBitwiseWriteFlagsPartial allows other valid operations to be committed if this operations is
+	// denied due to flag constraints.
+	CdtBitwiseWriteFlagsPartial = 8;
+}
+
+enum CdtBitwiseResizeFlags {
+	// CdtBitwiseResizeFlagsDefault specifies the defalt flag.
+	CdtBitwiseResizeFlagsDefault = 0;
+
+	// CdtBitwiseResizeFlagsFromFront Adds/removes bytes from the beginning instead of the end.
+	CdtBitwiseResizeFlagsFromFront = 1;
+
+	// CdtBitwiseResizeFlagsGrowOnly will only allow the []byte size to increase.
+	CdtBitwiseResizeFlagsGrowOnly = 2;
+
+	// CdtBitwiseResizeFlagsShrinkOnly will only allow the []byte size to decrease.
+	CdtBitwiseResizeFlagsShrinkOnly = 4;
+}
+
+enum CdtBitwiseOverflowAction {
+	// CdtBitwiseOverflowActionFail specifies to fail operation with error.
+	CdtBitwiseOverflowActionFail = 0;
+
+	// CdtBitwiseOverflowActionSaturate specifies that in add/subtract overflows/underflows, set to max/min value.
+	// Example: MAXINT + 1 = MAXINT
+	CdtBitwiseOverflowActionSaturate = 2;
+
+	// CdtBitwiseOverflowActionWrap specifies that in add/subtract overflows/underflows, wrap the value.
+	// Example: MAXINT + 1 = -1
+	CdtBitwiseOverflowActionWrap = 4;
+}
+
+
+// BitwisePolicy determines the HyperLogLog operation policy.
+message CdtBitwisePolicy {
+	CdtBitwiseWriteFlags flags = 1;
+}
+
+message CdtBitwiseOperation {
+	CdtBitwiseCommandOp op = 1;
+	CdtBitwisePolicy policy = 2;
+	string binName = 3;
+	repeated Value args = 4;
+	repeated CDTContext ctx = 6;
 }

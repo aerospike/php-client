@@ -6,12 +6,16 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 
 	aero "github.com/aerospike/aerospike-client-go/v7"
 
@@ -23,6 +27,9 @@ import (
 const (
 	version = "0.1.0"
 )
+
+// TODO: Add the version command to the KVS server
+// TODO: Finish logging and make sure logs have prefixes for different clusters
 
 func main() {
 	var (
@@ -71,6 +78,9 @@ func cleanUp(conf map[string]*client.AerospikeConfig) {
 
 func launchServer(name string, ac *client.AerospikeConfig) {
 	cp, err := ac.NewClientPolicy()
+	if cp.ConnectionQueueSize == 0 {
+		cp.ConnectionQueueSize = 32
+	}
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -81,6 +91,7 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+	client.WarmUp(-1)
 
 	log.Printf("Server is Initializing for cluster `%s`. There will be cake...", name)
 	ln, err := net.Listen("unix", ac.Socket)
@@ -96,7 +107,16 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 	// 	log.Fatal(err)
 	// }
 
-	srv := grpc.NewServer()
+	grpcPanicRecoveryHandler := func(p any) (err error) {
+		log.Println("recovered from panic", "panic", p, "stack", string(debug.Stack()))
+		return status.Errorf(codes.Internal, "%s", p)
+	}
+
+	srv := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))),
+		grpc.ChainStreamInterceptor(recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))),
+	)
+
 	grpc_health_v1.RegisterHealthServer(srv, health.NewServer())
 	pb.RegisterKVSServer(srv, &server{client: client})
 	reflection.Register(srv)
@@ -106,6 +126,6 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 	// 	log.Fatal(srv.Serve(tcpLn))
 	// }()
 
-	log.Printf("Server ready for unix socket protocol: %s", ac.Socket)
-	log.Fatal(srv.Serve(ln))
+	log.Printf("Cake is ready for unix socket protocol: %s", ac.Socket)
+	log.Println(srv.Serve(ln))
 }

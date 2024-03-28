@@ -1,7 +1,4 @@
-[![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client)
-## This project is beta, and should not be used in production. If you're an enterprise customer feel free to reach out to our support with feedback and feature requests. We appreciate feedback from the Aerospike community on issues related to the new PHP client.
-
-# Aerospike PHP 8+ Client (v0.5.0-beta)
+# Aerospike PHP 8+ Client (v1.0.0)
 
 An [Aerospike](https://www.aerospike.com/) client library for PHP 8+.
 
@@ -21,11 +18,7 @@ This is the documentation for the Aerospike PHP Client. The PHP client comprises
 * Go Toolchain [Go Toolchains - The Go Programming Language](https://go.dev/doc/toolchain)
 * Protobuf Compiler [protoc-gen-go command - google.golang.org/protobuf/cmd/protoc-gen-go - Go Packages](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go)
 * ext-php-rs v0.12.0 [github repository link](https://github.com/davidcole1340/ext-php-rs/tree/master)
-
-## Current Limitations
-
-* Does not support Scan/Query API features
-* Does not support CDTs
+NOTE: Please see instruction for setting up ext-php-rs for windows [here] 
 
 ## Setup
 
@@ -125,7 +118,7 @@ namespace Aerospike;
 try{
   $socket = "/tmp/asld_grpc.sock";
   $client = Client::connect($socket);
-  var_dump($client->hosts);
+  var_dump($client->socket);
 }catch(AerospikeException $e){
   var_dump($e);
 }

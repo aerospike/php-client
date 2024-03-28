@@ -34,15 +34,27 @@ all: lint build install test clean
 lint:
 	cargo clippy
 
+build-dev:
+	cargo build
+
 build:
 	cargo build --release
+
+install-dev: build-dev
+	sudo cp -f target/debug/libaerospike$(EXTENSION) $(EXT_DIR_PATH)
+	echo "extension=libaerospike$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
 
 install: build
 	sudo cp -f target/release/libaerospike$(EXTENSION) $(EXT_DIR_PATH)
 	echo "extension=libaerospike$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
+
+restart: install
 	$(RESTART_COMMAND)
 
-test: build
+test-dev: install-dev
+	sudo ./vendor/phpunit/phpunit/phpunit tests/
+
+test: install
 	phpunit tests/
 
 clean:
