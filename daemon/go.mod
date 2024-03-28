@@ -3,7 +3,7 @@ module github.com/aerospike/php-client/asld
 go 1.21.3
 
 require (
-	github.com/aerospike/aerospike-client-go/v7 v7.1.1-0.20240328171557-9de8b8866fef
+	github.com/aerospike/aerospike-client-go/v7 v7.2.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.0.1
 	github.com/pelletier/go-toml/v2 v2.1.1
 	github.com/stretchr/testify v1.8.4

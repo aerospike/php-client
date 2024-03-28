@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io/fs"
 	"log"
 	"net"
 	"os"
@@ -64,6 +65,7 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
+		cleanUp(conf)
 		os.Exit(1)
 	}()
 
@@ -77,7 +79,11 @@ func main() {
 
 func cleanUp(conf map[string]*client.AerospikeConfig) {
 	for _, ac := range conf {
-		os.Remove(ac.Socket)
+		log.Printf("cleaning up socket `%s`.", ac.Socket)
+		err := os.Remove(ac.Socket)
+		if err != nil && err != os.ErrNotExist && err != fs.ErrNotExist {
+			log.Printf("Socket %s was not cleaned up: %s.", ac.Socket, err)
+		}
 	}
 }
 
