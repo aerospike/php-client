@@ -1,5 +1,5 @@
-github.com/aerospike/aerospike-client-go/v7 v7.1.1-0.20240328171557-9de8b8866fef h1:XdAsLLhjaQ6y7DsmOuAEcmn6cnq0HhyndS+Las5xwZY=
-github.com/aerospike/aerospike-client-go/v7 v7.1.1-0.20240328171557-9de8b8866fef/go.mod h1:RuwffKg1xMlCvFtKRl0+UW9MTr+aonoXVrVsCqRFJ28=
+github.com/aerospike/aerospike-client-go/v7 v7.2.0 h1:bw5DesRDpK/6Rjkf4qQghDHZGSj97yxMQvZxyQu9NcY=
+github.com/aerospike/aerospike-client-go/v7 v7.2.0/go.mod h1:RuwffKg1xMlCvFtKRl0+UW9MTr+aonoXVrVsCqRFJ28=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

@@ -503,7 +503,7 @@ func toPartitionStatus(in *pb.PartitionStatus) *aero.PartitionStatus {
 		}
 		return &aero.PartitionStatus{
 			BVal:   bval,
-			Id:     int16(in.Id),
+			Id:     int(in.Id),
 			Retry:  in.Retry,
 			Digest: in.Digest,
 		}
