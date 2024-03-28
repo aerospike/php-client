@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"runtime/debug"
 	"syscall"
+	"time"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
@@ -24,8 +25,10 @@ import (
 	pb "github.com/aerospike/php-client/asld/proto"
 )
 
-const (
-	version = "0.1.0"
+var (
+	version    = "0.1.0"
+	revision   = "N/A"
+	lastCommit time.Time
 )
 
 // TODO: Add the version command to the KVS server
@@ -45,9 +48,11 @@ func main() {
 	}
 
 	if *showVersion {
-		log.Println(version)
+		println(version)
 		os.Exit(0)
 	}
+
+	log.Printf("Aerospike Local Proxy `%s`.", version)
 
 	conf, err := config.Read(*configFile)
 	if err != nil {
@@ -128,4 +133,20 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 
 	log.Printf("Cake is ready for unix socket protocol: %s", ac.Socket)
 	log.Println(srv.Serve(ln))
+}
+
+func init() {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, kv := range info.Settings {
+			if kv.Value == "" {
+				continue
+			}
+			switch kv.Key {
+			case "vcs.revision":
+				revision = kv.Value
+			case "vcs.time":
+				lastCommit, _ = time.Parse(time.RFC3339, kv.Value)
+			}
+		}
+	}
 }

@@ -1,11 +1,12 @@
 GOCMD=go
-GOBUILD=$(GOCMD) build
+VERSION=$(shell git describe --tags --abbrev=0 | cut -c 2-)
+GOBUILD=$(GOCMD) build -ldflags="-X 'main.version=$(VERSION)'" -o  asld
 GOGET=$(GOCMD) get -u
 BINARY_NAME=asld
 SERVICE_NAME=asld
 
 .PHONY: test test-rest lint lint-insane clean docs deps modtidy check
-all: run
+all: build
 
 proto:
 	protoc --go-grpc_out=. --go_out=. asld_kvs.proto --experimental_allow_proto3_optional
