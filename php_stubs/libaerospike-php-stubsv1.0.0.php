@@ -42,6 +42,41 @@ namespace Aerospike {
         public static function Partial(): \Aerospike\MapWriteFlags {}
     }
 
+    /**
+     * QueryDuration represents the expected duration for a query operation in the Aerospike database. 
+     */
+    class QueryDuration {
+        /**
+         * LONG specifies that the query is expected to return more than 100 records per node. The server optimizes for a large record set in
+         * the following ways:
+         *
+         * Allow query to be run in multiple threads using the server's query threading configuration.
+         * Do not relax read consistency for AP namespaces.
+         * Add the query to the server's query monitor.
+         * Do not add the overall latency to the server's latency histogram.
+         * Do not allow server timeouts.    
+         */
+        public static function long(): \Aerospike\QueryDuration {}
+
+        /**
+         * Short specifies that the query is expected to return less than 100 records per node. The server optimizes for a small record set in
+         * the following ways:
+         * Always run the query in one thread and ignore the server's query threading configuration.
+         * Allow query to be inlined directly on the server's service thread.
+         * Relax read consistency for AP namespaces.
+         * Do not add the query to the server's query monitor.
+         * Add the overall latency to the server's latency histogram.
+         * Allow server timeouts. The default server timeout for a short query is 1 second.
+         */
+        public static function short(): \Aerospike\QueryDuration {}
+
+        /**
+         * LongRelaxAP will treat query as a LONG query, but relax read consistency for AP namespaces.
+         * This value is treated exactly like LONG for server versions < 7.1.
+         */
+        public static function longRelaxAP(): \Aerospike\QueryDuration {}
+    }
+
     /** Instantiate a Client instance to access an Aerospike database cluster and perform database operations.
      * The client is thread-safe. Only one client instance should be used per cluster. Multiple threads should share this cluster instance.
      * Your application uses this class' API to perform database operations such as writing and reading records, and selecting sets of records. Write operations include specialized functionality such as append/prepend and arithmetic addition.
@@ -1810,45 +1845,43 @@ namespace Aerospike {
      * QueryPolicy encapsulates parameters for policy attributes used in query operations.
      */
     class QueryPolicy {
-        public $sleep_multiplier;
-
-        public $read_mode_ap;
-
-        public $total_timeout;
-
-        public $socket_timeout;
+        public $expected_duration;
 
         public $max_retries;
 
-        public $record_queue_size;
-
-        public $max_concurrent_nodes;
-
-        public $send_key;
-
         public $use_compression;
-
-        public $exit_fast_on_exhausted_connection_pool;
-
-        public $short_query;
 
         public $read_mode_sc;
 
         public $filter_expression;
 
+        public $max_concurrent_nodes;
+
+        public $exit_fast_on_exhausted_connection_pool;
+
+        public $send_key;
+
+        public $sleep_multiplier;
+
+        public $total_timeout;
+
+        public $read_mode_ap;
+
+        public $record_queue_size;
+
+        public $socket_timeout;
+
         public function __construct() {}
 
         /**
-         * ShortQuery detemines wether query expected to return less than 100 records.
-         * If true, the server will optimize the query for a small record set.
-         * This field is ignored for aggregation queries, background queries
-         * and server versions 6.0+.
-         *
-         * Default: false
+         * QueryDuration represents the expected duration for a query operation in the Aerospike database. 
+         * It provides options for specifying whether a query is expected to return a large number of records per node (Long), 
+         * a small number of records per node (Short), or a long query with relaxed read consistency for AP namespaces (LongRelaxAP). 
+         * These options influence how the server optimizes query execution to meet the expected duration requirements.
          */
-        public function getShortQuery(): bool {}
+        public function getExpectedDuration(): \Aerospike\QueryDuration {}
 
-        public function setShortQuery(bool $short_query) {}
+        public function setExpectedDuration(mixed $expected_duration) {}
 
         /**
          * ***************************************************************************

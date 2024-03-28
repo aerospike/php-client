@@ -2,12 +2,14 @@ package main
 
 import (
 	"flag"
+	"io/fs"
 	"log"
 	"net"
 	"os"
 	"os/signal"
 	"runtime/debug"
 	"syscall"
+	"time"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
@@ -24,8 +26,10 @@ import (
 	pb "github.com/aerospike/php-client/asld/proto"
 )
 
-const (
-	version = "0.1.0"
+var (
+	version    = "0.1.0"
+	revision   = "N/A"
+	lastCommit time.Time
 )
 
 // TODO: Add the version command to the KVS server
@@ -33,7 +37,7 @@ const (
 
 func main() {
 	var (
-		configFile  = flag.String("config-file", "/etc/aerospike-local-daemon/asld.toml", "Config File")
+		configFile  = flag.String("config-file", "/etc/aerospike-connection-manager/asld.toml", "Config File")
 		showUsage   = flag.Bool("h", false, "Show usage information")
 		showVersion = flag.Bool("v", false, "Print version")
 	)
@@ -45,9 +49,11 @@ func main() {
 	}
 
 	if *showVersion {
-		log.Println(version)
+		println(version)
 		os.Exit(0)
 	}
+
+	log.Printf("Aerospike Local Proxy `%s`.", version)
 
 	conf, err := config.Read(*configFile)
 	if err != nil {
@@ -59,6 +65,7 @@ func main() {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
+		cleanUp(conf)
 		os.Exit(1)
 	}()
 
@@ -72,7 +79,11 @@ func main() {
 
 func cleanUp(conf map[string]*client.AerospikeConfig) {
 	for _, ac := range conf {
-		os.Remove(ac.Socket)
+		log.Printf("cleaning up socket `%s`.", ac.Socket)
+		err := os.Remove(ac.Socket)
+		if err != nil && err != os.ErrNotExist && err != fs.ErrNotExist {
+			log.Printf("Socket %s was not cleaned up: %s.", ac.Socket, err)
+		}
 	}
 }
 
@@ -128,4 +139,20 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 
 	log.Printf("Cake is ready for unix socket protocol: %s", ac.Socket)
 	log.Println(srv.Serve(ln))
+}
+
+func init() {
+	if info, ok := debug.ReadBuildInfo(); ok {
+		for _, kv := range info.Settings {
+			if kv.Value == "" {
+				continue
+			}
+			switch kv.Key {
+			case "vcs.revision":
+				revision = kv.Value
+			case "vcs.time":
+				lastCommit, _ = time.Parse(time.RFC3339, kv.Value)
+			}
+		}
+	}
 }

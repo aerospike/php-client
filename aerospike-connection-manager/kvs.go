@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	aero "github.com/aerospike/aerospike-client-go/v7"
@@ -16,6 +17,7 @@ type server struct {
 	pb.UnimplementedKVSServer
 
 	client *aero.Client
+	logger slog.Logger
 }
 
 func (s *server) Get(ctx context.Context, in *pb.AerospikeGetRequest) (*pb.AerospikeSingleResponse, error) {
@@ -740,8 +742,8 @@ func toScanPolicy(in *pb.ScanPolicy) *aero.ScanPolicy {
 func toQueryPolicy(in *pb.QueryPolicy) *aero.QueryPolicy {
 	if in != nil && in.MultiPolicy != nil {
 		return &aero.QueryPolicy{
-			MultiPolicy: *toMultiPolicy(in.MultiPolicy),
-			ShortQuery:  in.ShortQuery,
+			MultiPolicy:      *toMultiPolicy(in.MultiPolicy),
+			ExpectedDuration: aero.QueryDuration(in.ExpectedDuration),
 		}
 	}
 	return nil
@@ -1111,6 +1113,10 @@ func toCdtListOp(in *pb.CdtListOperation) *aero.Operation {
 		case pb.CdtListCommandOp_CdtListCommandOpCreate:
 			listOrder := aero.ListOrderType(in.Args[0].GetI())
 			pad := in.Args[1].GetB()
+			persistedIndex := in.Args[2].GetB()
+			if persistedIndex {
+				return aero.ListCreateWithIndexOp(in.BinName, listOrder, pad, toCDTContexts(in.Ctx)...)
+			}
 			return aero.ListCreateOp(in.BinName, listOrder, pad, toCDTContexts(in.Ctx)...)
 		case pb.CdtListCommandOp_CdtListCommandOpSetOrder:
 			listOrder := aero.ListOrderType(in.Args[0].GetI())

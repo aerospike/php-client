@@ -8,7 +8,7 @@ BUILD_DIR = $(PKG_DIR)/build
 TARGET_DIR = $(PKG_DIR)/target
 
 # Package variables
-NAME = "aerospike-local-daemon"
+NAME = "aerospike-connection-manager"
 VERSION = $(shell git describe --tags | cut -c 2-)
 MAINTAINER = "Aerospike"
 DESCRIPTION = "Aerospike Local Daemon, A GRPC-based API Server for Aerospike"
@@ -67,7 +67,7 @@ fips-deb: fipsparam deb
 .PHONY: deb
 deb: prep
 	fpm --force \
-		--config-files /etc/aerospike-local-daemon \
+		--config-files /etc/aerospike-connection-manager \
 		--input-type dir \
 		--output-type deb \
 		--deb-compression xz \
@@ -93,7 +93,7 @@ rpm: prep
 	$(eval DISTRO_VERSION := $(shell echo $(DISTRO_VERSION) | cut -d'.' -f1)) # Only major version for RPM
 
 	fpm --force \
-		--config-files /etc/aerospike-local-daemon \
+		--config-files /etc/aerospike-connection-manager \
 		--input-type dir \
 		--output-type rpm \
 		--chdir $(BUILD_DIR)/ \
@@ -115,7 +115,7 @@ fips-tar: fipsparam tar
 .PHONY: tar
 tar: prep
 	fpm --force \
-		--config-files /etc/aerospike-local-daemon \
+		--config-files /etc/aerospike-connection-manager \
 		--input-type dir \
 		--output-type tar \
 		--chdir $(BUILD_DIR)/ \
@@ -134,10 +134,10 @@ prep:
 	@echo "prep PKG_FILENAME "$(PKG_FILENAME)
 	install -d $(TARGET_DIR)
 	install -d $(BUILD_DIR)/usr/bin
-	install -d $(BUILD_DIR)/etc/aerospike-local-daemon
-	install -pm 755 $(TOP_DIR)/aerospike-local-daemon $(BUILD_DIR)/usr/bin/aerospike-local-daemon
-	install -pm 644 $(TOP_DIR)/ape.toml $(BUILD_DIR)/etc/aerospike-local-daemon/ape.toml
-	install -pm 644 $(TOP_DIR)/gauge_stats_list.toml $(BUILD_DIR)/etc/aerospike-local-daemon/gauge_stats_list.toml
+	install -d $(BUILD_DIR)/etc/aerospike-connection-manager
+	install -pm 755 $(TOP_DIR)/aerospike-connection-manager $(BUILD_DIR)/usr/bin/aerospike-connection-manager
+	install -pm 644 $(TOP_DIR)/ape.toml $(BUILD_DIR)/etc/aerospike-connection-manager/ape.toml
+	install -pm 644 $(TOP_DIR)/gauge_stats_list.toml $(BUILD_DIR)/etc/aerospike-connection-manager/gauge_stats_list.toml
 
 .PHONY: clean
 clean:

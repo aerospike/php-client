@@ -7,7 +7,7 @@ $set = "test";
 $socket = "/tmp/asld_grpc.sock";
 
 $client = Client::connect($socket);
-echo "* Connected to the local daemon: $client->socket \n";
+echo "* Connected to the local aerospike-connection-manager: $client->socket \n";
 
 
 $udfBody = 'function testFunc1(rec, div)

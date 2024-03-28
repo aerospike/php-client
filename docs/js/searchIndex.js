@@ -41,6 +41,26 @@ Search.appendIndex(
             "summary": "MapWriteFlagsNoFail\u0020means\u003A\u0020Allow\u0020other\u0020valid\u0020map\u0020items\u0020to\u0020be\u0020committed\u0020if\u0020a\u0020map\u0020item\u0020is\u0020denied\u0020due\u0020to\nwrite\u0020flag\u0020constraints.",
             "url": "classes/Aerospike-MapWriteFlags.html#method_Partial"
         },                {
+            "fqsen": "\\Aerospike\\QueryDuration",
+            "name": "QueryDuration",
+            "summary": "QueryDuration\u0020represents\u0020the\u0020expected\u0020duration\u0020for\u0020a\u0020query\u0020operation\u0020in\u0020the\u0020Aerospike\u0020database.",
+            "url": "classes/Aerospike-QueryDuration.html"
+        },                {
+            "fqsen": "\\Aerospike\\QueryDuration\u003A\u003Along\u0028\u0029",
+            "name": "long",
+            "summary": "LONG\u0020specifies\u0020that\u0020the\u0020query\u0020is\u0020expected\u0020to\u0020return\u0020more\u0020than\u0020100\u0020records\u0020per\u0020node.\u0020The\u0020server\u0020optimizes\u0020for\u0020a\u0020large\u0020record\u0020set\u0020in\nthe\u0020following\u0020ways\u003A",
+            "url": "classes/Aerospike-QueryDuration.html#method_long"
+        },                {
+            "fqsen": "\\Aerospike\\QueryDuration\u003A\u003Ashort\u0028\u0029",
+            "name": "short",
+            "summary": "Short\u0020specifies\u0020that\u0020the\u0020query\u0020is\u0020expected\u0020to\u0020return\u0020less\u0020than\u0020100\u0020records\u0020per\u0020node.\u0020The\u0020server\u0020optimizes\u0020for\u0020a\u0020small\u0020record\u0020set\u0020in\nthe\u0020following\u0020ways\u003A\nAlways\u0020run\u0020the\u0020query\u0020in\u0020one\u0020thread\u0020and\u0020ignore\u0020the\u0020server\u0027s\u0020query\u0020threading\u0020configuration.",
+            "url": "classes/Aerospike-QueryDuration.html#method_short"
+        },                {
+            "fqsen": "\\Aerospike\\QueryDuration\u003A\u003AlongRelaxAP\u0028\u0029",
+            "name": "longRelaxAP",
+            "summary": "LongRelaxAP\u0020will\u0020treat\u0020query\u0020as\u0020a\u0020LONG\u0020query,\u0020but\u0020relax\u0020read\u0020consistency\u0020for\u0020AP\u0020namespaces.",
+            "url": "classes/Aerospike-QueryDuration.html#method_longRelaxAP"
+        },                {
             "fqsen": "\\Aerospike\\Client",
             "name": "Client",
             "summary": "Instantiate\u0020a\u0020Client\u0020instance\u0020to\u0020access\u0020an\u0020Aerospike\u0020database\u0020cluster\u0020and\u0020perform\u0020database\u0020operations.",
@@ -2021,15 +2041,15 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Aerospike-QueryPolicy.html#method___construct"
         },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003AgetShortQuery\u0028\u0029",
-            "name": "getShortQuery",
-            "summary": "ShortQuery\u0020detemines\u0020wether\u0020query\u0020expected\u0020to\u0020return\u0020less\u0020than\u0020100\u0020records.",
-            "url": "classes/Aerospike-QueryPolicy.html#method_getShortQuery"
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003AgetExpectedDuration\u0028\u0029",
+            "name": "getExpectedDuration",
+            "summary": "QueryDuration\u0020represents\u0020the\u0020expected\u0020duration\u0020for\u0020a\u0020query\u0020operation\u0020in\u0020the\u0020Aerospike\u0020database.",
+            "url": "classes/Aerospike-QueryPolicy.html#method_getExpectedDuration"
         },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003AsetShortQuery\u0028\u0029",
-            "name": "setShortQuery",
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003AsetExpectedDuration\u0028\u0029",
+            "name": "setExpectedDuration",
             "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#method_setShortQuery"
+            "url": "classes/Aerospike-QueryPolicy.html#method_setExpectedDuration"
         },                {
             "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003AgetMaxConcurrentNodes\u0028\u0029",
             "name": "getMaxConcurrentNodes",
@@ -2151,60 +2171,20 @@ Search.appendIndex(
             "summary": "",
             "url": "classes/Aerospike-QueryPolicy.html#method_setFilterExpression"
         },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024sleep_multiplier",
-            "name": "sleep_multiplier",
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024expected_duration",
+            "name": "expected_duration",
             "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#property_sleep_multiplier"
-        },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024read_mode_ap",
-            "name": "read_mode_ap",
-            "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#property_read_mode_ap"
-        },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024total_timeout",
-            "name": "total_timeout",
-            "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#property_total_timeout"
-        },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024socket_timeout",
-            "name": "socket_timeout",
-            "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#property_socket_timeout"
+            "url": "classes/Aerospike-QueryPolicy.html#property_expected_duration"
         },                {
             "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024max_retries",
             "name": "max_retries",
             "summary": "",
             "url": "classes/Aerospike-QueryPolicy.html#property_max_retries"
         },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024record_queue_size",
-            "name": "record_queue_size",
-            "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#property_record_queue_size"
-        },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024max_concurrent_nodes",
-            "name": "max_concurrent_nodes",
-            "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#property_max_concurrent_nodes"
-        },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024send_key",
-            "name": "send_key",
-            "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#property_send_key"
-        },                {
             "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024use_compression",
             "name": "use_compression",
             "summary": "",
             "url": "classes/Aerospike-QueryPolicy.html#property_use_compression"
-        },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024exit_fast_on_exhausted_connection_pool",
-            "name": "exit_fast_on_exhausted_connection_pool",
-            "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#property_exit_fast_on_exhausted_connection_pool"
-        },                {
-            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024short_query",
-            "name": "short_query",
-            "summary": "",
-            "url": "classes/Aerospike-QueryPolicy.html#property_short_query"
         },                {
             "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024read_mode_sc",
             "name": "read_mode_sc",
@@ -2215,6 +2195,46 @@ Search.appendIndex(
             "name": "filter_expression",
             "summary": "",
             "url": "classes/Aerospike-QueryPolicy.html#property_filter_expression"
+        },                {
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024max_concurrent_nodes",
+            "name": "max_concurrent_nodes",
+            "summary": "",
+            "url": "classes/Aerospike-QueryPolicy.html#property_max_concurrent_nodes"
+        },                {
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024exit_fast_on_exhausted_connection_pool",
+            "name": "exit_fast_on_exhausted_connection_pool",
+            "summary": "",
+            "url": "classes/Aerospike-QueryPolicy.html#property_exit_fast_on_exhausted_connection_pool"
+        },                {
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024send_key",
+            "name": "send_key",
+            "summary": "",
+            "url": "classes/Aerospike-QueryPolicy.html#property_send_key"
+        },                {
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024sleep_multiplier",
+            "name": "sleep_multiplier",
+            "summary": "",
+            "url": "classes/Aerospike-QueryPolicy.html#property_sleep_multiplier"
+        },                {
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024total_timeout",
+            "name": "total_timeout",
+            "summary": "",
+            "url": "classes/Aerospike-QueryPolicy.html#property_total_timeout"
+        },                {
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024read_mode_ap",
+            "name": "read_mode_ap",
+            "summary": "",
+            "url": "classes/Aerospike-QueryPolicy.html#property_read_mode_ap"
+        },                {
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024record_queue_size",
+            "name": "record_queue_size",
+            "summary": "",
+            "url": "classes/Aerospike-QueryPolicy.html#property_record_queue_size"
+        },                {
+            "fqsen": "\\Aerospike\\QueryPolicy\u003A\u003A\u0024socket_timeout",
+            "name": "socket_timeout",
+            "summary": "",
+            "url": "classes/Aerospike-QueryPolicy.html#property_socket_timeout"
         },                {
             "fqsen": "\\Aerospike\\AdminPolicy",
             "name": "AdminPolicy",

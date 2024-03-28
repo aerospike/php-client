@@ -1,6 +1,6 @@
 # Aerospike Connection manager Daemon Setup Guide
 
-This guide provides step-by-step instructions on setting up the Go Local Daemon.
+This guide provides step-by-step instructions on setting up the aerospike-connection-manager
 
 ## Prerequisites
 
@@ -9,12 +9,12 @@ This guide provides step-by-step instructions on setting up the Go Local Daemon.
 
 ## Setup Instructions
 
-1. **Change Directory**: Navigate into the `php-client/daemon` directory:
+1. **Change Directory**: Navigate into the `php-client/aerospike-connection-manager` directory:
    ```bash
-   cd php-client/daemon
+   cd php-client/aerospike-connection-manager
    ```
 
-2. **Run Makefile**: Execute the Makefile to build the daemon:
+2. **Run Makefile**: Execute the Makefile to build the aerospike-connection-manager:
    ```bash
    sudo make
    ```
@@ -36,13 +36,13 @@ github.com/aerospike/php-client/asld
 Aerospike's client policy allows for flexible control over read and write operations, including optimistic concurrency, time-to-live settings, and conditional writes based on record existence.
 
 1. **Using the existing asld.toml file to configure the client policy:**: 
-    - Change directory to php-client/daemon.
-    - Edit the asld.toml file to change the client policy to your custom values.
+    - Change directory to php-client/aerospike-connection-manager
+    - Edit the asld.toml file to change the client policy to your custom values
 
 2. **Using a custom custom_client_policy.toml file as your client policy**: 
-    - Copy the template from `/php-client/daemon/asld.toml.template` to your `custom_client_policy.toml`
+    - Copy the template from `/php-client/aerospike-connection-manager/asld.toml.template` to your `custom_client_policy.toml`
     - Make the changes you desire.
-    - Change directory to php-client/daemon and copy the custom_client_policy.toml file into this directory
+    - Change directory to `php-client/aerospike-connection-manager` and copy the custom_client_policy.toml file into this directory
     - In the make under the run  section change asld.toml to the path of your custom config file.
 ```bash
 run: clean proto

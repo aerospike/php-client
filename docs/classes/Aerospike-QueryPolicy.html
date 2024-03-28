@@ -111,7 +111,7 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1812</span>
+    <span class="phpdocumentor-element-found-in__line">1847</span>
 
     </aside>
 
@@ -144,6 +144,12 @@
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a href="classes/Aerospike-QueryPolicy.html#property_exit_fast_on_exhausted_connection_pool">$exit_fast_on_exhausted_connection_pool</a>
+    <span>
+                        &nbsp;: mixed            </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -property -public">
+    <a href="classes/Aerospike-QueryPolicy.html#property_expected_duration">$expected_duration</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
@@ -191,12 +197,6 @@
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a href="classes/Aerospike-QueryPolicy.html#property_short_query">$short_query</a>
-    <span>
-                        &nbsp;: mixed            </span>
-</dt>
-
-            <dt class="phpdocumentor-table-of-contents__entry -property -public">
     <a href="classes/Aerospike-QueryPolicy.html#property_sleep_multiplier">$sleep_multiplier</a>
     <span>
                         &nbsp;: mixed            </span>
@@ -239,6 +239,13 @@
     <span>
                                 &nbsp;: bool    </span>
 </dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/Aerospike-QueryPolicy.html#method_getExpectedDuration">getExpectedDuration()</a>
+    <span>
+                                &nbsp;: <a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a>    </span>
+</dt>
+<dd>QueryDuration represents the expected duration for a query operation in the Aerospike database.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Aerospike-QueryPolicy.html#method_getFilterExpression">getFilterExpression()</a>
@@ -291,13 +298,6 @@ ReadPolicy Attrs
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-QueryPolicy.html#method_getShortQuery">getShortQuery()</a>
-    <span>
-                                &nbsp;: bool    </span>
-</dt>
-<dd>ShortQuery detemines wether query expected to return less than 100 records.</dd>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Aerospike-QueryPolicy.html#method_getSleepMultiplier">getSleepMultiplier()</a>
     <span>
                                 &nbsp;: float    </span>
@@ -323,6 +323,12 @@ ReadPolicy Attrs
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Aerospike-QueryPolicy.html#method_setExitFastOnExhaustedConnectionPool">setExitFastOnExhaustedConnectionPool()</a>
+    <span>
+                                &nbsp;: mixed    </span>
+</dt>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/Aerospike-QueryPolicy.html#method_setExpectedDuration">setExpectedDuration()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
@@ -365,12 +371,6 @@ ReadPolicy Attrs
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
     <a href="classes/Aerospike-QueryPolicy.html#method_setSendKey">setSendKey()</a>
-    <span>
-                                &nbsp;: mixed    </span>
-</dt>
-
-            <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-QueryPolicy.html#method_setShortQuery">setShortQuery()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
@@ -430,7 +430,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1831</span>
+    <span class="phpdocumentor-element-found-in__line">1860</span>
 
     </aside>
 
@@ -439,6 +439,39 @@ ReadPolicy Attrs
     <span class="phpdocumentor-signature__visibility">public</span>
         <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$exit_fast_on_exhausted_connection_pool</span>
+    </code>
+
+    
+    
+    
+
+</article>
+                    <article
+        class="
+            phpdocumentor-element
+            -property
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="property_expected_duration">
+        $expected_duration
+        <a href="classes/Aerospike-QueryPolicy.html#property_expected_duration" class="headerlink"><i class="fas fa-link"></i></a>
+
+        <span class="phpdocumentor-element__modifiers">
+                                </span>
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1848</span>
+
+    </aside>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+        <span class="phpdocumentor-signature__type">mixed</span>
+    <span class="phpdocumentor-signature__name">$expected_duration</span>
     </code>
 
     
@@ -463,7 +496,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1837</span>
+    <span class="phpdocumentor-element-found-in__line">1856</span>
 
     </aside>
 
@@ -496,7 +529,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1825</span>
+    <span class="phpdocumentor-element-found-in__line">1858</span>
 
     </aside>
 
@@ -529,7 +562,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1821</span>
+    <span class="phpdocumentor-element-found-in__line">1850</span>
 
     </aside>
 
@@ -562,7 +595,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1815</span>
+    <span class="phpdocumentor-element-found-in__line">1868</span>
 
     </aside>
 
@@ -595,7 +628,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1835</span>
+    <span class="phpdocumentor-element-found-in__line">1854</span>
 
     </aside>
 
@@ -628,7 +661,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1823</span>
+    <span class="phpdocumentor-element-found-in__line">1870</span>
 
     </aside>
 
@@ -661,7 +694,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1827</span>
+    <span class="phpdocumentor-element-found-in__line">1862</span>
 
     </aside>
 
@@ -670,39 +703,6 @@ ReadPolicy Attrs
     <span class="phpdocumentor-signature__visibility">public</span>
         <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$send_key</span>
-    </code>
-
-    
-    
-    
-
-</article>
-                    <article
-        class="
-            phpdocumentor-element
-            -property
-            -public
-                                                        "
->
-    <h4 class="phpdocumentor-element__name" id="property_short_query">
-        $short_query
-        <a href="classes/Aerospike-QueryPolicy.html#property_short_query" class="headerlink"><i class="fas fa-link"></i></a>
-
-        <span class="phpdocumentor-element__modifiers">
-                                </span>
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">1833</span>
-
-    </aside>
-
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
-    <span class="phpdocumentor-signature__name">$short_query</span>
     </code>
 
     
@@ -727,7 +727,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1813</span>
+    <span class="phpdocumentor-element-found-in__line">1864</span>
 
     </aside>
 
@@ -760,7 +760,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1819</span>
+    <span class="phpdocumentor-element-found-in__line">1872</span>
 
     </aside>
 
@@ -793,7 +793,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1817</span>
+    <span class="phpdocumentor-element-found-in__line">1866</span>
 
     </aside>
 
@@ -826,7 +826,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1829</span>
+    <span class="phpdocumentor-element-found-in__line">1852</span>
 
     </aside>
 
@@ -864,7 +864,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1839</span>
+    <span class="phpdocumentor-element-found-in__line">1874</span>
 
     </aside>
 
@@ -895,7 +895,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1907</span>
+    <span class="phpdocumentor-element-found-in__line">1940</span>
 
     </aside>
 
@@ -922,6 +922,46 @@ ReadPolicy Attrs
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_getExpectedDuration">
+        getExpectedDuration()
+        <a href="classes/Aerospike-QueryPolicy.html#method_getExpectedDuration" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1882</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">QueryDuration represents the expected duration for a query operation in the Aerospike database.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">getExpectedDuration</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+        <section class="phpdocumentor-description"><p>It provides options for specifying whether a query is expected to return a large number of records per node (Long),
+a small number of records per node (Short), or a long query with relaxed read consistency for AP namespaces (LongRelaxAP).
+These options influence how the server optimizes query execution to meet the expected duration requirements.</p>
+</section>
+
+    
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_getFilterExpression">
         getFilterExpression()
         <a href="classes/Aerospike-QueryPolicy.html#method_getFilterExpression" class="headerlink"><i class="fas fa-link"></i></a>
@@ -930,7 +970,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1919</span>
+    <span class="phpdocumentor-element-found-in__line">1952</span>
 
     </aside>
 
@@ -965,7 +1005,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1864</span>
+    <span class="phpdocumentor-element-found-in__line">1897</span>
 
     </aside>
 
@@ -1010,7 +1050,7 @@ Default (0) is to issue requests to all server nodes in parallel.
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1883</span>
+    <span class="phpdocumentor-element-found-in__line">1916</span>
 
     </aside>
 
@@ -1048,7 +1088,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1911</span>
+    <span class="phpdocumentor-element-found-in__line">1944</span>
 
     </aside>
 
@@ -1083,7 +1123,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1915</span>
+    <span class="phpdocumentor-element-found-in__line">1948</span>
 
     </aside>
 
@@ -1118,7 +1158,7 @@ ReadPolicy Attrs
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1874</span>
+    <span class="phpdocumentor-element-found-in__line">1907</span>
 
     </aside>
 
@@ -1158,7 +1198,7 @@ If the queue is full, the producer goroutines will block until records are consu
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1899</span>
+    <span class="phpdocumentor-element-found-in__line">1932</span>
 
     </aside>
 
@@ -1185,47 +1225,6 @@ If the queue is full, the producer goroutines will block until records are consu
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_getShortQuery">
-        getShortQuery()
-        <a href="classes/Aerospike-QueryPolicy.html#method_getShortQuery" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">1849</span>
-
-    </aside>
-
-        <p class="phpdocumentor-summary">ShortQuery detemines wether query expected to return less than 100 records.</p>
-
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">getShortQuery</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-        <section class="phpdocumentor-description"><p>If true, the server will optimize the query for a small record set.
-This field is ignored for aggregation queries, background queries
-and server versions 6.0+.</p>
-<p>Default: false</p>
-</section>
-
-    
-    
-
-            <section>
-        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
-        <span class="phpdocumentor-signature__response_type">bool</span>
-            </section>
-
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
     <h4 class="phpdocumentor-element__name" id="method_getSleepMultiplier">
         getSleepMultiplier()
         <a href="classes/Aerospike-QueryPolicy.html#method_getSleepMultiplier" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1234,7 +1233,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1887</span>
+    <span class="phpdocumentor-element-found-in__line">1920</span>
 
     </aside>
 
@@ -1269,7 +1268,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1895</span>
+    <span class="phpdocumentor-element-found-in__line">1928</span>
 
     </aside>
 
@@ -1304,7 +1303,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1891</span>
+    <span class="phpdocumentor-element-found-in__line">1924</span>
 
     </aside>
 
@@ -1339,7 +1338,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1903</span>
+    <span class="phpdocumentor-element-found-in__line">1936</span>
 
     </aside>
 
@@ -1374,7 +1373,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1909</span>
+    <span class="phpdocumentor-element-found-in__line">1942</span>
 
     </aside>
 
@@ -1407,6 +1406,47 @@ and server versions 6.0+.</p>
             -public
                                                         "
 >
+    <h4 class="phpdocumentor-element__name" id="method_setExpectedDuration">
+        setExpectedDuration()
+        <a href="classes/Aerospike-QueryPolicy.html#method_setExpectedDuration" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">1884</span>
+
+    </aside>
+
+    
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">setExpectedDuration</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">mixed&nbsp;</span><span class="phpdocumentor-signature__argument__name">$expected_duration</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
+    <dl class="phpdocumentor-argument-list">
+                    <dt class="phpdocumentor-argument-list__entry">
+                <span class="phpdocumentor-signature__argument__name">$expected_duration</span>
+                : <span class="phpdocumentor-signature__argument__return-type">mixed</span>
+                            </dt>
+            <dd class="phpdocumentor-argument-list__definition">
+                
+            </dd>
+            </dl>
+
+    
+
+    
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
     <h4 class="phpdocumentor-element__name" id="method_setFilterExpression">
         setFilterExpression()
         <a href="classes/Aerospike-QueryPolicy.html#method_setFilterExpression" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1415,7 +1455,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1921</span>
+    <span class="phpdocumentor-element-found-in__line">1954</span>
 
     </aside>
 
@@ -1456,7 +1496,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1866</span>
+    <span class="phpdocumentor-element-found-in__line">1899</span>
 
     </aside>
 
@@ -1497,7 +1537,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1885</span>
+    <span class="phpdocumentor-element-found-in__line">1918</span>
 
     </aside>
 
@@ -1538,7 +1578,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1913</span>
+    <span class="phpdocumentor-element-found-in__line">1946</span>
 
     </aside>
 
@@ -1579,7 +1619,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1917</span>
+    <span class="phpdocumentor-element-found-in__line">1950</span>
 
     </aside>
 
@@ -1620,7 +1660,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1876</span>
+    <span class="phpdocumentor-element-found-in__line">1909</span>
 
     </aside>
 
@@ -1661,7 +1701,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1901</span>
+    <span class="phpdocumentor-element-found-in__line">1934</span>
 
     </aside>
 
@@ -1694,47 +1734,6 @@ and server versions 6.0+.</p>
             -public
                                                         "
 >
-    <h4 class="phpdocumentor-element__name" id="method_setShortQuery">
-        setShortQuery()
-        <a href="classes/Aerospike-QueryPolicy.html#method_setShortQuery" class="headerlink"><i class="fas fa-link"></i></a>
-
-    </h4>
-    <aside class="phpdocumentor-element-found-in">
-    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
-    :
-    <span class="phpdocumentor-element-found-in__line">1851</span>
-
-    </aside>
-
-    
-    <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-                    <span class="phpdocumentor-signature__name">setShortQuery</span><span>(</span><span class="phpdocumentor-signature__argument"><span class="phpdocumentor-signature__argument__return-type">bool&nbsp;</span><span class="phpdocumentor-signature__argument__name">$short_query</span></span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">mixed</span></code>
-
-    <div class="phpdocumentor-label-line">
-        </div>
-    
-        <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
-    <dl class="phpdocumentor-argument-list">
-                    <dt class="phpdocumentor-argument-list__entry">
-                <span class="phpdocumentor-signature__argument__name">$short_query</span>
-                : <span class="phpdocumentor-signature__argument__return-type">bool</span>
-                            </dt>
-            <dd class="phpdocumentor-argument-list__definition">
-                
-            </dd>
-            </dl>
-
-    
-
-    
-</article>
-                    <article
-        class="phpdocumentor-element
-            -method
-            -public
-                                                        "
->
     <h4 class="phpdocumentor-element__name" id="method_setSleepMultiplier">
         setSleepMultiplier()
         <a href="classes/Aerospike-QueryPolicy.html#method_setSleepMultiplier" class="headerlink"><i class="fas fa-link"></i></a>
@@ -1743,7 +1742,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1889</span>
+    <span class="phpdocumentor-element-found-in__line">1922</span>
 
     </aside>
 
@@ -1784,7 +1783,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1897</span>
+    <span class="phpdocumentor-element-found-in__line">1930</span>
 
     </aside>
 
@@ -1825,7 +1824,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1893</span>
+    <span class="phpdocumentor-element-found-in__line">1926</span>
 
     </aside>
 
@@ -1866,7 +1865,7 @@ and server versions 6.0+.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">1905</span>
+    <span class="phpdocumentor-element-found-in__line">1938</span>
 
     </aside>
 
@@ -2007,6 +2006,7 @@ and server versions 6.0+.</p>
                 <li>
                     <ul class="phpdocumentor-list -clean">
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_exit_fast_on_exhausted_connection_pool">$exit_fast_on_exhausted_connection_pool<a href="classes/Aerospike-QueryPolicy.html"></li>
+                                                    <li><a href="classes/Aerospike-QueryPolicy.html#property_expected_duration">$expected_duration<a href="classes/Aerospike-QueryPolicy.html"></li>
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_filter_expression">$filter_expression<a href="classes/Aerospike-QueryPolicy.html"></li>
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_max_concurrent_nodes">$max_concurrent_nodes<a href="classes/Aerospike-QueryPolicy.html"></li>
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_max_retries">$max_retries<a href="classes/Aerospike-QueryPolicy.html"></li>
@@ -2014,7 +2014,6 @@ and server versions 6.0+.</p>
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_read_mode_sc">$read_mode_sc<a href="classes/Aerospike-QueryPolicy.html"></li>
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_record_queue_size">$record_queue_size<a href="classes/Aerospike-QueryPolicy.html"></li>
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_send_key">$send_key<a href="classes/Aerospike-QueryPolicy.html"></li>
-                                                    <li><a href="classes/Aerospike-QueryPolicy.html#property_short_query">$short_query<a href="classes/Aerospike-QueryPolicy.html"></li>
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_sleep_multiplier">$sleep_multiplier<a href="classes/Aerospike-QueryPolicy.html"></li>
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_socket_timeout">$socket_timeout<a href="classes/Aerospike-QueryPolicy.html"></li>
                                                     <li><a href="classes/Aerospike-QueryPolicy.html#property_total_timeout">$total_timeout<a href="classes/Aerospike-QueryPolicy.html"></li>
@@ -2027,6 +2026,7 @@ and server versions 6.0+.</p>
                 <ul class="phpdocumentor-list -clean">
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method___construct">__construct()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getExitFastOnExhaustedConnectionPool">getExitFastOnExhaustedConnectionPool()</a></li>
+                                            <li><a href="classes/Aerospike-QueryPolicy.html#method_getExpectedDuration">getExpectedDuration()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getFilterExpression">getFilterExpression()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getMaxConcurrentNodes">getMaxConcurrentNodes()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getMaxRetries">getMaxRetries()</a></li>
@@ -2034,12 +2034,12 @@ and server versions 6.0+.</p>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getReadModeSc">getReadModeSc()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getRecordQueueSize">getRecordQueueSize()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getSendKey">getSendKey()</a></li>
-                                            <li><a href="classes/Aerospike-QueryPolicy.html#method_getShortQuery">getShortQuery()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getSleepMultiplier">getSleepMultiplier()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getSocketTimeout">getSocketTimeout()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getTotalTimeout">getTotalTimeout()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_getUseCompression">getUseCompression()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setExitFastOnExhaustedConnectionPool">setExitFastOnExhaustedConnectionPool()</a></li>
+                                            <li><a href="classes/Aerospike-QueryPolicy.html#method_setExpectedDuration">setExpectedDuration()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setFilterExpression">setFilterExpression()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setMaxConcurrentNodes">setMaxConcurrentNodes()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setMaxRetries">setMaxRetries()</a></li>
@@ -2047,7 +2047,6 @@ and server versions 6.0+.</p>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setReadModeSc">setReadModeSc()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setRecordQueueSize">setRecordQueueSize()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setSendKey">setSendKey()</a></li>
-                                            <li><a href="classes/Aerospike-QueryPolicy.html#method_setShortQuery">setShortQuery()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setSleepMultiplier">setSleepMultiplier()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setSocketTimeout">setSocketTimeout()</a></li>
                                             <li><a href="classes/Aerospike-QueryPolicy.html#method_setTotalTimeout">setTotalTimeout()</a></li>
