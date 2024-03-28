@@ -30,7 +30,7 @@ class CDTListOpTest extends TestCase{
 
         $list = array();
         $bwp = new BatchWritePolicy(); 
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
         $bp = new BatchPolicy();
         for ($i = 1; $i <= 10; $i++) {
             $list[] = $i;
@@ -59,7 +59,7 @@ class CDTListOpTest extends TestCase{
     public function testShouldCreateValidCDTList(){
         $list = array();
         $bwp = new BatchWritePolicy(); 
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
         $bp = new BatchPolicy();
         $binName = "listBin";
         for ($i = 1; $i <= 100; $i++) {
@@ -74,7 +74,7 @@ class CDTListOpTest extends TestCase{
     }
 
     public function testShouldGetListSize(){
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
         $bp = new BatchPolicy();
 
         // Get the size of the list
@@ -88,7 +88,7 @@ class CDTListOpTest extends TestCase{
 
     public function testShouldAppendElementToTail(){
         $bwp = new BatchWritePolicy(); 
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
         $bp = new BatchPolicy();
         
         $ops = [ListOp::append($lp, self::$cdtBinName, [11])];
@@ -103,7 +103,7 @@ class CDTListOpTest extends TestCase{
 
     public function testShouldAppendFewElementsToTail(){
         $bwp = new BatchWritePolicy(); 
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
         $bp = new BatchPolicy();
         
         $ops = [ListOp::append($lp, self::$cdtBinName, [11, 12, 13])];
@@ -120,7 +120,7 @@ class CDTListOpTest extends TestCase{
 
     public function testShouldPrependElement(){
         $bwp = new BatchWritePolicy(); 
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
         $bp = new BatchPolicy();
         
         $ops = [ListOp::insert($lp, self::$cdtBinName, 0, [-1])];
@@ -231,7 +231,7 @@ class CDTListOpTest extends TestCase{
         $bwp = new BatchWritePolicy(); 
         $bp = new BatchPolicy();
         $rp = new ReadPolicy();
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
 
         $record = self::$client->get($rp, self::$key);
         
@@ -248,7 +248,7 @@ class CDTListOpTest extends TestCase{
         $bwp = new BatchWritePolicy(); 
         $bp = new BatchPolicy();
         $rp = new ReadPolicy();
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
 
         $record = self::$client->get($rp, self::$key);
         
@@ -265,7 +265,7 @@ class CDTListOpTest extends TestCase{
         $bwp = new BatchWritePolicy(); 
         $bp = new BatchPolicy();
         $rp = new ReadPolicy();
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
 
         $record = self::$client->get($rp, self::$key);
         
@@ -282,7 +282,7 @@ class CDTListOpTest extends TestCase{
         $bwp = new BatchWritePolicy(); 
         $bp = new BatchPolicy();
         $rp = new ReadPolicy();
-        $lp = new ListPolicy(ListOrderType::unordered());
+        $lp = new ListPolicy(ListOrderType::Unordered());
 
         $record = self::$client->get($rp, self::$key);
         

@@ -1,5 +1,6 @@
 /target
 /Cargo.lock
+.phpdoc
 *.todo
 aerospike-rust-client.sublime-project
 aerospike-rust-client.sublime-workspace

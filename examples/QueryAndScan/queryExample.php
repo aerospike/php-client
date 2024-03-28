@@ -1,123 +1,71 @@
 <?php
 
-namespace Aerospike;
-
-class AerospikeHelper
-{
-    protected static $client;
-    protected static $namespace = "test";
-    protected static $socket = "/tmp/asld_grpc.sock";
-    protected static $keyCount = 100;
-    protected static $set = "queryTestSet";
-    protected static $keys = [];
-    protected static $indexName;
-    protected static $indexName2;
-    protected static $indexName3;
-
-    public static function connect()
-    {
-        try {
-            self::$client = Client::connect(self::$socket);
-        } catch (AerospikeException $e) {
-            throw $e;
-        }
-    }
+use Aerospike\Client;
+use Aerospike\WritePolicy;
+use Aerospike\QueryPolicy;
+use Aerospike\Bin;
+use Aerospike\Key;
+use Aerospike\PartitionFilter;
+use Aerospike\Filter;
+use Aerospike\Statement;
+use Aerospike\IndexType;
 
 
-    public static function setUp()
-    {
-        echo "\n Set up started ..";
-        $wp = new WritePolicy();
+$socket = "/tmp/asld_grpc.sock";
+// Establish connection to Aerospike server
+$client = Client::connect($socket);
 
-        for ($i = 0; $i < self::$keyCount; $i++) {
-            $key = new Key(self::$namespace, self::$set, self::randomString(random_int(1, 50) + $i));
-            // echo "Key Digest: ". $keyDigest;
-            $keyString = $key->digest;
-            self::$keys[$keyString] = $key;
+// Define namespace and set
+$namespace = "test";
+$set = "products";
 
-            $bins = [
-                new Bin("AerospikeBin1", 46),
-                new Bin("AerospikeBin2", "randomString12"),
-                new Bin("AerospikeBin3", 987),
-                new Bin("AerospikeBin4", "constVal"),
-                new Bin("AerospikeBin5", -1),
-                new Bin("AerospikeBin6", 1),
-                new Bin("AerospikeBin7", null)
-            ];
-            $bins[7] = new Bin("AerospikeBin7", $i % 3);
-            self::$client->put($wp, $key, $bins);
-        }
+// Define bins (attributes) for product data
+$productBins = [
+    new Bin("name", "Smartphone"),
+    new Bin("price", 599.99),
+    new Bin("stock", 100)
+];
 
-        self::$indexName = self::$set . "AerospikeBin3";
-        self::$client->createIndex($wp, self::$namespace, self::$set, "AerospikeBin3", self::$indexName, IndexType::Numeric());
+// Define write policy for adding data
+$writePolicy = new WritePolicy();
+$writePolicy->setSendKey(true);
+$pf = PartitionFilter::all();
 
-        self::$indexName2 = self::$set . "AerospikeBin6";
-        self::$client->createIndex($wp, self::$namespace, self::$set, "AerospikeBin6", self::$indexName2, IndexType::Numeric());
-
-        self::$indexName3 = self::$set . "AerospikeBin7";
-        self::$client->createIndex($wp, self::$namespace, self::$set, "AerospikeBin7", self::$indexName3, IndexType::Numeric());
-        usleep(1000000);
-        echo "\n Set up completed ..";
-    }
-
-    public static function tearDown()
-    {
-        echo "\n tear down started..";
-        $wp = new WritePolicy();
-        self::$indexName = self::$set . "AerospikeBin3";
-        self::$client->dropIndex($wp, self::$namespace, self::$set, self::$indexName);
-        self::$indexName = self::$set . "AerospikeBin6";
-        self::$client->dropIndex($wp, self::$namespace, self::$set, self::$indexName);
-        self::$indexName = self::$set . "AerospikeBin7";
-        self::$client->dropIndex($wp, self::$namespace, self::$set, self::$indexName);
-
-        $ip = new InfoPolicy();
-        self::$client->truncate($ip, self::$namespace, self::$set);
-        echo "\n tear down completed..";
-    }
-
-    public static function queryAllPartitionRecordsWithFilter()
-    {
-        echo "\n Query start up..";
-        $pf = PartitionFilter::all();
-        $qp = new QueryPolicy();
-        $qp->setMaxRetries(10);
-        $rangeFilter = Filter::Range('randomIndex', 1, 2);
-        $statement = new Statement(self::$namespace, self::$set, $rangeFilter);
-        $recordSet = self::$client->query($qp, $pf, $statement);
-
-        $counter = 0;
-        $keyCount1 = 0;
-
-        while ($rec = $recordSet->next()) {
-            $keyString = $rec->key->digest;
-            if(array_key_exists($keyString, self::$keys)){
-                $keyCount1++;
-            }
-            unset(self::$keys[$keyString]);
-            $counter++;
-        }
-
-        echo "\n Total records: " . $counter . "\n";
-        echo "\n Total keys: ". $keyCount1;
-        echo "\n Query completed..";
-    }
-
-    public static function printAllKeys()
-    {
-        echo "\n Count of all keys - ".count(self::$keys);
-    }
-
-    protected static function randomString($length)
-    {
-        $randomBytes = random_bytes($length);
-        $randomString = base64_encode($randomBytes);
-        $randomString = preg_replace('/[^a-zA-Z0-9]/', '', $randomString);
-        $randomString = substr($randomString, 0, $length);
-
-        return $randomString;
-    }
+// Add sample product data to the server
+for ($i = 1; $i <= 10; $i++) {
+    $key = new Key($namespace, $set, "product_" . $i);
+    $client->put($writePolicy, $key, $productBins);
 }
 
-AerospikeHelper::connect();
-AerospikeHelper::tearDown();
+// Define index name
+$indexName = $set . "_price_index";
+
+// Create index on 'price' bin
+$client->createIndex($writePolicy, $namespace, $set, "price", $indexName, IndexType::Numeric());
+usleep(100000);
+
+// Define query policy
+$queryPolicy = new QueryPolicy();
+
+// Define filter for the query (e.g., retrieve products with a price less than $500)
+$priceFilter = Filter::Range("price", 0, 700);
+
+// Create statement with namespace, set, and filter
+$statement = new Statement($namespace, $set, $priceFilter);
+
+// Perform the query
+$queryResultSet = $client->query($queryPolicy, $pf, $statement);
+
+// Iterate over the query results
+while ($record = $queryResultSet->next()) {
+    // Access bin values of each product
+    $productName = $record->bins["name"];
+    $productPrice = $record->bins["price"];
+    $productStock = $record->bins["stock"];
+    
+    // Display retrieved product data
+    echo "Product: $productName, Price: $productPrice, Stock: $productStock\n";
+}
+
+// Close the query result set after processing
+$queryResultSet->close();

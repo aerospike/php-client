@@ -105,8 +105,8 @@ class CDTBitwiseOpTest extends TestCase{
 
     public function testShouldSetBin(){
         $bit0 = [0x80];
-        $defaultBitPolicy = new BitwisePolicy(BitwiseWriteFlags::default());
-        $updateBitPolicy = new BitwisePolicy(BitwiseWriteFlags::updateOnly());
+        $defaultBitPolicy = new BitwisePolicy(BitwiseWriteFlags::Default());
+        $updateBitPolicy = new BitwisePolicy(BitwiseWriteFlags::UpdateOnly());
 
         self::assertBitModifyOperations(
             [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08],
@@ -120,7 +120,7 @@ class CDTBitwiseOpTest extends TestCase{
     public function testShouldSetBinsBits(){
         $bit0 = [0x80];
         $bits1 = [0x11, 0x22, 0x33];
-        $defaultBitPolicy = new BitwisePolicy(BitwiseWriteFlags::default());
+        $defaultBitPolicy = new BitwisePolicy(BitwiseWriteFlags::Default());
 
         self::assertBitModifyOperations(
             [0x01, 0x12, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D,
@@ -141,7 +141,7 @@ class CDTBitwiseOpTest extends TestCase{
     public function testShouldLShiftBits(){
         $bit0 = [0x80];
         $bits1 = [0x11, 0x22, 0x33];
-        $defaultBitPolicy = new BitwisePolicy(BitwiseWriteFlags::default());
+        $defaultBitPolicy = new BitwisePolicy(BitwiseWriteFlags::Default());
 
         self::assertBitModifyOperations(
             [0x01, 0x01, 0x00, 0x80,
@@ -160,7 +160,7 @@ class CDTBitwiseOpTest extends TestCase{
     }
 
     public function testShouldRShiftBits(){
-        $putMode = new BitwisePolicy(BitwiseWriteFlags::default());
+        $putMode = new BitwisePolicy(BitwiseWriteFlags::Default());
     
         self::assertBitModifyOperations(
             [0x80, 0x40, 0x01, 0x00,
@@ -180,7 +180,7 @@ class CDTBitwiseOpTest extends TestCase{
 
     public function testShouldORBits(){
         $bits1 = [0x11, 0x22, 0x33];
-        $putMode = new BitwisePolicy(BitwiseWriteFlags::default());
+        $putMode = new BitwisePolicy(BitwiseWriteFlags::Default());
     
         self::assertBitModifyOperations(
             [0x80, 0x40, 0x01, 0x00, 0x00,
@@ -197,7 +197,7 @@ class CDTBitwiseOpTest extends TestCase{
 
     public function testShouldXORBits(){
         $bits1 = [0x11, 0x22, 0x33];
-        $putMode = new BitwisePolicy(BitwiseWriteFlags::default());
+        $putMode = new BitwisePolicy(BitwiseWriteFlags::Default());
     
         self::assertBitModifyOperations(
             [0x80, 0x40, 0x01, 0x00, 0x00,
@@ -214,7 +214,7 @@ class CDTBitwiseOpTest extends TestCase{
 
     public function testShouldANDBits(){
         $bits1 = [0x11, 0x22, 0x33];
-        $putMode = new BitwisePolicy(BitwiseWriteFlags::default());
+        $putMode = new BitwisePolicy(BitwiseWriteFlags::Default());
     
         self::assertBitModifyOperations(
             [0x80, 0x40, 0x01, 0x00, 0x00,
@@ -229,7 +229,7 @@ class CDTBitwiseOpTest extends TestCase{
     }
 
     public function testShouldNOTBits(){
-        $putMode = new BitwisePolicy(BitwiseWriteFlags::default());
+        $putMode = new BitwisePolicy(BitwiseWriteFlags::Default());
     
         self::assertBitModifyOperations(
             [0x80, 0x40, 0x01, 0x00, 0x00, 0x01, 0x02, 0x03],

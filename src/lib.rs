@@ -6,7 +6,7 @@
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
- * the License at http://www.apache.org/licenses/LICENSE-2.0
+ * the License at http:///www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -21,8 +21,6 @@
 mod grpc;
 
 use grpc::proto::{self};
-// use std::fs::File;
-// use std::io::Write;
 use std::collections::HashMap;
 use std::fmt;
 use std::hash::{Hash, Hasher};
@@ -56,7 +54,6 @@ use byteorder::{LittleEndian, ReadBytesExt};
 use rand::prelude::*;
 
 use lazy_static::lazy_static;
-// use log::LevelFilter;
 use log::trace;
 
 lazy_static! {
@@ -64,7 +61,6 @@ lazy_static! {
         Mutex::new(HashMap::new());
 }
 
-// pub type AspResult<T = ()> = std::result::Result<T, AspException>;
 pub type AsResult<T = ()> = std::result::Result<T, AerospikeException>;
 
 const PARTITIONS: u16 = 4096;
@@ -76,6 +72,7 @@ const CITRUSLEAF_EPOCH: u64 = 1262304000;
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// ExpType defines the expression's data type.
 #[php_class(name = "Aerospike\\ExpType")]
 pub struct ExpType {
     _as: proto::ExpType,
@@ -94,60 +91,70 @@ impl FromZval<'_> for ExpType {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ExpType {
+    /// ExpTypeNIL is NIL Expression Type
     pub fn Nil() -> Self {
         ExpType {
             _as: proto::ExpType::Nil,
         }
     }
 
+    /// ExpTypeBOOL is BOOLEAN Expression Type
     pub fn Bool() -> Self {
         ExpType {
             _as: proto::ExpType::Bool,
         }
     }
 
+    /// ExpTypeINT is INTEGER Expression Type
     pub fn Int() -> Self {
         ExpType {
             _as: proto::ExpType::Int,
         }
     }
 
+    /// ExpTypeSTRING is STRING Expression Type
     pub fn String() -> Self {
         ExpType {
             _as: proto::ExpType::String,
         }
     }
 
+    /// ExpTypeLIST is LIST Expression Type
     pub fn List() -> Self {
         ExpType {
             _as: proto::ExpType::List,
         }
     }
 
+    /// ExpTypeMAP is MAP Expression Type
     pub fn Map() -> Self {
         ExpType {
             _as: proto::ExpType::Map,
         }
     }
 
+    /// ExpTypeBLOB is BLOB Expression Type
     pub fn Blob() -> Self {
         ExpType {
             _as: proto::ExpType::Blob,
         }
     }
 
+    /// ExpTypeFLOAT is FLOAT Expression Type
     pub fn Float() -> Self {
         ExpType {
             _as: proto::ExpType::Float,
         }
     }
 
+    /// ExpTypeGEO is GEO String Expression Type
     pub fn Geo() -> Self {
         ExpType {
             _as: proto::ExpType::Geo,
         }
     }
 
+    /// ExpTypeHLL is HLL Expression Type
     pub fn Hll() -> Self {
         ExpType {
             _as: proto::ExpType::Hll,
@@ -662,7 +669,7 @@ impl Expression {
     }
 
     /// Create "and" (&&) operator that applies to a variable number of expressions.
-    /// // (a > 5 || a == 0) && b < 3
+    /// /// (a > 5 || a == 0) && b < 3
     pub fn and(exps: Vec<&Expression>) -> Self {
         Expression::new(Some(proto::ExpOp::And.into()), None, None, None, None, exps)
     }
@@ -847,7 +854,7 @@ impl Expression {
 
     /// Create expression that rounds a floating point number down to the closest integer value.
     /// The return type is float.
-    // Requires server version 5.6.0+.
+    /// Requires server version 5.6.0+.
     pub fn num_floor(num: &Expression) -> Self {
         Expression::new(
             Some(proto::ExpOp::Floor.into()),
@@ -1055,16 +1062,16 @@ impl Expression {
         Expression::new(Some(proto::ExpOp::Max.into()), None, None, None, None, exps)
     }
 
-    //--------------------------------------------------
-    // Variables
-    //--------------------------------------------------
+    ///--------------------------------------------------
+    /// Variables
+    ///--------------------------------------------------
 
     /// Conditionally select an expression from a variable number of expression pairs
     /// followed by default expression action.
     /// Requires server version 5.6.0+.
     /// ```
-    /// // Args Format: bool exp1, action exp1, bool exp2, action exp2, ..., action-default
-    /// // Apply operator based on type.
+    /// /// Args Format: bool exp1, action exp1, bool exp2, action exp2, ..., action-default
+    /// /// Apply operator based on type.
     pub fn cond(exps: Vec<&Expression>) -> Self {
         Expression::new(
             Some(proto::ExpOp::Cond.into()),
@@ -1079,7 +1086,7 @@ impl Expression {
     /// Define variables and expressions in scope.
     /// Requires server version 5.6.0+.
     /// ```
-    /// // 5 < a < 10
+    /// /// 5 < a < 10
     pub fn exp_let(exps: Vec<&Expression>) -> Self {
         Expression::new(Some(proto::ExpOp::Let.into()), None, None, None, None, exps)
     }
@@ -1087,7 +1094,7 @@ impl Expression {
     /// Assign variable to an expression that can be accessed later.
     /// Requires server version 5.6.0+.
     /// ```
-    /// // 5 < a < 10
+    /// /// 5 < a < 10
     pub fn def(name: String, value: &Expression) -> Self {
         Expression::new(
             None,
@@ -1134,9 +1141,9 @@ impl Expression {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// ReadModeAP is the read policy in AP (availability) mode namespaces.
-// It indicates how duplicates should be consulted in a read operation.
-// Only makes a difference during migrations and only applicable in AP mode.
+/// ReadModeAP is the read policy in AP (availability) mode namespaces.
+/// It indicates how duplicates should be consulted in a read operation.
+/// Only makes a difference during migrations and only applicable in AP mode.
 #[php_class(name = "Aerospike\\ReadModeAP")]
 pub struct ReadModeAP {
     _as: proto::ReadModeAp,
@@ -1145,15 +1152,15 @@ pub struct ReadModeAP {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ReadModeAP {
-    // ReadModeAPOne indicates that a single node should be involved in the read operation.
+    /// ReadModeAPOne indicates that a single node should be involved in the read operation.
     pub fn One() -> Self {
         ReadModeAP {
             _as: proto::ReadModeAp::One,
         }
     }
 
-    // ReadModeAPAll indicates that all duplicates should be consulted in
-    // the read operation.
+    /// ReadModeAPAll indicates that all duplicates should be consulted in
+    /// the read operation.
     pub fn All() -> Self {
         ReadModeAP {
             _as: proto::ReadModeAp::All,
@@ -1200,8 +1207,8 @@ impl FromZval<'_> for ReadModeAP {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// ReadModeSC is the read policy in SC (strong consistency) mode namespaces.
-// Determines SC read consistency options.
+/// ReadModeSC is the read policy in SC (strong consistency) mode namespaces.
+/// Determines SC read consistency options.
 #[php_class(name = "Aerospike\\ReadModeSC")]
 pub struct ReadModeSC {
     _as: proto::ReadModeSc,
@@ -1210,32 +1217,32 @@ pub struct ReadModeSC {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ReadModeSC {
-    // ReadModeSCSession ensures this client will only see an increasing sequence of record versions.
-    // Server only reads from master.  This is the default.
+    /// ReadModeSCSession ensures this client will only see an increasing sequence of record versions.
+    /// Server only reads from master.  This is the default.
     pub fn Session() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::Session,
         }
     }
 
-    // ReadModeSCLinearize ensures ALL clients will only see an increasing sequence of record versions.
-    // Server only reads from master.
+    /// ReadModeSCLinearize ensures ALL clients will only see an increasing sequence of record versions.
+    /// Server only reads from master.
     pub fn Linearize() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::Linearize,
         }
     }
 
-    // ReadModeSCAllowReplica indicates that the server may read from master or any full (non-migrating) replica.
-    // Increasing sequence of record versions is not guaranteed.
+    /// ReadModeSCAllowReplica indicates that the server may read from master or any full (non-migrating) replica.
+    /// Increasing sequence of record versions is not guaranteed.
     pub fn AllowReplica() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::AllowReplica,
         }
     }
 
-    // ReadModeSCAllowUnavailable indicates that the server may read from master or any full (non-migrating) replica or from unavailable
-    // partitions.  Increasing sequence of record versions is not guaranteed.
+    /// ReadModeSCAllowUnavailable indicates that the server may read from master or any full (non-migrating) replica or from unavailable
+    /// partitions.  Increasing sequence of record versions is not guaranteed.
     pub fn AllowUnavailable() -> Self {
         ReadModeSC {
             _as: proto::ReadModeSc::AllowUnavailable,
@@ -1290,6 +1297,8 @@ impl FromZval<'_> for ReadModeSC {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// RecordExistsAction determines how to handle writes when
+/// the record already exists.
 #[php_class(name = "Aerospike\\RecordExistsAction")]
 pub struct RecordExistsAction {
     _as: proto::RecordExistsAction,
@@ -1352,13 +1361,13 @@ impl RecordExistsAction {
     }
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  CommitLevel
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// CommitLevel indicates the desired consistency guarantee when committing a transaction on the server.
 #[php_class(name = "Aerospike\\CommitLevel")]
 pub struct CommitLevel {
     _as: proto::CommitLevel,
@@ -1398,14 +1407,15 @@ impl CommitLevel {
 //  ConsistencyLevel
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
+
+/// `ConsistencyLevel` indicates how replicas should be consulted in a read
+/// operation to provide the desired consistency guarantee.
 #[derive(Debug, Clone, Copy)]
 pub enum _ConsistencyLevel {
     ConsistencyOne,
     ConsistencyAll,
 }
 
-/// `ConsistencyLevel` indicates how replicas should be consulted in a read
-/// operation to provide the desired consistency guarantee.
 #[php_class(name = "Aerospike\\ConsistencyLevel")]
 pub struct ConsistencyLevel {
     v: _ConsistencyLevel,
@@ -1451,9 +1461,9 @@ impl From<&ConsistencyLevel> for proto::ConsistencyLevel {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  GenerationPolicy
-//
+///
+///  GenerationPolicy
+///
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 /// `GenerationPolicy` determines how to handle record writes based on record generation.
@@ -1499,7 +1509,6 @@ impl GenerationPolicy {
     }
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  Expiration
@@ -1507,9 +1516,10 @@ impl GenerationPolicy {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 const NAMESPACE_DEFAULT: u32 = 0x0000_0000;
-const NEVER_EXPIRE: u32 = 0xFFFF_FFFF; // -1 as i32
+const NEVER_EXPIRE: u32 = 0xFFFF_FFFF; /// -1 as i32
 const DONT_UPDATE: u32 = 0xFFFF_FFFE;
 
+/// Record expiration, also known as time-to-live (TTL).
 #[derive(Debug, Clone, Copy)]
 pub enum _Expiration {
     Seconds(u32),
@@ -1518,7 +1528,6 @@ pub enum _Expiration {
     DontUpdate,
 }
 
-/// Record expiration, also known as time-to-live (TTL).
 #[php_class(name = "Aerospike\\Expiration")]
 pub struct Expiration {
     _as: _Expiration,
@@ -1596,6 +1605,9 @@ impl From<u32> for Expiration {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Specifies whether a command, that needs to be executed on multiple cluster nodes, should be
+/// executed sequentially, one node at a time, or in parallel on multiple nodes using the client's
+/// thread pool.
 #[derive(Debug, Clone, Copy)]
 pub enum _Concurrency {
     Sequential,
@@ -1603,9 +1615,6 @@ pub enum _Concurrency {
     MaxThreads(u32),
 }
 
-/// Specifies whether a command, that needs to be executed on multiple cluster nodes, should be
-/// executed sequentially, one node at a time, or in parallel on multiple nodes using the client's
-/// thread pool.
 #[php_class(name = "Aerospike\\Concurrency")]
 pub struct Concurrency {
     v: _Concurrency,
@@ -1703,14 +1712,14 @@ impl ListOrderType {
         }
     }
 
-    // ListOrderOrdered signifies that list is Ordered.
+    /// ListOrderOrdered signifies that list is Ordered.
     pub fn Ordered() -> Self {
         ListOrderType {
             _as: proto::ListOrderType::Ordered,
         }
     }
 
-    // ListOrderUnordered signifies that list is not ordered. This is the default.
+    /// ListOrderUnordered signifies that list is not ordered. This is the default.
     pub fn Unordered() -> Self {
         ListOrderType {
             _as: proto::ListOrderType::Unordered,
@@ -1761,21 +1770,21 @@ impl MapOrderType {
         }
     }
 
-    // Map is not ordered. This is the default.
+    /// Map is not ordered. This is the default.
     pub fn Unordered() -> Self {
         MapOrderType {
             _as: proto::MapOrderType::Unordered,
         }
     }
 
-    // Order map by key.
+    /// Order map by key.
     pub fn Key_Ordered() -> Self {
         MapOrderType {
             _as: proto::MapOrderType::KeyOrdered,
         }
     }
 
-    // Order map by key, then value.
+    /// Order map by key, then value.
     pub fn Key_Value_Ordered() -> Self {
         MapOrderType {
             _as: proto::MapOrderType::KeyValueOrdered,
@@ -1789,10 +1798,10 @@ impl MapOrderType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// CDTContext defines Nested CDT context. Identifies the location of nested list/map to apply the operation.
-// for the current level.
-// An array of CTX identifies location of the list/map on multiple
-// levels on nesting.
+/// CDTContext defines Nested CDT context. Identifies the location of nested list/map to apply the operation.
+/// for the current level.
+/// An array of CTX identifies location of the list/map on multiple
+/// levels on nesting.
 enum CDTContextType {
     ListIndex = 0x10,
     ListRank = 0x11,
@@ -1831,14 +1840,14 @@ impl CDTContext {
         return 0x40;
     }
 
-    // CtxListIndex defines Lookup list by index offset.
-    // If the index is negative, the resolved index starts backwards from end of list.
-    // If an index is out of bounds, a parameter error will be returned.
-    // Examples:
-    // 0: First item.
-    // 4: Fifth item.
-    // -1: Last item.
-    // -3: Third to last item.
+    /// CtxListIndex defines Lookup list by index offset.
+    /// If the index is negative, the resolved index starts backwards from end of list.
+    /// If an index is out of bounds, a parameter error will be returned.
+    /// Examples:
+    /// 0: First item.
+    /// 4: Fifth item.
+    /// -1: Last item.
+    /// -3: Third to last item.
     pub fn ListIndex(index: i32) -> Self {
         CDTContext {
             _as: proto::CdtContext {
@@ -1848,7 +1857,7 @@ impl CDTContext {
         }
     }
 
-    // CtxListIndexCreate list with given type at index offset, given an order and pad.
+    /// CtxListIndexCreate list with given type at index offset, given an order and pad.
     pub fn ListIndexCreate(index: i32, order: ListOrderType, pad: bool) -> Self {
         CDTContext {
             _as: proto::CdtContext {
@@ -1858,10 +1867,10 @@ impl CDTContext {
         }
     }
 
-    // CtxListRank defines Lookup list by rank.
-    // 0 = smallest value
-    // N = Nth smallest value
-    // -1 = largest value
+    /// CtxListRank defines Lookup list by rank.
+    /// 0 = smallest value
+    /// N = Nth smallest value
+    /// -1 = largest value
     pub fn ListRank(rank: i32) -> Self {
         CDTContext {
             _as: proto::CdtContext {
@@ -1871,7 +1880,7 @@ impl CDTContext {
         }
     }
 
-    // CtxListValue defines Lookup list by value.
+    /// CtxListValue defines Lookup list by value.
     pub fn ListValue(key: PHPValue) -> Self {
         CDTContext {
             _as: proto::CdtContext {
@@ -1881,14 +1890,14 @@ impl CDTContext {
         }
     }
 
-    // CtxMapIndex defines Lookup map by index offset.
-    // If the index is negative, the resolved index starts backwards from end of list.
-    // If an index is out of bounds, a parameter error will be returned.
-    // Examples:
-    // 0: First item.
-    // 4: Fifth item.
-    // -1: Last item.
-    // -3: Third to last item.
+    /// CtxMapIndex defines Lookup map by index offset.
+    /// If the index is negative, the resolved index starts backwards from end of list.
+    /// If an index is out of bounds, a parameter error will be returned.
+    /// Examples:
+    /// 0: First item.
+    /// 4: Fifth item.
+    /// -1: Last item.
+    /// -3: Third to last item.
     pub fn MapIndex(index: i32) -> Self {
         CDTContext {
             _as: proto::CdtContext {
@@ -1898,10 +1907,10 @@ impl CDTContext {
         }
     }
 
-    // CtxMapRank defines Lookup map by rank.
-    // 0 = smallest value
-    // N = Nth smallest value
-    // -1 = largest value
+    /// CtxMapRank defines Lookup map by rank.
+    /// 0 = smallest value
+    /// N = Nth smallest value
+    /// -1 = largest value
     pub fn MapRank(rank: i32) -> Self {
         CDTContext {
             _as: proto::CdtContext {
@@ -1911,7 +1920,7 @@ impl CDTContext {
         }
     }
 
-    // CtxMapKey defines Lookup map by key.
+    /// CtxMapKey defines Lookup map by key.
     pub fn MapKey(key: PHPValue) -> Self {
         CDTContext {
             _as: proto::CdtContext {
@@ -1921,7 +1930,7 @@ impl CDTContext {
         }
     }
 
-    // CtxMapKeyCreate creates map with given type at map key.
+    /// CtxMapKeyCreate creates map with given type at map key.
     pub fn MapKeyCreate(key: PHPValue, order: MapOrderType) -> Self {
         CDTContext {
             _as: proto::CdtContext {
@@ -1931,7 +1940,7 @@ impl CDTContext {
         }
     }
 
-    // CtxMapValue defines Lookup map by value.
+    /// CtxMapValue defines Lookup map by value.
     pub fn MapValue(key: PHPValue) -> Self {
         CDTContext {
             _as: proto::CdtContext {
@@ -1948,13 +1957,14 @@ impl CDTContext {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// `ReadPolicy` excapsulates parameters for transaction policy attributes
+/// used in all database operation calls.
 #[php_class(name = "Aerospike\\ReadPolicy")]
 pub struct ReadPolicy {
     _as: proto::ReadPolicy,
 }
 
-/// `ReadPolicy` excapsulates parameters for transaction policy attributes
-/// used in all database operation calls.
+
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ReadPolicy {
@@ -1962,6 +1972,23 @@ impl ReadPolicy {
         ReadPolicy::default()
     }
 
+    /// MaxRetries determines the maximum number of retries before aborting the current transaction.
+	/// The initial attempt is not counted as a retry.
+	///
+	/// If MaxRetries is exceeded, the transaction will abort with an error.
+	///
+	/// WARNING: Database writes that are not idempotent (such as AddOp)
+	/// should not be retried because the write operation may be performed
+	/// multiple times if the client timed out previous transaction attempts.
+	/// It's important to use a distinct WritePolicy for non-idempotent
+	/// writes which sets maxRetries = 0;
+	///
+	/// Default for read: 2 (initial attempt + 2 retries = 3 attempts)
+	///
+	/// Default for write: 0 (no retries)
+	///
+	/// Default for partition scan or query with nil filter: 5
+	/// (6 attempts. See ScanPolicy comments.)
     #[getter]
     pub fn get_max_retries(&self) -> u32 {
         self._as.max_retries
@@ -1972,6 +1999,8 @@ impl ReadPolicy {
         self._as.max_retries = max_retries;
     }
 
+    /// SleepMultiplier specifies the multiplying factor to be used for exponential backoff during retries.
+	/// Default to (1.0); Only values greater than 1 are valid.
     #[getter]
     pub fn get_sleep_multiplier(&self) -> f64 {
         self._as.sleep_multiplier
@@ -1982,6 +2011,22 @@ impl ReadPolicy {
         self._as.sleep_multiplier = sleep_multiplier;
     }
 
+    /// TotalTimeout specifies total transaction timeout.
+	///
+	/// The TotalTimeout is tracked on the client and also sent to the server along
+	/// with the transaction in the wire protocol. The client will most likely
+	/// timeout first, but the server has the capability to Timeout the transaction.
+	///
+	/// If TotalTimeout is not zero and TotalTimeout is reached before the transaction
+	/// completes, the transaction will abort with TotalTimeout error.
+	///
+	/// If TotalTimeout is zero, there will be no time limit and the transaction will retry
+	/// on network timeouts/errors until MaxRetries is exceeded. If MaxRetries is exceeded, the
+	/// transaction also aborts with Timeout error.
+	///
+	/// Default for scan/query: 0 (no time limit and rely on MaxRetries)
+	///
+	/// Default for all other commands: 1000ms
     #[getter]
     pub fn get_total_timeout(&self) -> u64 {
         self._as.total_timeout
@@ -1992,6 +2037,14 @@ impl ReadPolicy {
         self._as.total_timeout = timeout_millis;
     }
 
+    /// SocketTimeout determines network timeout for each attempt.
+	///
+	/// If SocketTimeout is not zero and SocketTimeout is reached before an attempt completes,
+	/// the Timeout above is checked. If Timeout is not exceeded, the transaction
+	/// is retried. If both SocketTimeout and Timeout are non-zero, SocketTimeout must be less
+	/// than or equal to Timeout, otherwise Timeout will also be used for SocketTimeout.
+	///
+	/// Default: 30s
     #[getter]
     pub fn get_socket_timeout(&self) -> u64 {
         self._as.socket_timeout
@@ -2002,6 +2055,10 @@ impl ReadPolicy {
         self._as.socket_timeout = timeout_millis;
     }
 
+    /// SendKey determines to whether send user defined key in addition to hash digest on both reads and writes.
+	/// If the key is sent on a write, the key will be stored with the record on
+	/// the server.
+	/// The default is to not send the user defined key.
     #[getter]
     pub fn get_send_key(&self) -> bool {
         self._as.send_key
@@ -2012,6 +2069,13 @@ impl ReadPolicy {
         self._as.send_key = send_key;
     }
 
+    /// UseCompression uses zlib compression on command buffers sent to the server and responses received
+	/// from the server when the buffer size is greater than 128 bytes.
+	///
+	/// This option will increase cpu and memory usage (for extra compressed buffers),but
+	/// decrease the size of data sent over the network.
+	///
+	/// Default: false
     #[getter]
     pub fn get_use_compression(&self) -> bool {
         self._as.use_compression
@@ -2022,6 +2086,13 @@ impl ReadPolicy {
         self._as.use_compression = use_compression;
     }
 
+    /// ExitFastOnExhaustedConnectionPool determines if a command that tries to get a
+	/// connection from the connection pool will wait and retry in case the pool is
+	/// exhausted until a connection becomes available (or the TotalTimeout is reached).
+	/// If set to true, an error will be return immediately.
+	/// If set to false, getting a connection will be retried.
+	/// This only applies if LimitConnectionsToQueueSize is set to true and the number of open connections to a node has reached ConnectionQueueSize.
+	/// The default is false
     #[getter]
     pub fn get_exit_fast_on_exhausted_connection_pool(&self) -> bool {
         self._as.exit_fast_on_exhausted_connection_pool
@@ -2035,6 +2106,7 @@ impl ReadPolicy {
         self._as.exit_fast_on_exhausted_connection_pool = exit_fast_on_exhausted_connection_pool;
     }
 
+    /// ReadModeAP indicates read policy for AP (availability) namespaces.
     #[getter]
     pub fn get_read_mode_ap(&self) -> ReadModeAP {
         ReadModeAP {
@@ -2051,6 +2123,7 @@ impl ReadPolicy {
         self._as.read_mode_ap = read_mode_ap._as.into();
     }
 
+    /// ReadModeSC indicates read policy for SC (strong consistency) namespaces.
     #[getter]
     pub fn get_read_mode_sc(&self) -> ReadModeSC {
         ReadModeSC {
@@ -2069,6 +2142,7 @@ impl ReadPolicy {
         self._as.read_mode_sc = read_mode_sc._as.into();
     }
 
+    /// FilterExpression is the optional Filter Expression. Supported on Server v5.2+
     #[getter]
     pub fn get_filter_expression(&self) -> Option<Expression> {
         self._as
@@ -2113,12 +2187,12 @@ impl Default for ReadPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// `AdminPolicy` encapsulates parameters for all admin operations.
 #[php_class(name = "Aerospike\\AdminPolicy")]
 pub struct AdminPolicy {
     _as: proto::AdminPolicy,
 }
 
-/// `AdminPolicy` encapsulates parameters for all admin operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl AdminPolicy {
@@ -2126,6 +2200,8 @@ impl AdminPolicy {
         AdminPolicy::default()
     }
 
+    /// User administration command socket timeout.
+	/// Default is 2 seconds.
     #[getter]
     pub fn get_timeout(&self) -> u32 {
         self._as.timeout
@@ -2151,12 +2227,12 @@ impl Default for AdminPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// `InfoPolicy` encapsulates parameters for all info operations.
 #[php_class(name = "Aerospike\\InfoPolicy")]
 pub struct InfoPolicy {
     _as: proto::InfoPolicy,
 }
 
-/// `InfoPolicy` encapsulates parameters for all info operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl InfoPolicy {
@@ -2179,12 +2255,12 @@ impl Default for InfoPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// `WritePolicy` encapsulates parameters for all write operations.
 #[php_class(name = "Aerospike\\WritePolicy")]
 pub struct WritePolicy {
     _as: proto::WritePolicy,
 }
 
-/// `WritePolicy` encapsulates parameters for all write operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl WritePolicy {
@@ -2192,7 +2268,7 @@ impl WritePolicy {
         WritePolicy::default()
     }
 
-    // RecordExistsAction qualifies how to handle writes where the record already exists.
+    /// RecordExistsAction qualifies how to handle writes where the record already exists.
     #[getter]
     pub fn get_record_exists_action(&self) -> RecordExistsAction {
         RecordExistsAction {
@@ -2212,8 +2288,8 @@ impl WritePolicy {
         self._as.record_exists_action = record_exists_action._as.into();
     }
 
-    // GenerationPolicy qualifies how to handle record writes based on record generation. The default (NONE)
-	// indicates that the generation is not used to restrict writes.
+    /// GenerationPolicy qualifies how to handle record writes based on record generation. The default (NONE)
+    /// indicates that the generation is not used to restrict writes.
     #[getter]
     pub fn get_generation_policy(&self) -> GenerationPolicy {
         GenerationPolicy {
@@ -2231,9 +2307,9 @@ impl WritePolicy {
         self._as.generation_policy = generation_policy._as.into();
     }
 
-    // Desired consistency guarantee when committing a transaction on the server. The default
-	// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
-	// be successful before returning success to the client.
+    /// Desired consistency guarantee when committing a transaction on the server. The default
+    /// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
+    /// be successful before returning success to the client.
     #[getter]
     pub fn get_commit_level(&self) -> CommitLevel {
         CommitLevel {
@@ -2250,10 +2326,10 @@ impl WritePolicy {
         self._as.commit_level = commit_level._as.into();
     }
 
-    // Generation determines expected generation.
-	// Generation is the number of times a record has been
-	// modified (including creation) on the server.
-	// If a write operation is creating a record, the expected generation would be 0.
+    /// Generation determines expected generation.
+    /// Generation is the number of times a record has been
+    /// modified (including creation) on the server.
+    /// If a write operation is creating a record, the expected generation would be 0.
     #[getter]
     pub fn get_generation(&self) -> u32 {
         self._as.generation
@@ -2264,13 +2340,13 @@ impl WritePolicy {
         self._as.generation = generation;
     }
 
-	// Expiration determines record expiration in seconds. Also known as TTL (Time-To-Live).
-	// Seconds record will live before being removed by the server.
-	// Expiration values:
-	// TTLServerDefault (0): Default to namespace configuration variable "default-ttl" on the server.
-	// TTLDontExpire (MaxUint32): Never expire for Aerospike 2 server versions >= 2.7.2 and Aerospike 3+ server
-	// TTLDontUpdate (MaxUint32 - 1): Do not change ttl when record is written. Supported by Aerospike server versions >= 3.10.1
-	// > 0: Actual expiration in seconds.
+    /// Expiration determines record expiration in seconds. Also known as TTL (Time-To-Live).
+    /// Seconds record will live before being removed by the server.
+    /// Expiration values:
+    /// TTLServerDefault (0): Default to namespace configuration variable "default-ttl" on the server.
+    /// TTLDontExpire (MaxUint32): Never expire for Aerospike 2 server versions >= 2.7.2 and Aerospike 3+ server
+    /// TTLDontUpdate (MaxUint32 - 1): Do not change ttl when record is written. Supported by Aerospike server versions >= 3.10.1
+    /// > 0: Actual expiration in seconds.
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
@@ -2286,15 +2362,15 @@ impl WritePolicy {
         self._as.expiration = (&expiration).into();
     }
 
-    // RespondPerEachOp defines for client.Operate() method, return a result for every operation.
-	// Some list operations do not return results by default (ListClearOp() for example).
-	// This can sometimes make it difficult to determine the desired result offset in the returned
-	// bin's result list.
-	//
-	// Setting RespondPerEachOp to true makes it easier to identify the desired result offset
-	// (result offset equals bin's operate sequence). This only makes sense when multiple list
-	// operations are used in one operate call and some of those operations do not return results
-	// by default.
+    /// RespondPerEachOp defines for client.Operate() method, return a result for every operation.
+    /// Some list operations do not return results by default (ListClearOp() for example).
+    /// This can sometimes make it difficult to determine the desired result offset in the returned
+    /// bin's result list.
+    ///
+    /// Setting RespondPerEachOp to true makes it easier to identify the desired result offset
+    /// (result offset equals bin's operate sequence). This only makes sense when multiple list
+    /// operations are used in one operate call and some of those operations do not return results
+    /// by default.
     #[getter]
     pub fn get_respond_per_each_op(&self) -> bool {
         self._as.respond_per_each_op
@@ -2305,9 +2381,9 @@ impl WritePolicy {
         self._as.respond_per_each_op = respond_per_each_op;
     }
 
-    // DurableDelete leaves a tombstone for the record if the transaction results in a record deletion.
-	// This prevents deleted records from reappearing after node failures.
-	// Valid for Aerospike Server Enterprise Edition 3.10+ only.
+    /// DurableDelete leaves a tombstone for the record if the transaction results in a record deletion.
+    /// This prevents deleted records from reappearing after node failures.
+    /// Valid for Aerospike Server Enterprise Edition 3.10+ only.
     #[getter]
     pub fn get_durable_delete(&self) -> bool {
         self._as.respond_per_each_op
@@ -2318,9 +2394,9 @@ impl WritePolicy {
         self._as.durable_delete = durable_delete;
     }
 
-    // ***************************************************************************
-    // ReadPolicy Attrs
-    // ***************************************************************************
+    /// ***************************************************************************
+    /// ReadPolicy Attrs
+    /// ***************************************************************************
 
     #[getter]
     pub fn get_max_retries(&self) -> u32 {
@@ -2510,8 +2586,8 @@ impl Default for WritePolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// MultiPolicy contains parameters for policy attributes used in
-// query and scan operations.
+/// MultiPolicy contains parameters for policy attributes used in
+/// query and scan operations.
 pub struct MultiPolicy {
     _as: proto::MultiPolicy,
 }
@@ -2539,7 +2615,7 @@ impl Default for MultiPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// QueryPolicy encapsulates parameters for policy attributes used in query operations.
+/// QueryPolicy encapsulates parameters for policy attributes used in query operations.
 #[php_class(name = "Aerospike\\QueryPolicy")]
 pub struct QueryPolicy {
     _as: proto::QueryPolicy,
@@ -2552,12 +2628,12 @@ impl QueryPolicy {
         QueryPolicy::default()
     }
 
-    // ShortQuery detemines wether query expected to return less than 100 records.
-	// If true, the server will optimize the query for a small record set.
-	// This field is ignored for aggregation queries, background queries
-	// and server versions 6.0+.
-	//
-	// Default: false
+    /// ShortQuery detemines wether query expected to return less than 100 records.
+    /// If true, the server will optimize the query for a small record set.
+    /// This field is ignored for aggregation queries, background queries
+    /// and server versions 6.0+.
+    ///
+    /// Default: false
     #[getter]
     pub fn get_short_query(&self) -> bool {
         self._as.short_query
@@ -2568,10 +2644,16 @@ impl QueryPolicy {
         self._as.short_query = short_query;
     }
 
-    // ***************************************************************************
-    // MultiPolicy Attrs
-    // ***************************************************************************
+    /// ***************************************************************************
+    /// MultiPolicy Attrs
+    /// ***************************************************************************
 
+    /// Maximum number of concurrent requests to server nodes at any point in time.
+	/// If there are 16 nodes in the cluster and maxConcurrentNodes is 8, then queries
+	/// will be made to 8 nodes in parallel.  When a query completes, a new query will
+	/// be issued until all 16 nodes have been queried.
+	/// Default (0) is to issue requests to all server nodes in parallel.
+	/// 1 will to issue requests to server nodes one by one avoiding parallel queries.
     #[getter]
     pub fn get_max_concurrent_nodes(&self) -> u32 {
         self._as.multi_policy.as_ref().unwrap().max_concurrent_nodes
@@ -2582,6 +2664,10 @@ impl QueryPolicy {
         self._as.multi_policy.as_mut().unwrap().max_concurrent_nodes = max_concurrent_nodes;
     }
 
+    /// Number of records to place in queue before blocking.
+	/// Records received from multiple server nodes will be placed in a queue.
+	/// A separate goroutine consumes these records in parallel.
+	/// If the queue is full, the producer goroutines will block until records are consumed.
     #[getter]
     pub fn get_record_queue_size(&self) -> u32 {
         self._as.multi_policy.as_ref().unwrap().record_queue_size
@@ -2592,9 +2678,9 @@ impl QueryPolicy {
         self._as.multi_policy.as_mut().unwrap().record_queue_size = record_queue_size;
     }
 
-    // ***************************************************************************
-    // ReadPolicy Attrs
-    // ***************************************************************************
+    /// ***************************************************************************
+    /// ReadPolicy Attrs
+    /// ***************************************************************************
 
     #[getter]
     pub fn get_max_retries(&self) -> u32 {
@@ -2880,12 +2966,12 @@ impl Default for QueryPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// `ScanPolicy` encapsulates optional parameters used in scan operations.
 #[php_class(name = "Aerospike\\ScanPolicy")]
 pub struct ScanPolicy {
     _as: proto::ScanPolicy,
 }
 
-/// `ScanPolicy` encapsulates optional parameters used in scan operations.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ScanPolicy {
@@ -2893,9 +2979,9 @@ impl ScanPolicy {
         ScanPolicy::default()
     }
 
-    // ***************************************************************************
-    // MultiPolicy Attrs
-    // ***************************************************************************
+    /// ***************************************************************************
+    /// MultiPolicy Attrs
+    /// ***************************************************************************
 
     #[getter]
     pub fn get_max_records(&self) -> u64 {
@@ -2927,9 +3013,9 @@ impl ScanPolicy {
         self._as.multi_policy.as_mut().unwrap().record_queue_size = record_queue_size;
     }
 
-    // ***************************************************************************
-    // ReadPolicy Attrs
-    // ***************************************************************************
+    /// ***************************************************************************
+    /// ReadPolicy Attrs
+    /// ***************************************************************************
 
     #[getter]
     pub fn get_max_retries(&self) -> u32 {
@@ -3214,7 +3300,7 @@ impl Default for ScanPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// IndexCollectionType is the secondary index collection type.
+/// IndexCollectionType is the secondary index collection type.
 #[php_class(name = "Aerospike\\IndexCollectionType")]
 pub struct IndexCollectionType {
     _as: proto::IndexCollectionType,
@@ -3223,29 +3309,28 @@ pub struct IndexCollectionType {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl IndexCollectionType {
-
-    // ICT_DEFAULT is the Normal scalar index.
+    /// ICT_DEFAULT is the Normal scalar index.
     pub fn Default() -> Self {
         IndexCollectionType {
             _as: proto::IndexCollectionType::Default,
         }
     }
 
-    // ICT_LIST is Index list elements.
+    /// ICT_LIST is Index list elements.
     pub fn List() -> Self {
         IndexCollectionType {
             _as: proto::IndexCollectionType::List,
         }
     }
 
-    // ICT_MAPKEYS is Index map keys.
+    /// ICT_MAPKEYS is Index map keys.
     pub fn MapKeys() -> Self {
         IndexCollectionType {
             _as: proto::IndexCollectionType::MapKeys,
         }
     }
 
-    // ICT_MAPVALUES is Index map values.
+    /// ICT_MAPVALUES is Index map values.
     pub fn MapValues() -> Self {
         IndexCollectionType {
             _as: proto::IndexCollectionType::MapValues,
@@ -3259,7 +3344,7 @@ impl IndexCollectionType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// Server particle types. Unsupported types are commented out.
+/// Server particle types. Unsupported types are commented out.
 #[php_class(name = "Aerospike\\ParticleType")]
 pub struct ParticleType {
     _as: proto::ParticleType,
@@ -3360,7 +3445,7 @@ impl From<ParticleType> for i64 {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// IndexType the type of the secondary index.
+/// IndexType the type of the secondary index.
 #[php_class(name = "Aerospike\\IndexType")]
 pub struct IndexType {
     _as: proto::IndexType,
@@ -3369,35 +3454,34 @@ pub struct IndexType {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl IndexType {
-    // NUMERIC specifies an index on numeric values.
+    /// NUMERIC specifies an index on numeric values.
     pub fn Numeric() -> Self {
         IndexType {
             _as: proto::IndexType::Numeric,
         }
     }
 
-    // STRING specifies an index on string values.
+    /// STRING specifies an index on string values.
     pub fn String() -> Self {
         IndexType {
             _as: proto::IndexType::String,
         }
     }
 
-    // BLOB specifies a []byte index. Requires server version 7.0+.
+    /// BLOB specifies a []byte index. Requires server version 7.0+.
     pub fn Blob() -> Self {
         IndexType {
             _as: proto::IndexType::Blob,
         }
     }
 
-    // GEO2DSPHERE specifies 2-dimensional spherical geospatial index.
+    /// GEO2DSPHERE specifies 2-dimensional spherical geospatial index.
     pub fn Geo2DSphere() -> Self {
         IndexType {
             _as: proto::IndexType::Geo2DSphere,
         }
     }
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -3407,7 +3491,7 @@ impl IndexType {
 
 /// Query filter definition. Currently, only one filter is allowed in a Statement, and must be on a
 /// bin which has a secondary index defined.
-/// Filter instances should be instantiated using one of the provided macros:
+/// Filter instances should be instantiated using one of the provided macros.
 #[php_class(name = "Aerospike\\Filter")]
 pub struct Filter {
     _as: proto::QueryFilter,
@@ -3416,9 +3500,8 @@ pub struct Filter {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Filter {
-
-    // NewEqualFilter creates a new equality filter instance for query.
-    // Value can be an integer, string or a blob (byte array). Byte arrays are only supported on server v7+.
+    /// NewEqualFilter creates a new equality filter instance for query.
+    /// Value can be an integer, string or a blob (byte array). Byte arrays are only supported on server v7+.
     pub fn equal(bin_name: &str, value: PHPValue, ctx: Option<Vec<&CDTContext>>) -> Self {
         Filter {
             _as: proto::QueryFilter {
@@ -3434,9 +3517,9 @@ impl Filter {
         }
     }
 
-    // NewRangeFilter creates a range filter for query.
-    // Range arguments must be int64 values.
-    // String ranges are not supported.
+    /// NewRangeFilter creates a range filter for query.
+    /// Range arguments must be int64 values.
+    /// String ranges are not supported.
     pub fn range(
         bin_name: &str,
         begin: PHPValue,
@@ -3457,8 +3540,8 @@ impl Filter {
         }
     }
 
-    // NewContainsFilter creates a contains filter for query on collection index.
-    // Value can be an integer, string or a blob (byte array). Byte arrays are only supported on server v7+.
+    /// NewContainsFilter creates a contains filter for query on collection index.
+    /// Value can be an integer, string or a blob (byte array). Byte arrays are only supported on server v7+.
     pub fn contains(
         bin_name: &str,
         value: PHPValue,
@@ -3481,7 +3564,7 @@ impl Filter {
         }
     }
 
-    // NewContainsRangeFilter creates a contains filter for query on ranges of data in a collection index.
+    /// NewContainsRangeFilter creates a contains filter for query on ranges of data in a collection index.
     pub fn contains_range(
         bin_name: &str,
         begin: PHPValue,
@@ -3505,8 +3588,8 @@ impl Filter {
         }
     }
 
-    // NewGeoWithinRegionFilter creates a geospatial "within region" filter for query.
-    // Argument must be a valid GeoJSON region.
+    /// NewGeoWithinRegionFilter creates a geospatial "within region" filter for query.
+    /// Argument must be a valid GeoJSON region.
     pub fn within_region(
         bin_name: &str,
         region: &str,
@@ -3530,8 +3613,8 @@ impl Filter {
         }
     }
 
-    // NewGeoWithinRegionForCollectionFilter creates a geospatial "within region" filter for query on collection index.
-    // Argument must be a valid GeoJSON region.
+    /// NewGeoWithinRegionForCollectionFilter creates a geospatial "within region" filter for query on collection index.
+    /// Argument must be a valid GeoJSON region.
     pub fn within_radius(
         bin_name: &str,
         lat: f64,
@@ -3561,8 +3644,8 @@ impl Filter {
         }
     }
 
-    // NewGeoRegionsContainingPointFilter creates a geospatial "containing point" filter for query.
-    // Argument must be a valid GeoJSON point.
+    /// NewGeoRegionsContainingPointFilter creates a geospatial "containing point" filter for query.
+    /// Argument must be a valid GeoJSON point.
     pub fn regions_containing_point(
         bin_name: &str,
         lat: f64,
@@ -3608,7 +3691,7 @@ impl FromZval<'_> for Filter {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// Statement encapsulates query statement parameters.
+/// Statement encapsulates query statement parameters.
 #[php_class(name = "Aerospike\\Statement")]
 pub struct Statement {
     _as: proto::Statement,
@@ -3639,9 +3722,9 @@ impl Statement {
         }
     }
 
-    // Filter determines query index filter (Optional).
-	// This filter is applied to the secondary index on query.
-	// Query index filters must reference a bin which has a secondary index defined.
+    /// Filter determines query index filter (Optional).
+    /// This filter is applied to the secondary index on query.
+    /// Query index filters must reference a bin which has a secondary index defined.
     #[getter]
     pub fn get_filter(&self) -> Option<Filter> {
         self._as.filter.as_ref().map(|f| Filter { _as: f.clone() })
@@ -3652,8 +3735,8 @@ impl Statement {
         self._as.filter = filter.map(|f| f._as.clone());
     }
 
-    // IndexName determines query index name (Optional)
-	// If not set, the server will determine the index from the filter's bin name.
+    /// IndexName determines query index name (Optional)
+    /// If not set, the server will determine the index from the filter's bin name.
     #[getter]
     pub fn get_index_name(&self) -> Option<String> {
         self._as.index_name.clone()
@@ -3664,7 +3747,7 @@ impl Statement {
         self._as.index_name = index_name;
     }
 
-    // BinNames detemines bin names (optional)
+    /// BinNames detemines bin names (optional)
     #[getter]
     pub fn get_bin_names(&self) -> Vec<String> {
         self._as.bin_names.clone()
@@ -3675,7 +3758,7 @@ impl Statement {
         self._as.bin_names = bin_names;
     }
 
-    // Namespace determines query Namespace
+    /// Namespace determines query Namespace
     #[getter]
     pub fn get_namespace(&self) -> String {
         self._as.namespace.clone()
@@ -3686,7 +3769,7 @@ impl Statement {
         self._as.namespace = namespace;
     }
 
-	// SetName determines query Set name (Optional)
+    /// SetName determines query Set name (Optional)
     #[getter]
     pub fn get_setname(&self) -> String {
         self._as.set_name.clone()
@@ -3727,26 +3810,26 @@ impl PartitionStatus {
         }
     }
 
-    // BVal
+    /// get BVal
     #[getter]
     pub fn get_bval(&self) -> Option<i64> {
         self._as.bval
     }
 
-    // Id shows the partition Id.
+    /// Id shows the partition Id.
     #[getter]
     pub fn get_partition_id(&self) -> u32 {
         self._as.id
     }
 
-    // Digest records the digest of the last key digest received from the server
-	// for this partition.
+    /// Digest records the digest of the last key digest received from the server
+    /// for this partition.
     #[getter]
     pub fn get_digest(&self) -> Vec<u8> {
         self._as.digest.clone()
     }
 
-    // Retry signifies if the partition requires a retry.
+    /// Retry signifies if the partition requires a retry.
     #[getter]
     pub fn get_retry(&self) -> bool {
         self._as.retry
@@ -3797,8 +3880,8 @@ impl PartitionFilter {
         p.partitions.iter().map(|ps| ps.into()).collect()
     }
 
-    // NewPartitionFilterAll creates a partition filter that
-    // reads all the partitions.
+    /// NewPartitionFilterAll creates a partition filter that
+    /// reads all the partitions.
     pub fn all() -> Self {
         PartitionFilter {
             _as: Arc::new(Mutex::new(proto::PartitionFilter {
@@ -3812,8 +3895,8 @@ impl PartitionFilter {
         }
     }
 
-    // NewPartitionFilterById creates a partition filter by partition id.
-    // Partition id is between 0 - 4095
+    /// NewPartitionFilterById creates a partition filter by partition id.
+    /// Partition id is between 0 - 4095
     pub fn partition(id: u32) -> Self {
         PartitionFilter {
             _as: Arc::new(Mutex::new(proto::PartitionFilter {
@@ -3827,9 +3910,9 @@ impl PartitionFilter {
         }
     }
 
-    // NewPartitionFilterByRange creates a partition filter by partition range.
-    // begin partition id is between 0 - 4095
-    // count is the number of partitions, in the range of 1 - 4096 inclusive.
+    /// NewPartitionFilterByRange creates a partition filter by partition range.
+    /// begin partition id is between 0 - 4095
+    /// count is the number of partitions, in the range of 1 - 4096 inclusive.
     pub fn range(begin: u32, count: u32) -> Self {
         PartitionFilter {
             _as: Arc::new(Mutex::new(proto::PartitionFilter {
@@ -3885,18 +3968,18 @@ pub struct Recordset {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Recordset {
+    /// Drop the stream, which will signal the server and close the recordset
     pub fn close(&mut self) {
-        // Drop the stream, which will signal the server and close the recordset
         self._as = None;
     }
 
-    // IsActive returns true if the operation hasn't been finished or cancelled.
+    /// IsActive returns true if the operation hasn't been finished or cancelled.
     #[getter]
     pub fn get_active(&self) -> bool {
         self._as.is_some()
     }
 
-    // Records is a channel on which the resulting records will be sent back.
+    /// Records is a channel on which the resulting records will be sent back.
     pub fn next(&mut self) -> Option<Result<Record>> {
         let mut pid: Option<usize> = None;
         let mut digest: Option<Vec<u8>> = None;
@@ -3984,9 +4067,9 @@ impl Bin {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  Record
-//
+///
+///  Record
+///
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Container object for a database record.
@@ -3998,21 +4081,26 @@ pub struct Record {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Record {
+    /// Bins is the map of requested name/value bins.
     pub fn bin(&self, name: &str) -> Option<PHPValue> {
         let b = self._as.bins.get(name);
         b.map(|v| (*v).clone().into())
     }
 
+    /// Bins is the map of requested name/value bins.
     #[getter]
     pub fn get_bins(&self) -> Option<PHPValue> {
         Some(self._as.bins.clone().into())
     }
 
+    /// Generation shows record modification count.
     #[getter]
     pub fn get_generation(&self) -> Option<u32> {
         Some(self._as.generation)
     }
 
+    /// Expiration is TTL (Time-To-Live).
+	/// Number of seconds until record expires.
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
@@ -4020,7 +4108,9 @@ impl Record {
             secs => secs.into(),
         }
     }
-
+    
+    /// Expiration is TTL (Time-To-Live).
+	/// Number of seconds until record expires.
     #[getter]
     pub fn get_ttl(&self) -> Option<u32> {
         match self._as.expiration {
@@ -4043,6 +4133,8 @@ impl Record {
         }
     }
 
+    /// Key is the record's key.
+	/// Might be empty, or may only consist of digest value.
     #[getter]
     pub fn get_key(&self) -> Option<Key> {
         Some(Key {
@@ -4067,6 +4159,8 @@ impl FromZval<'_> for Record {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchPolicy encapsulates parameters for policy attributes used in write operations.
+/// This object is passed into methods where database writes can occur.
 #[php_class(name = "Aerospike\\BatchPolicy")]
 #[derive(Debug)]
 pub struct BatchPolicy {
@@ -4324,6 +4418,7 @@ impl Default for BatchPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchReadPolicy attributes used in batch read commands.
 #[php_class(name = "Aerospike\\BatchReadPolicy")]
 pub struct BatchReadPolicy {
     _as: proto::BatchReadPolicy,
@@ -4336,6 +4431,10 @@ impl BatchReadPolicy {
         BatchReadPolicy::default()
     }
 
+    /// FilterExpression is the optional expression filter. If FilterExpression exists and evaluates to false, the specific batch key
+	/// request is not performed and BatchRecord.ResultCode is set to types.FILTERED_OUT.
+	///
+	/// Default: null
     #[getter]
     pub fn get_filter_expression(&self) -> Option<Expression> {
         self._as
@@ -4352,6 +4451,7 @@ impl BatchReadPolicy {
         }
     }
 
+    /// ReadModeAP indicates read policy for AP (availability) namespaces.
     #[getter]
     pub fn get_read_mode_ap(&self) -> ReadModeAP {
         ReadModeAP {
@@ -4368,6 +4468,7 @@ impl BatchReadPolicy {
         self._as.read_mode_ap = read_mode_ap._as.into();
     }
 
+    /// ReadModeSC indicates read policy for SC (strong consistency) namespaces.
     #[getter]
     pub fn get_read_mode_sc(&self) -> ReadModeSC {
         ReadModeSC {
@@ -4405,6 +4506,7 @@ impl Default for BatchReadPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchWritePolicy attributes used in batch write commands.
 #[php_class(name = "Aerospike\\BatchWritePolicy")]
 pub struct BatchWritePolicy {
     _as: proto::BatchWritePolicy,
@@ -4417,6 +4519,10 @@ impl BatchWritePolicy {
         BatchWritePolicy::default()
     }
 
+    /// FilterExpression is optional expression filter. If FilterExpression exists and evaluates to false, the specific batch key
+    /// request is not performed and BatchRecord#resultCode is set to types.FILTERED_OUT.
+    ///
+    /// Default: nil
     #[getter]
     pub fn get_filter_expression(&self) -> Option<Expression> {
         self._as
@@ -4433,6 +4539,7 @@ impl BatchWritePolicy {
         }
     }
 
+    /// RecordExistsAction qualifies how to handle writes where the record already exists.
     #[getter]
     pub fn get_record_exists_action(&self) -> RecordExistsAction {
         RecordExistsAction {
@@ -4452,6 +4559,11 @@ impl BatchWritePolicy {
         self._as.record_exists_action = record_exists_action._as.into();
     }
 
+    /// Desired consistency guarantee when committing a transaction on the server. The default
+    /// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
+    /// be successful before returning success to the client.
+    ///
+    /// Default: CommitLevel.COMMIT_ALL
     #[getter]
     pub fn get_generation_policy(&self) -> GenerationPolicy {
         GenerationPolicy {
@@ -4469,6 +4581,14 @@ impl BatchWritePolicy {
         self._as.generation_policy = generation_policy._as.into();
     }
 
+    /// GenerationPolicy qualifies how to handle record writes based on record generation. The default (NONE)
+    /// indicates that the generation is not used to restrict writes.
+    ///
+    /// The server does not support this field for UDF execute() calls. The read-modify-write
+    /// usage model can still be enforced inside the UDF code itself.
+    ///
+    /// Default: GenerationPolicy.NONE
+    /// indicates that the generation is not used to restrict writes.
     #[getter]
     pub fn get_commit_level(&self) -> CommitLevel {
         CommitLevel {
@@ -4485,6 +4605,15 @@ impl BatchWritePolicy {
         self._as.commit_level = commit_level._as.into();
     }
 
+    /// Expected generation. Generation is the number of times a record has been modified
+    /// (including creation) on the server. If a write operation is creating a record,
+    /// the expected generation would be 0. This field is only relevant when
+    /// generationPolicy is not NONE.
+    ///
+    /// The server does not support this field for UDF execute() calls. The read-modify-write
+    /// usage model can still be enforced inside the UDF code itself.
+    ///
+    /// Default: 0
     #[getter]
     pub fn get_generation(&self) -> u32 {
         self._as.generation
@@ -4495,6 +4624,13 @@ impl BatchWritePolicy {
         self._as.generation = generation;
     }
 
+    /// Expiration determines record expiration in seconds. Also known as TTL (Time-To-Live).
+    /// Seconds record will live before being removed by the server.
+    /// Expiration values:
+    /// TTLServerDefault (0): Default to namespace configuration variable "default-ttl" on the server.
+    /// TTLDontExpire (MaxUint32): Never expire for Aerospike 2 server versions >= 2.7.2 and Aerospike 3+ server
+    /// TTLDontUpdate (MaxUint32 - 1): Do not change ttl when record is written. Supported by Aerospike server versions >= 3.10.1
+    /// > 0: Actual expiration in seconds.
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
@@ -4510,6 +4646,9 @@ impl BatchWritePolicy {
         self._as.expiration = (&expiration).into();
     }
 
+    /// DurableDelete leaves a tombstone for the record if the transaction results in a record deletion.
+    /// This prevents deleted records from reappearing after node failures.
+    /// Valid for Aerospike Server Enterprise Edition 3.10+ only.
     #[getter]
     pub fn get_durable_delete(&self) -> bool {
         self._as.durable_delete
@@ -4544,6 +4683,7 @@ impl Default for BatchWritePolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchDeletePolicy is used in batch delete commands.
 #[php_class(name = "Aerospike\\BatchDeletePolicy")]
 pub struct BatchDeletePolicy {
     _as: proto::BatchDeletePolicy,
@@ -4556,6 +4696,9 @@ impl BatchDeletePolicy {
         BatchDeletePolicy::default()
     }
 
+    /// FilterExpression is optional expression filter. If FilterExpression exists and evaluates to false, the specific batch key
+    /// request is not performed and BatchRecord.ResultCode is set to type.FILTERED_OUT.
+    /// Default: nil
     #[getter]
     pub fn get_filter_expression(&self) -> Option<Expression> {
         self._as
@@ -4572,6 +4715,10 @@ impl BatchDeletePolicy {
         }
     }
 
+    /// Desired consistency guarantee when committing a transaction on the server. The default
+    /// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
+    /// be successful before returning success to the client.
+    /// Default: CommitLevel.COMMIT_ALL
     #[getter]
     pub fn get_commit_level(&self) -> CommitLevel {
         CommitLevel {
@@ -4588,6 +4735,10 @@ impl BatchDeletePolicy {
         self._as.commit_level = commit_level._as.into();
     }
 
+    /// Expected generation. Generation is the number of times a record has been modified
+    /// (including creation) on the server. This field is only relevant when generationPolicy
+    /// is not NONE.
+    /// Default: 0
     #[getter]
     pub fn get_generation(&self) -> u32 {
         self._as.generation
@@ -4598,6 +4749,10 @@ impl BatchDeletePolicy {
         self._as.generation = generation;
     }
 
+    /// If the transaction results in a record deletion, leave a tombstone for the record.
+    /// This prevents deleted records from reappearing after node failures.
+    /// Valid for Aerospike Server Enterprise Edition only.
+    /// Default: false (do not tombstone deleted records).
     #[getter]
     pub fn get_durable_delete(&self) -> bool {
         self._as.durable_delete
@@ -4608,6 +4763,9 @@ impl BatchDeletePolicy {
         self._as.durable_delete = durable_delete;
     }
 
+    /// Send user defined key in addition to hash digest.
+    /// If true, the key will be stored with the tombstone record on the server.
+    /// Default: false (do not send the user defined key)
     #[getter]
     pub fn get_send_key(&self) -> bool {
         self._as.send_key
@@ -4640,6 +4798,7 @@ impl Default for BatchDeletePolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchUDFPolicy attributes used in batch UDF execute commands.
 #[php_class(name = "Aerospike\\BatchUdfPolicy")]
 pub struct BatchUdfPolicy {
     _as: proto::BatchUdfPolicy,
@@ -4652,6 +4811,10 @@ impl BatchUdfPolicy {
         BatchUdfPolicy::default()
     }
 
+    /// Optional expression filter. If FilterExpression exists and evaluates to false, the specific batch key
+    /// request is not performed and BatchRecord.ResultCode is set to types.FILTERED_OUT.
+    ///
+    /// Default: nil
     #[getter]
     pub fn get_filter_expression(&self) -> Option<Expression> {
         self._as
@@ -4667,7 +4830,11 @@ impl BatchUdfPolicy {
             None => self._as.filter_expression = None,
         }
     }
-
+    /// Desired consistency guarantee when committing a transaction on the server. The default
+    /// (COMMIT_ALL) indicates that the server should wait for master and all replica commits to
+    /// be successful before returning success to the client.
+    ///
+    /// Default: CommitLevel.COMMIT_ALL
     #[getter]
     pub fn get_commit_level(&self) -> CommitLevel {
         CommitLevel {
@@ -4684,6 +4851,13 @@ impl BatchUdfPolicy {
         self._as.commit_level = commit_level._as.into();
     }
 
+    /// Expiration determines record expiration in seconds. Also known as TTL (Time-To-Live).
+    /// Seconds record will live before being removed by the server.
+    /// Expiration values:
+    /// TTLServerDefault (0): Default to namespace configuration variable "default-ttl" on the server.
+    /// TTLDontExpire (MaxUint32): Never expire for Aerospike 2 server versions >= 2.7.2 and Aerospike 3+ server
+    /// TTLDontUpdate (MaxUint32 - 1): Do not change ttl when record is written. Supported by Aerospike server versions >= 3.10.1
+    /// > 0: Actual expiration in seconds.
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
@@ -4699,6 +4873,9 @@ impl BatchUdfPolicy {
         self._as.expiration = (&expiration).into();
     }
 
+    /// DurableDelete leaves a tombstone for the record if the transaction results in a record deletion.
+    /// This prevents deleted records from reappearing after node failures.
+    /// Valid for Aerospike Server Enterprise Edition 3.10+ only.
     #[getter]
     pub fn get_durable_delete(&self) -> bool {
         self._as.durable_delete
@@ -4709,6 +4886,10 @@ impl BatchUdfPolicy {
         self._as.durable_delete = durable_delete;
     }
 
+    /// SendKey determines to whether send user defined key in addition to hash digest on both reads and writes.
+    /// If the key is sent on a write, the key will be stored with the record on
+    /// the server.
+    /// The default is to not send the user defined key.
     #[getter]
     pub fn get_send_key(&self) -> bool {
         self._as.send_key
@@ -4735,11 +4916,12 @@ impl Default for BatchUdfPolicy {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
-
+//
 //  Operation
-
+//
 //////////////////////////////////////////////////////////////////////////////////////////
 
+/// OperationType determines operation type
 #[php_class(name = "Aerospike\\Operation")]
 pub struct Operation {
     _as: proto::operation::Op,
@@ -4748,7 +4930,7 @@ pub struct Operation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Operation {
-    // read bin database operation.
+    /// read bin database operation.
     pub fn get(bin_name: Option<String>) -> Self {
         Operation {
             _as: proto::operation::Op::Std(proto::StdOperation {
@@ -4759,7 +4941,7 @@ impl Operation {
         }
     }
 
-    // read record header database operation.
+    /// read record header database operation.
     pub fn get_header() -> Self {
         Operation {
             _as: proto::operation::Op::Std(proto::StdOperation {
@@ -4769,7 +4951,7 @@ impl Operation {
         }
     }
 
-    // set database operation.
+    /// set database operation.
     pub fn put(bin: &Bin) -> Self {
         Operation {
             _as: proto::operation::Op::Std(proto::StdOperation {
@@ -4781,7 +4963,7 @@ impl Operation {
         }
     }
 
-    // string append database operation.
+    /// string append database operation.
     pub fn append(bin: &Bin) -> Self {
         Operation {
             _as: proto::operation::Op::Std(proto::StdOperation {
@@ -4793,7 +4975,7 @@ impl Operation {
         }
     }
 
-    // string prepend database operation.
+    /// string prepend database operation.
     pub fn prepend(bin: &Bin) -> Self {
         Operation {
             _as: proto::operation::Op::Std(proto::StdOperation {
@@ -4805,7 +4987,7 @@ impl Operation {
         }
     }
 
-    // integer add database operation.
+    /// integer add database operation.
     pub fn add(bin: &Bin) -> Self {
         Operation {
             _as: proto::operation::Op::Std(proto::StdOperation {
@@ -4817,7 +4999,7 @@ impl Operation {
         }
     }
 
-    // touch record database operation.
+    /// touch record database operation.
     pub fn touch() -> Self {
         Operation {
             _as: proto::operation::Op::Std(proto::StdOperation {
@@ -4827,7 +5009,7 @@ impl Operation {
         }
     }
 
-    // delete record database operation.
+    /// delete record database operation.
     pub fn delete() -> Self {
         Operation {
             _as: proto::operation::Op::Std(proto::StdOperation {
@@ -4839,11 +5021,12 @@ impl Operation {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  BatchRecord
-//
+///
+///  BatchRecord
+///
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchRecord encasulates the Batch key and record result.
 #[php_class(name = "Aerospike\\BatchRecord")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct BatchRecord {
@@ -4853,6 +5036,7 @@ pub struct BatchRecord {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl BatchRecord {
+    /// Key.
     #[getter]
     pub fn get_key(&self) -> Option<Key> {
         Some(Key {
@@ -4860,6 +5044,8 @@ impl BatchRecord {
         })
     }
 
+    /// Record result after batch command has completed.  Will be nil if record was not found
+    /// or an error occurred. See ResultCode.
     #[getter]
     pub fn get_record(&self) -> Option<Record> {
         let r: proto::Record = self._as.record.clone()?;
@@ -4873,6 +5059,8 @@ impl BatchRecord {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchRead specifies the Key and bin names used in batch read commands
+/// where variable bins are needed for each key.
 #[php_class(name = "Aerospike\\BatchRead")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct BatchRead {
@@ -4903,6 +5091,7 @@ impl BatchRead {
         }
     }
 
+    /// Optional read policy.
     pub fn ops(policy: &BatchReadPolicy, key: &Key, ops: Vec<&Operation>) -> Self {
         BatchRead {
             _as: proto::BatchRead {
@@ -4924,6 +5113,10 @@ impl BatchRead {
         }
     }
 
+    /// Ops specifies the operations to perform for every key.
+    /// Ops are mutually exclusive with BinNames.
+    /// A binName can be emulated with `GetOp(binName)`
+    /// Supported by server v5.6.0+.
     pub fn header(policy: &BatchReadPolicy, key: &Key) -> Self {
         BatchRead {
             _as: proto::BatchRead {
@@ -4947,6 +5140,7 @@ impl BatchRead {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchWrite encapsulates a batch key and read/write operations with write policy.
 #[php_class(name = "Aerospike\\BatchWrite")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct BatchWrite {
@@ -4982,6 +5176,7 @@ impl BatchWrite {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchDelete encapsulates a batch delete operation.
 #[php_class(name = "Aerospike\\BatchDelete")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct BatchDelete {
@@ -5011,6 +5206,7 @@ impl BatchDelete {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BatchUDF encapsulates a batch user defined function operation.
 #[php_class(name = "Aerospike\\BatchUdf")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct BatchUdf {
@@ -5105,6 +5301,7 @@ impl From<UdfLanguage> for i32 {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Represents UDF (User-Defined Function) metadata for Aerospike.
 #[php_class(name = "Aerospike\\UdfMeta")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct UdfMeta {
@@ -5114,16 +5311,19 @@ pub struct UdfMeta {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl UdfMeta {
+    /// Getter method to retrieve the package name of the UDF.
     #[getter]
     pub fn get_package_name(&self) -> String {
         self._as.package_name.clone()
     }
 
+    /// Getter method to retrieve the hash of the UDF.
     #[getter]
     pub fn get_hash(&self) -> String {
         self._as.hash.clone()
     }
-
+    
+    /// Getter method to retrieve the language of the UDF.
     #[getter]
     pub fn get_language(&self) -> UdfLanguage {
         self._as.language.into()
@@ -5142,6 +5342,7 @@ impl From<&proto::UserRole> for UserRole {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// UserRoles contains information about a user.
 #[php_class(name = "Aerospike\\UserRole")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct UserRole {
@@ -5151,26 +5352,47 @@ pub struct UserRole {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl UserRole {
+    /// User name.
     #[getter]
     pub fn get_user(&self) -> String {
         self._as.user.clone()
     }
 
+    /// Roles is a list of assigned roles.
     #[getter]
     pub fn get_roles(&self) -> Vec<String> {
         self._as.roles.clone()
     }
 
+    /// ReadInfo is the list of read statistics. List may be nil.
+    /// Current statistics by offset are:
+    ///
+    /// 0: read quota in records per second
+    /// 1: single record read transaction rate (TPS)
+    /// 2: read scan/query record per second rate (RPS)
+    /// 3: number of limitless read scans/queries
+    ///
+    /// Future server releases may add additional statistics.
     #[getter]
     pub fn get_read_info(&self) -> Vec<u64> {
         self._as.read_info.clone().into()
     }
 
+    /// WriteInfo is the list of write statistics. List may be nil.
+    /// Current statistics by offset are:
+    ///
+    /// 0: write quota in records per second
+    /// 1: single record write transaction rate (TPS)
+    /// 2: write scan/query record per second rate (RPS)
+    /// 3: number of limitless write scans/queries
+    ///
+    /// Future server releases may add additional statistics.
     #[getter]
     pub fn get_write_info(&self) -> Vec<u64> {
         self._as.write_info.clone().into()
     }
 
+    /// ConnsInUse is the number of currently open connections for the user
     #[getter]
     pub fn get_conns_in_use(&self) -> u64 {
         self._as.conns_in_use.into()
@@ -5183,6 +5405,7 @@ impl UserRole {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Role allows granular access to database entities for users.
 #[php_class(name = "Aerospike\\Role")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct Role {
@@ -5192,26 +5415,31 @@ pub struct Role {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Role {
+    /// Name is role name
     #[getter]
     pub fn get_name(&self) -> String {
         self._as.name.clone()
     }
 
+    /// Privilege is the list of assigned privileges
     #[getter]
     pub fn get_privileges(&self) -> Vec<Privilege> {
         self._as.privileges.iter().map(|v| v.into()).collect()
     }
 
+    /// While is the list of allowable IP addresses
     #[getter]
     pub fn get_allowlist(&self) -> Vec<String> {
         self._as.allowlist.clone().into()
     }
 
+    /// ReadQuota is the maximum reads per second limit for the role
     #[getter]
     pub fn get_read_quota(&self) -> u64 {
         self._as.read_quota.into()
     }
 
+    /// WriteQuota is the maximum writes per second limit for the role
     #[getter]
     pub fn write_quota(&self) -> u64 {
         self._as.write_quota.into()
@@ -5240,6 +5468,7 @@ impl FromZval<'_> for Role {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Privilege determines user access granularity.
 #[php_class(name = "Aerospike\\Privilege")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct Privilege {
@@ -5264,52 +5493,52 @@ impl Privilege {
         self._as.set_name.clone()
     }
 
-    // UserAdmin allows to manages users and their roles.
+    /// UserAdmin allows to manages users and their roles.
     pub fn user_admin() -> String {
         "user-admin".into()
     }
 
-    // SysAdmin allows to manage indexes, user defined functions and server configuration.
+    /// SysAdmin allows to manage indexes, user defined functions and server configuration.
     pub fn sys_admin() -> String {
         "sys-admin".into()
     }
 
-    // DataAdmin allows to manage indicies and user defined functions.
+    /// DataAdmin allows to manage indicies and user defined functions.
     pub fn data_admin() -> String {
         "data-admin".into()
     }
 
-    // UDFAdmin allows to manage user defined functions.
+    /// UDFAdmin allows to manage user defined functions.
     pub fn udf_admin() -> String {
         "udf-admin".into()
     }
 
-    // SIndexAdmin allows to manage indicies.
+    /// SIndexAdmin allows to manage indicies.
     pub fn sindex_admin() -> String {
         "sindex-admin".into()
     }
 
-    // ReadWriteUDF allows read, write and UDF transactions with the database.
+    /// ReadWriteUDF allows read, write and UDF transactions with the database.
     pub fn read_write_udf() -> String {
         "read-write-udf".into()
     }
 
-    // ReadWrite allows read and write transactions with the database.
+    /// ReadWrite allows read and write transactions with the database.
     pub fn read_write() -> String {
         "read-write".into()
     }
 
-    // Read allows read transactions with the database.
+    /// Read allows read transactions with the database.
     pub fn read() -> String {
         "read".into()
     }
 
-    // Write allows write transactions with the database.
+    /// Write allows write transactions with the database.
     pub fn write() -> String {
         "write".into()
     }
 
-    // Truncate allow issuing truncate commands.
+    /// Truncate allow issuing truncate commands.
     pub fn truncate() -> String {
         "truncate".into()
     }
@@ -5337,90 +5566,91 @@ impl FromZval<'_> for Privilege {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// ListReturnType determines the returned values in CDT List operations.
 #[php_class(name = "Aerospike\\ListReturnType")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtListReturnType {
-    // _as: proto::CdtListReturnType,
+    /// _as: proto::CdtListReturnType,
     _as: i32,
 }
 
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtListReturnType {
-    // ListReturnTypeNone will not return a result.
-    pub fn none() -> Self {
+    /// ListReturnTypeNone will not return a result.
+    pub fn None() -> Self {
         Self {
             _as: proto::CdtListReturnType::None.into(),
         }
     }
 
-    // ListReturnTypeIndex will return index offset order.
-    // 0 = first key
-    // N = Nth key
-    // -1 = last key
-    pub fn index() -> Self {
+    /// ListReturnTypeIndex will return index offset order.
+    /// 0 = first key
+    /// N = Nth key
+    /// -1 = last key
+    pub fn Index() -> Self {
         Self {
             _as: proto::CdtListReturnType::Index.into(),
         }
     }
 
-    // ListReturnTypeReverseIndex will return reverse index offset order.
-    // 0 = last key
-    // -1 = first key
-    pub fn reverse_index() -> Self {
+    /// ListReturnTypeReverseIndex will return reverse index offset order.
+    /// 0 = last key
+    /// -1 = first key
+    pub fn Reverse_index() -> Self {
         Self {
             _as: proto::CdtListReturnType::ReverseIndex.into(),
         }
     }
 
-    // ListReturnTypeRank will return value order.
-    // 0 = smallest value
-    // N = Nth smallest value
-    // -1 = largest value
-    pub fn rank() -> Self {
+    /// ListReturnTypeRank will return value order.
+    /// 0 = smallest value
+    /// N = Nth smallest value
+    /// -1 = largest value
+    pub fn Rank() -> Self {
         Self {
             _as: proto::CdtListReturnType::Rank.into(),
         }
     }
 
-    // ListReturnTypeReverseRank will return reverse value order.
-    // 0 = largest value
-    // N = Nth largest value
-    // -1 = smallest value
-    pub fn reverse_rank() -> Self {
+    /// ListReturnTypeReverseRank will return reverse value order.
+    /// 0 = largest value
+    /// N = Nth largest value
+    /// -1 = smallest value
+    pub fn Reverse_rank() -> Self {
         Self {
             _as: proto::CdtListReturnType::ReverseRank.into(),
         }
     }
 
-    // ListReturnTypeCount will return count of items selected.
-    pub fn count() -> Self {
+    /// ListReturnTypeCount will return count of items selected.
+    pub fn Count() -> Self {
         Self {
             _as: proto::CdtListReturnType::Count.into(),
         }
     }
 
-    // ListReturnTypeValue will return value for single key read and value list for range read.
-    pub fn value() -> Self {
+    /// ListReturnTypeValue will return value for single key read and value list for range read.
+    pub fn Value() -> Self {
         Self {
             _as: proto::CdtListReturnType::Value.into(),
         }
     }
 
-    // ListReturnTypeExists returns true if count > 0.
-    pub fn exists() -> Self {
+    /// ListReturnTypeExists returns true if count > 0.
+    pub fn Exists() -> Self {
         Self {
             _as: proto::CdtListReturnType::Exists.into(),
         }
     }
 
-    // ListReturnTypeInverted will invert meaning of list command and return values.  For example:
-    // ListOperation.getByIndexRange(binName, index, count, ListReturnType.INDEX | ListReturnType.INVERTED)
-    // With the INVERTED flag enabled, the items outside of the specified index range will be returned.
-    // The meaning of the list command can also be inverted.  For example:
-    // ListOperation.removeByIndexRange(binName, index, count, ListReturnType.INDEX | ListReturnType.INVERTED);
-    // With the INVERTED flag enabled, the items outside of the specified index range will be removed and returned.
-    pub fn inverted(&self) -> Self {
+    /// ListReturnTypeInverted will invert meaning of list command and return values.  For example:
+    /// ListOperation.getByIndexRange(binName, index, count, ListReturnType.INDEX | ListReturnType.INVERTED)
+    /// With the INVERTED flag enabled, the items outside of the specified index range will be returned.
+    /// The meaning of the list command can also be inverted.  For example:
+    /// ListOperation.removeByIndexRange(binName, index, count, ListReturnType.INDEX | ListReturnType.INVERTED);
+    /// With the INVERTED flag enabled, the items outside of the specified index range will be removed and returned.
+    pub fn Inverted(&self) -> Self {
         Self {
             _as: self._as | 0x10000,
         }
@@ -5451,6 +5681,8 @@ impl FromZval<'_> for CdtListReturnType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// ListWriteFlags detemines write flags for CDT lists
+/// type ListWriteFlags int
 #[php_class(name = "Aerospike\\ListWriteFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtListWriteFlags {
@@ -5460,38 +5692,38 @@ pub struct CdtListWriteFlags {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtListWriteFlags {
-    // ListWriteFlagsDefault is the default behavior. It means:  Allow duplicate values and insertions at any index.
-    pub fn default() -> Self {
+    /// ListWriteFlagsDefault is the default behavior. It means:  Allow duplicate values and insertions at any index.
+    pub fn Default() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::Default,
         }
     }
 
-    // ListWriteFlagsAddUnique means: Only add unique values.
-    pub fn add_unique() -> Self {
+    /// ListWriteFlagsAddUnique means: Only add unique values.
+    pub fn Add_Unique() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::AddUnique,
         }
     }
 
-    // ListWriteFlagsInsertBounded means: Enforce list boundaries when inserting.  Do not allow values to be inserted
-    // at index outside current list boundaries.
-    pub fn insert_bounded() -> Self {
+    /// ListWriteFlagsInsertBounded means: Enforce list boundaries when inserting.  Do not allow values to be inserted
+    /// at index outside current list boundaries.
+    pub fn Insert_Bounded() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::InsertBounded,
         }
     }
 
-    // ListWriteFlagsNoFail means: do not raise error if a list item fails due to write flag constraints.
-    pub fn no_fail() -> Self {
+    /// ListWriteFlagsNoFail means: do not raise error if a list item fails due to write flag constraints.
+    pub fn No_Fail() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::NoFail,
         }
     }
 
-    // ListWriteFlagsPartial means: allow other valid list items to be committed if a list item fails due to
-    // write flag constraints.
-    pub fn partial() -> Self {
+    /// ListWriteFlagsPartial means: allow other valid list items to be committed if a list item fails due to
+    /// write flag constraints.
+    pub fn Partial() -> Self {
         Self {
             _as: proto::CdtListWriteFlags::Partial,
         }
@@ -5524,6 +5756,7 @@ impl FromZval<'_> for CdtListWriteFlags {
 // TODO: Add the additional expressions (HLL, BIT, etc.)
 // TODO: Add method comments
 
+/// ListOrderType determines the order of returned values in CDT list operations.
 #[php_class(name = "Aerospike\\ListSortFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtListSortFlags {
@@ -5533,22 +5766,22 @@ pub struct CdtListSortFlags {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtListSortFlags {
-    // ListSortFlagsDefault is the default sort flag for CDT lists, and sort in Ascending order.
-    pub fn default() -> Self {
+    /// ListSortFlagsDefault is the default sort flag for CDT lists, and sort in Ascending order.
+    pub fn Default() -> Self {
         Self {
             _as: proto::CdtListSortFlags::Default,
         }
     }
 
-    // ListSortFlagsDescending will sort the contents of the list in descending order.
-    pub fn descending() -> Self {
+    /// ListSortFlagsDescending will sort the contents of the list in descending order.
+    pub fn Descending() -> Self {
         Self {
             _as: proto::CdtListSortFlags::Descending,
         }
     }
 
-    // ListSortFlagsDropDuplicates will drop duplicate values in the results of the CDT list operation.
-    pub fn drop_duplicates() -> Self {
+    /// ListSortFlagsDropDuplicates will drop duplicate values in the results of the CDT list operation.
+    pub fn Drop_Duplicates() -> Self {
         Self {
             _as: proto::CdtListSortFlags::DropDuplicates,
         }
@@ -5577,6 +5810,7 @@ impl FromZval<'_> for CdtListSortFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// ListPolicy directives when creating a list and writing list items.
 #[php_class(name = "Aerospike\\ListPolicy")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtListPolicy {
@@ -5586,6 +5820,8 @@ pub struct CdtListPolicy {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtListPolicy {
+    /// NewListPolicy creates a policy with directives when creating a list and writing list items.
+    /// Flags are ListWriteFlags. You can specify multiple by `or`ing them together.
     pub fn __construct(order: ListOrderType, flags: Option<Vec<CdtListWriteFlags>>) -> Self {
         let flags: i32 = flags
             .map(|flags| {
@@ -5627,21 +5863,21 @@ impl FromZval<'_> for CdtListPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// List operations support negative indexing.  If the index is negative, the
-// resolved index starts backwards from end of list. If an index is out of bounds,
-// a parameter error will be returned. If a range is partially out of bounds, the
-// valid part of the range will be returned. Index/Range examples:
-//
-// Index/Range examples:
-//
-//    Index 0: First item in list.
-//    Index 4: Fifth item in list.
-//    Index -1: Last item in list.
-//    Index -3: Third to last item in list.
-//    Index 1 Count 2: Second and third items in list.
-//    Index -3 Count 3: Last three items in list.
-//    Index -5 Count 4: Range between fifth to last item to second to last item inclusive.
-//
+/// List operations support negative indexing.  If the index is negative, the
+/// resolved index starts backwards from end of list. If an index is out of bounds,
+/// a parameter error will be returned. If a range is partially out of bounds, the
+/// valid part of the range will be returned. Index/Range examples:
+///
+/// Index/Range examples:
+///
+///    Index 0: First item in list.
+///    Index 4: Fifth item in list.
+///    Index -1: Last item in list.
+///    Index -3: Third to last item in list.
+///    Index 1 Count 2: Second and third items in list.
+///    Index -3 Count 3: Last three items in list.
+///    Index -5 Count 4: Range between fifth to last item to second to last item inclusive.
+///
 #[php_class(name = "Aerospike\\ListOp")]
 pub struct CdtListOperation {
     _as: proto::CdtListOperation,
@@ -5660,10 +5896,10 @@ impl FromZval<'_> for CdtListOperation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtListOperation {
-    // ListCreateOp creates list create operation.
-    // Server creates list at given context level. The context is allowed to be beyond list
-    // boundaries only if pad is set to true.  In that case, nil list entries will be inserted to
-    // satisfy the context position.
+    /// ListCreateOp creates list create operation.
+    /// Server creates list at given context level. The context is allowed to be beyond list
+    /// boundaries only if pad is set to true.  In that case, nil list entries will be inserted to
+    /// satisfy the context position.
     pub fn create(
         bin_name: String,
         order: ListOrderType,
@@ -5688,8 +5924,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListSetOrderOp creates a set list order operation.
-    // Server sets list order.  Server returns nil.
+    /// ListSetOrderOp creates a set list order operation.
+    /// Server sets list order.  Server returns nil.
     pub fn set_order(
         bin_name: String,
         order: ListOrderType,
@@ -5710,10 +5946,10 @@ impl CdtListOperation {
         }
     }
 
-    // ListAppendOp creates a list append operation.
-    // Server appends values to end of list bin.
-    // Server returns list size on bin name.
-    // It will panic is no values have been passed.
+    /// ListAppendOp creates a list append operation.
+    /// Server appends values to end of list bin.
+    /// Server returns list size on bin name.
+    /// It will panic is no values have been passed.
     pub fn append(
         policy: &CdtListPolicy,
         bin_name: String,
@@ -5736,10 +5972,10 @@ impl CdtListOperation {
         }
     }
 
-    // ListInsertOp creates a list insert operation.
-    // Server inserts value to specified index of list bin.
-    // Server returns list size on bin name.
-    // It will panic is no values have been passed.
+    /// ListInsertOp creates a list insert operation.
+    /// Server inserts value to specified index of list bin.
+    /// Server returns list size on bin name.
+    /// It will panic is no values have been passed.
     pub fn insert(
         policy: &CdtListPolicy,
         bin_name: String,
@@ -5764,8 +6000,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListPopOp creates list pop operation.
-    // Server returns item at specified index and removes item from list bin.
+    /// ListPopOp creates list pop operation.
+    /// Server returns item at specified index and removes item from list bin.
     pub fn pop(bin_name: String, index: i64, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::List(proto::CdtListOperation {
@@ -5781,8 +6017,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListPopRangeOp creates a list pop range operation.
-    // Server returns items starting at specified index and removes items from list bin.
+    /// ListPopRangeOp creates a list pop range operation.
+    /// Server returns items starting at specified index and removes items from list bin.
     pub fn pop_range(
         bin_name: String,
         index: i64,
@@ -5803,8 +6039,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListPopRangeFromOp creates a list pop range operation.
-    // Server returns items starting at specified index to the end of list and removes items from list bin.
+    /// ListPopRangeFromOp creates a list pop range operation.
+    /// Server returns items starting at specified index to the end of list and removes items from list bin.
     pub fn pop_range_from(
         bin_name: String,
         index: i64,
@@ -5824,8 +6060,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByValueOp creates list remove by value operation.
-    // Server removes the item identified by value and returns removed data specified by returnType.
+    /// ListRemoveByValueOp creates list remove by value operation.
+    /// Server removes the item identified by value and returns removed data specified by returnType.
     pub fn remove_values(
         bin_name: String,
         values: Vec<PHPValue>,
@@ -5850,11 +6086,11 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByValueRangeOp creates a list remove operation.
-    // Server removes list items identified by value range (valueBegin inclusive, valueEnd exclusive).
-    // If valueBegin is nil, the range is less than valueEnd.
-    // If valueEnd is nil, the range is greater than equal to valueBegin.
-    // Server returns removed data specified by returnType
+    /// ListRemoveByValueRangeOp creates a list remove operation.
+    /// Server removes list items identified by value range (valueBegin inclusive, valueEnd exclusive).
+    /// If valueBegin is nil, the range is less than valueEnd.
+    /// If valueEnd is nil, the range is greater than equal to valueBegin.
+    /// Server returns removed data specified by returnType
     pub fn remove_by_value_range(
         bin_name: String,
         begin: PHPValue,
@@ -5884,19 +6120,19 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByValueRelativeRankRangeOp creates a list remove by value relative to rank range operation.
-    // Server removes list items nearest to value and greater by relative rank.
-    // Server returns removed data specified by returnType.
-    //
-    // Examples for ordered list [0,4,5,9,11,15]:
-    //
-    //	(value,rank) = [removed items]
-    //	(5,0) = [5,9,11,15]
-    //	(5,1) = [9,11,15]
-    //	(5,-1) = [4,5,9,11,15]
-    //	(3,0) = [4,5,9,11,15]
-    //	(3,3) = [11,15]
-    //	(3,-3) = [0,4,5,9,11,15]
+    /// ListRemoveByValueRelativeRankRangeOp creates a list remove by value relative to rank range operation.
+    /// Server removes list items nearest to value and greater by relative rank.
+    /// Server returns removed data specified by returnType.
+    ///
+    /// Examples for ordered list [0,4,5,9,11,15]:
+    ///
+    ///	(value,rank) = [removed items]
+    ///	(5,0) = [5,9,11,15]
+    ///	(5,1) = [9,11,15]
+    ///	(5,-1) = [4,5,9,11,15]
+    ///	(3,0) = [4,5,9,11,15]
+    ///	(3,3) = [11,15]
+    ///	(3,-3) = [0,4,5,9,11,15]
     pub fn remove_by_value_relative_rank_range(
         bin_name: String,
         value: PHPValue,
@@ -5920,18 +6156,18 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByValueRelativeRankRangeCountOp creates a list remove by value relative to rank range operation.
-    // Server removes list items nearest to value and greater by relative rank with a count limit.
-    // Server returns removed data specified by returnType.
-    // Examples for ordered list [0,4,5,9,11,15]:
-    //
-    //	(value,rank,count) = [removed items]
-    //	(5,0,2) = [5,9]
-    //	(5,1,1) = [9]
-    //	(5,-1,2) = [4,5]
-    //	(3,0,1) = [4]
-    //	(3,3,7) = [11,15]
-    //	(3,-3,2) = []
+    /// ListRemoveByValueRelativeRankRangeCountOp creates a list remove by value relative to rank range operation.
+    /// Server removes list items nearest to value and greater by relative rank with a count limit.
+    /// Server returns removed data specified by returnType.
+    /// Examples for ordered list [0,4,5,9,11,15]:
+    ///
+    ///	(value,rank,count) = [removed items]
+    ///	(5,0,2) = [5,9]
+    ///	(5,1,1) = [9]
+    ///	(5,-1,2) = [4,5]
+    ///	(3,0,1) = [4]
+    ///	(3,3,7) = [11,15]
+    ///	(3,-3,2) = []
     pub fn remove_by_value_relative_rank_range_count(
         bin_name: String,
         value: PHPValue,
@@ -5960,9 +6196,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveRangeOp creates a list remove range operation.
-    // Server removes "count" items starting at specified index from list bin.
-    // Server returns number of items removed.
+    /// ListRemoveRangeOp creates a list remove range operation.
+    /// Server removes "count" items starting at specified index from list bin.
+    /// Server returns number of items removed.
     pub fn remove_range(
         bin_name: String,
         index: i64,
@@ -5983,9 +6219,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveRangeFromOp creates a list remove range operation.
-    // Server removes all items starting at specified index to the end of list.
-    // Server returns number of items removed.
+    /// ListRemoveRangeFromOp creates a list remove range operation.
+    /// Server removes all items starting at specified index to the end of list.
+    /// Server returns number of items removed.
     pub fn remove_range_from(
         bin_name: String,
         index: i64,
@@ -6006,9 +6242,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListSetOp creates a list set operation.
-    // Server sets item value at specified index in list bin.
-    // Server does not return a result by default.
+    /// ListSetOp creates a list set operation.
+    /// Server sets item value at specified index in list bin.
+    /// Server does not return a result by default.
     pub fn set(
         bin_name: String,
         index: i64,
@@ -6029,10 +6265,10 @@ impl CdtListOperation {
         }
     }
 
-    // ListTrimOp creates a list trim operation.
-    // Server removes items in list bin that do not fall into range specified by index
-    // and count range. If the range is out of bounds, then all items will be removed.
-    // Server returns number of elements that were removed.
+    /// ListTrimOp creates a list trim operation.
+    /// Server removes items in list bin that do not fall into range specified by index
+    /// and count range. If the range is out of bounds, then all items will be removed.
+    /// Server returns number of elements that were removed.
     pub fn trim(
         bin_name: String,
         index: i64,
@@ -6053,9 +6289,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListClearOp creates a list clear operation.
-    // Server removes all items in list bin.
-    // Server does not return a result by default.
+    /// ListClearOp creates a list clear operation.
+    /// Server removes all items in list bin.
+    /// Server does not return a result by default.
     pub fn clear(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::List(proto::CdtListOperation {
@@ -6071,10 +6307,10 @@ impl CdtListOperation {
         }
     }
 
-    // ListIncrementOp creates a list increment operation.
-    // Server increments list[index] by value.
-    // Value should be integer(IntegerValue, LongValue) or float(FloatValue).
-    // Server returns list[index] after incrementing.
+    /// ListIncrementOp creates a list increment operation.
+    /// Server increments list[index] by value.
+    /// Value should be integer(IntegerValue, LongValue) or float(FloatValue).
+    /// Server returns list[index] after incrementing.
     pub fn increment(
         bin_name: String,
         index: i64,
@@ -6095,8 +6331,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListSizeOp creates a list size operation.
-    // Server returns size of list on bin name.
+    /// ListSizeOp creates a list size operation.
+    /// Server returns size of list on bin name.
     pub fn size(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::List(proto::CdtListOperation {
@@ -6112,9 +6348,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListSortOp creates list sort operation.
-    // Server sorts list according to sortFlags.
-    // Server does not return a result by default.
+    /// ListSortOp creates list sort operation.
+    /// Server sorts list according to sortFlags.
+    /// Server does not return a result by default.
     pub fn sort(
         bin_name: String,
         sort_flags: &CdtListSortFlags,
@@ -6135,8 +6371,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByIndexOp creates a list remove operation.
-    // Server removes list item identified by index and returns removed data specified by returnType.
+    /// ListRemoveByIndexOp creates a list remove operation.
+    /// Server removes list item identified by index and returns removed data specified by returnType.
     pub fn remove_by_index(
         bin_name: String,
         index: i64,
@@ -6159,9 +6395,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByIndexRangeOp creates a list remove operation.
-    // Server removes list items starting at specified index to the end of list and returns removed
-    // data specified by returnType.
+    /// ListRemoveByIndexRangeOp creates a list remove operation.
+    /// Server removes list items starting at specified index to the end of list and returns removed
+    /// data specified by returnType.
     pub fn remove_by_index_range(
         bin_name: String,
         index: i64,
@@ -6184,8 +6420,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByIndexRangeCountOp creates a list remove operation.
-    // Server removes "count" list items starting at specified index and returns removed data specified by returnType.
+    /// ListRemoveByIndexRangeCountOp creates a list remove operation.
+    /// Server removes "count" list items starting at specified index and returns removed data specified by returnType.
     pub fn remove_by_index_range_count(
         bin_name: String,
         index: i64,
@@ -6209,8 +6445,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByRankOp creates a list remove operation.
-    // Server removes list item identified by rank and returns removed data specified by returnType.
+    /// ListRemoveByRankOp creates a list remove operation.
+    /// Server removes list item identified by rank and returns removed data specified by returnType.
     pub fn remove_by_rank(
         bin_name: String,
         rank: i64,
@@ -6233,9 +6469,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByRankRangeOp creates a list remove operation.
-    // Server removes list items starting at specified rank to the last ranked item and returns removed
-    // data specified by returnType.
+    /// ListRemoveByRankRangeOp creates a list remove operation.
+    /// Server removes list items starting at specified rank to the last ranked item and returns removed
+    /// data specified by returnType.
     pub fn remove_by_rank_range(
         bin_name: String,
         rank: i64,
@@ -6258,8 +6494,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListRemoveByRankRangeCountOp creates a list remove operation.
-    // Server removes "count" list items starting at specified rank and returns removed data specified by returnType.
+    /// ListRemoveByRankRangeCountOp creates a list remove operation.
+    /// Server removes "count" list items starting at specified rank and returns removed data specified by returnType.
     pub fn remove_by_rank_range_count(
         bin_name: String,
         rank: i64,
@@ -6283,8 +6519,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByValueOp creates a list get by value operation.
-    // Server selects list items identified by value and returns selected data specified by returnType.
+    /// ListGetByValueOp creates a list get by value operation.
+    /// Server selects list items identified by value and returns selected data specified by returnType.
     pub fn get_by_values(
         bin_name: String,
         values: Vec<PHPValue>,
@@ -6309,11 +6545,11 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByValueRangeOp creates a list get by value range operation.
-    // Server selects list items identified by value range (valueBegin inclusive, valueEnd exclusive)
-    // If valueBegin is nil, the range is less than valueEnd.
-    // If valueEnd is nil, the range is greater than equal to valueBegin.
-    // Server returns selected data specified by returnType.
+    /// ListGetByValueRangeOp creates a list get by value range operation.
+    /// Server selects list items identified by value range (valueBegin inclusive, valueEnd exclusive)
+    /// If valueBegin is nil, the range is less than valueEnd.
+    /// If valueEnd is nil, the range is greater than equal to valueBegin.
+    /// Server returns selected data specified by returnType.
     pub fn get_by_value_range(
         bin_name: String,
         begin: PHPValue,
@@ -6343,8 +6579,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByIndexOp creates list get by index operation.
-    // Server selects list item identified by index and returns selected data specified by returnType
+    /// ListGetByIndexOp creates list get by index operation.
+    /// Server selects list item identified by index and returns selected data specified by returnType
     pub fn get_by_index(
         bin_name: String,
         index: i64,
@@ -6367,9 +6603,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByIndexRangeOp creates list get by index range operation.
-    // Server selects list items starting at specified index to the end of list and returns selected
-    // data specified by returnType.
+    /// ListGetByIndexRangeOp creates list get by index range operation.
+    /// Server selects list items starting at specified index to the end of list and returns selected
+    /// data specified by returnType.
     pub fn get_by_index_range(
         bin_name: String,
         index: i64,
@@ -6392,9 +6628,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByIndexRangeCountOp creates list get by index range operation.
-    // Server selects "count" list items starting at specified index and returns selected data specified
-    // by returnType.
+    /// ListGetByIndexRangeCountOp creates list get by index range operation.
+    /// Server selects "count" list items starting at specified index and returns selected data specified
+    /// by returnType.
     pub fn get_by_index_range_count(
         bin_name: String,
         index: i64,
@@ -6418,8 +6654,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByRankOp creates a list get by rank operation.
-    // Server selects list item identified by rank and returns selected data specified by returnType.
+    /// ListGetByRankOp creates a list get by rank operation.
+    /// Server selects list item identified by rank and returns selected data specified by returnType.
     pub fn get_by_rank(
         bin_name: String,
         rank: i64,
@@ -6442,9 +6678,9 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByRankRangeOp creates a list get by rank range operation.
-    // Server selects list items starting at specified rank to the last ranked item and returns selected
-    // data specified by returnType
+    /// ListGetByRankRangeOp creates a list get by rank range operation.
+    /// Server selects list items starting at specified rank to the last ranked item and returns selected
+    /// data specified by returnType
     pub fn get_by_rank_range(
         bin_name: String,
         rank: i64,
@@ -6467,8 +6703,8 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByRankRangeCountOp creates a list get by rank range operation.
-    // Server selects "count" list items starting at specified rank and returns selected data specified by returnType.
+    /// ListGetByRankRangeCountOp creates a list get by rank range operation.
+    /// Server selects "count" list items starting at specified rank and returns selected data specified by returnType.
     pub fn get_by_rank_range_count(
         bin_name: String,
         rank: i64,
@@ -6492,19 +6728,19 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByValueRelativeRankRangeOp creates a list get by value relative to rank range operation.
-    // Server selects list items nearest to value and greater by relative rank.
-    // Server returns selected data specified by returnType.
-    //
-    // Examples for ordered list [0,4,5,9,11,15]:
-    //
-    //	(value,rank) = [selected items]
-    //	(5,0) = [5,9,11,15]
-    //	(5,1) = [9,11,15]
-    //	(5,-1) = [4,5,9,11,15]
-    //	(3,0) = [4,5,9,11,15]
-    //	(3,3) = [11,15]
-    //	(3,-3) = [0,4,5,9,11,15]
+    /// ListGetByValueRelativeRankRangeOp creates a list get by value relative to rank range operation.
+    /// Server selects list items nearest to value and greater by relative rank.
+    /// Server returns selected data specified by returnType.
+    ///
+    /// Examples for ordered list [0,4,5,9,11,15]:
+    ///
+    ///	(value,rank) = [selected items]
+    ///	(5,0) = [5,9,11,15]
+    ///	(5,1) = [9,11,15]
+    ///	(5,-1) = [4,5,9,11,15]
+    ///	(3,0) = [4,5,9,11,15]
+    ///	(3,3) = [11,15]
+    ///	(3,-3) = [0,4,5,9,11,15]
     pub fn get_by_value_relative_rank_range(
         bin_name: String,
         value: PHPValue,
@@ -6528,19 +6764,19 @@ impl CdtListOperation {
         }
     }
 
-    // ListGetByValueRelativeRankRangeCountOp creates a list get by value relative to rank range operation.
-    // Server selects list items nearest to value and greater by relative rank with a count limit.
-    // Server returns selected data specified by returnType.
-    //
-    // Examples for ordered list [0,4,5,9,11,15]:
-    //
-    //	(value,rank,count) = [selected items]
-    //	(5,0,2) = [5,9]
-    //	(5,1,1) = [9]
-    //	(5,-1,2) = [4,5]
-    //	(3,0,1) = [4]
-    //	(3,3,7) = [11,15]
-    //	(3,-3,2) = []
+    /// ListGetByValueRelativeRankRangeCountOp creates a list get by value relative to rank range operation.
+    /// Server selects list items nearest to value and greater by relative rank with a count limit.
+    /// Server returns selected data specified by returnType.
+    ///
+    /// Examples for ordered list [0,4,5,9,11,15]:
+    ///
+    ///	(value,rank,count) = [selected items]
+    ///	(5,0,2) = [5,9]
+    ///	(5,1,1) = [9]
+    ///	(5,-1,2) = [4,5]
+    ///	(3,0,1) = [4]
+    ///	(3,3,7) = [11,15]
+    ///	(3,-3,2) = []
     pub fn get_by_value_relative_rank_range_count(
         bin_name: String,
         value: PHPValue,
@@ -6576,122 +6812,124 @@ impl CdtListOperation {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// MapReturnType defines the map return type.
+/// Type of data to return when selecting or removing items from the map.
 #[php_class(name = "Aerospike\\MapReturnType")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtMapReturnType {
-    // _as: proto::CdtMapReturnType,
+    /// _as: proto::CdtMapReturnType,
     _as: i32,
 }
 
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapReturnType {
-    // NONE will will not return a result.
-    pub fn none() -> Self {
+    /// NONE will will not return a result.
+    pub fn None() -> Self {
         Self {
             _as: proto::CdtMapReturnType::None.into(),
         }
     }
 
-    // INDEX will return key index order.
-    //
-    // 0 = first key
-    // N = Nth key
-    // -1 = last key
-    pub fn index() -> Self {
+    /// INDEX will return key index order.
+    ///
+    /// 0 = first key
+    /// N = Nth key
+    /// -1 = last key
+    pub fn Index() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Index.into(),
         }
     }
 
-    // REVERSE_INDEX will return reverse key order.
-    //
-    // 0 = last key
-    // -1 = first key
-    pub fn reverse_index() -> Self {
+    /// REVERSE_INDEX will return reverse key order.
+    ///
+    /// 0 = last key
+    /// -1 = first key
+    pub fn Reverse_Index() -> Self {
         Self {
             _as: proto::CdtMapReturnType::ReverseIndex.into(),
         }
     }
 
-    // RANK will return value order.
-    //
-    // 0 = smallest value
-    // N = Nth smallest value
-    // -1 = largest value
-    pub fn rank() -> Self {
+    /// RANK will return value order.
+    ///
+    /// 0 = smallest value
+    /// N = Nth smallest value
+    /// -1 = largest value
+    pub fn Rank() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Rank.into(),
         }
     }
 
-    // REVERSE_RANK will return reverse value order.
-    //
-    // 0 = largest value
-    // N = Nth largest value
-    // -1 = smallest value
-    pub fn reverse_rank() -> Self {
+    /// REVERSE_RANK will return reverse value order.
+    ///
+    /// 0 = largest value
+    /// N = Nth largest value
+    /// -1 = smallest value
+    pub fn Reverse_Rank() -> Self {
         Self {
             _as: proto::CdtMapReturnType::ReverseRank.into(),
         }
     }
 
-    // COUNT will return count of items selected.
-    pub fn count() -> Self {
+    /// COUNT will return count of items selected.
+    pub fn Count() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Count.into(),
         }
     }
 
-    // KEY will return key for single key read and key list for range read.
-    pub fn key() -> Self {
+    /// KEY will return key for single key read and key list for range read.
+    pub fn Key() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Key.into(),
         }
     }
 
-    // VALUE will return value for single key read and value list for range read.
-    pub fn value() -> Self {
+    /// VALUE will return value for single key read and value list for range read.
+    pub fn Value() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Value.into(),
         }
     }
 
-    // KEY_VALUE will return key/value items. The possible return types are:
-    //
-    // map[interface{}]interface{} : Returned for unordered maps
-    // []MapPair : Returned for range results where range order needs to be preserved.
-    pub fn key_value() -> Self {
+    /// KEY_VALUE will return key/value items. The possible return types are:
+    ///
+    /// map[interface{}]interface{} : Returned for unordered maps
+    /// []MapPair : Returned for range results where range order needs to be preserved.
+    pub fn Key_Value() -> Self {
         Self {
             _as: proto::CdtMapReturnType::KeyValue.into(),
         }
     }
 
-    // EXISTS returns true if count > 0.
-    pub fn exists() -> Self {
+    /// EXISTS returns true if count > 0.
+    pub fn Exists() -> Self {
         Self {
             _as: proto::CdtMapReturnType::Exists.into(),
         }
     }
 
-    // UNORDERED_MAP returns an unordered map.
-    pub fn unordered_map() -> Self {
+    /// UNORDERED_MAP returns an unordered map.
+    pub fn Unordered_Map() -> Self {
         Self {
             _as: proto::CdtMapReturnType::UnorderedMap.into(),
         }
     }
 
-    // ORDERED_MAP returns an ordered map.
-    pub fn ordered_map() -> Self {
+    /// ORDERED_MAP returns an ordered map.
+    pub fn Ordered_Map() -> Self {
         Self {
             _as: proto::CdtMapReturnType::OrderedMap.into(),
         }
     }
 
-    // INVERTED will invert meaning of map command and return values.  For example:
-    // MapRemoveByKeyRange(binName, keyBegin, keyEnd, MapReturnType.KEY | MapReturnType.INVERTED)
-    // With the INVERTED flag enabled, the keys outside of the specified key range will be removed and returned.
-    pub fn inverted(&self) -> Self {
+    /// INVERTED will invert meaning of map command and return values.  For example:
+    /// MapRemoveByKeyRange(binName, keyBegin, keyEnd, MapReturnType.KEY | MapReturnType.INVERTED)
+    /// With the INVERTED flag enabled, the keys outside of the specified key range will be removed and returned.
+    pub fn Inverted(&self) -> Self {
         Self {
             _as: self._as | 0x10000,
         }
@@ -6722,6 +6960,9 @@ impl FromZval<'_> for CdtMapReturnType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+
+/// MapWriteMode should only be used for server versions < 4.3.
+/// MapWriteFlags are recommended for server versions >= 4.3.
 #[php_class(name = "Aerospike\\MapWriteMode")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtMapWriteMode {
@@ -6731,25 +6972,25 @@ pub struct CdtMapWriteMode {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapWriteMode {
-    // If the key already exists, the item will be overwritten.
-    // If the key does not exist, a new item will be created.
-    pub fn update() -> Self {
+    /// If the key already exists, the item will be overwritten.
+    /// If the key does not exist, a new item will be created.
+    pub fn Update() -> Self {
         Self {
             _as: proto::CdtMapWriteMode::Update,
         }
     }
 
-    // If the key already exists, the item will be overwritten.
-    // If the key does not exist, the write will fail.
-    pub fn update_only() -> Self {
+    /// If the key already exists, the item will be overwritten.
+    /// If the key does not exist, the write will fail.
+    pub fn Update_Only() -> Self {
         Self {
             _as: proto::CdtMapWriteMode::UpdateOnly,
         }
     }
 
-    // If the key already exists, the write will fail.
-    // If the key does not exist, a new item will be created.
-    pub fn create_only() -> Self {
+    /// If the key already exists, the write will fail.
+    /// If the key does not exist, a new item will be created.
+    pub fn Create_Only() -> Self {
         Self {
             _as: proto::CdtMapWriteMode::CreateOnly,
         }
@@ -6778,6 +7019,8 @@ impl FromZval<'_> for CdtMapWriteMode {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Map write bit flags.
+/// Requires server versions >= 4.3.
 #[php_class(name = "Aerospike\\MapWriteFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtMapWriteFlags {
@@ -6787,39 +7030,39 @@ pub struct CdtMapWriteFlags {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapWriteFlags {
-    // MapWriteFlagsDefault is the Default. Allow create or update.
-    pub fn default() -> Self {
+    /// MapWriteFlagsDefault is the Default. Allow create or update.
+    pub fn Default() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::Default,
         }
     }
 
-    // MapWriteFlagsCreateOnly means: If the key already exists, the item will be denied.
-    // If the key does not exist, a new item will be created.
-    pub fn create_only() -> Self {
+    /// MapWriteFlagsCreateOnly means: If the key already exists, the item will be denied.
+    /// If the key does not exist, a new item will be created.
+    pub fn Create_Only() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::CreateOnly,
         }
     }
 
-    // MapWriteFlagsUpdateOnly means: If the key already exists, the item will be overwritten.
-    // If the key does not exist, the item will be denied.
-    pub fn update_only() -> Self {
+    /// MapWriteFlagsUpdateOnly means: If the key already exists, the item will be overwritten.
+    /// If the key does not exist, the item will be denied.
+    pub fn Update_Only() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::UpdateOnly,
         }
     }
 
-    // MapWriteFlagsNoFail means: Do not raise error if a map item is denied due to write flag constraints.
-    pub fn no_fail() -> Self {
+    /// MapWriteFlagsNoFail means: Do not raise error if a map item is denied due to write flag constraints.
+    pub fn No_Fail() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::NoFail,
         }
     }
 
-    // MapWriteFlagsNoFail means: Allow other valid map items to be committed if a map item is denied due to
-    // write flag constraints.
-    pub fn partial() -> Self {
+    /// MapWriteFlagsNoFail means: Allow other valid map items to be committed if a map item is denied due to
+    /// write flag constraints.
+    pub fn Partial() -> Self {
         Self {
             _as: proto::CdtMapWriteFlags::Partial,
         }
@@ -6848,6 +7091,7 @@ impl FromZval<'_> for CdtMapWriteFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// MapPolicy directives when creating a map and writing map items.
 #[php_class(name = "Aerospike\\MapPolicy")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtMapPolicy {
@@ -6857,7 +7101,7 @@ pub struct CdtMapPolicy {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapPolicy {
-    // NewMapPolicy creates a MapPolicy with WriteMode. Use with servers before v4.3.
+    /// NewMapPolicy creates a MapPolicy with WriteMode. Use with servers before v4.3.
     pub fn __construct(
         order: &MapOrderType,
         flags: Option<Vec<&CdtMapWriteFlags>>,
@@ -6915,45 +7159,45 @@ impl Default for CdtMapPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// Unique key map bin operations. Create map operations used by the client operate command.
-// The default unique key map is unordered.
-//
-// All maps maintain an index and a rank.  The index is the item offset from the start of the map,
-// for both unordered and ordered maps.  The rank is the sorted index of the value component.
-// Map supports negative indexing for index and rank.
-//
-// Index examples:
-//
-//  Index 0: First item in map.
-//  Index 4: Fifth item in map.
-//  Index -1: Last item in map.
-//  Index -3: Third to last item in map.
-//  Index 1 Count 2: Second and third items in map.
-//  Index -3 Count 3: Last three items in map.
-//  Index -5 Count 4: Range between fifth to last item to second to last item inclusive.
-//
-//
-// Rank examples:
-//
-//  Rank 0: Item with lowest value rank in map.
-//  Rank 4: Fifth lowest ranked item in map.
-//  Rank -1: Item with highest ranked value in map.
-//  Rank -3: Item with third highest ranked value in map.
-//  Rank 1 Count 2: Second and third lowest ranked items in map.
-//  Rank -3 Count 3: Top three ranked items in map.
-//
-//
-// Nested CDT operations are supported by optional CTX context arguments.  Examples:
-//
-//  bin = {key1:{key11:9,key12:4}, key2:{key21:3,key22:5}}
-//  Set map value to 11 for map key "key21" inside of map key "key2".
-//  MapOperation.put(MapPolicy.Default, "bin", StringValue("key21"), IntegerValue(11), CtxMapKey(StringValue("key2")))
-//  bin result = {key1:{key11:9,key12:4},key2:{key21:11,key22:5}}
-//
-//  bin : {key1:{key11:{key111:1},key12:{key121:5}}, key2:{key21:{"key211":7}}}
-//  Set map value to 11 in map key "key121" for highest ranked map ("key12") inside of map key "key1".
-//  MapPutOp(DefaultMapPolicy(), "bin", StringValue("key121"), IntegerValue(11), CtxMapKey(StringValue("key1")), CtxMapRank(-1))
-//  bin result = {key1:{key11:{key111:1},key12:{key121:11}}, key2:{key21:{"key211":7}}}
+/// Unique key map bin operations. Create map operations used by the client operate command.
+/// The default unique key map is unordered.
+///
+/// All maps maintain an index and a rank.  The index is the item offset from the start of the map,
+/// for both unordered and ordered maps.  The rank is the sorted index of the value component.
+/// Map supports negative indexing for index and rank.
+///
+/// Index examples:
+///
+///  Index 0: First item in map.
+///  Index 4: Fifth item in map.
+///  Index -1: Last item in map.
+///  Index -3: Third to last item in map.
+///  Index 1 Count 2: Second and third items in map.
+///  Index -3 Count 3: Last three items in map.
+///  Index -5 Count 4: Range between fifth to last item to second to last item inclusive.
+///
+///
+/// Rank examples:
+///
+///  Rank 0: Item with lowest value rank in map.
+///  Rank 4: Fifth lowest ranked item in map.
+///  Rank -1: Item with highest ranked value in map.
+///  Rank -3: Item with third highest ranked value in map.
+///  Rank 1 Count 2: Second and third lowest ranked items in map.
+///  Rank -3 Count 3: Top three ranked items in map.
+///
+///
+/// Nested CDT operations are supported by optional CTX context arguments.  Examples:
+///
+///  bin = {key1:{key11:9,key12:4}, key2:{key21:3,key22:5}}
+///  Set map value to 11 for map key "key21" inside of map key "key2".
+///  MapOperation.put(MapPolicy.Default, "bin", StringValue("key21"), IntegerValue(11), CtxMapKey(StringValue("key2")))
+///  bin result = {key1:{key11:9,key12:4},key2:{key21:11,key22:5}}
+///
+///  bin : {key1:{key11:{key111:1},key12:{key121:5}}, key2:{key21:{"key211":7}}}
+///  Set map value to 11 in map key "key121" for highest ranked map ("key12") inside of map key "key1".
+///  MapPutOp(DefaultMapPolicy(), "bin", StringValue("key121"), IntegerValue(11), CtxMapKey(StringValue("key1")), CtxMapRank(-1))
+///  bin result = {key1:{key11:{key111:1},key12:{key121:11}}, key2:{key21:{"key211":7}}}
 
 #[php_class(name = "Aerospike\\MapOp")]
 pub struct CdtMapOperation {
@@ -6973,8 +7217,8 @@ impl FromZval<'_> for CdtMapOperation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtMapOperation {
-    // MapCreateOp creates a map create operation.
-    // Server creates map at given context level.
+    /// MapCreateOp creates a map create operation.
+    /// Server creates map at given context level.
     pub fn create(
         bin_name: String,
         order: &MapOrderType,
@@ -6995,10 +7239,10 @@ impl CdtMapOperation {
         }
     }
 
-    // MapSetPolicyOp creates set map policy operation.
-    // Server sets map policy attributes.  Server returns nil.
-    //
-    // The required map policy attributes can be changed after the map is created.
+    /// MapSetPolicyOp creates set map policy operation.
+    /// Server sets map policy attributes.  Server returns nil.
+    ///
+    /// The required map policy attributes can be changed after the map is created.
     pub fn set_policy(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7018,8 +7262,8 @@ impl CdtMapOperation {
         }
     }
 
-    // MapSizeOp creates map size operation.
-    // Server returns size of map.
+    /// MapSizeOp creates map size operation.
+    /// Server returns size of map.
     pub fn size(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::Map(proto::CdtMapOperation {
@@ -7035,11 +7279,11 @@ impl CdtMapOperation {
         }
     }
 
-    // MapPutOp creates map put operation.
-    // Server writes key/value item to map bin and returns map size.
-    //
-    // The required map policy dictates the type of map to create when it does not exist.
-    // The map policy also specifies the mode used when writing items to the map.
+    /// MapPutOp creates map put operation.
+    /// Server writes key/value item to map bin and returns map size.
+    ///
+    /// The required map policy dictates the type of map to create when it does not exist.
+    /// The map policy also specifies the mode used when writing items to the map.
     pub fn put(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7064,12 +7308,12 @@ impl CdtMapOperation {
         })
     }
 
-    // MapIncrementOp creates map increment operation.
-    // Server increments values by incr for all items identified by key and returns final result.
-    // Valid only for numbers.
-    //
-    // The required map policy dictates the type of map to create when it does not exist.
-    // The map policy also specifies the mode used when writing items to the map.
+    /// MapIncrementOp creates map increment operation.
+    /// Server increments values by incr for all items identified by key and returns final result.
+    /// Valid only for numbers.
+    ///
+    /// The required map policy dictates the type of map to create when it does not exist.
+    /// The map policy also specifies the mode used when writing items to the map.
     pub fn increment(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7091,12 +7335,12 @@ impl CdtMapOperation {
         }
     }
 
-    // MapDecrementOp creates map decrement operation.
-    // Server decrements values by decr for all items identified by key and returns final result.
-    // Valid only for numbers.
-    //
-    // The required map policy dictates the type of map to create when it does not exist.
-    // The map policy also specifies the mode used when writing items to the map.
+    /// MapDecrementOp creates map decrement operation.
+    /// Server decrements values by decr for all items identified by key and returns final result.
+    /// Valid only for numbers.
+    ///
+    /// The required map policy dictates the type of map to create when it does not exist.
+    /// The map policy also specifies the mode used when writing items to the map.
     pub fn decrement(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7118,8 +7362,8 @@ impl CdtMapOperation {
         }
     }
 
-    // MapClearOp creates map clear operation.
-    // Server removes all items in map.  Server returns nil.
+    /// MapClearOp creates map clear operation.
+    /// Server removes all items in map.  Server returns nil.
     pub fn clear(bin_name: String, ctx: Option<Vec<&CDTContext>>) -> Operation {
         Operation {
             _as: proto::operation::Op::Map(proto::CdtMapOperation {
@@ -7135,8 +7379,8 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByKeyOp creates map remove operation.
-    // Server removes map item identified by key and returns removed data specified by returnType.
+    /// MapRemoveByKeyOp creates map remove operation.
+    /// Server removes map item identified by key and returns removed data specified by returnType.
     pub fn remove_by_keys(
         bin_name: String,
         keys: Vec<PHPValue>,
@@ -7151,7 +7395,7 @@ impl CdtMapOperation {
                 args: vec![PHPValue::List(keys.iter().map(|k| k.clone().into()).collect()).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7159,12 +7403,12 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByKeyRangeOp creates map remove operation.
-    // Server removes map items identified by key range (keyBegin inclusive, keyEnd exclusive).
-    // If keyBegin is nil, the range is less than keyEnd.
-    // If keyEnd is nil, the range is greater than equal to keyBegin.
-    //
-    // Server returns removed data specified by returnType.
+    /// MapRemoveByKeyRangeOp creates map remove operation.
+    /// Server removes map items identified by key range (keyBegin inclusive, keyEnd exclusive).
+    /// If keyBegin is nil, the range is less than keyEnd.
+    /// If keyEnd is nil, the range is greater than equal to keyBegin.
+    ///
+    /// Server returns removed data specified by returnType.
     pub fn remove_by_key_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7181,7 +7425,7 @@ impl CdtMapOperation {
                 args: vec![begin.into(), end.into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7189,8 +7433,8 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByValueOp creates map remove operation.
-    // Server removes map items identified by value and returns removed data specified by returnType.
+    /// MapRemoveByValueOp creates map remove operation.
+    /// Server removes map items identified by value and returns removed data specified by returnType.
     pub fn remove_by_values(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7208,7 +7452,7 @@ impl CdtMapOperation {
                 ],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7216,8 +7460,8 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByValueListOp creates map remove operation.
-    // Server removes map items identified by values and returns removed data specified by returnType.
+    /// MapRemoveByValueListOp creates map remove operation.
+    /// Server removes map items identified by values and returns removed data specified by returnType.
     pub fn remove_by_value_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7234,7 +7478,7 @@ impl CdtMapOperation {
                 args: vec![begin.into(), end.into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7242,15 +7486,15 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByValueRelativeRankRangeOp creates a map remove by value relative to rank range operation.
-    // Server removes map items nearest to value and greater by relative rank.
-    // Server returns removed data specified by returnType.
-    //
-    // Examples for map [{4=2},{9=10},{5=15},{0=17}]:
-    //
-    //	(value,rank) = [removed items]
-    //	(11,1) = [{0=17}]
-    //	(11,-1) = [{9=10},{5=15},{0=17}]
+    /// MapRemoveByValueRelativeRankRangeOp creates a map remove by value relative to rank range operation.
+    /// Server removes map items nearest to value and greater by relative rank.
+    /// Server returns removed data specified by returnType.
+    ///
+    /// Examples for map [{4=2},{9=10},{5=15},{0=17}]:
+    ///
+    ///	(value,rank) = [removed items]
+    ///	(11,1) = [{0=17}]
+    ///	(11,-1) = [{9=10},{5=15},{0=17}]
     pub fn remove_by_value_relative_rank_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7267,7 +7511,7 @@ impl CdtMapOperation {
                 args: vec![value.into(), PHPValue::Int(rank).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7275,15 +7519,15 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByValueRelativeRankRangeCountOp creates a map remove by value relative to rank range operation.
-    // Server removes map items nearest to value and greater by relative rank with a count limit.
-    // Server returns removed data specified by returnType (See MapReturnType).
-    //
-    // Examples for map [{4=2},{9=10},{5=15},{0=17}]:
-    //
-    //	(value,rank,count) = [removed items]
-    //	(11,1,1) = [{0=17}]
-    //	(11,-1,1) = [{9=10}]
+    /// MapRemoveByValueRelativeRankRangeCountOp creates a map remove by value relative to rank range operation.
+    /// Server removes map items nearest to value and greater by relative rank with a count limit.
+    /// Server returns removed data specified by returnType (See MapReturnType).
+    ///
+    /// Examples for map [{4=2},{9=10},{5=15},{0=17}]:
+    ///
+    ///	(value,rank,count) = [removed items]
+    ///	(11,1,1) = [{0=17}]
+    ///	(11,-1,1) = [{9=10}]
     pub fn remove_by_value_relative_rank_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7305,7 +7549,7 @@ impl CdtMapOperation {
                 ],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7313,8 +7557,8 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByIndexOp creates map remove operation.
-    // Server removes map item identified by index and returns removed data specified by returnType.
+    /// MapRemoveByIndexOp creates map remove operation.
+    /// Server removes map item identified by index and returns removed data specified by returnType.
     pub fn remove_by_index(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7330,7 +7574,7 @@ impl CdtMapOperation {
                 args: vec![PHPValue::Int(index).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7338,9 +7582,9 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByIndexRangeOp creates map remove operation.
-    // Server removes map items starting at specified index to the end of map and returns removed
-    // data specified by returnTyp
+    /// MapRemoveByIndexRangeOp creates map remove operation.
+    /// Server removes map items starting at specified index to the end of map and returns removed
+    /// data specified by returnTyp
     pub fn remove_by_index_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7356,7 +7600,7 @@ impl CdtMapOperation {
                 args: vec![PHPValue::Int(index).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7364,8 +7608,8 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByIndexRangeCountOp creates map remove operation.
-    // Server removes "count" map items starting at specified index and returns removed data specified by returnType.
+    /// MapRemoveByIndexRangeCountOp creates map remove operation.
+    /// Server removes "count" map items starting at specified index and returns removed data specified by returnType.
     pub fn remove_by_index_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7382,7 +7626,7 @@ impl CdtMapOperation {
                 args: vec![PHPValue::Int(index).into(), PHPValue::Int(count).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7390,8 +7634,8 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByRankOp creates map remove operation.
-    // Server removes map item identified by rank and returns removed data specified by returnType.
+    /// MapRemoveByRankOp creates map remove operation.
+    /// Server removes map item identified by rank and returns removed data specified by returnType.
     pub fn remove_by_rank(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7407,7 +7651,7 @@ impl CdtMapOperation {
                 args: vec![PHPValue::Int(rank).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7415,9 +7659,9 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByRankRangeOp creates map remove operation.
-    // Server removes map items starting at specified rank to the last ranked item and returns removed
-    // data specified by returnType.
+    /// MapRemoveByRankRangeOp creates map remove operation.
+    /// Server removes map items starting at specified rank to the last ranked item and returns removed
+    /// data specified by returnType.
     pub fn remove_by_rank_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7433,7 +7677,7 @@ impl CdtMapOperation {
                 args: vec![PHPValue::Int(rank).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7441,8 +7685,8 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByRankRangeCountOp creates map remove operation.
-    // Server removes "count" map items starting at specified rank and returns removed data specified by returnType.
+    /// MapRemoveByRankRangeCountOp creates map remove operation.
+    /// Server removes "count" map items starting at specified rank and returns removed data specified by returnType.
     pub fn remove_by_rank_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7459,7 +7703,7 @@ impl CdtMapOperation {
                 args: vec![PHPValue::Int(rank).into(), PHPValue::Int(count).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7467,18 +7711,18 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByKeyRelativeIndexRangeOp creates a map remove by key relative to index range operation.
-    // Server removes map items nearest to key and greater by index.
-    // Server returns removed data specified by returnType.
-    //
-    // Examples for map [{0=17},{4=2},{5=15},{9=10}]:
-    //
-    //	(value,index) = [removed items]
-    //	(5,0) = [{5=15},{9=10}]
-    //	(5,1) = [{9=10}]
-    //	(5,-1) = [{4=2},{5=15},{9=10}]
-    //	(3,2) = [{9=10}]
-    //	(3,-2) = [{0=17},{4=2},{5=15},{9=10}]
+    /// MapRemoveByKeyRelativeIndexRangeOp creates a map remove by key relative to index range operation.
+    /// Server removes map items nearest to key and greater by index.
+    /// Server returns removed data specified by returnType.
+    ///
+    /// Examples for map [{0=17},{4=2},{5=15},{9=10}]:
+    ///
+    ///	(value,index) = [removed items]
+    ///	(5,0) = [{5=15},{9=10}]
+    ///	(5,1) = [{9=10}]
+    ///	(5,-1) = [{4=2},{5=15},{9=10}]
+    ///	(3,2) = [{9=10}]
+    ///	(3,-2) = [{0=17},{4=2},{5=15},{9=10}]
     pub fn remove_by_key_relative_index_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7495,7 +7739,7 @@ impl CdtMapOperation {
                 args: vec![key.into(), PHPValue::Int(index).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7503,18 +7747,18 @@ impl CdtMapOperation {
         }
     }
 
-    // MapRemoveByKeyRelativeIndexRangeCountOp creates map remove by key relative to index range operation.
-    // Server removes map items nearest to key and greater by index with a count limit.
-    // Server returns removed data specified by returnType.
-    //
-    // Examples for map [{0=17},{4=2},{5=15},{9=10}]:
-    //
-    //	(value,index,count) = [removed items]
-    //	(5,0,1) = [{5=15}]
-    //	(5,1,2) = [{9=10}]
-    //	(5,-1,1) = [{4=2}]
-    //	(3,2,1) = [{9=10}]
-    //	(3,-2,2) = [{0=17}]
+    /// MapRemoveByKeyRelativeIndexRangeCountOp creates map remove by key relative to index range operation.
+    /// Server removes map items nearest to key and greater by index with a count limit.
+    /// Server returns removed data specified by returnType.
+    ///
+    /// Examples for map [{0=17},{4=2},{5=15},{9=10}]:
+    ///
+    ///	(value,index,count) = [removed items]
+    ///	(5,0,1) = [{5=15}]
+    ///	(5,1,2) = [{9=10}]
+    ///	(5,-1,1) = [{4=2}]
+    ///	(3,2,1) = [{9=10}]
+    ///	(3,-2,2) = [{0=17}]
     pub fn remove_by_key_relative_index_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7536,7 +7780,7 @@ impl CdtMapOperation {
                 ],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7544,8 +7788,9 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByKeyOp creates map get by key operation.
-    // Server selects map item identified by key and returns selected data specified by returnType.
+    /// MapGetByKeyOp creates map get by key operation.
+    /// Server selects map item identified by key and returns selected data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_keys(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7563,7 +7808,7 @@ impl CdtMapOperation {
                 ],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7571,12 +7816,13 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByKeyRangeOp creates map get by key range operation.
-    // Server selects map items identified by key range (keyBegin inclusive, keyEnd exclusive).
-    // If keyBegin is nil, the range is less than keyEnd.
-    // If keyEnd is nil, the range is greater than equal to keyBegin.
-    //
-    // Server returns selected data specified by returnType.
+    /// MapGetByKeyRangeOp creates map get by key range operation.
+    /// Server selects map items identified by key range (keyBegin inclusive, keyEnd exclusive).
+    /// If keyBegin is nil, the range is less than keyEnd.
+    /// If keyEnd is nil, the range is greater than equal to keyBegin.
+    ///
+    /// Server returns selected data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_key_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7593,7 +7839,7 @@ impl CdtMapOperation {
                 args: vec![begin.into(), end.into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7601,18 +7847,19 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByKeyRelativeIndexRangeOp creates a map get by key relative to index range operation.
-    // Server selects map items nearest to key and greater by index.
-    // Server returns selected data specified by returnType.
-    //
-    // Examples for ordered map [{0=17},{4=2},{5=15},{9=10}]:
-    //
-    //	(value,index) = [selected items]
-    //	(5,0) = [{5=15},{9=10}]
-    //	(5,1) = [{9=10}]
-    //	(5,-1) = [{4=2},{5=15},{9=10}]
-    //	(3,2) = [{9=10}]
-    //	(3,-2) = [{0=17},{4=2},{5=15},{9=10}]
+    /// MapGetByKeyRelativeIndexRangeOp creates a map get by key relative to index range operation.
+    /// Server selects map items nearest to key and greater by index.
+    /// Server returns selected data specified by returnType.
+    ///
+    /// Examples for ordered map [{0=17},{4=2},{5=15},{9=10}]:
+    ///
+    ///	(value,index) = [selected items]
+    ///	(5,0) = [{5=15},{9=10}]
+    ///	(5,1) = [{9=10}]
+    ///	(5,-1) = [{4=2},{5=15},{9=10}]
+    ///	(3,2) = [{9=10}]
+    ///	(3,-2) = [{0=17},{4=2},{5=15},{9=10}]
+    /// Should be used with BatchRead.
     pub fn get_by_key_relative_index_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7629,7 +7876,7 @@ impl CdtMapOperation {
                 args: vec![key.into(), PHPValue::Int(index).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7637,18 +7884,19 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByKeyRelativeIndexRangeCountOp creates a map get by key relative to index range operation.
-    // Server selects map items nearest to key and greater by index with a count limit.
-    // Server returns selected data specified by returnType (See MapReturnType).
-    //
-    // Examples for ordered map [{0=17},{4=2},{5=15},{9=10}]:
-    //
-    //	(value,index,count) = [selected items]
-    //	(5,0,1) = [{5=15}]
-    //	(5,1,2) = [{9=10}]
-    //	(5,-1,1) = [{4=2}]
-    //	(3,2,1) = [{9=10}]
-    //	(3,-2,2) = [{0=17}]
+    /// MapGetByKeyRelativeIndexRangeCountOp creates a map get by key relative to index range operation.
+    /// Server selects map items nearest to key and greater by index with a count limit.
+    /// Server returns selected data specified by returnType (See MapReturnType).
+    ///
+    /// Examples for ordered map [{0=17},{4=2},{5=15},{9=10}]:
+    ///
+    ///	(value,index,count) = [selected items]
+    ///	(5,0,1) = [{5=15}]
+    ///	(5,1,2) = [{9=10}]
+    ///	(5,-1,1) = [{4=2}]
+    ///	(3,2,1) = [{9=10}]
+    ///	(3,-2,2) = [{0=17}]
+    /// Should be used with BatchRead.
     pub fn get_by_key_relative_index_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7670,7 +7918,7 @@ impl CdtMapOperation {
                 ],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7678,8 +7926,9 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByKeyListOp creates a map get by key list operation.
-    // Server selects map items identified by keys and returns selected data specified by returnType.
+    /// MapGetByKeyListOp creates a map get by key list operation.
+    /// Server selects map items identified by keys and returns selected data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_values(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7697,7 +7946,7 @@ impl CdtMapOperation {
                 ],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7705,12 +7954,13 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByValueRangeOp creates map get by value range operation.
-    // Server selects map items identified by value range (valueBegin inclusive, valueEnd exclusive)
-    // If valueBegin is nil, the range is less than valueEnd.
-    // If valueEnd is nil, the range is greater than equal to valueBegin.
-    //
-    // Server returns selected data specified by returnType.
+    /// MapGetByValueRangeOp creates map get by value range operation.
+    /// Server selects map items identified by value range (valueBegin inclusive, valueEnd exclusive)
+    /// If valueBegin is nil, the range is less than valueEnd.
+    /// If valueEnd is nil, the range is greater than equal to valueBegin.
+    ///
+    /// Server returns selected data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_value_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7727,7 +7977,7 @@ impl CdtMapOperation {
                 args: vec![begin.into(), end.into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7735,15 +7985,16 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByValueRelativeRankRangeOp creates a map get by value relative to rank range operation.
-    // Server selects map items nearest to value and greater by relative rank.
-    // Server returns selected data specified by returnType.
-    //
-    // Examples for map [{4=2},{9=10},{5=15},{0=17}]:
-    //
-    //	(value,rank) = [selected items]
-    //	(11,1) = [{0=17}]
-    //	(11,-1) = [{9=10},{5=15},{0=17}]
+    /// MapGetByValueRelativeRankRangeOp creates a map get by value relative to rank range operation.
+    /// Server selects map items nearest to value and greater by relative rank.
+    /// Server returns selected data specified by returnType.
+    ///
+    /// Examples for map [{4=2},{9=10},{5=15},{0=17}]:
+    ///
+    ///	(value,rank) = [selected items]
+    ///	(11,1) = [{0=17}]
+    ///	(11,-1) = [{9=10},{5=15},{0=17}]
+    /// Should be used with BatchRead.
     pub fn get_by_value_relative_rank_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7760,7 +8011,7 @@ impl CdtMapOperation {
                 args: vec![value.into(), PHPValue::Int(rank).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7768,15 +8019,16 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByValueRelativeRankRangeCountOp creates a map get by value relative to rank range operation.
-    // Server selects map items nearest to value and greater by relative rank with a count limit.
-    // Server returns selected data specified by returnType.
-    //
-    // Examples for map [{4=2},{9=10},{5=15},{0=17}]:
-    //
-    //	(value,rank,count) = [selected items]
-    //	(11,1,1) = [{0=17}]
-    //	(11,-1,1) = [{9=10}]
+    /// MapGetByValueRelativeRankRangeCountOp creates a map get by value relative to rank range operation.
+    /// Server selects map items nearest to value and greater by relative rank with a count limit.
+    /// Server returns selected data specified by returnType.
+    ///
+    /// Examples for map [{4=2},{9=10},{5=15},{0=17}]:
+    ///
+    ///	(value,rank,count) = [selected items]
+    ///	(11,1,1) = [{0=17}]
+    ///	(11,-1,1) = [{9=10}]
+    /// Should be used with BatchRead.
     pub fn get_by_value_relative_rank_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7798,7 +8050,7 @@ impl CdtMapOperation {
                 ],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7806,8 +8058,9 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByIndexOp creates map get by index operation.
-    // Server selects map item identified by index and returns selected data specified by returnType.
+    /// MapGetByIndexOp creates map get by index operation.
+    /// Server selects map item identified by index and returns selected data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_index(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7823,7 +8076,7 @@ impl CdtMapOperation {
                 args: vec![PHPValue::Int(index).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7831,9 +8084,10 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByIndexRangeOp creates map get by index range operation.
-    // Server selects map items starting at specified index to the end of map and returns selected
-    // data specified by returnType.
+    /// MapGetByIndexRangeOp creates map get by index range operation.
+    /// Server selects map items starting at specified index to the end of map and returns selected
+    /// data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_index_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7850,7 +8104,7 @@ impl CdtMapOperation {
                 args: vec![begin.into(), end.into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7858,8 +8112,9 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByIndexRangeCountOp creates map get by index range operation.
-    // Server selects "count" map items starting at specified index and returns selected data specified by returnType.
+    /// MapGetByIndexRangeCountOp creates map get by index range operation.
+    /// Server selects "count" map items starting at specified index and returns selected data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_index_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7881,7 +8136,7 @@ impl CdtMapOperation {
                 ],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7889,8 +8144,9 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByRankOp creates map get by rank operation.
-    // Server selects map item identified by rank and returns selected data specified by returnType.
+    /// MapGetByRankOp creates map get by rank operation.
+    /// Server selects map item identified by rank and returns selected data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_rank(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7906,7 +8162,7 @@ impl CdtMapOperation {
                 args: vec![PHPValue::Int(rank).into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7914,9 +8170,10 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByRankRangeOp creates map get by rank range operation.
-    // Server selects map items starting at specified rank to the last ranked item and returns selected
-    // data specified by returnType.
+    /// MapGetByRankRangeOp creates map get by rank range operation.
+    /// Server selects map items starting at specified rank to the last ranked item and returns selected
+    /// data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_rank_range(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7933,7 +8190,7 @@ impl CdtMapOperation {
                 args: vec![begin.into(), end.into()],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7941,8 +8198,9 @@ impl CdtMapOperation {
         }
     }
 
-    // MapGetByRankRangeCountOp creates map get by rank range operation.
-    // Server selects "count" map items starting at specified rank and returns selected data specified by returnType.
+    /// MapGetByRankRangeCountOp creates map get by rank range operation.
+    /// Server selects "count" map items starting at specified rank and returns selected data specified by returnType.
+    /// Should be used with BatchRead.
     pub fn get_by_rank_range_count(
         policy: &CdtMapPolicy,
         bin_name: String,
@@ -7964,7 +8222,7 @@ impl CdtMapOperation {
                 ],
                 return_type: return_type
                     .map(|v| v._as)
-                    .or(Some(CdtMapReturnType::key_value()._as)),
+                    .or(Some(CdtMapReturnType::Key_Value()._as)),
                 ctx: ctx
                     .map(|ctx| ctx.iter().map(|ctx| ctx._as.clone()).collect())
                     .unwrap_or(vec![]),
@@ -7979,6 +8237,7 @@ impl CdtMapOperation {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// HLLWriteFlags specifies the HLL write operation flags.
 #[php_class(name = "Aerospike\\HllWriteFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtHllWriteFlags {
@@ -7988,31 +8247,42 @@ pub struct CdtHllWriteFlags {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtHllWriteFlags {
-    pub fn default() -> Self {
+    /// HLLWriteFlagsDefault is Default. Allow create or update.
+    pub fn Default() -> Self {
         Self {
             _as: proto::CdtHllWriteFlags::Default,
         }
     }
 
-    pub fn create_only() -> Self {
+    /// HLLWriteFlagsCreateOnly behaves like the following:
+    /// If the bin already exists, the operation will be denied.
+    /// If the bin does not exist, a new bin will be created.
+    pub fn Create_Only() -> Self {
         Self {
             _as: proto::CdtHllWriteFlags::CreateOnly,
         }
     }
 
-    pub fn update_only() -> Self {
+    /// HLLWriteFlagsUpdateOnly behaves like the following:
+    /// If the bin already exists, the bin will be overwritten.
+    /// If the bin does not exist, the operation will be denied.
+    pub fn Update_Only() -> Self {
         Self {
             _as: proto::CdtHllWriteFlags::UpdateOnly,
         }
     }
 
-    pub fn no_fail() -> Self {
+    /// HLLWriteFlagsNoFail does not raise error if operation is denied.
+    pub fn No_Fail() -> Self {
         Self {
             _as: proto::CdtHllWriteFlags::NoFail,
         }
     }
 
-    pub fn allow_fold() -> Self {
+    /// HLLWriteFlagsAllowFold allows the resulting set to be the minimum of provided index bits.
+    /// Also, allow the usage of less precise HLL algorithms when minHash bits
+    /// of all participating sets do not match.
+    pub fn Allow_Fold() -> Self {
         Self {
             _as: proto::CdtHllWriteFlags::AllowFold,
         }
@@ -8041,6 +8311,7 @@ impl FromZval<'_> for CdtHllWriteFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// HLLPolicy determines the HyperLogLog operation policy.
 #[php_class(name = "Aerospike\\HllPolicy")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtHllPolicy {
@@ -8050,9 +8321,11 @@ pub struct CdtHllPolicy {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtHllPolicy {
+    /// new HLLPolicy uses specified optional HLLWriteFlags when performing HLL operations.
     pub fn __construct(flags: Option<CdtListWriteFlags>) -> Self {
         let flags: i32 = flags.map(|f| f._as.into()).unwrap_or(0);
 
+        // DefaultHLLPolicy uses the default policy when performing HLL operations.
         CdtHllPolicy {
             _as: proto::CdtHllPolicy { flags: flags },
         }
@@ -8081,11 +8354,11 @@ impl FromZval<'_> for CdtHllPolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// HyperLogLog (HLL) operations.
-// Requires server versions >= 4.9.
-//
-// HyperLogLog operations on HLL items nested in lists/maps are not currently
-// supported by the server.
+/// HyperLogLog (HLL) operations.
+/// Requires server versions >= 4.9.
+///
+/// HyperLogLog operations on HLL items nested in lists/maps are not currently
+/// supported by the server.
 #[php_class(name = "Aerospike\\HllOp")]
 pub struct CdtHllOperation {
     _as: proto::CdtHllOperation,
@@ -8104,15 +8377,15 @@ impl FromZval<'_> for CdtHllOperation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtHllOperation {
-    // HLLInitOp creates HLL init operation with minhash bits.
-    // Server creates a new HLL or resets an existing HLL.
-    // Server does not return a value.
-    //
-    // policy			write policy, use DefaultHLLPolicy for default
-    // binName			name of bin
-    // indexBitCount	number of index bits. Must be between 4 and 16 inclusive. Pass -1 for default.
-    // minHashBitCount  number of min hash bits. Must be between 4 and 58 inclusive. Pass -1 for default.
-    // indexBitCount + minHashBitCount must be <= 64.
+    /// HLLInitOp creates HLL init operation with minhash bits.
+    /// Server creates a new HLL or resets an existing HLL.
+    /// Server does not return a value.
+    ///
+    /// policy			write policy, use DefaultHLLPolicy for default
+    /// binName			name of bin
+    /// indexBitCount	number of index bits. Must be between 4 and 16 inclusive. Pass -1 for default.
+    /// minHashBitCount  number of min hash bits. Must be between 4 and 58 inclusive. Pass -1 for default.
+    /// indexBitCount + minHashBitCount must be <= 64.
     pub fn init(
         policy: &CdtHllPolicy,
         bin_name: String,
@@ -8132,16 +8405,16 @@ impl CdtHllOperation {
         }
     }
 
-    // HLLAddOp creates HLL add operation with minhash bits.
-    // Server adds values to HLL set. If HLL bin does not exist, use indexBitCount and minHashBitCount
-    // to create HLL bin. Server returns number of entries that caused HLL to update a register.
-    //
-    // policy			write policy, use DefaultHLLPolicy for default
-    // binName			name of bin
-    // list				list of values to be added
-    // indexBitCount	number of index bits. Must be between 4 and 16 inclusive. Pass -1 for default.
-    // minHashBitCount  number of min hash bits. Must be between 4 and 58 inclusive. Pass -1 for default.
-    // indexBitCount + minHashBitCount must be <= 64.
+    /// HLLAddOp creates HLL add operation with minhash bits.
+    /// Server adds values to HLL set. If HLL bin does not exist, use indexBitCount and minHashBitCount
+    /// to create HLL bin. Server returns number of entries that caused HLL to update a register.
+    ///
+    /// policy			write policy, use DefaultHLLPolicy for default
+    /// binName			name of bin
+    /// list				list of values to be added
+    /// indexBitCount	number of index bits. Must be between 4 and 16 inclusive. Pass -1 for default.
+    /// minHashBitCount  number of min hash bits. Must be between 4 and 58 inclusive. Pass -1 for default.
+    /// indexBitCount + minHashBitCount must be <= 64.
     pub fn add(
         policy: &CdtHllPolicy,
         bin_name: String,
@@ -8163,13 +8436,13 @@ impl CdtHllOperation {
         }
     }
 
-    // HLLSetUnionOp creates HLL set union operation.
-    // Server sets union of specified HLL objects with HLL bin.
-    // Server does not return a value.
-    //
-    // policy			write policy, use DefaultHLLPolicy for default
-    // binName			name of bin
-    // list				list of HLL objects
+    /// HLLSetUnionOp creates HLL set union operation.
+    /// Server sets union of specified HLL objects with HLL bin.
+    /// Server does not return a value.
+    ///
+    /// policy			write policy, use DefaultHLLPolicy for default
+    /// binName			name of bin
+    /// list				list of HLL objects
     pub fn set_union(
         policy: &CdtHllPolicy,
         bin_name: String,
@@ -8189,10 +8462,10 @@ impl CdtHllOperation {
         })
     }
 
-    // HLLRefreshCountOp creates HLL refresh operation.
-    // Server updates the cached count (if stale) and returns the count.
-    //
-    // binName			name of bin
+    /// HLLRefreshCountOp creates HLL refresh operation.
+    /// Server updates the cached count (if stale) and returns the count.
+    ///
+    /// binName			name of bin
     pub fn refresh_count(bin_name: String) -> Option<Operation> {
         Some(Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -8204,13 +8477,13 @@ impl CdtHllOperation {
         })
     }
 
-    // HLLFoldOp creates HLL fold operation.
-    // Servers folds indexBitCount to the specified value.
-    // This can only be applied when minHashBitCount on the HLL bin is 0.
-    // Server does not return a value.
-    //
-    // binName			name of bin
-    // indexBitCount		number of index bits. Must be between 4 and 16 inclusive.
+    /// HLLFoldOp creates HLL fold operation.
+    /// Servers folds indexBitCount to the specified value.
+    /// This can only be applied when minHashBitCount on the HLL bin is 0.
+    /// Server does not return a value.
+    ///
+    /// binName			name of bin
+    /// indexBitCount		number of index bits. Must be between 4 and 16 inclusive.
     pub fn fold(bin_name: String, index_bit_count: i64) -> Option<Operation> {
         Some(Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -8222,10 +8495,10 @@ impl CdtHllOperation {
         })
     }
 
-    // HLLGetCountOp creates HLL getCount operation.
-    // Server returns estimated number of elements in the HLL bin.
-    //
-    // binName			name of bin
+    /// HLLGetCountOp creates HLL getCount operation.
+    /// Server returns estimated number of elements in the HLL bin.
+    ///
+    /// binName			name of bin
     pub fn get_count(bin_name: String) -> Option<Operation> {
         Some(Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -8237,12 +8510,12 @@ impl CdtHllOperation {
         })
     }
 
-    // HLLGetUnionOp creates HLL getUnion operation.
-    // Server returns an HLL object that is the union of all specified HLL objects in the list
-    // with the HLL bin.
-    //
-    // binName			name of bin
-    // list				list of HLL objects
+    /// HLLGetUnionOp creates HLL getUnion operation.
+    /// Server returns an HLL object that is the union of all specified HLL objects in the list
+    /// with the HLL bin.
+    ///
+    /// binName			name of bin
+    /// list				list of HLL objects
     pub fn get_union(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -8258,12 +8531,12 @@ impl CdtHllOperation {
         })
     }
 
-    // HLLGetUnionCountOp creates HLL getUnionCount operation.
-    // Server returns estimated number of elements that would be contained by the union of these
-    // HLL objects.
-    //
-    // binName			name of bin
-    // list				list of HLL objects
+    /// HLLGetUnionCountOp creates HLL getUnionCount operation.
+    /// Server returns estimated number of elements that would be contained by the union of these
+    /// HLL objects.
+    ///
+    /// binName			name of bin
+    /// list				list of HLL objects
     pub fn get_union_count(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -8279,12 +8552,12 @@ impl CdtHllOperation {
         })
     }
 
-    // HLLGetIntersectCountOp creates HLL getIntersectCount operation.
-    // Server returns estimated number of elements that would be contained by the intersection of
-    // these HLL objects.
-    //
-    // binName			name of bin
-    // list				list of HLL objects
+    /// HLLGetIntersectCountOp creates HLL getIntersectCount operation.
+    /// Server returns estimated number of elements that would be contained by the intersection of
+    /// these HLL objects.
+    ///
+    /// binName			name of bin
+    /// list				list of HLL objects
     pub fn get_intersect_count(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -8300,11 +8573,11 @@ impl CdtHllOperation {
         })
     }
 
-    // HLLGetSimilarityOp creates HLL getSimilarity operation.
-    // Server returns estimated similarity of these HLL objects. Return type is a double.
-    //
-    // binName			name of bin
-    // list				list of HLL objects
+    /// HLLGetSimilarityOp creates HLL getSimilarity operation.
+    /// Server returns estimated similarity of these HLL objects. Return type is a double.
+    ///
+    /// binName			name of bin
+    /// list				list of HLL objects
     pub fn get_similarity(bin_name: String, list: Vec<PHPValue>) -> Option<Operation> {
         if !assert_hll_list(&list) {
             return None;
@@ -8320,11 +8593,11 @@ impl CdtHllOperation {
         })
     }
 
-    // HLLDescribeOp creates HLL describe operation.
-    // Server returns indexBitCount and minHashBitCount used to create HLL bin in a list of longs.
-    // The list size is 2.
-    //
-    // binName			name of bin
+    /// HLLDescribeOp creates HLL describe operation.
+    /// Server returns indexBitCount and minHashBitCount used to create HLL bin in a list of longs.
+    /// The list size is 2.
+    ///
+    /// binName			name of bin
     pub fn describe(bin_name: String) -> Operation {
         Operation {
             _as: proto::operation::Op::Hll(proto::CdtHllOperation {
@@ -8343,6 +8616,7 @@ impl CdtHllOperation {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BitWriteFlags specify bitwise operation policy write flags.
 #[php_class(name = "Aerospike\\BitwiseWriteFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtBitwiseWriteFlags {
@@ -8352,31 +8626,41 @@ pub struct CdtBitwiseWriteFlags {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtBitwiseWriteFlags {
-    pub fn default() -> Self {
+    /// BitWriteFlagsDefault allows create or update.
+    pub fn Default() -> Self {
         Self {
             _as: proto::CdtBitwiseWriteFlags::Default,
         }
     }
 
-    pub fn create_only() -> Self {
+    /// BitWriteFlagsCreateOnly specifies that:
+    /// If the bin already exists, the operation will be denied.
+    /// If the bin does not exist, a new bin will be created.
+    pub fn Create_Only() -> Self {
         Self {
             _as: proto::CdtBitwiseWriteFlags::CreateOnly,
         }
     }
 
-    pub fn update_only() -> Self {
+    /// BitWriteFlagsUpdateOnly specifies that:
+    /// If the bin already exists, the bin will be overwritten.
+    /// If the bin does not exist, the operation will be denied.
+    pub fn Update_Only() -> Self {
         Self {
             _as: proto::CdtBitwiseWriteFlags::UpdateOnly,
         }
     }
 
-    pub fn no_fail() -> Self {
+    /// BitWriteFlagsNoFail specifies not to raise error if operation is denied.
+    pub fn No_Fail() -> Self {
         Self {
             _as: proto::CdtBitwiseWriteFlags::NoFail,
         }
     }
 
-    pub fn partial() -> Self {
+    /// BitWriteFlagsPartial allows other valid operations to be committed if this operations is
+    /// denied due to flag constraints.
+    pub fn Partial() -> Self {
         Self {
             _as: proto::CdtBitwiseWriteFlags::Partial,
         }
@@ -8405,6 +8689,7 @@ impl FromZval<'_> for CdtBitwiseWriteFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BitResizeFlags specifies the bitwise operation flags for resize.
 #[php_class(name = "Aerospike\\BitwiseResizeFlags")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtBitwiseResizeFlags {
@@ -8414,25 +8699,29 @@ pub struct CdtBitwiseResizeFlags {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtBitwiseResizeFlags {
-    pub fn default() -> Self {
+    /// BitResizeFlagsDefault specifies the defalt flag.
+    pub fn Default() -> Self {
         Self {
             _as: proto::CdtBitwiseResizeFlags::Default,
         }
     }
 
-    pub fn from_front() -> Self {
+    /// BitResizeFlagsFromFront Adds/removes bytes from the beginning instead of the end.
+    pub fn From_Front() -> Self {
         Self {
             _as: proto::CdtBitwiseResizeFlags::FromFront,
         }
     }
 
-    pub fn grow_only() -> Self {
+    /// BitResizeFlagsGrowOnly will only allow the []byte size to increase.
+    pub fn Grow_Only() -> Self {
         Self {
             _as: proto::CdtBitwiseResizeFlags::GrowOnly,
         }
     }
 
-    pub fn shrink_only() -> Self {
+    /// BitResizeFlagsShrinkOnly will only allow the []byte size to decrease.
+    pub fn Shrink_Only() -> Self {
         Self {
             _as: proto::CdtBitwiseResizeFlags::ShrinkOnly,
         }
@@ -8461,6 +8750,7 @@ impl FromZval<'_> for CdtBitwiseResizeFlags {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BitOverflowAction specifies the action to take when bitwise add/subtract results in overflow/underflow.
 #[php_class(name = "Aerospike\\BitwiseOverflowAction")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtBitwiseOverflowAction {
@@ -8470,19 +8760,24 @@ pub struct CdtBitwiseOverflowAction {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtBitwiseOverflowAction {
-    pub fn fail() -> Self {
+    /// BitOverflowActionFail specifies to fail operation with error.
+    pub fn Fail() -> Self {
         Self {
             _as: proto::CdtBitwiseOverflowAction::Fail,
         }
     }
 
-    pub fn saturate() -> Self {
+    /// BitOverflowActionSaturate specifies that in add/subtract overflows/underflows, set to max/min value.
+    /// Example: MAXINT + 1 = MAXINT
+    pub fn Saturate() -> Self {
         Self {
             _as: proto::CdtBitwiseOverflowAction::Saturate,
         }
     }
 
-    pub fn wrap() -> Self {
+    /// BitOverflowActionWrap specifies that in add/subtract overflows/underflows, wrap the value.
+    /// Example: MAXINT + 1 = -1
+    pub fn Wrap() -> Self {
         Self {
             _as: proto::CdtBitwiseOverflowAction::Wrap,
         }
@@ -8511,6 +8806,7 @@ impl FromZval<'_> for CdtBitwiseOverflowAction {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// BitPolicy determines the Bit operation policy.
 #[php_class(name = "Aerospike\\BitwisePolicy")]
 #[derive(Debug, PartialEq, Clone)]
 pub struct CdtBitwisePolicy {
@@ -8520,6 +8816,7 @@ pub struct CdtBitwisePolicy {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtBitwisePolicy {
+    /// new BitwisePolicy(int) will return a BitPolicy will provided flags.
     pub fn __construct(flags: Option<CdtBitwiseWriteFlags>) -> Self {
         let flags: i32 = flags.map(|f| f._as.into()).unwrap_or(0);
 
@@ -8551,10 +8848,16 @@ impl FromZval<'_> for CdtBitwisePolicy {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// Bit operations. Create bit operations used by client operate command.
-// Offset orientation is left-to-right.  Negative offsets are supported.
-// If the offset is negative, the offset starts backwards from end of the bitmap.
-// If an offset is out of bounds, a parameter error will be returned.
+/// Bit operations. Create bit operations used by client operate command.
+/// Offset orientation is left-to-right.  Negative offsets are supported.
+/// If the offset is negative, the offset starts backwards from end of the bitmap.
+/// If an offset is out of bounds, a parameter error will be returned.
+///
+///	Nested CDT operations are supported by optional CTX context arguments.  Example:
+///	bin = [[0b00000001, 0b01000010],[0b01011010]]
+///	Resize first bitmap (in a list of bitmaps) to 3 bytes.
+///	BitOperation.resize("bin", 3, BitResizeFlags.DEFAULT, CTX.listIndex(0))
+///	bin result = [[0b00000001, 0b01000010, 0b00000000],[0b01011010]]
 #[php_class(name = "Aerospike\\BitwiseOp")]
 pub struct CdtBitwiseOperation {
     _as: proto::CdtBitwiseOperation,
@@ -8573,15 +8876,15 @@ impl FromZval<'_> for CdtBitwiseOperation {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl CdtBitwiseOperation {
-    // BitResizeOp creates byte "resize" operation.
-    // Server resizes []byte to byteSize according to resizeFlags (See BitResizeFlags).
-    // Server does not return a value.
-    // Example:
-    //
-    //	$bin = [0b00000001, 0b01000010]
-    //	$byteSize = 4
-    //	$resizeFlags = 0
-    //	$bin result = [0b00000001, 0b01000010, 0b00000000, 0b00000000]
+    /// BitResizeOp creates byte "resize" operation.
+    /// Server resizes []byte to byteSize according to resizeFlags (See BitResizeFlags).
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	$bin = [0b00000001, 0b01000010]
+    ///	$byteSize = 4
+    ///	$resizeFlags = 0
+    ///	$bin result = [0b00000001, 0b01000010, 0b00000000, 0b00000000]
     pub fn resize(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8606,15 +8909,15 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitInsertOp creates byte "insert" operation.
-    // Server inserts value bytes into []byte bin at byteOffset.
-    // Server does not return a value.
-    // Example:
-    //
-    //	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	$byteOffset = 1
-    //	$value = [0b11111111, 0b11000111]
-    //	$bin result = [0b00000001, 0b11111111, 0b11000111, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    /// BitInsertOp creates byte "insert" operation.
+    /// Server inserts value bytes into []byte bin at byteOffset.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	$byteOffset = 1
+    ///	$value = [0b11111111, 0b11000111]
+    ///	$bin result = [0b00000001, 0b11111111, 0b11000111, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
     pub fn insert(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8638,15 +8941,15 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitRemoveOp creates byte "remove" operation.
-    // Server removes bytes from []byte bin at byteOffset for byteSize.
-    // Server does not return a value.
-    // Example:
-    //
-    //	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	$byteOffset = 2
-    //	$byteSize = 3
-    //	$bin result = [0b00000001, 0b01000010]
+    /// BitRemoveOp creates byte "remove" operation.
+    /// Server removes bytes from []byte bin at byteOffset for byteSize.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	$byteOffset = 2
+    ///	$byteSize = 3
+    ///	$bin result = [0b00000001, 0b01000010]
     pub fn remove(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8670,16 +8973,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitSetOp creates bit "set" operation.
-    // Server sets value on []byte bin at bitOffset for bitSize.
-    // Server does not return a value.
-    // Example:
-    //
-    //	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	$bitOffset = 13
-    //	$bitSize = 3
-    //	$value = [0b11100000]
-    //	$bin result = [0b00000001, 0b01000111, 0b00000011, 0b00000100, 0b00000101]
+    /// BitSetOp creates bit "set" operation.
+    /// Server sets value on []byte bin at bitOffset for bitSize.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	$bitOffset = 13
+    ///	$bitSize = 3
+    ///	$value = [0b11100000]
+    ///	$bin result = [0b00000001, 0b01000111, 0b00000011, 0b00000100, 0b00000101]
     pub fn set(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8705,16 +9008,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitOrOp creates bit "or" operation.
-    // Server performs bitwise "or" on value and []byte bin at bitOffset for bitSize.
-    // Server does not return a value.
-    // Example:
-    //
-    //	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	$bitOffset = 17
-    //	$bitSize = 6
-    //	$value = [0b10101000]
-    //	bin result = [0b00000001, 0b01000010, 0b01010111, 0b00000100, 0b00000101]
+    /// BitOrOp creates bit "or" operation.
+    /// Server performs bitwise "or" on value and []byte bin at bitOffset for bitSize.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	$bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	$bitOffset = 17
+    ///	$bitSize = 6
+    ///	$value = [0b10101000]
+    ///	bin result = [0b00000001, 0b01000010, 0b01010111, 0b00000100, 0b00000101]
     pub fn or(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8740,16 +9043,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitXorOp creates bit "exclusive or" operation.
-    // Server performs bitwise "xor" on value and []byte bin at bitOffset for bitSize.
-    // Server does not return a value.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 17
-    //	bitSize = 6
-    //	value = [0b10101100]
-    //	bin result = [0b00000001, 0b01000010, 0b01010101, 0b00000100, 0b00000101]
+    /// BitXorOp creates bit "exclusive or" operation.
+    /// Server performs bitwise "xor" on value and []byte bin at bitOffset for bitSize.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 17
+    ///	bitSize = 6
+    ///	value = [0b10101100]
+    ///	bin result = [0b00000001, 0b01000010, 0b01010101, 0b00000100, 0b00000101]
     pub fn xor(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8775,16 +9078,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitAndOp creates bit "and" operation.
-    // Server performs bitwise "and" on value and []byte bin at bitOffset for bitSize.
-    // Server does not return a value.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 23
-    //	bitSize = 9
-    //	value = [0b00111100, 0b10000000]
-    //	bin result = [0b00000001, 0b01000010, 0b00000010, 0b00000000, 0b00000101]
+    /// BitAndOp creates bit "and" operation.
+    /// Server performs bitwise "and" on value and []byte bin at bitOffset for bitSize.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 23
+    ///	bitSize = 9
+    ///	value = [0b00111100, 0b10000000]
+    ///	bin result = [0b00000001, 0b01000010, 0b00000010, 0b00000000, 0b00000101]
     pub fn and(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8810,15 +9113,15 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitNotOp creates bit "not" operation.
-    // Server negates []byte bin starting at bitOffset for bitSize.
-    // Server does not return a value.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 25
-    //	bitSize = 6
-    //	bin result = [0b00000001, 0b01000010, 0b00000011, 0b01111010, 0b00000101]
+    /// BitNotOp creates bit "not" operation.
+    /// Server negates []byte bin starting at bitOffset for bitSize.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 25
+    ///	bitSize = 6
+    ///	bin result = [0b00000001, 0b01000010, 0b00000011, 0b01111010, 0b00000101]
     pub fn not(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8842,16 +9145,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitLShiftOp creates bit "left shift" operation.
-    // Server shifts left []byte bin starting at bitOffset for bitSize.
-    // Server does not return a value.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 32
-    //	bitSize = 8
-    //	shift = 3
-    //	bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00101000]
+    /// BitLShiftOp creates bit "left shift" operation.
+    /// Server shifts left []byte bin starting at bitOffset for bitSize.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 32
+    ///	bitSize = 8
+    ///	shift = 3
+    ///	bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00101000]
     pub fn lshift(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8877,16 +9180,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitRShiftOp creates bit "right shift" operation.
-    // Server shifts right []byte bin starting at bitOffset for bitSize.
-    // Server does not return a value.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 0
-    //	bitSize = 9
-    //	shift = 1
-    //	bin result = [0b00000000, 0b11000010, 0b00000011, 0b00000100, 0b00000101]
+    /// BitRShiftOp creates bit "right shift" operation.
+    /// Server shifts right []byte bin starting at bitOffset for bitSize.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 0
+    ///	bitSize = 9
+    ///	shift = 1
+    ///	bin result = [0b00000000, 0b11000010, 0b00000011, 0b00000100, 0b00000101]
     pub fn rshift(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8912,19 +9215,19 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitAddOp creates bit "add" operation.
-    // Server adds value to []byte bin starting at bitOffset for bitSize. BitSize must be <= 64.
-    // Signed indicates if bits should be treated as a signed number.
-    // If add overflows/underflows, BitOverflowAction is used.
-    // Server does not return a value.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 24
-    //	bitSize = 16
-    //	value = 128
-    //	signed = false
-    //	bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b10000101]
+    /// BitAddOp creates bit "add" operation.
+    /// Server adds value to []byte bin starting at bitOffset for bitSize. BitSize must be <= 64.
+    /// Signed indicates if bits should be treated as a signed number.
+    /// If add overflows/underflows, BitOverflowAction is used.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 24
+    ///	bitSize = 16
+    ///	value = 128
+    ///	signed = false
+    ///	bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b10000101]
     pub fn add(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8955,19 +9258,19 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitSubtractOp creates bit "subtract" operation.
-    // Server subtracts value from []byte bin starting at bitOffset for bitSize. BitSize must be <= 64.
-    // Signed indicates if bits should be treated as a signed number.
-    // If add overflows/underflows, BitOverflowAction is used.
-    // Server does not return a value.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 24
-    //	bitSize = 16
-    //	value = 128
-    //	signed = false
-    //	bin result = [0b00000001, 0b01000010, 0b00000011, 0b0000011, 0b10000101]
+    /// BitSubtractOp creates bit "subtract" operation.
+    /// Server subtracts value from []byte bin starting at bitOffset for bitSize. BitSize must be <= 64.
+    /// Signed indicates if bits should be treated as a signed number.
+    /// If add overflows/underflows, BitOverflowAction is used.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 24
+    ///	bitSize = 16
+    ///	value = 128
+    ///	signed = false
+    ///	bin result = [0b00000001, 0b01000010, 0b00000011, 0b0000011, 0b10000101]
     pub fn subtract(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -8998,16 +9301,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitSetIntOp creates bit "setInt" operation.
-    // Server sets value to []byte bin starting at bitOffset for bitSize. Size must be <= 64.
-    // Server does not return a value.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 1
-    //	bitSize = 8
-    //	value = 127
-    //	bin result = [0b00111111, 0b11000010, 0b00000011, 0b0000100, 0b00000101]
+    /// BitSetIntOp creates bit "setInt" operation.
+    /// Server sets value to []byte bin starting at bitOffset for bitSize. Size must be <= 64.
+    /// Server does not return a value.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 1
+    ///	bitSize = 8
+    ///	value = 127
+    ///	bin result = [0b00111111, 0b11000010, 0b00000011, 0b0000100, 0b00000101]
     pub fn set_int(
         policy: &CdtBitwisePolicy,
         bin_name: String,
@@ -9033,14 +9336,14 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitGetOp creates bit "get" operation.
-    // Server returns bits from []byte bin starting at bitOffset for bitSize.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 9
-    //	bitSize = 5
-    //	returns [0b1000000]
+    /// BitGetOp creates bit "get" operation.
+    /// Server returns bits from []byte bin starting at bitOffset for bitSize.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 9
+    ///	bitSize = 5
+    ///	returns [0b1000000]
     pub fn get(
         bin_name: String,
         bit_offset: i64,
@@ -9063,14 +9366,14 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitCountOp creates bit "count" operation.
-    // Server returns integer count of set bits from []byte bin starting at bitOffset for bitSize.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 20
-    //	bitSize = 4
-    //	returns 2
+    /// BitCountOp creates bit "count" operation.
+    /// Server returns integer count of set bits from []byte bin starting at bitOffset for bitSize.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 20
+    ///	bitSize = 4
+    ///	returns 2
     pub fn count(
         bin_name: String,
         bit_offset: i64,
@@ -9093,16 +9396,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitLScanOp creates bit "left scan" operation.
-    // Server returns integer bit offset of the first specified value bit in []byte bin
-    // starting at bitOffset for bitSize.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 24
-    //	bitSize = 8
-    //	value = true
-    //	returns 5
+    /// BitLScanOp creates bit "left scan" operation.
+    /// Server returns integer bit offset of the first specified value bit in []byte bin
+    /// starting at bitOffset for bitSize.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 24
+    ///	bitSize = 8
+    ///	value = true
+    ///	returns 5
     pub fn lscan(
         bin_name: String,
         bit_offset: i64,
@@ -9127,16 +9430,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitRScanOp creates bit "right scan" operation.
-    // Server returns integer bit offset of the last specified value bit in []byte bin
-    // starting at bitOffset for bitSize.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 32
-    //	bitSize = 8
-    //	value = true
-    //	returns 7
+    /// BitRScanOp creates bit "right scan" operation.
+    /// Server returns integer bit offset of the last specified value bit in []byte bin
+    /// starting at bitOffset for bitSize.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 32
+    ///	bitSize = 8
+    ///	value = true
+    ///	returns 7
     pub fn rscan(
         bin_name: String,
         bit_offset: i64,
@@ -9161,16 +9464,16 @@ impl CdtBitwiseOperation {
         }
     }
 
-    // BitGetIntOp creates bit "get integer" operation.
-    // Server returns integer from []byte bin starting at bitOffset for bitSize.
-    // Signed indicates if bits should be treated as a signed number.
-    // Example:
-    //
-    //	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
-    //	bitOffset = 8
-    //	bitSize = 16
-    //	signed = false
-    //	returns 16899
+    /// BitGetIntOp creates bit "get integer" operation.
+    /// Server returns integer from []byte bin starting at bitOffset for bitSize.
+    /// Signed indicates if bits should be treated as a signed number.
+    /// Example:
+    ///
+    ///	bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
+    ///	bitOffset = 8
+    ///	bitSize = 16
+    ///	signed = false
+    ///	returns 16899
     pub fn get_int(
         bin_name: String,
         bit_offset: i64,
@@ -9226,16 +9529,30 @@ pub struct Client {
     socket: String,
 }
 
-// This trivial implementation of `drop` adds a print to console.
+/// This trivial implementation of `drop` adds a print to console.
 impl Drop for Client {
     fn drop(&mut self) {
         trace!("Dropping client: {}, ptr: {:p}", self.socket, &self);
     }
 }
 
+/// Client encapsulates an Aerospike cluster.
+/// All database operations are available against this object.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Client {
+    /// Connects to the Aerospike database using the provided socket address.
+    ///
+    /// If a persisted client object is found for the given socket address, it is returned.
+    /// Otherwise, a new client object is created, persisted, and returned.
+    ///
+    /// # Arguments
+    ///
+    /// * `socket` - A string representing the socket address of the Aerospike database.
+    ///
+    /// # Returns
+    ///
+    /// * `Err("Error connecting to the database".into())` - If an error occurs during connection.
     pub fn connect(socket: &str) -> PhpResult<Zval> {
         match get_persisted_client(socket) {
             Some(c) => {
@@ -9258,6 +9575,11 @@ impl Client {
         }
     }
 
+    /// Retrieves the socket address associated with this client.
+    ///
+    /// # Returns
+    ///
+    /// A string representing the socket address.
     #[getter]
     pub fn socket(&self) -> String {
         self.socket.clone()
@@ -9519,13 +9841,13 @@ impl Client {
         }
     }
 
-    // BatchExecute will read/write multiple records for specified batch keys in one batch call.
-    // This method allows different namespaces/bins for each key in the batch.
-    // The returned records are located in the same list.
-    //
-    // BatchRecord can be *BatchRead, *BatchWrite, *BatchDelete or *BatchUDF.
-    //
-    // Requires server version 6.0+
+    /// BatchExecute will read/write multiple records for specified batch keys in one batch call.
+    /// This method allows different namespaces/bins for each key in the batch.
+    /// The returned records are located in the same list.
+    ///
+    /// BatchRecord can be *BatchRead, *BatchWrite, *BatchDelete or *BatchUDF.
+    ///
+    /// Requires server version 6.0+
     pub fn batch(&self, policy: &BatchPolicy, cmds: Vec<&Zval>) -> PhpResult<Vec<BatchRecord>> {
         let mut res = Vec::<proto::BatchOperate>::with_capacity(cmds.len());
         cmds.into_iter().for_each(|v| {
@@ -9679,12 +10001,12 @@ impl Client {
         })
     }
 
-    // CreateIndex creates a secondary index.
-    // This asynchronous server call will return before the command is complete.
-    // The user can optionally wait for command completion by using the returned
-    // IndexTask instance.
-    // This method is only supported by Aerospike 3+ servers.
-    // If the policy is nil, the default relevant policy will be used.
+    /// CreateIndex creates a secondary index.
+    /// This asynchronous server call will return before the command is complete.
+    /// The user can optionally wait for command completion by using the returned
+    /// IndexTask instance.
+    /// This method is only supported by Aerospike 3+ servers.
+    /// If the policy is nil, the default relevant policy will be used.
     pub fn create_index(
         &self,
         policy: &WritePolicy,
@@ -9723,9 +10045,9 @@ impl Client {
         }
     }
 
-    // DropIndex deletes a secondary index. It will block until index is dropped on all nodes.
-    // This method is only supported by Aerospike 3+ servers.
-    // If the policy is nil, the default relevant policy will be used.
+    /// DropIndex deletes a secondary index. It will block until index is dropped on all nodes.
+    /// This method is only supported by Aerospike 3+ servers.
+    /// If the policy is nil, the default relevant policy will be used.
     pub fn drop_index(
         &self,
         policy: &WritePolicy,
@@ -9752,13 +10074,13 @@ impl Client {
         }
     }
 
-    // RegisterUDF registers a package containing user defined functions with server.
-    // This asynchronous server call will return before command is complete.
-    // The user can optionally wait for command completion by using the returned
-    // RegisterTask instance.
-    //
-    // This method is only supported by Aerospike 3+ servers.
-    // If the policy is nil, the default relevant policy will be used.
+    /// RegisterUDF registers a package containing user defined functions with server.
+    /// This asynchronous server call will return before command is complete.
+    /// The user can optionally wait for command completion by using the returned
+    /// RegisterTask instance.
+    ///
+    /// This method is only supported by Aerospike 3+ servers.
+    /// If the policy is nil, the default relevant policy will be used.
     pub fn register_udf(
         &self,
         policy: &WritePolicy,
@@ -9785,13 +10107,13 @@ impl Client {
         }
     }
 
-    // DropUDF removes a package containing user defined functions in the server.
-    // This asynchronous server call will return before command is complete.
-    // The user can optionally wait for command completion by using the returned
-    // RemoveTask instance.
-    //
-    // This method is only supported by Aerospike 3+ servers.
-    // If the policy is nil, the default relevant policy will be used.
+    /// DropUDF removes a package containing user defined functions in the server.
+    /// This asynchronous server call will return before command is complete.
+    /// The user can optionally wait for command completion by using the returned
+    /// RemoveTask instance.
+    ///
+    /// This method is only supported by Aerospike 3+ servers.
+    /// If the policy is nil, the default relevant policy will be used.
     pub fn drop_udf(&self, policy: &WritePolicy, package_name: &str) -> PhpResult<()> {
         let request = tonic::Request::new(proto::AerospikeDropUdfRequest {
             policy: Some(policy._as.clone()),
@@ -9810,9 +10132,9 @@ impl Client {
         }
     }
 
-    // ListUDF lists all packages containing user defined functions in the server.
-    // This method is only supported by Aerospike 3+ servers.
-    // If the policy is nil, the default relevant policy will be used.
+    /// ListUDF lists all packages containing user defined functions in the server.
+    /// This method is only supported by Aerospike 3+ servers.
+    /// If the policy is nil, the default relevant policy will be used.
     pub fn list_udf(&self, policy: &ReadPolicy) -> PhpResult<Vec<UdfMeta>> {
         let request = tonic::Request::new(proto::AerospikeListUdfRequest {
             policy: Some(policy._as.clone()),
@@ -9838,14 +10160,14 @@ impl Client {
         }
     }
 
-    // Execute executes a user defined function on server and return results.
-    // The function operates on a single record.
-    // The package name is used to locate the udf file location:
-    //
-    // udf file = <server udf dir>/<package name>.lua
-    //
-    // This method is only supported by Aerospike 3+ servers.
-    // If the policy is nil, the default relevant policy will be used.
+    /// Execute executes a user defined function on server and return results.
+    /// The function operates on a single record.
+    /// The package name is used to locate the udf file location:
+    ///
+    /// udf file = <server udf dir>/<package name>.lua
+    ///
+    /// This method is only supported by Aerospike 3+ servers.
+    /// If the policy is nil, the default relevant policy will be used.
     pub fn udf_execute(
         &self,
         policy: &WritePolicy,
@@ -9888,8 +10210,8 @@ impl Client {
     // User administration
     //-------------------------------------------------------
 
-    // CreateUser creates a new user with password and roles. Clear-text password will be hashed using bcrypt
-    // before sending to server.
+    /// CreateUser creates a new user with password and roles. Clear-text password will be hashed using bcrypt
+    /// before sending to server.
     pub fn create_user(
         &self,
         policy: &AdminPolicy,
@@ -9916,7 +10238,7 @@ impl Client {
         }
     }
 
-    // DropUser removes a user from the cluster.
+    /// DropUser removes a user from the cluster.
     pub fn drop_user(&self, policy: &AdminPolicy, user: String) -> PhpResult<()> {
         let request = tonic::Request::new(proto::AerospikeDropUserRequest {
             policy: Some(policy._as.clone()),
@@ -9935,7 +10257,7 @@ impl Client {
         }
     }
 
-    // ChangePassword changes a user's password. Clear-text password will be hashed using bcrypt before sending to server.
+    /// ChangePassword changes a user's password. Clear-text password will be hashed using bcrypt before sending to server.
     pub fn change_password(
         &self,
         policy: &AdminPolicy,
@@ -9960,7 +10282,7 @@ impl Client {
         }
     }
 
-    // GrantRoles adds roles to user's list of roles.
+    /// GrantRoles adds roles to user's list of roles.
     pub fn grant_roles(
         &self,
         policy: &AdminPolicy,
@@ -9985,7 +10307,7 @@ impl Client {
         }
     }
 
-    // RevokeRoles removes roles from user's list of roles.
+    /// RevokeRoles removes roles from user's list of roles.
     pub fn revoke_roles(
         &self,
         policy: &AdminPolicy,
@@ -10010,7 +10332,7 @@ impl Client {
         }
     }
 
-    // QueryUser retrieves roles for a given user.
+    /// QueryUser retrieves roles for a given user.
     pub fn query_users(
         &self,
         policy: &AdminPolicy,
@@ -10038,7 +10360,7 @@ impl Client {
         }
     }
 
-    // QueryRole retrieves privileges for a given role.
+    /// QueryRole retrieves privileges for a given role.
     pub fn query_roles(
         &self,
         policy: &AdminPolicy,
@@ -10065,9 +10387,9 @@ impl Client {
         }
     }
 
-    // CreateRole creates a user-defined role.
-    // Quotas require server security configuration "enable-quotas" to be set to true.
-    // Pass 0 for quota values for no limit.
+    /// CreateRole creates a user-defined role.
+    /// Quotas require server security configuration "enable-quotas" to be set to true.
+    /// Pass 0 for quota values for no limit.
     pub fn create_role(
         &self,
         policy: &AdminPolicy,
@@ -10098,7 +10420,7 @@ impl Client {
         }
     }
 
-    // DropRole removes a user-defined role.
+    /// DropRole removes a user-defined role.
     pub fn drop_role(&self, policy: &AdminPolicy, role_name: String) -> PhpResult<()> {
         let request = tonic::Request::new(proto::AerospikeDropRoleRequest {
             policy: Some(policy._as.clone()),
@@ -10117,7 +10439,7 @@ impl Client {
         }
     }
 
-    // GrantPrivileges grant privileges to a user-defined role.
+    /// GrantPrivileges grant privileges to a user-defined role.
     pub fn grant_privileges(
         &self,
         policy: &AdminPolicy,
@@ -10144,7 +10466,7 @@ impl Client {
         }
     }
 
-    // RevokePrivileges revokes privileges from a user-defined role.
+    /// RevokePrivileges revokes privileges from a user-defined role.
     pub fn revoke_privileges(
         &self,
         policy: &AdminPolicy,
@@ -10171,7 +10493,7 @@ impl Client {
         }
     }
 
-    // SetAllowlist sets IP address whitelist for a role. If whitelist is nil or empty, it removes existing whitelist from role.
+    /// SetAllowlist sets IP address whitelist for a role. If whitelist is nil or empty, it removes existing whitelist from role.
     pub fn set_allowlist(
         &self,
         policy: &AdminPolicy,
@@ -10196,9 +10518,9 @@ impl Client {
         }
     }
 
-    // SetQuotas sets maximum reads/writes per second limits for a role.  If a quota is zero, the limit is removed.
-    // Quotas require server security configuration "enable-quotas" to be set to true.
-    // Pass 0 for quota values for no limit.
+    /// SetQuotas sets maximum reads/writes per second limits for a role.  If a quota is zero, the limit is removed.
+    /// Quotas require server security configuration "enable-quotas" to be set to true.
+    /// Pass 0 for quota values for no limit.
     pub fn set_quotas(
         &self,
         policy: &AdminPolicy,
@@ -10232,6 +10554,7 @@ impl Client {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Represents an exception specific to the Aerospike database operations.
 #[php_class(name = "Aerospike\\AerospikeException")]
 #[extends(ext_php_rs::zend::ce::exception())]
 #[derive(Debug, Clone)]
@@ -10244,6 +10567,15 @@ pub struct AerospikeException {
     in_doubt: bool,
 }
 
+/// Constructs a new `AerospikeException` with the specified error message.
+///
+/// # Arguments
+///
+/// * `message` - The error message describing the exception.
+///
+/// # Returns
+///
+/// A new `AerospikeException` instance initialized with the provided error message.
 impl AerospikeException {
     pub fn new(message: &str) -> Self {
         AerospikeException {
@@ -10277,10 +10609,10 @@ impl From<AerospikeException> for PhpException {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// Key is the unique record identifier. Records can be identified using a specified namespace,
-// an optional set name, and a user defined key which must be unique within a set.
-// Records can also be identified by namespace/digest which is the combination used
-// on the server.
+/// Key is the unique record identifier. Records can be identified using a specified namespace,
+/// an optional set name, and a user defined key which must be unique within a set.
+/// Records can also be identified by namespace/digest which is the combination used
+/// on the server.
 #[php_class(name = "Aerospike\\Key")]
 pub struct Key {
     _as: proto::Key,
@@ -10299,21 +10631,26 @@ impl Key {
         Key { _as: _as }
     }
 
+    /// namespace. Equivalent to database name.
     #[getter]
     pub fn get_namespace(&self) -> String {
         self._as.namespace.clone().unwrap_or("".into())
     }
 
+    /// Optional set name. Equivalent to database table.
     #[getter]
     pub fn get_setname(&self) -> String {
         self._as.set.clone().unwrap_or("".into())
     }
 
+    /// getValue() returns key's value.
     #[getter]
     pub fn get_value(&self) -> Option<PHPValue> {
         self._as.value.clone().map(|v| v.into())
     }
 
+    /// Generate unique server hash value from set name, key type and user defined key.
+    /// The hash function is RIPEMD-160 (a 160 bit hash).
     fn compute_digest(&self) -> Vec<u8> {
         let mut hash = Ripemd160::new();
         match (self._as.set.as_ref(), self._as.value.as_ref()) {
@@ -10334,6 +10671,7 @@ impl Key {
         }
     }
 
+    /// get_digest_bytes returns key digest as byte array.
     pub fn get_digest_bytes(&self) -> Vec<u8> {
         self._as
             .digest
@@ -10342,11 +10680,13 @@ impl Key {
             .unwrap_or(self.compute_digest())
     }
 
+    /// get_digest returns key digest as string.
     #[getter]
     pub fn get_digest(&self) -> String {
         hex::encode(self.get_digest_bytes())
     }
 
+    /// PartitionId returns the partition that the key belongs to.
     #[getter]
     fn partition_id(&self) -> Option<usize> {
         let digest = self.get_digest_bytes();
@@ -10371,7 +10711,7 @@ impl FromZval<'_> for Key {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// Define `GeoJSON` Value.
+/// Implementation of the GeoJson Value for Aerospike.
 #[php_class(name = "Aerospike\\GeoJSON")]
 pub struct GeoJSON {
     v: String,
@@ -10418,6 +10758,7 @@ impl fmt::Display for GeoJSON {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Implementation of the Json (Map<String, Value>) data structure for Aerospike.
 #[php_class(name = "Aerospike\\Json")]
 pub struct Json {
     v: HashMap<String, PHPValue>,
@@ -10436,11 +10777,14 @@ impl FromZval<'_> for Json {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Json {
+
+    /// getter method to get the json value
     #[getter]
     pub fn get_value(&self) -> HashMap<String, PHPValue> {
         self.v.clone()
     }
 
+    /// setter method to set the json value
     #[setter]
     pub fn set_value(&mut self, v: HashMap<String, PHPValue>) {
         self.v = v
@@ -10464,6 +10808,7 @@ impl fmt::Display for Json {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Represents a infinity value for Aerospike.
 #[php_class(name = "Aerospike\\Infinity")]
 pub struct Infinity {}
 
@@ -10483,6 +10828,7 @@ impl FromZval<'_> for Infinity {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Represents a wildcard value for Aerospike.
 #[php_class(name = "Aerospike\\Wildcard")]
 pub struct Wildcard {}
 
@@ -10502,6 +10848,7 @@ impl FromZval<'_> for Wildcard {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Implementation of the HyperLogLog (HLL) data structure for Aerospike.
 #[php_class(name = "Aerospike\\HLL")]
 pub struct HLL {
     v: Vec<u8>,
@@ -10548,9 +10895,9 @@ impl fmt::Display for HLL {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-// Container for bin values stored in the Aerospike database.
+/// Container for bin values stored in the Aerospike database.
 #[derive(Debug, Clone, PartialEq, Eq)]
-//TODO: underlying_value; convert to proto::Value to avoid conversions
+// TODO: underlying_value; convert to proto::Value to avoid conversions
 pub enum PHPValue {
     /// Empty value.
     Nil,
@@ -10580,7 +10927,7 @@ pub enum PHPValue {
     /// Map data type is a collection of key-value pairs. Each key can only appear once in a
     /// collection and is associated with a value. Map keys and values can be any supported data
     /// type.
-    // TODO: Implement the ordered map and remove hashmap completely
+    /// TODO: Implement the ordered map and remove hashmap completely
     HashMap(HashMap<PHPValue, PHPValue>),
     /// Map data type is a collection of key-value pairs. Each key can only appear once in a
     /// collection and is associated with a value. Map keys and values can be any supported data
@@ -10849,24 +11196,6 @@ impl From<HashMap<PHPValue, PHPValue>> for PHPValue {
     }
 }
 
-// impl FromZval<'_> for HashMap<PHPValue, PHPValue> {
-//     const TYPE: DataType = DataType::Mixed;
-
-//     fn from_zval(zval: &Zval) -> Option<Self> {
-//         from_zval(zval)
-//     }
-// }
-
-// impl FromZval<'_> for HashMap<PHPValue, PHPValue> {
-//     fn from(h: HashMap<String, proto::Value>) -> Self {
-//         let mut hash = HashMap::<PHPValue, PHPValue>::with_capacity(h.len());
-//         h.iter().for_each(|(k, v)| {
-//             hash.insert(PHPValue::String(k.into()), v.into());
-//         });
-//         PHPValue::HashMap(hash)
-//     }
-// }
-
 impl From<PHPValue> for proto::Value {
     fn from(other: PHPValue) -> Self {
         match other {
@@ -10988,6 +11317,7 @@ impl From<proto::Value> for PHPValue {
 #[php_class(name = "Aerospike\\Value")]
 pub struct Value;
 
+/// Value interface is used to efficiently serialize objects into the wire protocol.
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Value {
@@ -11061,6 +11391,7 @@ impl Value {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Implementation of conversion traits for interoperability with the `proto` module.
 impl From<&proto::Key> for Key {
     fn from(other: &proto::Key) -> Self {
         Key { _as: other.clone() }
@@ -11079,12 +11410,6 @@ impl From<&Bin> for proto::Bin {
     }
 }
 
-// impl From<Arc<aerospike_core::Recordset>> for Recordset {
-//     fn from(other: Arc<aerospike_core::Recordset>) -> Self {
-//         Recordset { _as: other }
-//     }
-// }
-
 #[derive(Debug)]
 pub struct AeroPHPError(String);
 
@@ -11100,388 +11425,391 @@ impl std::fmt::Display for AeroPHPError {
 // ResultCode
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
+
+/// ResultCode signifies the database operation error codes.
+/// The positive numbers align with the server side file kvs.h.
 #[php_class(name = "Aerospike\\ResultCode")]
 struct ResultCode {}
 
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ResultCode {
-    // GRPC_ERROR is wrapped and directly returned from the grpc library
+    /// GRPC_ERROR is wrapped and directly returned from the grpc library
     const GRPC_ERROR: i32 = -21;
 
-    // BATCH_FAILED means one or more keys failed in a batch.
+    /// BATCH_FAILED means one or more keys failed in a batch.
     const BATCH_FAILED: i32 = -20;
 
-    // NO_RESPONSE means no response was received from the server.
+    /// NO_RESPONSE means no response was received from the server.
     const NO_RESPONSE: i32 = -19;
 
-    // NETWORK_ERROR defines a network error. Checked the wrapped error for detail.
+    /// NETWORK_ERROR defines a network error. Checked the wrapped error for detail.
     const NETWORK_ERROR: i32 = -18;
 
-    // COMMON_ERROR defines a common, none-aerospike error. Checked the wrapped error for detail.
+    /// COMMON_ERROR defines a common, none-aerospike error. Checked the wrapped error for detail.
     const COMMON_ERROR: i32 = -17;
 
-    // MAX_RETRIES_EXCEEDED defines max retries limit reached.
+    /// MAX_RETRIES_EXCEEDED defines max retries limit reached.
     const MAX_RETRIES_EXCEEDED: i32 = -16;
 
-    // MAX_ERROR_RATE defines max errors limit reached.
+    /// MAX_ERROR_RATE defines max errors limit reached.
     const MAX_ERROR_RATE: i32 = -15;
 
-    // RACK_NOT_DEFINED defines requested Rack for node/namespace was not defined in the cluster.
+    /// RACK_NOT_DEFINED defines requested Rack for node/namespace was not defined in the cluster.
     const RACK_NOT_DEFINED: i32 = -13;
 
-    // INVALID_CLUSTER_PARTITION_MAP defines cluster has an invalid partition map, usually due to bad configuration.
+    /// INVALID_CLUSTER_PARTITION_MAP defines cluster has an invalid partition map, usually due to bad configuration.
     const INVALID_CLUSTER_PARTITION_MAP: i32 = -12;
 
-    // SERVER_NOT_AVAILABLE defines server is not accepting requests.
+    /// SERVER_NOT_AVAILABLE defines server is not accepting requests.
     const SERVER_NOT_AVAILABLE: i32 = -11;
 
-    // CLUSTER_NAME_MISMATCH_ERROR defines cluster Name does not match the ClientPolicy.ClusterName value.
+    /// CLUSTER_NAME_MISMATCH_ERROR defines cluster Name does not match the ClientPolicy.ClusterName value.
     const CLUSTER_NAME_MISMATCH_ERROR: i32 = -10;
 
-    // RECORDSET_CLOSED defines recordset has already been closed or cancelled
+    /// RECORDSET_CLOSED defines recordset has already been closed or cancelled
     const RECORDSET_CLOSED: i32 = -9;
 
-    // NO_AVAILABLE_CONNECTIONS_TO_NODE defines there were no connections available to the node in the pool, and the pool was limited
+    /// NO_AVAILABLE_CONNECTIONS_TO_NODE defines there were no connections available to the node in the pool, and the pool was limited
     const NO_AVAILABLE_CONNECTIONS_TO_NODE: i32 = -8;
 
-    // TYPE_NOT_SUPPORTED defines data type is not supported by aerospike server.
+    /// TYPE_NOT_SUPPORTED defines data type is not supported by aerospike server.
     const TYPE_NOT_SUPPORTED: i32 = -7;
 
-    // COMMAND_REJECTED defines info Command was rejected by the server.
+    /// COMMAND_REJECTED defines info Command was rejected by the server.
     const COMMAND_REJECTED: i32 = -6;
 
-    // QUERY_TERMINATED defines query was terminated by user.
+    /// QUERY_TERMINATED defines query was terminated by user.
     const QUERY_TERMINATED: i32 = -5;
 
-    // SCAN_TERMINATED defines scan was terminated by user.
+    /// SCAN_TERMINATED defines scan was terminated by user.
     const SCAN_TERMINATED: i32 = -4;
 
-    // INVALID_NODE_ERROR defines chosen node is not currently active.
+    /// INVALID_NODE_ERROR defines chosen node is not currently active.
     const INVALID_NODE_ERROR: i32 = -3;
 
-    // PARSE_ERROR defines client parse error.
+    /// PARSE_ERROR defines client parse error.
     const PARSE_ERROR: i32 = -2;
 
-    // SERIALIZE_ERROR defines client serialization error.
+    /// SERIALIZE_ERROR defines client serialization error.
     const SERIALIZE_ERROR: i32 = -1;
 
-    // OK defines operation was successful.
+    /// OK defines operation was successful.
     const OK: i32 = 0;
 
-    // SERVER_ERROR defines unknown server failure.
+    /// SERVER_ERROR defines unknown server failure.
     const SERVER_ERROR: i32 = 1;
 
-    // KEY_NOT_FOUND_ERROR defines on retrieving, touching or replacing a record that doesn't exist.
+    /// KEY_NOT_FOUND_ERROR defines on retrieving, touching or replacing a record that doesn't exist.
     const KEY_NOT_FOUND_ERROR: i32 = 2;
 
-    // GENERATION_ERROR defines on modifying a record with unexpected generation.
+    /// GENERATION_ERROR defines on modifying a record with unexpected generation.
     const GENERATION_ERROR: i32 = 3;
 
-    // PARAMETER_ERROR defines bad parameter(s) were passed in database operation call.
+    /// PARAMETER_ERROR defines bad parameter(s) were passed in database operation call.
     const PARAMETER_ERROR: i32 = 4;
 
-    // KEY_EXISTS_ERROR defines on create-only (write unique) operations on a record that already exists.
+    /// KEY_EXISTS_ERROR defines on create-only (write unique) operations on a record that already exists.
     const KEY_EXISTS_ERROR: i32 = 5;
 
-    // BIN_EXISTS_ERROR defines bin already exists on a create-only operation.
+    /// BIN_EXISTS_ERROR defines bin already exists on a create-only operation.
     const BIN_EXISTS_ERROR: i32 = 6;
 
-    // CLUSTER_KEY_MISMATCH defines expected cluster ID was not received.
+    /// CLUSTER_KEY_MISMATCH defines expected cluster ID was not received.
     const CLUSTER_KEY_MISMATCH: i32 = 7;
 
-    // SERVER_MEM_ERROR defines server has run out of memory.
+    /// SERVER_MEM_ERROR defines server has run out of memory.
     const SERVER_MEM_ERROR: i32 = 8;
 
-    // TIMEOUT defines client or server has timed out.
+    /// TIMEOUT defines client or server has timed out.
     const TIMEOUT: i32 = 9;
 
-    // ALWAYS_FORBIDDEN defines operation not allowed in current configuration.
+    /// ALWAYS_FORBIDDEN defines operation not allowed in current configuration.
     const ALWAYS_FORBIDDEN: i32 = 10;
 
-    // PARTITION_UNAVAILABLE defines partition is unavailable.
+    /// PARTITION_UNAVAILABLE defines partition is unavailable.
     const PARTITION_UNAVAILABLE: i32 = 11;
 
-    // BIN_TYPE_ERROR defines operation is not supported with configured bin type (single-bin or multi-bin);
+    /// BIN_TYPE_ERROR defines operation is not supported with configured bin type (single-bin or multi-bin);
     const BIN_TYPE_ERROR: i32 = 12;
 
-    // RECORD_TOO_BIG defines record size exceeds limit.
+    /// RECORD_TOO_BIG defines record size exceeds limit.
     const RECORD_TOO_BIG: i32 = 13;
 
-    // KEY_BUSY defines too many concurrent operations on the same record.
+    /// KEY_BUSY defines too many concurrent operations on the same record.
     const KEY_BUSY: i32 = 14;
 
-    // SCAN_ABORT defines scan aborted by server.
+    /// SCAN_ABORT defines scan aborted by server.
     const SCAN_ABORT: i32 = 15;
 
-    // UNSUPPORTED_FEATURE defines unsupported Server Feature (e.g. Scan + UDF)
+    /// UNSUPPORTED_FEATURE defines unsupported Server Feature (e.g. Scan + UDF)
     const UNSUPPORTED_FEATURE: i32 = 16;
 
-    // BIN_NOT_FOUND defines bin not found on update-only operation.
+    /// BIN_NOT_FOUND defines bin not found on update-only operation.
     const BIN_NOT_FOUND: i32 = 17;
 
-    // DEVICE_OVERLOAD defines device not keeping up with writes.
+    /// DEVICE_OVERLOAD defines device not keeping up with writes.
     const DEVICE_OVERLOAD: i32 = 18;
 
-    // KEY_MISMATCH defines key type mismatch.
+    /// KEY_MISMATCH defines key type mismatch.
     const KEY_MISMATCH: i32 = 19;
 
-    // INVALID_NAMESPACE defines invalid namespace.
+    /// INVALID_NAMESPACE defines invalid namespace.
     const INVALID_NAMESPACE: i32 = 20;
 
-    // BIN_NAME_TOO_LONG defines bin name length greater than 14 characters, or maximum number of unique bin names are exceeded;
+    /// BIN_NAME_TOO_LONG defines bin name length greater than 14 characters, or maximum number of unique bin names are exceeded;
     const BIN_NAME_TOO_LONG: i32 = 21;
 
-    // FAIL_FORBIDDEN defines operation not allowed at this time.
+    /// FAIL_FORBIDDEN defines operation not allowed at this time.
     const FAIL_FORBIDDEN: i32 = 22;
 
-    // FAIL_ELEMENT_NOT_FOUND defines element Not Found in CDT
+    /// FAIL_ELEMENT_NOT_FOUND defines element Not Found in CDT
     const FAIL_ELEMENT_NOT_FOUND: i32 = 23;
 
-    // FAIL_ELEMENT_EXISTS defines element Already Exists in CDT
+    /// FAIL_ELEMENT_EXISTS defines element Already Exists in CDT
     const FAIL_ELEMENT_EXISTS: i32 = 24;
 
-    // ENTERPRISE_ONLY defines attempt to use an Enterprise feature on a Community server or a server without the applicable feature key;
+    /// ENTERPRISE_ONLY defines attempt to use an Enterprise feature on a Community server or a server without the applicable feature key;
     const ENTERPRISE_ONLY: i32 = 25;
 
-    // OP_NOT_APPLICABLE defines the operation cannot be applied to the current bin value on the server.
+    /// OP_NOT_APPLICABLE defines the operation cannot be applied to the current bin value on the server.
     const OP_NOT_APPLICABLE: i32 = 26;
 
-    // FILTERED_OUT defines the transaction was not performed because the filter was false.
+    /// FILTERED_OUT defines the transaction was not performed because the filter was false.
     const FILTERED_OUT: i32 = 27;
 
-    // LOST_CONFLICT defines write command loses conflict to XDR.
+    /// LOST_CONFLICT defines write command loses conflict to XDR.
     const LOST_CONFLICT: i32 = 28;
 
-    // QUERY_END defines there are no more records left for query.
+    /// QUERY_END defines there are no more records left for query.
     const QUERY_END: i32 = 50;
 
-    // SECURITY_NOT_SUPPORTED defines security type not supported by connected server.
+    /// SECURITY_NOT_SUPPORTED defines security type not supported by connected server.
     const SECURITY_NOT_SUPPORTED: i32 = 51;
 
-    // SECURITY_NOT_ENABLED defines administration command is invalid.
+    /// SECURITY_NOT_ENABLED defines administration command is invalid.
     const SECURITY_NOT_ENABLED: i32 = 52;
 
-    // SECURITY_SCHEME_NOT_SUPPORTED defines administration field is invalid.
+    /// SECURITY_SCHEME_NOT_SUPPORTED defines administration field is invalid.
     const SECURITY_SCHEME_NOT_SUPPORTED: i32 = 53;
 
-    // INVALID_COMMAND defines administration command is invalid.
+    /// INVALID_COMMAND defines administration command is invalid.
     const INVALID_COMMAND: i32 = 54;
 
-    // INVALID_FIELD defines administration field is invalid.
+    /// INVALID_FIELD defines administration field is invalid.
     const INVALID_FIELD: i32 = 55;
 
-    // ILLEGAL_STATE defines security protocol not followed.
+    /// ILLEGAL_STATE defines security protocol not followed.
     const ILLEGAL_STATE: i32 = 56;
 
-    // INVALID_USER defines user name is invalid.
+    /// INVALID_USER defines user name is invalid.
     const INVALID_USER: i32 = 60;
 
-    // USER_ALREADY_EXISTS defines user was previously created.
+    /// USER_ALREADY_EXISTS defines user was previously created.
     const USER_ALREADY_EXISTS: i32 = 61;
 
-    // INVALID_PASSWORD defines password is invalid.
+    /// INVALID_PASSWORD defines password is invalid.
     const INVALID_PASSWORD: i32 = 62;
 
-    // EXPIRED_PASSWORD defines security credential is invalid.
+    /// EXPIRED_PASSWORD defines security credential is invalid.
     const EXPIRED_PASSWORD: i32 = 63;
 
-    // FORBIDDEN_PASSWORD defines forbidden password (e.g. recently used)
+    /// FORBIDDEN_PASSWORD defines forbidden password (e.g. recently used)
     const FORBIDDEN_PASSWORD: i32 = 64;
 
-    // INVALID_CREDENTIAL defines security credential is invalid.
+    /// INVALID_CREDENTIAL defines security credential is invalid.
     const INVALID_CREDENTIAL: i32 = 65;
 
-    // EXPIRED_SESSION defines login session expired.
+    /// EXPIRED_SESSION defines login session expired.
     const EXPIRED_SESSION: i32 = 66;
 
-    // INVALID_ROLE defines role name is invalid.
+    /// INVALID_ROLE defines role name is invalid.
     const INVALID_ROLE: i32 = 70;
 
-    // ROLE_ALREADY_EXISTS defines role already exists.
+    /// ROLE_ALREADY_EXISTS defines role already exists.
     const ROLE_ALREADY_EXISTS: i32 = 71;
 
-    // INVALID_PRIVILEGE defines privilege is invalid.
+    /// INVALID_PRIVILEGE defines privilege is invalid.
     const INVALID_PRIVILEGE: i32 = 72;
 
-    // INVALID_WHITELIST defines invalid IP address whiltelist
+    /// INVALID_WHITELIST defines invalid IP address whiltelist
     const INVALID_WHITELIST: i32 = 73;
 
-    // QUOTAS_NOT_ENABLED defines Quotas not enabled on server.
+    /// QUOTAS_NOT_ENABLED defines Quotas not enabled on server.
     const QUOTAS_NOT_ENABLED: i32 = 74;
 
-    // INVALID_QUOTA defines invalid quota value.
+    /// INVALID_QUOTA defines invalid quota value.
     const INVALID_QUOTA: i32 = 75;
 
-    // NOT_AUTHENTICATED defines user must be authentication before performing database operations.
+    /// NOT_AUTHENTICATED defines user must be authentication before performing database operations.
     const NOT_AUTHENTICATED: i32 = 80;
 
-    // ROLE_VIOLATION defines user does not posses the required role to perform the database operation.
+    /// ROLE_VIOLATION defines user does not posses the required role to perform the database operation.
     const ROLE_VIOLATION: i32 = 81;
 
-    // NOT_WHITELISTED defines command not allowed because sender IP address not whitelisted.
+    /// NOT_WHITELISTED defines command not allowed because sender IP address not whitelisted.
     const NOT_WHITELISTED: i32 = 82;
 
-    // QUOTA_EXCEEDED defines Quota exceeded.
+    /// QUOTA_EXCEEDED defines Quota exceeded.
     const QUOTA_EXCEEDED: i32 = 83;
 
-    // UDF_BAD_RESPONSE defines a user defined function returned an error code.
+    /// UDF_BAD_RESPONSE defines a user defined function returned an error code.
     const UDF_BAD_RESPONSE: i32 = 100;
 
-    // BATCH_DISABLED defines batch functionality has been disabled.
+    /// BATCH_DISABLED defines batch functionality has been disabled.
     const BATCH_DISABLED: i32 = 150;
 
-    // BATCH_MAX_REQUESTS_EXCEEDED defines batch max requests have been exceeded.
+    /// BATCH_MAX_REQUESTS_EXCEEDED defines batch max requests have been exceeded.
     const BATCH_MAX_REQUESTS_EXCEEDED: i32 = 151;
 
-    // BATCH_QUEUES_FULL defines all batch queues are full.
+    /// BATCH_QUEUES_FULL defines all batch queues are full.
     const BATCH_QUEUES_FULL: i32 = 152;
 
-    // GEO_INVALID_GEOJSON defines invalid GeoJSON on insert/update
+    /// GEO_INVALID_GEOJSON defines invalid GeoJSON on insert/update
     const GEO_INVALID_GEOJSON: i32 = 160;
 
-    // INDEX_FOUND defines secondary index already exists.
+    /// INDEX_FOUND defines secondary index already exists.
     const INDEX_FOUND: i32 = 200;
 
-    // INDEX_NOTFOUND defines requested secondary index does not exist.
+    /// INDEX_NOTFOUND defines requested secondary index does not exist.
     const INDEX_NOT_FOUND: i32 = 201;
 
-    // INDEX_OOM defines secondary index memory space exceeded.
+    /// INDEX_OOM defines secondary index memory space exceeded.
     const INDEX_OOM: i32 = 202;
 
-    // INDEX_NOTREADABLE defines secondary index not available.
+    /// INDEX_NOTREADABLE defines secondary index not available.
     const INDEX_NOT_READABLE: i32 = 203;
 
-    // INDEX_GENERIC defines generic secondary index error.
+    /// INDEX_GENERIC defines generic secondary index error.
     const INDEX_GENERIC: i32 = 204;
 
-    // INDEX_NAME_MAXLEN defines index name maximum length exceeded.
+    /// INDEX_NAME_MAXLEN defines index name maximum length exceeded.
     const INDEX_NAME_MAX_LEN: i32 = 205;
 
-    // INDEX_MAXCOUNT defines maximum number of indexes exceeded.
+    /// INDEX_MAXCOUNT defines maximum number of indexes exceeded.
     const INDEX_MAX_COUNT: i32 = 206;
 
-    // QUERY_ABORTED defines secondary index query aborted.
+    /// QUERY_ABORTED defines secondary index query aborted.
     const QUERY_ABORTED: i32 = 210;
 
-    // QUERY_QUEUEFULL defines secondary index queue full.
+    /// QUERY_QUEUEFULL defines secondary index queue full.
     const QUERY_QUEUE_FULL: i32 = 211;
 
-    // QUERY_TIMEOUT defines secondary index query timed out on server.
+    /// QUERY_TIMEOUT defines secondary index query timed out on server.
     const QUERY_TIMEOUT: i32 = 212;
 
-    // QUERY_GENERIC defines generic query error.
+    /// QUERY_GENERIC defines generic query error.
     const QUERY_GENERIC: i32 = 213;
 
-    // QUERY_NETIO_ERR defines query NetIO error on server
+    /// QUERY_NETIO_ERR defines query NetIO error on server
     const QUERY_NET_IO_ERR: i32 = 214;
 
-    // QUERY_DUPLICATE defines duplicate TaskId sent for the statement
+    /// QUERY_DUPLICATE defines duplicate TaskId sent for the statement
     const QUERY_DUPLICATE: i32 = 215;
 
-    // AEROSPIKE_ERR_UDF_NOT_FOUND defines UDF does not exist.
+    /// AEROSPIKE_ERR_UDF_NOT_FOUND defines UDF does not exist.
     const AEROSPIKE_ERR_UDF_NOT_FOUND: i32 = 1301;
 
-    // AEROSPIKE_ERR_LUA_FILE_NOT_FOUND defines LUA file does not exist.
+    /// AEROSPIKE_ERR_LUA_FILE_NOT_FOUND defines LUA file does not exist.
     const AEROSPIKE_ERR_LUA_FILE_NOT_FOUND: i32 = 1302;
 
     pub fn to_string(code: i32) -> String {
         match code {
-            ResultCode::GRPC_ERROR => "wrapped and directly returned from the grpc library".into(),
-            ResultCode::BATCH_FAILED => "one or more keys failed in a batch".into(),
-            ResultCode::NO_RESPONSE => "no response was received from the server".into(),
-            ResultCode::NETWORK_ERROR => "a network error. Checked the wrapped error for detail".into(),
-            ResultCode::COMMON_ERROR => "a common, none-aerospike error. Checked the wrapped error for detail".into(),
-            ResultCode::MAX_RETRIES_EXCEEDED => "max retries limit reached".into(),
-            ResultCode::MAX_ERROR_RATE => "max errors limit reached".into(),
-            ResultCode::RACK_NOT_DEFINED => "requested Rack for node/namespace was not defined in the cluster".into(),
-            ResultCode::INVALID_CLUSTER_PARTITION_MAP => "cluster has an invalid partition map, usually due to bad configuration".into(),
-            ResultCode::SERVER_NOT_AVAILABLE => "server is not accepting requests".into(),
-            ResultCode::CLUSTER_NAME_MISMATCH_ERROR => "cluster Name does not match the ClientPolicy.ClusterName value".into(),
-            ResultCode::RECORDSET_CLOSED=> "recordset has already been closed or cancelled".into(),
-            ResultCode::NO_AVAILABLE_CONNECTIONS_TO_NODE=> "there were no connections available to the node in the pool, and the pool was limited".into(),
-            ResultCode::TYPE_NOT_SUPPORTED=> "data type is not supported by aerospike server".into(),
-            ResultCode::COMMAND_REJECTED=> "info Command was rejected by the server".into(),
-            ResultCode::QUERY_TERMINATED=> "query was terminated by user".into(),
-            ResultCode::SCAN_TERMINATED=> "scan was terminated by user".into(),
-            ResultCode::INVALID_NODE_ERROR=> "chosen node is not currently active".into(),
-            ResultCode::PARSE_ERROR=> "client parse error".into(),
-            ResultCode::SERIALIZE_ERROR=> "client serialization error".into(),
-            ResultCode::OK=> "operation was successful".into(),
-            ResultCode::SERVER_ERROR=> "unknown server failure".into(),
-            ResultCode::KEY_NOT_FOUND_ERROR=> "on retrieving, touching or replacing a record that doesn't exist".into(),
-            ResultCode::GENERATION_ERROR=> "on modifying a record with unexpected generation".into(),
-            ResultCode::PARAMETER_ERROR=> "bad parameter(s) were passed in database operation call".into(),
-            ResultCode::KEY_EXISTS_ERROR=> "on create-only (write unique) operations on a record that already exists".into(),
-            ResultCode::BIN_EXISTS_ERROR=> "bin already exists on a create-only operation".into(),
-            ResultCode::CLUSTER_KEY_MISMATCH=> "expected cluster ID was not received".into(),
-            ResultCode::SERVER_MEM_ERROR=> "server has run out of memory".into(),
-            ResultCode::TIMEOUT=> "client or server has timed out".into(),
-            ResultCode::ALWAYS_FORBIDDEN=> "operation not allowed in current configuration".into(),
-            ResultCode::PARTITION_UNAVAILABLE=> "partition is unavailable".into(),
-            ResultCode::BIN_TYPE_ERROR=> "operation is not supported with configured bin type (single-bin or multi-bin)".into(),
-            ResultCode::RECORD_TOO_BIG=> "record size exceeds limit".into(),
-            ResultCode::KEY_BUSY=> "too many concurrent operations on the same record".into(),
-            ResultCode::SCAN_ABORT=> "scan aborted by server".into(),
-            ResultCode::UNSUPPORTED_FEATURE=> "unsupported Server Feature (e.g. Scan + UDF)".into(),
-            ResultCode::BIN_NOT_FOUND=> "bin not found on update-only operation".into(),
-            ResultCode::DEVICE_OVERLOAD=> "device not keeping up with writes".into(),
-            ResultCode::KEY_MISMATCH=> "key type mismatch".into(),
-            ResultCode::INVALID_NAMESPACE=> "invalid namespace".into(),
-            ResultCode::BIN_NAME_TOO_LONG=> "bin name length greater than 14 characters, or maximum number of unique bin names are exceeded".into(),
-            ResultCode::FAIL_FORBIDDEN=> "operation not allowed at this time".into(),
-            ResultCode::FAIL_ELEMENT_NOT_FOUND=> "element Not Found in CDT".into(),
-            ResultCode::FAIL_ELEMENT_EXISTS=> "element Already Exists in CDT".into(),
-            ResultCode::ENTERPRISE_ONLY=> "attempt to use an Enterprise feature on a Community server or a server without the applicable feature key".into(),
-            ResultCode::OP_NOT_APPLICABLE=> "the operation cannot be applied to the current bin value on the server".into(),
-            ResultCode::FILTERED_OUT=> "the transaction was not performed because the filter was false".into(),
-            ResultCode::LOST_CONFLICT=> "write command loses conflict to XDR".into(),
-            ResultCode::QUERY_END=> "there are no more records left for query".into(),
-            ResultCode::SECURITY_NOT_SUPPORTED=> "security type not supported by connected server".into(),
-            ResultCode::SECURITY_NOT_ENABLED=> "administration command is invalid".into(),
-            ResultCode::SECURITY_SCHEME_NOT_SUPPORTED=> "administration field is invalid".into(),
-            ResultCode::INVALID_COMMAND=> "administration command is invalid".into(),
-            ResultCode::INVALID_FIELD=> "administration field is invalid".into(),
-            ResultCode::ILLEGAL_STATE=> "security protocol not followed".into(),
-            ResultCode::INVALID_USER=> "user name is invalid".into(),
-            ResultCode::USER_ALREADY_EXISTS=> "user was previously created".into(),
-            ResultCode::INVALID_PASSWORD=> "password is invalid".into(),
-            ResultCode::EXPIRED_PASSWORD=> "security credential is invalid".into(),
-            ResultCode::FORBIDDEN_PASSWORD=> "forbidden password (e.g. recently used)".into(),
-            ResultCode::INVALID_CREDENTIAL=> "security credential is invalid".into(),
-            ResultCode::EXPIRED_SESSION=> "login session expired".into(),
-            ResultCode::INVALID_ROLE=> "role name is invalid".into(),
-            ResultCode::ROLE_ALREADY_EXISTS=> "role already exists".into(),
-            ResultCode::INVALID_PRIVILEGE=> "privilege is invalid".into(),
-            ResultCode::INVALID_WHITELIST=> "invalid IP address whiltelist".into(),
-            ResultCode::QUOTAS_NOT_ENABLED=> "Quotas not enabled on server".into(),
-            ResultCode::INVALID_QUOTA=> "invalid quota value".into(),
-            ResultCode::NOT_AUTHENTICATED=> "user must be authentication before performing database operations".into(),
-            ResultCode::ROLE_VIOLATION=> "user does not posses the required role to perform the database operation".into(),
-            ResultCode::NOT_WHITELISTED=> "command not allowed because sender IP address not whitelisted".into(),
-            ResultCode::QUOTA_EXCEEDED=> "Quota exceeded".into(),
-            ResultCode::UDF_BAD_RESPONSE => "a user defined function returned an error code".into(),
-            ResultCode::BATCH_DISABLED => "batch functionality has been disabled".into(),
-            ResultCode::BATCH_MAX_REQUESTS_EXCEEDED => "batch max requests have been exceeded".into(),
-            ResultCode::BATCH_QUEUES_FULL => "all batch queues are full".into(),
-            ResultCode::GEO_INVALID_GEOJSON => "invalid GeoJSON on insert/update".into(),
-            ResultCode::INDEX_FOUND => "secondary index already exists".into(),
-            ResultCode::INDEX_NOT_FOUND => "requested secondary index does not exist".into(),
-            ResultCode::INDEX_OOM => "secondary index memory space exceeded".into(),
-            ResultCode::INDEX_NOT_READABLE => "secondary index not available".into(),
-            ResultCode::INDEX_GENERIC => "generic secondary index error".into(),
-            ResultCode::INDEX_NAME_MAX_LEN => "index name maximum length exceeded".into(),
-            ResultCode::INDEX_MAX_COUNT => "maximum number of indexes exceeded".into(),
-            ResultCode::QUERY_ABORTED => "secondary index query aborted".into(),
-            ResultCode::QUERY_QUEUE_FULL => "secondary index queue full".into(),
-            ResultCode::QUERY_TIMEOUT => "secondary index query timed out on server".into(),
-            ResultCode::QUERY_GENERIC => "generic query error".into(),
-            ResultCode::QUERY_NET_IO_ERR => "query NetIO error on server".into(),
-            ResultCode::QUERY_DUPLICATE => "duplicate TaskId sent for the statement".into(),
-            ResultCode::AEROSPIKE_ERR_UDF_NOT_FOUND => "UDF does not exist".into(),
-            ResultCode::AEROSPIKE_ERR_LUA_FILE_NOT_FOUND => "LUA file does not exist".into(),
-            _ => "Unknown Error".into()
-            }
+             ResultCode::GRPC_ERROR => "wrapped and directly returned from the grpc library".into(),
+             ResultCode::BATCH_FAILED => "one or more keys failed in a batch".into(),
+             ResultCode::NO_RESPONSE => "no response was received from the server".into(),
+             ResultCode::NETWORK_ERROR => "a network error. Checked the wrapped error for detail".into(),
+             ResultCode::COMMON_ERROR => "a common, none-aerospike error. Checked the wrapped error for detail".into(),
+             ResultCode::MAX_RETRIES_EXCEEDED => "max retries limit reached".into(),
+             ResultCode::MAX_ERROR_RATE => "max errors limit reached".into(),
+             ResultCode::RACK_NOT_DEFINED => "requested Rack for node/namespace was not defined in the cluster".into(),
+             ResultCode::INVALID_CLUSTER_PARTITION_MAP => "cluster has an invalid partition map, usually due to bad configuration".into(),
+             ResultCode::SERVER_NOT_AVAILABLE => "server is not accepting requests".into(),
+             ResultCode::CLUSTER_NAME_MISMATCH_ERROR => "cluster Name does not match the ClientPolicy.ClusterName value".into(),
+             ResultCode::RECORDSET_CLOSED=> "recordset has already been closed or cancelled".into(),
+             ResultCode::NO_AVAILABLE_CONNECTIONS_TO_NODE=> "there were no connections available to the node in the pool, and the pool was limited".into(),
+             ResultCode::TYPE_NOT_SUPPORTED=> "data type is not supported by aerospike server".into(),
+             ResultCode::COMMAND_REJECTED=> "info Command was rejected by the server".into(),
+             ResultCode::QUERY_TERMINATED=> "query was terminated by user".into(),
+             ResultCode::SCAN_TERMINATED=> "scan was terminated by user".into(),
+             ResultCode::INVALID_NODE_ERROR=> "chosen node is not currently active".into(),
+             ResultCode::PARSE_ERROR=> "client parse error".into(),
+             ResultCode::SERIALIZE_ERROR=> "client serialization error".into(),
+             ResultCode::OK=> "operation was successful".into(),
+             ResultCode::SERVER_ERROR=> "unknown server failure".into(),
+             ResultCode::KEY_NOT_FOUND_ERROR=> "on retrieving, touching or replacing a record that doesn't exist".into(),
+             ResultCode::GENERATION_ERROR=> "on modifying a record with unexpected generation".into(),
+             ResultCode::PARAMETER_ERROR=> "bad parameter(s) were passed in database operation call".into(),
+             ResultCode::KEY_EXISTS_ERROR=> "on create-only (write unique) operations on a record that already exists".into(),
+             ResultCode::BIN_EXISTS_ERROR=> "bin already exists on a create-only operation".into(),
+             ResultCode::CLUSTER_KEY_MISMATCH=> "expected cluster ID was not received".into(),
+             ResultCode::SERVER_MEM_ERROR=> "server has run out of memory".into(),
+             ResultCode::TIMEOUT=> "client or server has timed out".into(),
+             ResultCode::ALWAYS_FORBIDDEN=> "operation not allowed in current configuration".into(),
+             ResultCode::PARTITION_UNAVAILABLE=> "partition is unavailable".into(),
+             ResultCode::BIN_TYPE_ERROR=> "operation is not supported with configured bin type (single-bin or multi-bin)".into(),
+             ResultCode::RECORD_TOO_BIG=> "record size exceeds limit".into(),
+             ResultCode::KEY_BUSY=> "too many concurrent operations on the same record".into(),
+             ResultCode::SCAN_ABORT=> "scan aborted by server".into(),
+             ResultCode::UNSUPPORTED_FEATURE=> "unsupported Server Feature (e.g. Scan + UDF)".into(),
+             ResultCode::BIN_NOT_FOUND=> "bin not found on update-only operation".into(),
+             ResultCode::DEVICE_OVERLOAD=> "device not keeping up with writes".into(),
+             ResultCode::KEY_MISMATCH=> "key type mismatch".into(),
+             ResultCode::INVALID_NAMESPACE=> "invalid namespace".into(),
+             ResultCode::BIN_NAME_TOO_LONG=> "bin name length greater than 14 characters, or maximum number of unique bin names are exceeded".into(),
+             ResultCode::FAIL_FORBIDDEN=> "operation not allowed at this time".into(),
+             ResultCode::FAIL_ELEMENT_NOT_FOUND=> "element Not Found in CDT".into(),
+             ResultCode::FAIL_ELEMENT_EXISTS=> "element Already Exists in CDT".into(),
+             ResultCode::ENTERPRISE_ONLY=> "attempt to use an Enterprise feature on a Community server or a server without the applicable feature key".into(),
+             ResultCode::OP_NOT_APPLICABLE=> "the operation cannot be applied to the current bin value on the server".into(),
+             ResultCode::FILTERED_OUT=> "the transaction was not performed because the filter was false".into(),
+             ResultCode::LOST_CONFLICT=> "write command loses conflict to XDR".into(),
+             ResultCode::QUERY_END=> "there are no more records left for query".into(),
+             ResultCode::SECURITY_NOT_SUPPORTED=> "security type not supported by connected server".into(),
+             ResultCode::SECURITY_NOT_ENABLED=> "administration command is invalid".into(),
+             ResultCode::SECURITY_SCHEME_NOT_SUPPORTED=> "administration field is invalid".into(),
+             ResultCode::INVALID_COMMAND=> "administration command is invalid".into(),
+             ResultCode::INVALID_FIELD=> "administration field is invalid".into(),
+             ResultCode::ILLEGAL_STATE=> "security protocol not followed".into(),
+             ResultCode::INVALID_USER=> "user name is invalid".into(),
+             ResultCode::USER_ALREADY_EXISTS=> "user was previously created".into(),
+             ResultCode::INVALID_PASSWORD=> "password is invalid".into(),
+             ResultCode::EXPIRED_PASSWORD=> "security credential is invalid".into(),
+             ResultCode::FORBIDDEN_PASSWORD=> "forbidden password (e.g. recently used)".into(),
+             ResultCode::INVALID_CREDENTIAL=> "security credential is invalid".into(),
+             ResultCode::EXPIRED_SESSION=> "login session expired".into(),
+             ResultCode::INVALID_ROLE=> "role name is invalid".into(),
+             ResultCode::ROLE_ALREADY_EXISTS=> "role already exists".into(),
+             ResultCode::INVALID_PRIVILEGE=> "privilege is invalid".into(),
+             ResultCode::INVALID_WHITELIST=> "invalid IP address whiltelist".into(),
+             ResultCode::QUOTAS_NOT_ENABLED=> "Quotas not enabled on server".into(),
+             ResultCode::INVALID_QUOTA=> "invalid quota value".into(),
+             ResultCode::NOT_AUTHENTICATED=> "user must be authentication before performing database operations".into(),
+             ResultCode::ROLE_VIOLATION=> "user does not posses the required role to perform the database operation".into(),
+             ResultCode::NOT_WHITELISTED=> "command not allowed because sender IP address not whitelisted".into(),
+             ResultCode::QUOTA_EXCEEDED=> "Quota exceeded".into(),
+             ResultCode::UDF_BAD_RESPONSE => "a user defined function returned an error code".into(),
+             ResultCode::BATCH_DISABLED => "batch functionality has been disabled".into(),
+             ResultCode::BATCH_MAX_REQUESTS_EXCEEDED => "batch max requests have been exceeded".into(),
+             ResultCode::BATCH_QUEUES_FULL => "all batch queues are full".into(),
+             ResultCode::GEO_INVALID_GEOJSON => "invalid GeoJSON on insert/update".into(),
+             ResultCode::INDEX_FOUND => "secondary index already exists".into(),
+             ResultCode::INDEX_NOT_FOUND => "requested secondary index does not exist".into(),
+             ResultCode::INDEX_OOM => "secondary index memory space exceeded".into(),
+             ResultCode::INDEX_NOT_READABLE => "secondary index not available".into(),
+             ResultCode::INDEX_GENERIC => "generic secondary index error".into(),
+             ResultCode::INDEX_NAME_MAX_LEN => "index name maximum length exceeded".into(),
+             ResultCode::INDEX_MAX_COUNT => "maximum number of indexes exceeded".into(),
+             ResultCode::QUERY_ABORTED => "secondary index query aborted".into(),
+             ResultCode::QUERY_QUEUE_FULL => "secondary index queue full".into(),
+             ResultCode::QUERY_TIMEOUT => "secondary index query timed out on server".into(),
+             ResultCode::QUERY_GENERIC => "generic query error".into(),
+             ResultCode::QUERY_NET_IO_ERR => "query NetIO error on server".into(),
+             ResultCode::QUERY_DUPLICATE => "duplicate TaskId sent for the statement".into(),
+             ResultCode::AEROSPIKE_ERR_UDF_NOT_FOUND => "UDF does not exist".into(),
+             ResultCode::AEROSPIKE_ERR_LUA_FILE_NOT_FOUND => "LUA file does not exist".into(),
+             _ => "Unknown Error".into()
+             }
     }
 }
 
@@ -11491,6 +11819,7 @@ impl ResultCode {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Utility methods
 fn assert_map(val: &PHPValue) -> bool {
     match val {
         PHPValue::HashMap(_) => true,

@@ -45,7 +45,7 @@ class CDTMapOpTest extends TestCase{
     public function testShouldCreateValidCDTMap(){
         $bwp = new BatchWritePolicy(); 
         $bp = new BatchPolicy();
-        $mp = new MapPolicy(MapOrderType::unordered());
+        $mp = new MapPolicy(MapOrderType::Unordered());
 
         $ops = [MapOp::put($mp, self::$cdtBinName, ["a" => 1, "b" => 2, "c" => 3, "d" => 4, "e" => 5, "f" => 6])];
         
