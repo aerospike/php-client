@@ -62,4 +62,4 @@ This will be the GA release for Aerospike PHP Client v1.0.0
   
 ## [0.1.0] - 2023-09-15
 
-- Initial Release.
+  - Initial Release.

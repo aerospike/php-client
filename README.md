@@ -1,3 +1,4 @@
+[![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client) 
 # Aerospike PHP 8+ Client (v1.0.0)
 
 An [Aerospike](https://www.aerospike.com/) client library for PHP 8+.
@@ -29,7 +30,7 @@ cd php-client
 
 ### Setting up the Aerospike client connection manager: 
 
-#### Installing up the dependencies and Running Aerospike Connection manager
+#### Installing up the dependencies and Running the Aerospike Connection manager
 1. Make sure the go toolchain has been installed. Download the package from [The Go Programming Language](https://golang.org/dl/). Follow the steps to correctly install Go.
    **NOTE:** Ensure that the PATH variable has been updated with the GOBIN path.
 2. Install protobuf compiler:
@@ -101,12 +102,12 @@ sudo rm -r /tmp/asld_grpc.soc
 
 ## Documentation
 
-* Reference documnetaion can be found [here] (https://aerospike.github.io/php-client/)
+* Reference Documentation can be found [here] (https://aerospike.github.io/php-client/)
 * Aerospike Documentation can be found [here](https://aerospike.com/docs/)
 
 ## Issues
 
-If there are any bugs, feature requests or feedback -> please create an issue on [GitHub](https://github.com/aerospike/php-client/issues). We will review it. 
+If there are any bugs, feature requests or feedback -> please create an issue on [GitHub](https://github.com/aerospike/php-client/issues). Issues will be regularly reviewed by the Aerospike Client Engineering Team.
 
 ## Usage
 

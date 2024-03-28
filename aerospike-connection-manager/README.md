@@ -1,6 +1,6 @@
 # Aerospike Connection manager Daemon Setup Guide
 
-This guide provides step-by-step instructions on setting up the aerospike-connection-manager
+This guide provides step-by-step instructions on setting up the aerospike-connection-manager.
 
 ## Prerequisites
 
