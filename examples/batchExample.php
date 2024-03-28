@@ -20,7 +20,7 @@ $socket = "/tmp/asld_grpc.sock";
 
 // Connect to Aerospike server
 $client = Client::connect($socket);
-echo "* Connected to the local daemon: {$client->socket} \n";
+echo "* Connected to the aerospike-connection-manager: {$client->socket} \n";
 
 // Truncate the set (clear any existing data)
 $ip = new InfoPolicy();

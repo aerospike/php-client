@@ -36,15 +36,15 @@ cd php-client
 ```bash
    go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 ```
-3. Change directory into php-client/daemon 
+3. Change directory into php-client/aerospike-connection-manager 
 ```bash 
-cd php-client/daemon
+cd php-client/aerospike-connection-manager 
 ```
-4. Build and run the go local daemon
+4. Build and run the aerospike-connection-manager 
 ```bash
 sudo make
 ```
-**NOTE:** Please view the README.md in the [`php-client/daemon`](./daemon/README.md) directory for more information about the setting up the go local daemon and configuring the client policy.
+**NOTE:** Please view the README.md in the [`php-client/aerospike-connection-manager`](./aerospike-connection-manager/README.md) directory for more information about the setting up the aerospike-connection-manager  and configuring the client policy.
 
 ### Build and Install the PHP-Client
 * Check the php version 

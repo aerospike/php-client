@@ -1,6 +1,5 @@
 # Build the Aerospike Connection manager
 
-
 # Determine the operating system
 UNAME_S := $(shell uname -s)
 EXT_DIR_PATH := $(shell php -r 'echo ini_get("extension_dir");')
