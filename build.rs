@@ -2,7 +2,7 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() {
-    let proto_file = "daemon/asld_kvs.proto";
+    let proto_file = "aerospike-connection-manager/asld_kvs.proto";
 
     let out_dir = PathBuf::from(env::var("OUT_DIR").unwrap());
 

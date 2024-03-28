@@ -1,7 +1,5 @@
-[![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client)
-## This project is beta, and should not be used in production. If you're an enterprise customer feel free to reach out to our support with feedback and feature requests. We appreciate feedback from the Aerospike community on issues related to the new PHP client.
-
-# Aerospike PHP 8+ Client (v0.5.0-beta)
+[![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client) 
+# Aerospike PHP 8+ Client (v1.0.0)
 
 An [Aerospike](https://www.aerospike.com/) client library for PHP 8+.
 
@@ -21,11 +19,7 @@ This is the documentation for the Aerospike PHP Client. The PHP client comprises
 * Go Toolchain [Go Toolchains - The Go Programming Language](https://go.dev/doc/toolchain)
 * Protobuf Compiler [protoc-gen-go command - google.golang.org/protobuf/cmd/protoc-gen-go - Go Packages](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go)
 * ext-php-rs v0.12.0 [github repository link](https://github.com/davidcole1340/ext-php-rs/tree/master)
-
-## Current Limitations
-
-* Does not support Scan/Query API features
-* Does not support CDTs
+NOTE: Please see instruction for setting up ext-php-rs for windows [here] 
 
 ## Setup
 
@@ -36,22 +30,22 @@ cd php-client
 
 ### Setting up the Aerospike client connection manager: 
 
-## Setting up the go dependencies
+#### Installing up the dependencies and Running the Aerospike Connection manager
 1. Make sure the go toolchain has been installed. Download the package from [The Go Programming Language](https://golang.org/dl/). Follow the steps to correctly install Go.
    **NOTE:** Ensure that the PATH variable has been updated with the GOBIN path.
 2. Install protobuf compiler:
-   ```bash
+```bash
    go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-   ```
-3. Change directory into php-client/daemon 
-```bash 
-cd php-client/daemon
 ```
-4. Build and run the go local daemon
+3. Change directory into php-client/aerospike-connection-manager 
+```bash 
+cd php-client/aerospike-connection-manager 
+```
+4. Build and run the aerospike-connection-manager 
 ```bash
 sudo make
 ```
-**NOTE:** Please view the README.md in the [`php-client/daemon`](./daemon/README.md) directory for more information about the setting up the go local daemon and configuring the client policy.
+**NOTE:** Please view the README.md in the [`php-client/aerospike-connection-manager`](./aerospike-connection-manager/README.md) directory for more information about the setting up the aerospike-connection-manager  and configuring the client policy.
 
 ### Build and Install the PHP-Client
 * Check the php version 
@@ -81,12 +75,12 @@ cargo clean && cargo build --release
   - Before running your script pre-requisites are Aerospike connection manager and Aerospike Server must be running.  
   - Once the build is successful and all the pre-requisites are met, import the Aerospike namespace to your PHP script. 
   - To connect to the Aerospike connection manager add:
-	```php
+```PHP
 	$socket = "/tmp/asld_grpc.sock";
 	$client = Client::connect($socket); 
-	```
+```
   - Run the php script
-  If there are no Errors then you have successfully connected to the Aerospike Db. 
+  If there are no Errors then you have successfully connected to the Aerospike DB. 
 
 ***NOTE:*** If the connection manager daemon crashes, you will have to manually remove the file `/tmp/asld_grpc.sock` from its path.
 ```bash 
@@ -108,11 +102,12 @@ sudo rm -r /tmp/asld_grpc.soc
 
 ## Documentation
 
+* Reference Documentation can be found [here] (https://aerospike.github.io/php-client/)
 * Aerospike Documentation can be found [here](https://aerospike.com/docs/)
 
 ## Issues
 
-If there are any issues, please create an issue on [GitHub](https://github.com/aerospike/php-client/issues).
+If there are any bugs, feature requests or feedback -> please create an issue on [GitHub](https://github.com/aerospike/php-client/issues). Issues will be regularly reviewed by the Aerospike Client Engineering Team.
 
 ## Usage
 
@@ -125,7 +120,7 @@ namespace Aerospike;
 try{
   $socket = "/tmp/asld_grpc.sock";
   $client = Client::connect($socket);
-  var_dump($client->hosts);
+  var_dump($client->socket);
 }catch(AerospikeException $e){
   var_dump($e);
 }

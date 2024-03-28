@@ -1,5 +1,6 @@
 /target
 /Cargo.lock
+.phpdoc
 *.todo
 aerospike-rust-client.sublime-project
 aerospike-rust-client.sublime-workspace
@@ -7,4 +8,5 @@ aerospike-rust-client.sublime-workspace
 .idea/
 .DS_Store
 src/com.aerospike.daemon.rs
-daemon/asld
+aerospike-connection-manager/asld
+/vendor
