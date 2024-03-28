@@ -1,2 +1,2 @@
 #!/bin/bash
-systemctl enable aerospike-local-daemon.service
+systemctl enable aerospike-connection-manager.service

@@ -37,7 +37,7 @@ var (
 
 func main() {
 	var (
-		configFile  = flag.String("config-file", "/etc/aerospike-local-daemon/asld.toml", "Config File")
+		configFile  = flag.String("config-file", "/etc/aerospike-connection-manager/asld.toml", "Config File")
 		showUsage   = flag.Bool("h", false, "Show usage information")
 		showVersion = flag.Bool("v", false, "Print version")
 	)
