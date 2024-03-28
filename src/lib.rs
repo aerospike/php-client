@@ -1363,6 +1363,85 @@ impl RecordExistsAction {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+//  QueryDuration
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+/// QueryDuration represents the expected duration for a query operation in the Aerospike database. 
+#[php_class(name = "Aerospike\\QueryDuration")]
+pub struct QueryDuration {
+    _as: proto::QueryDuration,
+}
+
+impl FromZval<'_> for QueryDuration {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &QueryDuration = zval.extract()?;
+
+        Some(QueryDuration { _as: f._as.clone() })
+    }
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl QueryDuration {
+    /// LONG specifies that the query is expected to return more than 100 records per node. The server optimizes for a large record set in
+    /// the following ways:
+    ///
+    /// Allow query to be run in multiple threads using the server's query threading configuration.
+    /// Do not relax read consistency for AP namespaces.
+    /// Add the query to the server's query monitor.
+    /// Do not add the overall latency to the server's latency histogram.
+    /// Do not allow server timeouts.    
+    pub fn Long() -> Self {
+        QueryDuration {
+            _as: proto::QueryDuration::Long,
+        }
+    }
+
+    /// Short specifies that the query is expected to return less than 100 records per node. The server optimizes for a small record set in
+    /// the following ways:
+    /// Always run the query in one thread and ignore the server's query threading configuration.
+    /// Allow query to be inlined directly on the server's service thread.
+    /// Relax read consistency for AP namespaces.
+    /// Do not add the query to the server's query monitor.
+    /// Add the overall latency to the server's latency histogram.
+    /// Allow server timeouts. The default server timeout for a short query is 1 second.
+    pub fn Short() -> Self {
+        QueryDuration {
+            _as: proto::QueryDuration::Short,
+        }
+    }
+
+    /// LongRelaxAP will treat query as a LONG query, but relax read consistency for AP namespaces.
+    /// This value is treated exactly like LONG for server versions < 7.1.
+    pub fn LongRelaxAP() -> Self {
+        QueryDuration {
+            _as: proto::QueryDuration::LongRelaxAp,
+        }
+    }
+}
+
+impl From<&proto::QueryDuration> for QueryDuration {
+    fn from(input: &proto::QueryDuration) -> Self {
+        QueryDuration { _as: input.clone() }
+    }
+}
+
+impl From<i32> for QueryDuration {
+    fn from(input: i32) -> Self {
+        match input {
+            0 => QueryDuration::Long(),
+            1 => QueryDuration::Short(),
+            2 => QueryDuration::LongRelaxAP(),
+            _ => unreachable!(),
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 //  CommitLevel
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -2629,20 +2708,18 @@ impl QueryPolicy {
         QueryPolicy::default()
     }
 
-    /// ShortQuery detemines wether query expected to return less than 100 records.
-    /// If true, the server will optimize the query for a small record set.
-    /// This field is ignored for aggregation queries, background queries
-    /// and server versions 6.0+.
-    ///
-    /// Default: false
+    /// QueryDuration represents the expected duration for a query operation in the Aerospike database. 
+    /// It provides options for specifying whether a query is expected to return a large number of records per node (Long), 
+    /// a small number of records per node (Short), or a long query with relaxed read consistency for AP namespaces (LongRelaxAP). 
+    /// These options influence how the server optimizes query execution to meet the expected duration requirements.
     #[getter]
-    pub fn get_short_query(&self) -> bool {
-        self._as.short_query
+    pub fn get_expected_duration(&self) -> QueryDuration {
+        self._as.expected_duration.into()
     }
 
     #[setter]
-    pub fn set_short_query(&mut self, short_query: bool) {
-        self._as.short_query = short_query;
+    pub fn set_expected_duration(&mut self, expected_duration: QueryDuration) {
+        self._as.expected_duration = expected_duration._as.into();
     }
 
     /// ***************************************************************************
@@ -2955,7 +3032,7 @@ impl Default for QueryPolicy {
         QueryPolicy {
             _as: proto::QueryPolicy {
                 multi_policy: Some(MultiPolicy::default()._as),
-                short_query: false,
+                expected_duration: QueryDuration::Long()._as.into(),
             },
         }
     }
@@ -5905,6 +5982,7 @@ impl CdtListOperation {
         bin_name: String,
         order: ListOrderType,
         pad: bool,
+        index: Option<bool>,
         ctx: Option<Vec<&CDTContext>>,
     ) -> Operation {
         let order: i32 = order._as.into();
@@ -5916,6 +5994,7 @@ impl CdtListOperation {
                 args: vec![
                     PHPValue::Int(order as i64).into(),
                     PHPValue::Bool(pad).into(),
+                    PHPValue::Bool(index.unwrap_or(false)).into(),
                 ],
                 return_type: None,
                 ctx: ctx

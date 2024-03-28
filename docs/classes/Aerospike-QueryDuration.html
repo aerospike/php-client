@@ -90,7 +90,7 @@
 
     <article class="phpdocumentor-element -class">
         <h2 class="phpdocumentor-content__title">
-    Wildcard
+    QueryDuration
 
     
             <div class="phpdocumentor-element__package">
@@ -111,11 +111,11 @@
         <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">3703</span>
+    <span class="phpdocumentor-element-found-in__line">48</span>
 
     </aside>
 
-            <p class="phpdocumentor-summary">Represents a wildcard value for Aerospike.</p>
+            <p class="phpdocumentor-summary">QueryDuration represents the expected duration for a query operation in the Aerospike database.</p>
 
 
 
@@ -124,7 +124,7 @@
 
 <h3 id="toc">
     Table of Contents
-    <a href="classes/Aerospike-Wildcard.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
+    <a href="classes/Aerospike-QueryDuration.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
 
 </h3>
 
@@ -137,6 +137,37 @@
 
 
 
+<h4 id="toc-methods">
+    Methods
+    <a href="classes/Aerospike-QueryDuration.html#toc-methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+</h4>
+<dl class="phpdocumentor-table-of-contents">
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/Aerospike-QueryDuration.html#method_long">long()</a>
+    <span>
+                                &nbsp;: <a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a>    </span>
+</dt>
+<dd>LONG specifies that the query is expected to return more than 100 records per node. The server optimizes for a large record set in
+the following ways:</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/Aerospike-QueryDuration.html#method_longRelaxAP">longRelaxAP()</a>
+    <span>
+                                &nbsp;: <a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a>    </span>
+</dt>
+<dd>LongRelaxAP will treat query as a LONG query, but relax read consistency for AP namespaces.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a href="classes/Aerospike-QueryDuration.html#method_short">short()</a>
+    <span>
+                                &nbsp;: <a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a>    </span>
+</dt>
+<dd>Short specifies that the query is expected to return less than 100 records per node. The server optimizes for a small record set in
+the following ways:
+Always run the query in one thread and ignore the server&#039;s query threading configuration.</dd>
+
+    </dl>
 
 
 
@@ -145,7 +176,139 @@
 
         
 
-        
+            <section class="phpdocumentor-methods">
+        <h3 class="phpdocumentor-elements__header" id="methods">
+            Methods
+            <a href="classes/Aerospike-QueryDuration.html#methods" class="headerlink"><i class="fas fa-link"></i></a>
+
+        </h3>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_long">
+        long()
+        <a href="classes/Aerospike-QueryDuration.html#method_long" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">59</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">LONG specifies that the query is expected to return more than 100 records per node. The server optimizes for a large record set in
+the following ways:</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">long</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+        <section class="phpdocumentor-description"><p>Allow query to be run in multiple threads using the server's query threading configuration.
+Do not relax read consistency for AP namespaces.
+Add the query to the server's query monitor.
+Do not add the overall latency to the server's latency histogram.
+Do not allow server timeouts.</p>
+</section>
+
+    
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_longRelaxAP">
+        longRelaxAP()
+        <a href="classes/Aerospike-QueryDuration.html#method_longRelaxAP" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">77</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">LongRelaxAP will treat query as a LONG query, but relax read consistency for AP namespaces.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">longRelaxAP</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+        <section class="phpdocumentor-description"><p>This value is treated exactly like LONG for server versions &lt; 7.1.</p>
+</section>
+
+    
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                    -static                    "
+>
+    <h4 class="phpdocumentor-element__name" id="method_short">
+        short()
+        <a href="classes/Aerospike-QueryDuration.html#method_short" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">71</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Short specifies that the query is expected to return less than 100 records per node. The server optimizes for a small record set in
+the following ways:
+Always run the query in one thread and ignore the server&#039;s query threading configuration.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__static">static</span>        <span class="phpdocumentor-signature__name">short</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a></span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+        <section class="phpdocumentor-description"><p>Allow query to be inlined directly on the server's service thread.
+Relax read consistency for AP namespaces.
+Do not add the query to the server's query monitor.
+Add the overall latency to the server's latency histogram.
+Allow server timeouts. The default server timeout for a short query is 1 second.</p>
+</section>
+
+    
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a></span>
+            </section>
+
+</article>
+            </section>
+
         <div class="phpdocumentor-modal" id="source-view">
     <div class="phpdocumentor-modal-bg" data-exit-button></div>
     <div class="phpdocumentor-modal-container">
@@ -249,10 +412,19 @@
             <li class="phpdocumentor-on-this-page-section__title">Table Of Contents</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                                                            </ul>
+                                                                                <li><a href="classes/Aerospike-QueryDuration.html#toc-methods">Methods</a></li>
+                                    </ul>
             </li>
             
             
+                        <li class="phpdocumentor-on-this-page-section__title">Methods</li>
+            <li>
+                <ul class="phpdocumentor-list -clean">
+                                            <li><a href="classes/Aerospike-QueryDuration.html#method_long">long()</a></li>
+                                            <li><a href="classes/Aerospike-QueryDuration.html#method_longRelaxAP">longRelaxAP()</a></li>
+                                            <li><a href="classes/Aerospike-QueryDuration.html#method_short">short()</a></li>
+                                    </ul>
+            </li>
                     </ul>
     </section>
 
@@ -270,7 +442,7 @@
     </section>
 </section>
         </div>
-        <a href="classes/Aerospike-Wildcard.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
+        <a href="classes/Aerospike-QueryDuration.html#top" class="phpdocumentor-back-to-top"><i class="fas fa-chevron-circle-up"></i></a>
 
     </main>
 

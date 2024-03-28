@@ -11,6 +11,7 @@ use Aerospike\IndexType;
 use Aerospike\Filter;
 use Aerospike\Statement;
 use Aerospike\AerospikeException;
+use Aerospike\QueryDuration;
 
 use PHPUnit\Framework\TestCase;
 
@@ -195,6 +196,26 @@ class QueryTest extends TestCase{
         $pf =  PartitionFilter::all();
         $qp = new QueryPolicy();
         $qp->setMaxRetries(20);
+        $eqFilter = Filter::Equal('AerospikeBin3', 987);
+        $statement = new Statement(self::$namespace, self::$set, $eqFilter);
+
+        $recordSet = self::$client->query($qp, $pf, $statement);
+        $counter = 0;
+        while($rec = $recordSet->next()) {  
+            $this->assertNotNull($rec->bins['AerospikeBin3']);
+            $counter++;
+        }
+        $this->assertGreaterThan(0, $counter);
+
+    }
+
+    public function testQueryWithExpectedDurationSet(){
+        $counter = 0;
+        $this->assertEquals(count(self::$keys), self::$keyCount);
+        $pf =  PartitionFilter::all();
+        $qp = new QueryPolicy();
+        $qp->setMaxRetries(20);
+        $qp->setExpectedDuration(QueryDuration::Short());
         $eqFilter = Filter::Equal('AerospikeBin3', 987);
         $statement = new Statement(self::$namespace, self::$set, $eqFilter);
 

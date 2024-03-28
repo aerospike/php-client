@@ -1,0 +1,11 @@
+[Unit]
+Description=Aerospike Local Daemon
+Documentation=https://github.com/aerospike/php-client
+Wants=network.target
+After=network-online.target
+
+[Service]
+ExecStart=/usr/bin/asld --config /etc/aerospike-local-daemon/asld.toml
+
+[Install]
+WantedBy=multi-user.target

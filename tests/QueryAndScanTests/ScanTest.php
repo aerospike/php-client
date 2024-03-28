@@ -37,7 +37,7 @@ class ScanTest extends TestCase
     {
         self::$keys = [];
         $wp = new WritePolicy();
-        self::$set = self::randomString(random_int(0, 50));
+        self::$set = self::randomString(random_int(5, 50));
         
         $ip = new InfoPolicy();
         self::$client->truncate($ip, self::$namespace, self::$set);

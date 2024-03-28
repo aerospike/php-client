@@ -1,10 +1,5 @@
-# Go parameters
-hosts ?= ""
-host ?= localhost
-port ?= 3000
-user ?= ""
-pass ?= ""
-ns ?= "test"
+# Build the Aerospike Connection manager
+
 
 # Determine the operating system
 UNAME_S := $(shell uname -s)
@@ -41,12 +36,12 @@ build:
 	cargo build --release
 
 install-dev: build-dev
-	sudo cp -f target/debug/libaerospike$(EXTENSION) $(EXT_DIR_PATH)
-	echo "extension=libaerospike$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
+	sudo cp -f target/debug/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
+	echo "extension=libaerospike_php$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
 
 install: build
-	sudo cp -f target/release/libaerospike$(EXTENSION) $(EXT_DIR_PATH)
-	echo "extension=libaerospike$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
+	sudo cp -f target/release/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
+	echo "extension=libaerospike_php$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
 
 restart: install
 	$(RESTART_COMMAND)

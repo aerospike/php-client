@@ -29,13 +29,13 @@ cd php-client
 
 ### Setting up the Aerospike client connection manager: 
 
-## Setting up the go dependencies
+#### Installing up the dependencies and Running Aerospike Connection manager
 1. Make sure the go toolchain has been installed. Download the package from [The Go Programming Language](https://golang.org/dl/). Follow the steps to correctly install Go.
    **NOTE:** Ensure that the PATH variable has been updated with the GOBIN path.
 2. Install protobuf compiler:
-   ```bash
+```bash
    go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-   ```
+```
 3. Change directory into php-client/daemon 
 ```bash 
 cd php-client/daemon
@@ -74,12 +74,12 @@ cargo clean && cargo build --release
   - Before running your script pre-requisites are Aerospike connection manager and Aerospike Server must be running.  
   - Once the build is successful and all the pre-requisites are met, import the Aerospike namespace to your PHP script. 
   - To connect to the Aerospike connection manager add:
-	```php
+```PHP
 	$socket = "/tmp/asld_grpc.sock";
 	$client = Client::connect($socket); 
-	```
+```
   - Run the php script
-  If there are no Errors then you have successfully connected to the Aerospike Db. 
+  If there are no Errors then you have successfully connected to the Aerospike DB. 
 
 ***NOTE:*** If the connection manager daemon crashes, you will have to manually remove the file `/tmp/asld_grpc.sock` from its path.
 ```bash 
@@ -101,11 +101,12 @@ sudo rm -r /tmp/asld_grpc.soc
 
 ## Documentation
 
+* Reference documnetaion can be found [here] (https://aerospike.github.io/php-client/)
 * Aerospike Documentation can be found [here](https://aerospike.com/docs/)
 
 ## Issues
 
-If there are any issues, please create an issue on [GitHub](https://github.com/aerospike/php-client/issues).
+If there are any bugs, feature requests or feedback -> please create an issue on [GitHub](https://github.com/aerospike/php-client/issues). We will review it. 
 
 ## Usage
 
