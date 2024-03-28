@@ -1798,10 +1798,7 @@ impl MapOrderType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-/// CDTContext defines Nested CDT context. Identifies the location of nested list/map to apply the operation.
-/// for the current level.
-/// An array of CTX identifies location of the list/map on multiple
-/// levels on nesting.
+
 enum CDTContextType {
     ListIndex = 0x10,
     ListRank = 0x11,
@@ -1812,6 +1809,10 @@ enum CDTContextType {
     MapValue = 0x23,
 }
 
+/// CDTContext defines Nested CDT context. Identifies the location of nested list/map to apply the operation.
+/// for the current level.
+/// An array of CTX identifies location of the list/map on multiple
+/// levels on nesting.
 #[php_class(name = "Aerospike\\Context")]
 pub struct CDTContext {
     _as: proto::CdtContext,

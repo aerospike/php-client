@@ -893,7 +893,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Aerospike\\Concurrency",
             "name": "Concurrency",
-            "summary": "",
+            "summary": "Specifies\u0020whether\u0020a\u0020command,\u0020that\u0020needs\u0020to\u0020be\u0020executed\u0020on\u0020multiple\u0020cluster\u0020nodes,\u0020should\u0020be\u0020executed\u0020sequentially,\u0020one\u0020node\u0020at\u0020a\u0020time,\u0020or\u0020in\u0020parallel\u0020on\u0020multiple\u0020nodes\u0020using\u0020the\u0020client\u0027s\nthread\u0020pool.",
             "url": "classes/Aerospike-Concurrency.html"
         },                {
             "fqsen": "\\Aerospike\\Concurrency\u003A\u003ASequential\u0028\u0029",
@@ -1463,7 +1463,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Aerospike\\Context",
             "name": "Context",
-            "summary": "",
+            "summary": "CDTContext\u0020defines\u0020Nested\u0020CDT\u0020context.\u0020Identifies\u0020the\u0020location\u0020of\u0020nested\u0020list\/map\u0020to\u0020apply\u0020the\u0020operation\u0020for\u0020the\u0020current\u0020level.",
             "url": "classes/Aerospike-Context.html"
         },                {
             "fqsen": "\\Aerospike\\Context\u003A\u003A__construct\u0028\u0029",
@@ -3633,7 +3633,7 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Aerospike\\Value",
             "name": "Value",
-            "summary": "",
+            "summary": "Value\u0020interface\u0020is\u0020used\u0020to\u0020efficiently\u0020serialize\u0020objects\u0020into\u0020the\u0020wire\u0020protocol.",
             "url": "classes/Aerospike-Value.html"
         },                {
             "fqsen": "\\Aerospike\\Value\u003A\u003Anil\u0028\u0029",
