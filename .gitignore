@@ -1,3 +1,4 @@
+aerospike.stubs.php
 /target
 /Cargo.lock
 .phpdoc
@@ -10,3 +11,5 @@ aerospike-rust-client.sublime-workspace
 src/com.aerospike.daemon.rs
 aerospike-connection-manager/asld
 /vendor
+/_debug
+/bench
