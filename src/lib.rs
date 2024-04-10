@@ -1367,7 +1367,7 @@ impl RecordExistsAction {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-/// QueryDuration represents the expected duration for a query operation in the Aerospike database. 
+/// QueryDuration represents the expected duration for a query operation in the Aerospike database.
 #[php_class(name = "Aerospike\\QueryDuration")]
 pub struct QueryDuration {
     _as: proto::QueryDuration,
@@ -1877,7 +1877,6 @@ impl MapOrderType {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-
 enum CDTContextType {
     ListIndex = 0x10,
     ListRank = 0x11,
@@ -2044,7 +2043,6 @@ pub struct ReadPolicy {
     _as: proto::ReadPolicy,
 }
 
-
 #[php_impl]
 #[derive(ZvalConvert)]
 impl ReadPolicy {
@@ -2053,22 +2051,22 @@ impl ReadPolicy {
     }
 
     /// MaxRetries determines the maximum number of retries before aborting the current transaction.
-	/// The initial attempt is not counted as a retry.
-	///
-	/// If MaxRetries is exceeded, the transaction will abort with an error.
-	///
-	/// WARNING: Database writes that are not idempotent (such as AddOp)
-	/// should not be retried because the write operation may be performed
-	/// multiple times if the client timed out previous transaction attempts.
-	/// It's important to use a distinct WritePolicy for non-idempotent
-	/// writes which sets maxRetries = 0;
-	///
-	/// Default for read: 2 (initial attempt + 2 retries = 3 attempts)
-	///
-	/// Default for write: 0 (no retries)
-	///
-	/// Default for partition scan or query with nil filter: 5
-	/// (6 attempts. See ScanPolicy comments.)
+    /// The initial attempt is not counted as a retry.
+    ///
+    /// If MaxRetries is exceeded, the transaction will abort with an error.
+    ///
+    /// WARNING: Database writes that are not idempotent (such as AddOp)
+    /// should not be retried because the write operation may be performed
+    /// multiple times if the client timed out previous transaction attempts.
+    /// It's important to use a distinct WritePolicy for non-idempotent
+    /// writes which sets maxRetries = 0;
+    ///
+    /// Default for read: 2 (initial attempt + 2 retries = 3 attempts)
+    ///
+    /// Default for write: 0 (no retries)
+    ///
+    /// Default for partition scan or query with nil filter: 5
+    /// (6 attempts. See ScanPolicy comments.)
     #[getter]
     pub fn get_max_retries(&self) -> u32 {
         self._as.max_retries
@@ -2080,7 +2078,7 @@ impl ReadPolicy {
     }
 
     /// SleepMultiplier specifies the multiplying factor to be used for exponential backoff during retries.
-	/// Default to (1.0); Only values greater than 1 are valid.
+    /// Default to (1.0); Only values greater than 1 are valid.
     #[getter]
     pub fn get_sleep_multiplier(&self) -> f64 {
         self._as.sleep_multiplier
@@ -2092,21 +2090,21 @@ impl ReadPolicy {
     }
 
     /// TotalTimeout specifies total transaction timeout.
-	///
-	/// The TotalTimeout is tracked on the client and also sent to the server along
-	/// with the transaction in the wire protocol. The client will most likely
-	/// timeout first, but the server has the capability to Timeout the transaction.
-	///
-	/// If TotalTimeout is not zero and TotalTimeout is reached before the transaction
-	/// completes, the transaction will abort with TotalTimeout error.
-	///
-	/// If TotalTimeout is zero, there will be no time limit and the transaction will retry
-	/// on network timeouts/errors until MaxRetries is exceeded. If MaxRetries is exceeded, the
-	/// transaction also aborts with Timeout error.
-	///
-	/// Default for scan/query: 0 (no time limit and rely on MaxRetries)
-	///
-	/// Default for all other commands: 1000ms
+    ///
+    /// The TotalTimeout is tracked on the client and also sent to the server along
+    /// with the transaction in the wire protocol. The client will most likely
+    /// timeout first, but the server has the capability to Timeout the transaction.
+    ///
+    /// If TotalTimeout is not zero and TotalTimeout is reached before the transaction
+    /// completes, the transaction will abort with TotalTimeout error.
+    ///
+    /// If TotalTimeout is zero, there will be no time limit and the transaction will retry
+    /// on network timeouts/errors until MaxRetries is exceeded. If MaxRetries is exceeded, the
+    /// transaction also aborts with Timeout error.
+    ///
+    /// Default for scan/query: 0 (no time limit and rely on MaxRetries)
+    ///
+    /// Default for all other commands: 1000ms
     #[getter]
     pub fn get_total_timeout(&self) -> u64 {
         self._as.total_timeout
@@ -2118,13 +2116,13 @@ impl ReadPolicy {
     }
 
     /// SocketTimeout determines network timeout for each attempt.
-	///
-	/// If SocketTimeout is not zero and SocketTimeout is reached before an attempt completes,
-	/// the Timeout above is checked. If Timeout is not exceeded, the transaction
-	/// is retried. If both SocketTimeout and Timeout are non-zero, SocketTimeout must be less
-	/// than or equal to Timeout, otherwise Timeout will also be used for SocketTimeout.
-	///
-	/// Default: 30s
+    ///
+    /// If SocketTimeout is not zero and SocketTimeout is reached before an attempt completes,
+    /// the Timeout above is checked. If Timeout is not exceeded, the transaction
+    /// is retried. If both SocketTimeout and Timeout are non-zero, SocketTimeout must be less
+    /// than or equal to Timeout, otherwise Timeout will also be used for SocketTimeout.
+    ///
+    /// Default: 30s
     #[getter]
     pub fn get_socket_timeout(&self) -> u64 {
         self._as.socket_timeout
@@ -2136,9 +2134,9 @@ impl ReadPolicy {
     }
 
     /// SendKey determines to whether send user defined key in addition to hash digest on both reads and writes.
-	/// If the key is sent on a write, the key will be stored with the record on
-	/// the server.
-	/// The default is to not send the user defined key.
+    /// If the key is sent on a write, the key will be stored with the record on
+    /// the server.
+    /// The default is to not send the user defined key.
     #[getter]
     pub fn get_send_key(&self) -> bool {
         self._as.send_key
@@ -2150,12 +2148,12 @@ impl ReadPolicy {
     }
 
     /// UseCompression uses zlib compression on command buffers sent to the server and responses received
-	/// from the server when the buffer size is greater than 128 bytes.
-	///
-	/// This option will increase cpu and memory usage (for extra compressed buffers),but
-	/// decrease the size of data sent over the network.
-	///
-	/// Default: false
+    /// from the server when the buffer size is greater than 128 bytes.
+    ///
+    /// This option will increase cpu and memory usage (for extra compressed buffers),but
+    /// decrease the size of data sent over the network.
+    ///
+    /// Default: false
     #[getter]
     pub fn get_use_compression(&self) -> bool {
         self._as.use_compression
@@ -2167,12 +2165,12 @@ impl ReadPolicy {
     }
 
     /// ExitFastOnExhaustedConnectionPool determines if a command that tries to get a
-	/// connection from the connection pool will wait and retry in case the pool is
-	/// exhausted until a connection becomes available (or the TotalTimeout is reached).
-	/// If set to true, an error will be return immediately.
-	/// If set to false, getting a connection will be retried.
-	/// This only applies if LimitConnectionsToQueueSize is set to true and the number of open connections to a node has reached ConnectionQueueSize.
-	/// The default is false
+    /// connection from the connection pool will wait and retry in case the pool is
+    /// exhausted until a connection becomes available (or the TotalTimeout is reached).
+    /// If set to true, an error will be return immediately.
+    /// If set to false, getting a connection will be retried.
+    /// This only applies if LimitConnectionsToQueueSize is set to true and the number of open connections to a node has reached ConnectionQueueSize.
+    /// The default is false
     #[getter]
     pub fn get_exit_fast_on_exhausted_connection_pool(&self) -> bool {
         self._as.exit_fast_on_exhausted_connection_pool
@@ -2281,7 +2279,7 @@ impl AdminPolicy {
     }
 
     /// User administration command socket timeout.
-	/// Default is 2 seconds.
+    /// Default is 2 seconds.
     #[getter]
     pub fn get_timeout(&self) -> u32 {
         self._as.timeout
@@ -2654,7 +2652,7 @@ impl Default for WritePolicy {
                 generation: 0,
                 expiration: 0,
                 respond_per_each_op: false,
-                durable_delete: true,
+                durable_delete: false,
             },
         }
     }
@@ -2708,9 +2706,9 @@ impl QueryPolicy {
         QueryPolicy::default()
     }
 
-    /// QueryDuration represents the expected duration for a query operation in the Aerospike database. 
-    /// It provides options for specifying whether a query is expected to return a large number of records per node (Long), 
-    /// a small number of records per node (Short), or a long query with relaxed read consistency for AP namespaces (LongRelaxAP). 
+    /// QueryDuration represents the expected duration for a query operation in the Aerospike database.
+    /// It provides options for specifying whether a query is expected to return a large number of records per node (Long),
+    /// a small number of records per node (Short), or a long query with relaxed read consistency for AP namespaces (LongRelaxAP).
     /// These options influence how the server optimizes query execution to meet the expected duration requirements.
     #[getter]
     pub fn get_expected_duration(&self) -> QueryDuration {
@@ -2727,11 +2725,11 @@ impl QueryPolicy {
     /// ***************************************************************************
 
     /// Maximum number of concurrent requests to server nodes at any point in time.
-	/// If there are 16 nodes in the cluster and maxConcurrentNodes is 8, then queries
-	/// will be made to 8 nodes in parallel.  When a query completes, a new query will
-	/// be issued until all 16 nodes have been queried.
-	/// Default (0) is to issue requests to all server nodes in parallel.
-	/// 1 will to issue requests to server nodes one by one avoiding parallel queries.
+    /// If there are 16 nodes in the cluster and maxConcurrentNodes is 8, then queries
+    /// will be made to 8 nodes in parallel.  When a query completes, a new query will
+    /// be issued until all 16 nodes have been queried.
+    /// Default (0) is to issue requests to all server nodes in parallel.
+    /// 1 will to issue requests to server nodes one by one avoiding parallel queries.
     #[getter]
     pub fn get_max_concurrent_nodes(&self) -> u32 {
         self._as.multi_policy.as_ref().unwrap().max_concurrent_nodes
@@ -2743,9 +2741,9 @@ impl QueryPolicy {
     }
 
     /// Number of records to place in queue before blocking.
-	/// Records received from multiple server nodes will be placed in a queue.
-	/// A separate goroutine consumes these records in parallel.
-	/// If the queue is full, the producer goroutines will block until records are consumed.
+    /// Records received from multiple server nodes will be placed in a queue.
+    /// A separate goroutine consumes these records in parallel.
+    /// If the queue is full, the producer goroutines will block until records are consumed.
     #[getter]
     pub fn get_record_queue_size(&self) -> u32 {
         self._as.multi_policy.as_ref().unwrap().record_queue_size
@@ -4178,7 +4176,7 @@ impl Record {
     }
 
     /// Expiration is TTL (Time-To-Live).
-	/// Number of seconds until record expires.
+    /// Number of seconds until record expires.
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
@@ -4186,9 +4184,9 @@ impl Record {
             secs => secs.into(),
         }
     }
-    
+
     /// Expiration is TTL (Time-To-Live).
-	/// Number of seconds until record expires.
+    /// Number of seconds until record expires.
     #[getter]
     pub fn get_ttl(&self) -> Option<u32> {
         match self._as.expiration {
@@ -4212,7 +4210,7 @@ impl Record {
     }
 
     /// Key is the record's key.
-	/// Might be empty, or may only consist of digest value.
+    /// Might be empty, or may only consist of digest value.
     #[getter]
     pub fn get_key(&self) -> Option<Key> {
         Some(Key {
@@ -4510,9 +4508,9 @@ impl BatchReadPolicy {
     }
 
     /// FilterExpression is the optional expression filter. If FilterExpression exists and evaluates to false, the specific batch key
-	/// request is not performed and BatchRecord.ResultCode is set to types.FILTERED_OUT.
-	///
-	/// Default: null
+    /// request is not performed and BatchRecord.ResultCode is set to types.FILTERED_OUT.
+    ///
+    /// Default: null
     #[getter]
     pub fn get_filter_expression(&self) -> Option<Expression> {
         self._as
@@ -4748,7 +4746,7 @@ impl Default for BatchWritePolicy {
                 commit_level: proto::CommitLevel::CommitAll.into(),
                 generation: 0,
                 expiration: 0,
-                durable_delete: true,
+                durable_delete: false,
                 send_key: false,
             },
         }
@@ -4863,7 +4861,7 @@ impl Default for BatchDeletePolicy {
                 generation_policy: proto::GenerationPolicy::None.into(),
                 commit_level: proto::CommitLevel::CommitAll.into(),
                 generation: 0,
-                durable_delete: true,
+                durable_delete: false,
                 send_key: false,
             },
         }
@@ -4986,7 +4984,7 @@ impl Default for BatchUdfPolicy {
                 filter_expression: None,
                 commit_level: proto::CommitLevel::CommitAll.into(),
                 expiration: 0,
-                durable_delete: true,
+                durable_delete: false,
                 send_key: false,
             },
         }
@@ -5400,7 +5398,7 @@ impl UdfMeta {
     pub fn get_hash(&self) -> String {
         self._as.hash.clone()
     }
-    
+
     /// Getter method to retrieve the language of the UDF.
     #[getter]
     pub fn get_language(&self) -> UdfLanguage {
@@ -7039,7 +7037,6 @@ impl FromZval<'_> for CdtMapReturnType {
 //  CdtMapWriteMode
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
-
 
 /// MapWriteMode should only be used for server versions < 4.3.
 /// MapWriteFlags are recommended for server versions >= 4.3.
@@ -10857,7 +10854,6 @@ impl FromZval<'_> for Json {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Json {
-
     /// getter method to get the json value
     #[getter]
     pub fn get_value(&self) -> HashMap<String, PHPValue> {
