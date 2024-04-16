@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [1.0.1] - 2024-04-16
+
+- **Fixes**
+  - [CLIENT-2871] Set `durable_delete` to `false` by default
+
+
 ## [1.0.0] - 2024-03-28
 
 This will be the GA release for Aerospike PHP Client v1.0.0
