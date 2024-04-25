@@ -1,0 +1,9 @@
+Package: aerospike-php-client-1.0.2
+Version: 1.0.2
+Section: Databases
+Priority: optional
+Architecture: all
+Maintainer: Aerospike, Inc. <support@aerospike.com>
+Description: The Aerospike php client library is an aerospike database client library that enables you to build applications using php
+Post-Inst: postinst
+BuildArch: x86_64
