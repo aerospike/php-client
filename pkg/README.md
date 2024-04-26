@@ -24,4 +24,11 @@ On succesful installation to run the aerospike connection manager run the follow
 asld -config-file <path-to-config-file>
 ```
 
+### Architecure Support 
+
+| Package Name                          	| Architecture 	| Supported Distros                               |
+|-----------------------------------------------|---------------|--------------------------------------|
+| aerospike-php-client_1.0.2_arm64.deb 		| arm64        	| debian10, debian11, debian12, ubuntu20.04, ubuntu22.04 |
+| aerospike-php-client_1.0.2_x86_64.deb 	| amd64        	| debian10, debian11, debian12, ubuntu20.04, ubuntu22.04 |
+| aerospike-php-client-1.0.2-1.noarch.rpm 	| noarch    	| el8, el9, amzn2023                              |
 
