@@ -24,7 +24,7 @@ On succesful installation to run the aerospike connection manager run the follow
 asld -config-file <path-to-config-file>
 ```
 
-### Architecure Support 
+### Architecture Support 
 
 | Package Name                          	| Architecture 	| Supported Distros                               |
 |-----------------------------------------------|---------------|--------------------------------------|
