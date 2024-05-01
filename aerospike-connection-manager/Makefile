@@ -1,9 +1,9 @@
 GOCMD=go
 VERSION=$(shell git describe --tags --abbrev=0 | cut -c 2-)
-GOBUILD=$(GOCMD) build -ldflags="-X 'main.version=$(VERSION)'" -o  asld
+GOBUILD=$(GOCMD) build -ldflags="-X 'main.version=$(VERSION)'" -o asld
 GOGET=$(GOCMD) get -u
 BINARY_NAME=asld
-SERVICE_NAME=asld
+SERVICE_NAME=aerospike-connection-manager.service
 
 .PHONY: test test-rest lint lint-insane clean docs deps modtidy check
 all: run
@@ -24,7 +24,7 @@ build:
 	$(GOBUILD) .
 
 run: clean proto
-	$(GOBUILD) -o $(BINARY_NAME) -v .
+	$(GOBUILD) -v .
 	./$(BINARY_NAME) -config-file asld.toml
 
 daemonize: clean proto

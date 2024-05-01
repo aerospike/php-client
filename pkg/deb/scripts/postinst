@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Define a function to log errors and exit the script
+log_error_and_exit() {
+    echo "Error: $1" >&2  # Print the error message to stderr
+    exit 1
+}
+
+# Check if PHP 8 is installed
+if ! dpkg -l | grep -q "php8"; then
+    echo "PHP 8 is not installed. Installing the latest PHP version..."
+    sudo apt update || log_error_and_exit "Failed to update package lists."
+    sudo apt install -y php php-fpm || log_error_and_exit "Failed to install PHP 8."
+fi
+
+# Determine PHP extension directory path
+EXT_DIR=$(php -r 'echo ini_get("extension_dir");') || log_error_and_exit "Failed to determine PHP extension directory path."
+
+# Determine the PHP INI path
+PHP_INI_PATH=$(php -r 'echo php_ini_loaded_file();') || log_error_and_exit "Failed to determine PHP INI file path."
+
+# Define the path to the Aerospike PHP extension in the data folder
+SO_FILE_PATH="usr/lib/libaerospike_php.so"
+
+# Check if the .so file exists in the data folder
+if [[ ! -f "$SO_FILE_PATH" ]]; then
+    log_error_and_exit "Aerospike PHP extension file not found at $SO_FILE_PATH."
+fi
+
+# Check if the Aerospike PHP extension already exists in the extension directory
+if [[ -f "$EXT_DIR/libaerospike_php.so" ]]; then
+    echo "Existing Aerospike PHP extension found. Removing the existing file..."
+    sudo rm -f "$EXT_DIR/libaerospike_php.so" || log_error_and_exit "Failed to remove the existing Aerospike PHP extension file."
+fi
+
+# Copy the `.so` file to the PHP extension directory
+echo "Copying Aerospike PHP extension to PHP extension directory..."
+sudo cp -f "$SO_FILE_PATH" "$EXT_DIR/" || log_error_and_exit "Failed to copy the .so file to PHP extension directory."
+
+# Check if the extension directive is already in the PHP INI file
+if ! grep -q "^extension=libaerospike_php\.so$" "$PHP_INI_PATH"; then
+    echo "Adding extension directive to PHP INI file..."
+    echo "extension=libaerospike_php.so" | sudo tee -a "$PHP_INI_PATH" || log_error_and_exit "Failed to add extension directive to PHP INI file."
+else
+    echo "Extension directive already present in PHP INI file. Skipping addition."
+fi
+
+echo "Aerospike PHP8 library Installation complete."
+
+# Check if Go is installed and if the version is above 1.21.3
+if ! command -v go &> /dev/null; then
+    log_error_and_exit "Go is not installed. Please install Go before proceeding."
+fi
+
+GO_VERSION=$(go version | grep -oP '\d+\.\d+\.\d+')
+REQUIRED_GO_VERSION="1.20.0"
+
+if ! dpkg --compare-versions "$GO_VERSION" ">=" "$REQUIRED_GO_VERSION"; then
+    log_error_and_exit "Go version $REQUIRED_GO_VERSION or above is required."
+fi
+
+
+# Set environment variable for binary name
+export AS_CONNECTION_MANAGER="asld"
+
+echo "Pre-installation steps completed successfully."
+echo "To start the server, run: ./$AS_CONNECTION_MANAGER -config-file asld.toml"
+
+
+
