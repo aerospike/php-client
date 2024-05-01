@@ -12,7 +12,7 @@ Version - 1.0.2
 ## Prerequisites
 
 The following are the prerequistes for the PHP client library.
-1. Go v1.21.3 or newer
+1. Go v1.20.0 or newer
 2. PHP v8.0.0 or newer
 
 ## Installation
