@@ -1,104 +1,108 @@
 on: 
-    push:
-        branches: main
+  push:
+      branches: main
 jobs:
-    build-php-client:
-        runs-on: ubuntu-latest
-        container: golang:latest
-        steps: 
-            - name: Check Go Version
-              run: |
-                go version
-                export GOPATH=$HOME/go
-                export PATH=$PATH:$GOPATH/bin
-                export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
-            - name: Install Go Dependencies
-              run: |
-                apt-get update
-                apt-get install -y protobuf-compiler
-                go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-                go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-            - name: Stable with rustfmt and clippy
-              uses: actions-rs/toolchain@v1
-              with:
-                profile: minimal
-                toolchain: stable
-                components: rustfmt, clippy
+  build-php-client:
+      runs-on: ubuntu-latest
+      container: golang:latest
+      steps: 
+          - name: Check Go Version
+            run: |
+              go version
+              export GOPATH=$HOME/go
+              export PATH=$PATH:$GOPATH/bin
+              export PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
+          - name: Install Go Dependencies
+            run: |
+              apt-get update
+              apt-get install -y protobuf-compiler
+              go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+              go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          - name: Stable with rustfmt and clippy
+            uses: actions-rs/toolchain@v1
+            with:
+              profile: minimal
+              toolchain: stable
+              components: rustfmt, clippy
 
-            - name: Install Rust 
-              run: | 
-                curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-                . "$HOME/.cargo/env"  
-                rustc --version
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: '8.2'
-            - name: Check php Version
-              run: |
-                php --version
-            - name: Install other dependencies
-              run: |
-                apt-get install -y clang
-                export LIBCLANG_PATH="/usr/lib/llvm-14/lib/"
-                apt-get install -y php-dev 
-                apt-get install -y rpm
-            - name: Checkout aerospike php client
-              uses: actions/checkout@v4
-              with: 
-                repository: 'aerospike/php-client'
-                ref: 'main'
-            - name: Build Aerospike connection manager
-              run: |
-                git config --global --add safe.directory '*'
-                cd aerospike-connection-manager
-                make clean
-                make proto
-                make build
-            - name: Build aerospike php client library
-              run: |
-                ls
-                cargo build --release
-                
-            - name: Get latest tag
-              id: get_tag
-              run: echo "::set-output name=tag::$(git describe --tags --abbrev=0 | sed 's/v//')"
-            - name: Replace version in control file
-              run: sed -i "s/@VERSION@/${{ steps.get_tag.outputs.tag }}/g" pkg/deb/control
-  
-            - name: Package for deb
-              run: |
-                mkdir -p pkg/deb/aerospike-php-client-deb
-                mkdir -p pkg/deb/aerospike-php-client-deb/DEBIAN
-                mkdir -p pkg/deb/aerospike-php-client-deb/etc
-                mkdir -p pkg/deb/aerospike-php-client-deb/usr/bin
-                mkdir -p pkg/deb/aerospike-php-client-deb/usr/lib
+          - name: Install Rust 
+            run: | 
+              curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+              . "$HOME/.cargo/env"  
+              rustc --version
+          - name: Setup PHP
+            uses: shivammathur/setup-php@v2
+            with:
+                php-version: '8.2'
+          - name: Check php Version
+            run: |
+              php --version
+          - name: Install other dependencies
+            run: |
+              apt-get install -y clang
+              export LIBCLANG_PATH="/usr/lib/llvm-14/lib/"
+              apt-get install -y php-dev 
+              apt-get install -y rpm
+          - name: Checkout aerospike php client
+            uses: actions/checkout@v4
+            with: 
+              repository: 'aerospike/php-client'
+              ref: 'main'
+          - name: Build Aerospike connection manager
+            run: |
+              git config --global --add safe.directory '*'
+              cd aerospike-connection-manager
+              make clean
+              make proto
+              make build
+          - name: Build aerospike php client library
+            run: |
+              ls
+              cargo build --release
+          - name: Fetch tags
+            run: git fetch --tags
 
-                cp aerospike-connection-manager/asld pkg/deb/aerospike-php-client-deb/usr/bin
-                cp aerospike-connection-manager/asld.toml pkg/deb/aerospike-php-client-deb/etc
-                cp target/release/libaerospike_php.so pkg/deb/aerospike-php-client-deb/usr/lib
-                
-                cp pkg/deb/control pkg/deb/aerospike-php-client-deb/DEBIAN/
-                cp pkg/deb/scripts/postinst pkg/deb/aerospike-php-client-deb/DEBIAN/
-                
-                dpkg-deb --build pkg/deb/aerospike-php-client-deb
-                cp pkg/deb/aerospike-php-client-deb.deb pkg/deb/aerospike-php-client-1.0.2-x86_64.deb
-                cp pkg/deb/aerospike-php-client-deb.deb pkg/deb/aerospike-php-client-1.0.2-aarch64.deb
-                ls pkg/deb/
-                rm -rf pkg/deb/aerospike-php-client-deb*
+          - name: List tags
+            run: git tag
 
-            - name: Move DEB x86_64 to artifacts
-              uses: actions/upload-artifact@v2
-              with:
-                name: aerospike-php-client-deb-x86_64
-                path: pkg/deb/aerospike-php-client-1.0.2-x86_64.deb
-                
-            - name: Move DEB aarch64 to artifacts
-              uses: actions/upload-artifact@v2
-              with:
-                name: aerospike-php-client-deb-aarch64
-                path: pkg/deb/aerospike-php-client-1.0.2-aarch64.deb
+          - name: Get latest tag
+            id: get_tag
+            run: echo "::set-output name=tag::$(git describe --tags --abbrev=0 | sed 's/v//')"
 
-            
+          - name: Replace version in control file
+            run: sed -i "s/@VERSION@/${{ steps.get_tag.outputs.tag }}/g" pkg/deb/control
+
+          - name: Package for deb
+            run: |
+              mkdir -p pkg/deb/aerospike-php-client-deb
+              mkdir -p pkg/deb/aerospike-php-client-deb/DEBIAN
+              mkdir -p pkg/deb/aerospike-php-client-deb/etc
+              mkdir -p pkg/deb/aerospike-php-client-deb/usr/bin
+              mkdir -p pkg/deb/aerospike-php-client-deb/usr/lib
+
+              cp aerospike-connection-manager/asld pkg/deb/aerospike-php-client-deb/usr/bin
+              cp aerospike-connection-manager/asld.toml pkg/deb/aerospike-php-client-deb/etc
+              cp target/release/libaerospike_php.so pkg/deb/aerospike-php-client-deb/usr/lib
               
+              cp pkg/deb/control pkg/deb/aerospike-php-client-deb/DEBIAN/
+              cp pkg/deb/scripts/postinst pkg/deb/aerospike-php-client-deb/DEBIAN/
+              
+              dpkg-deb --build pkg/deb/aerospike-php-client-deb
+              cp pkg/deb/aerospike-php-client-deb.deb pkg/deb/aerospike-php-client-1.0.2-x86_64.deb
+              cp pkg/deb/aerospike-php-client-deb.deb pkg/deb/aerospike-php-client-1.0.2-aarch64.deb
+              ls pkg/deb/
+              rm -rf pkg/deb/aerospike-php-client-deb*
+          - name: Move DEB x86_64 to artifacts
+            uses: actions/upload-artifact@v2
+            with:
+              name: aerospike-php-client-deb-x86_64
+              path: pkg/deb/aerospike-php-client-1.0.2-x86_64.deb
+              
+          - name: Move DEB aarch64 to artifacts
+            uses: actions/upload-artifact@v2
+            with:
+              name: aerospike-php-client-deb-aarch64
+              path: pkg/deb/aerospike-php-client-1.0.2-aarch64.deb
 
+          
+            
