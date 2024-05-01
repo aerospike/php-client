@@ -3,14 +3,14 @@
 %define _unpackaged_files_terminate_build 0
 
 Name: aerospike-php-client
-Version: 1.0.2
+Version: %{?VERSION}
 Release: 1
 Summary: Aerospike PHP Client Library
 License: Aerospike, Inc.
 Group: Applications/Databases
 BuildArch: noarch
 URL: https://github.com/aerospike/php-client
-Source0: aerospike-php-client-1.0.2.tar.gz
+Source0: aerospike-php-client-%{?VERSION}.tar.gz
 # Add any additional Source lines if needed
 
 %description
