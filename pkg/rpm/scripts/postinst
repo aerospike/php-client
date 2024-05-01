@@ -53,7 +53,7 @@ if ! command -v go &> /dev/null; then
 fi
 
 GO_VERSION=$(go version | grep -oP '\d+\.\d+\.\d+')
-REQUIRED_GO_VERSION="1.21.3"
+REQUIRED_GO_VERSION="1.20.0"
 
 if ! dpkg --compare-versions "$GO_VERSION" ">=" "$REQUIRED_GO_VERSION"; then
     log_error_and_exit "Go version $REQUIRED_GO_VERSION or above is required."
