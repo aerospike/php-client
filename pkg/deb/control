@@ -1,5 +1,5 @@
-Package: aerospike-php-client-1.0.2
-Version: 1.0.2
+Package: aerospike-php-client-@VERSION@
+Version: @VERSION@
 Section: Databases
 Priority: optional
 Architecture: all
