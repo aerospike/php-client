@@ -47,7 +47,7 @@ jobs:
               uses: actions/checkout@v4
               with: 
                 repository: 'aerospike/php-client'
-                ref: 'CLIENT-2836-pkg'
+                ref: 'main'
             - name: Build Aerospike connection manager
               run: |
                 git config --global --add safe.directory '*'
@@ -59,6 +59,13 @@ jobs:
               run: |
                 ls
                 cargo build --release
+                
+            - name: Get latest tag
+              id: get_tag
+              run: echo "::set-output name=tag::$(git describe --tags --abbrev=0 | sed 's/v//')"
+            - name: Replace version in control file
+              run: sed -i "s/@VERSION@/${{ steps.get_tag.outputs.tag }}/g" pkg/deb/control
+  
             - name: Package for deb
               run: |
                 mkdir -p pkg/deb/aerospike-php-client-deb
@@ -79,6 +86,7 @@ jobs:
                 cp pkg/deb/aerospike-php-client-deb.deb pkg/deb/aerospike-php-client-1.0.2-aarch64.deb
                 ls pkg/deb/
                 rm -rf pkg/deb/aerospike-php-client-deb*
+
             - name: Move DEB x86_64 to artifacts
               uses: actions/upload-artifact@v2
               with:
