@@ -12,7 +12,7 @@ ifeq ($(UNAME_S),Darwin)
 else ifeq ($(UNAME_S),Linux)
     EXTENSION := .so
 	PHP_VERSION := $(shell php -i | grep -Po '(?<=PHP Version => ).*' | uniq)
-    RESTART_COMMAND := sudo systemctl restart php$(PHP_VERSION)-fpm && sudo systemctl restart apache2
+    RESTART_COMMAND := systemctl restart php$(PHP_VERSION)-fpm && systemctl restart apache2
 else
     $(error Unsupported operating system: $(UNAME_S))
 endif
@@ -23,7 +23,7 @@ ifeq ($(shell awk 'BEGIN{ print ("$(PHP_VERSION)" >= "8.0") }'), 0)
 endif
 
 .PHONY: build install test clean
-all: lint build install test clean
+all: lint build install clean
 
 lint:
 	cargo clippy
@@ -35,21 +35,22 @@ build:
 	cargo build --release
 
 install-dev: build-dev
-	sudo cp -f target/debug/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
-	echo "extension=libaerospike_php$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
+	cp -f target/debug/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
+	echo "extension=libaerospike_php$(EXTENSION)" | tee -a $(PHP_INI_PATH)
 
 install: build
-	sudo cp -f target/release/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
-	echo "extension=libaerospike_php$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
+	cp -f target/release/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
+	echo "extension=libaerospike_php$(EXTENSION)" | tee -a $(PHP_INI_PATH)
 
 restart: install
 	$(RESTART_COMMAND)
 
 test-dev: install-dev
-	sudo ./vendor/phpunit/phpunit/phpunit tests/
+	./vendor/phpunit/phpunit/phpunit tests/
 
 test: install
-	phpunit tests/
+    @which phpunit > /dev/null || (echo "PHPUnit is not installed. Please install PHPUnit before running tests." && exit 1)
+    phpunit tests/
 
 clean:
 	cargo clean
