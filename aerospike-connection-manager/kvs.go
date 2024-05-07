@@ -700,6 +700,7 @@ func toReadPolicy(in *pb.ReadPolicy) *aero.BasePolicy {
 			SendKey:                           in.SendKey,
 			UseCompression:                    in.UseCompression,
 			ReplicaPolicy:                     aero.ReplicaPolicy(in.ReplicaPolicy),
+			ReadTouchTTLPercent:               in.ReadTouchTTLPercent,
 		}
 	}
 	return nil
@@ -786,9 +787,10 @@ func toBatchPolicy(in *pb.BatchPolicy) *aero.BatchPolicy {
 func toBatchReadPolicy(in *pb.BatchReadPolicy) *aero.BatchReadPolicy {
 	if in != nil {
 		return &aero.BatchReadPolicy{
-			FilterExpression: toExpression(in.FilterExpression),
-			ReadModeAP:       aero.ReadModeAP(in.ReadModeAP),
-			ReadModeSC:       aero.ReadModeSC(in.ReadModeSC),
+			FilterExpression:    toExpression(in.FilterExpression),
+			ReadModeAP:          aero.ReadModeAP(in.ReadModeAP),
+			ReadModeSC:          aero.ReadModeSC(in.ReadModeSC),
+			ReadTouchTTLPercent: in.ReadTouchTTLPercent,
 		}
 	}
 	return nil

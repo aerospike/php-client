@@ -4,7 +4,7 @@ use std::convert::TryFrom;
 use tokio::net::UnixStream;
 use tonic::transport::{Endpoint, Uri};
 
-use tokio_stream::{StreamExt};
+use tokio_stream::StreamExt;
 
 use tower::service_fn;
 
@@ -267,22 +267,23 @@ impl BlockingClient {
     pub fn scan(
         &mut self,
         request: impl tonic::IntoRequest<proto::AerospikeScanRequest>,
-    ) -> Result<tonic::Response<tonic::Streaming<proto::AerospikeStreamResponse>>, tonic::Status> {
+    ) -> Result<tonic::Response<tonic::Streaming<proto::AerospikeStreamResponse>>, tonic::Status>
+    {
         self.rt.block_on(self.client.scan(request))
     }
 
     pub fn query(
         &mut self,
         request: impl tonic::IntoRequest<proto::AerospikeQueryRequest>,
-    ) -> Result<tonic::Response<tonic::Streaming<proto::AerospikeStreamResponse>>, tonic::Status> {
+    ) -> Result<tonic::Response<tonic::Streaming<proto::AerospikeStreamResponse>>, tonic::Status>
+    {
         self.rt.block_on(self.client.query(request))
     }
 
     pub fn next_record(
         &mut self,
-        rs: &mut tonic::Streaming<proto::AerospikeStreamResponse>
+        rs: &mut tonic::Streaming<proto::AerospikeStreamResponse>,
     ) -> Option<Result<proto::AerospikeStreamResponse, tonic::Status>> {
         self.rt.block_on(rs.next())
     }
-
 }
