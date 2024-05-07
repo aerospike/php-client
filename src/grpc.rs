@@ -41,7 +41,8 @@ impl BlockingClient {
         // as the request to the `MakeConnection`.
         let channel = rt.block_on(ch)?;
 
-        let client = KvsClient::new(channel);
+        // set the maximum message size possible for a record: 128MiB for memory namespaces, with overhead
+        let client = KvsClient::new(channel).max_decoding_message_size(130 * 1024 * 1024);
 
         Ok(Self { client, rt })
     }
