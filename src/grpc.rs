@@ -47,6 +47,13 @@ impl BlockingClient {
         Ok(Self { client, rt })
     }
 
+    pub fn version(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeVersionRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeVersionResponse>, tonic::Status> {
+        self.rt.block_on(self.client.version(request))
+    }
+
     pub fn get(
         &mut self,
         request: impl tonic::IntoRequest<proto::AerospikeGetRequest>,

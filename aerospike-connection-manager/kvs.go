@@ -20,6 +20,12 @@ type server struct {
 	logger slog.Logger
 }
 
+func (s *server) Version(ctx context.Context, _ *pb.AerospikeVersionRequest) (*pb.AerospikeVersionResponse, error) {
+	return &pb.AerospikeVersionResponse{
+		Version: version,
+	}, nil
+}
+
 func (s *server) Get(ctx context.Context, in *pb.AerospikeGetRequest) (*pb.AerospikeSingleResponse, error) {
 	policy := toReadPolicy(in.Policy)
 	key := toKey(in.Key)

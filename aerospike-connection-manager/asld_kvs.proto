@@ -1222,8 +1222,20 @@ message AerospikeQueryRequest {
 	optional PartitionFilter partitionFilter = 5;
 }
 
+message AerospikeVersionRequest {
+}
+
+message AerospikeVersionResponse {
+  string version = 1;
+}
+
+
 // Aerospike KVS operations service
 service KVS {
+	rpc Version (AerospikeVersionRequest) returns
+		(AerospikeVersionResponse) {}
+	
+
 	// Put a single record
 	rpc Put (AerospikePutRequest) returns
 		(Error) {}

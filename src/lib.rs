@@ -32,6 +32,7 @@ use std::time::SystemTime;
 use byteorder::{ByteOrder, NetworkEndian};
 use ripemd160::digest::Digest;
 use ripemd160::Ripemd160;
+use version_compare::{Cmp, Version};
 
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::convert::IntoZendObject;
@@ -63,6 +64,7 @@ lazy_static! {
 
 pub type AsResult<T = ()> = std::result::Result<T, AerospikeException>;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 const PARTITIONS: u16 = 4096;
 const CITRUSLEAF_EPOCH: u64 = 1262304000;
 
@@ -9642,6 +9644,23 @@ impl Client {
         trace!("Creating a new Aerospike Client object for {}", socket);
 
         let c = Arc::new(Mutex::new(new_aerospike_client(&socket)?));
+
+        // check if version numbers match
+        let request = tonic::Request::new(proto::AerospikeVersionRequest {});
+        let grpcClient = c.clone();
+        let mut client = grpcClient.lock().unwrap();
+        let res = client.version(request).map_err(|e| e.to_string())?;
+        // Or match the comparison operators
+        let vClient = Version::from(VERSION).unwrap();
+        let vServer = Version::from(&res.get_ref().version).unwrap();
+        if vServer.compare(&vClient) != Cmp::Eq {
+            return Err(format!(
+                "Rust Client version `{}` does not match the connection manager version `{}`",
+                vClient, vServer,
+            )
+            .into());
+        };
+
         persist_client(socket, c)?;
 
         match get_persisted_client(socket) {

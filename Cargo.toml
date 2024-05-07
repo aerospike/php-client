@@ -1,6 +1,6 @@
 [package]
 name = "aerospike_php"
-version = "1.0.0"
+version = "1.0.2"
 edition = "2021"
 authors = ["Khosrow Afroozeh <khosrow@aerospike.com>", "Sachin Venkatesha Murthy <smurthy@aerospike.com>"]
 
@@ -8,6 +8,7 @@ authors = ["Khosrow Afroozeh <khosrow@aerospike.com>", "Sachin Venkatesha Murthy
 crate-type = ["cdylib"]
 
 [dependencies]
+version-compare = "0.2.0"
 ordered-float = { version = "3", default-features = false }
 ext-php-rs = "0.12.0"
 colored = "2.0.0"

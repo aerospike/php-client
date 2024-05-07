@@ -32,7 +32,6 @@ var (
 	lastCommit time.Time
 )
 
-// TODO: Add the version command to the KVS server
 // TODO: Finish logging and make sure logs have prefixes for different clusters
 
 func main() {
