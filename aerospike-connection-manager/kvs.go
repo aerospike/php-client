@@ -1710,6 +1710,8 @@ func fromValue(in any) *pb.Value {
 		return &pb.Value{V: &pb.Value_Nil{Nil: true}}
 	case aero.IntegerValue:
 		return &pb.Value{V: &pb.Value_I{I: int64(v)}}
+	case aero.LongValue:
+		return &pb.Value{V: &pb.Value_I{I: int64(v)}}
 	case aero.FloatValue:
 		return &pb.Value{V: &pb.Value_F{F: float64(v)}}
 	case aero.StringValue:
@@ -1755,6 +1757,8 @@ func toExpression(in *pb.Expression) *aero.Expression {
 		case aero.NullValue:
 			return aero.ExpNilValue()
 		case aero.IntegerValue:
+			return aero.ExpIntVal(int64(v))
+		case aero.LongValue:
 			return aero.ExpIntVal(int64(v))
 		case aero.FloatValue:
 			return aero.ExpFloatVal(float64(v))
