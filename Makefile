@@ -49,8 +49,8 @@ test-dev: install-dev
 	./vendor/phpunit/phpunit/phpunit tests/
 
 test: install
-    @which phpunit > /dev/null || (echo "PHPUnit is not installed. Please install PHPUnit before running tests." && exit 1)
-    phpunit tests/
+	@which phpunit > /dev/null || (echo "PHPUnit is not installed. Please install PHPUnit before running tests." && exit 1)
+	phpunit tests/
 
 clean:
 	cargo clean

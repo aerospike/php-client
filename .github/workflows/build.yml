@@ -73,7 +73,7 @@ jobs:
             run: |
               latest_tag=$(git describe --tags --abbrev=0 | sed 's/v//')
               if [ -z "$latest_tag" ]; then
-                echo "::set-output name=tag::1.0.2"
+                echo "::set-output name=tag::1.1.0"
               else
                 echo "::set-output name=tag::$latest_tag"
               fi
@@ -97,21 +97,21 @@ jobs:
               cp pkg/deb/scripts/postinst pkg/deb/aerospike-php-client-deb/DEBIAN/
               
               dpkg-deb --build pkg/deb/aerospike-php-client-deb
-              cp pkg/deb/aerospike-php-client-deb.deb pkg/deb/aerospike-php-client-1.0.2-x86_64.deb
-              cp pkg/deb/aerospike-php-client-deb.deb pkg/deb/aerospike-php-client-1.0.2-aarch64.deb
+              cp pkg/deb/aerospike-php-client-deb.deb pkg/deb/aerospike-php-client-${{ steps.get_tag.outputs.tag }}-x86_64.deb
+              cp pkg/deb/aerospike-php-client-deb.deb pkg/deb/aerospike-php-client-${{ steps.get_tag.outputs.tag }}-aarch64.deb
               ls pkg/deb/
               rm -rf pkg/deb/aerospike-php-client-deb*
           - name: Move DEB x86_64 to artifacts
             uses: actions/upload-artifact@v2
             with:
               name: aerospike-php-client-deb-x86_64
-              path: pkg/deb/aerospike-php-client-1.0.2-x86_64.deb
+              path: pkg/deb/aerospike-php-client-${{ steps.get_tag.outputs.tag }}-x86_64.deb
               
           - name: Move DEB aarch64 to artifacts
             uses: actions/upload-artifact@v2
             with:
               name: aerospike-php-client-deb-aarch64
-              path: pkg/deb/aerospike-php-client-1.0.2-aarch64.deb
+              path: pkg/deb/aerospike-php-client-${{ steps.get_tag.outputs.tag }}-aarch64.deb
 
           
             
