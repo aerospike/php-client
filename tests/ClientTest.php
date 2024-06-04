@@ -252,4 +252,16 @@ final class ClientTest extends TestCase
             $this->assertSame($e->code, ResultCode::BIN_TYPE_ERROR);
         }
     }
+
+    public function testReadTouchTTlPercent()
+    {
+        $stringKey = new Key(self::$namespace, self::$set, "new_key");
+        $wp = new WritePolicy();
+        $wp->setExpiration(Expiration::Seconds(10));
+        self::$client->put($wp, $stringKey, [new Bin("record", "expires_in_10")]);
+        $rp = new ReadPolicy();
+        $rp->setReadTouchTtlPercent(80);
+        $record = self::$client->get($rp, $stringKey);
+        $this->assertEquals($record->getTtl(), 1);
+    }
 }
