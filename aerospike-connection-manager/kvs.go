@@ -20,6 +20,12 @@ type server struct {
 	logger slog.Logger
 }
 
+func (s *server) Version(ctx context.Context, _ *pb.AerospikeVersionRequest) (*pb.AerospikeVersionResponse, error) {
+	return &pb.AerospikeVersionResponse{
+		Version: version,
+	}, nil
+}
+
 func (s *server) Get(ctx context.Context, in *pb.AerospikeGetRequest) (*pb.AerospikeSingleResponse, error) {
 	policy := toReadPolicy(in.Policy)
 	key := toKey(in.Key)
@@ -694,6 +700,7 @@ func toReadPolicy(in *pb.ReadPolicy) *aero.BasePolicy {
 			SendKey:                           in.SendKey,
 			UseCompression:                    in.UseCompression,
 			ReplicaPolicy:                     aero.ReplicaPolicy(in.ReplicaPolicy),
+			ReadTouchTTLPercent:               in.ReadTouchTTLPercent,
 		}
 	}
 	return nil
@@ -780,9 +787,10 @@ func toBatchPolicy(in *pb.BatchPolicy) *aero.BatchPolicy {
 func toBatchReadPolicy(in *pb.BatchReadPolicy) *aero.BatchReadPolicy {
 	if in != nil {
 		return &aero.BatchReadPolicy{
-			FilterExpression: toExpression(in.FilterExpression),
-			ReadModeAP:       aero.ReadModeAP(in.ReadModeAP),
-			ReadModeSC:       aero.ReadModeSC(in.ReadModeSC),
+			FilterExpression:    toExpression(in.FilterExpression),
+			ReadModeAP:          aero.ReadModeAP(in.ReadModeAP),
+			ReadModeSC:          aero.ReadModeSC(in.ReadModeSC),
+			ReadTouchTTLPercent: in.ReadTouchTTLPercent,
 		}
 	}
 	return nil
@@ -1702,6 +1710,8 @@ func fromValue(in any) *pb.Value {
 		return &pb.Value{V: &pb.Value_Nil{Nil: true}}
 	case aero.IntegerValue:
 		return &pb.Value{V: &pb.Value_I{I: int64(v)}}
+	case aero.LongValue:
+		return &pb.Value{V: &pb.Value_I{I: int64(v)}}
 	case aero.FloatValue:
 		return &pb.Value{V: &pb.Value_F{F: float64(v)}}
 	case aero.StringValue:
@@ -1747,6 +1757,8 @@ func toExpression(in *pb.Expression) *aero.Expression {
 		case aero.NullValue:
 			return aero.ExpNilValue()
 		case aero.IntegerValue:
+			return aero.ExpIntVal(int64(v))
+		case aero.LongValue:
 			return aero.ExpIntVal(int64(v))
 		case aero.FloatValue:
 			return aero.ExpFloatVal(float64(v))

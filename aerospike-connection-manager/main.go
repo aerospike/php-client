@@ -32,7 +32,6 @@ var (
 	lastCommit time.Time
 )
 
-// TODO: Add the version command to the KVS server
 // TODO: Finish logging and make sure logs have prefixes for different clusters
 
 func main() {
@@ -124,6 +123,9 @@ func launchServer(name string, ac *client.AerospikeConfig) {
 	}
 
 	srv := grpc.NewServer(
+		// set the maximum message size possible for a record: 128MiB for memory namespaces, with overhead
+		grpc.MaxRecvMsgSize(130*1024*1024),
+		grpc.MaxSendMsgSize(130*1024*1024),
 		grpc.ChainUnaryInterceptor(recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))),
 		grpc.ChainStreamInterceptor(recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))),
 	)

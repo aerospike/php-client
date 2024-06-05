@@ -4,7 +4,7 @@ use std::convert::TryFrom;
 use tokio::net::UnixStream;
 use tonic::transport::{Endpoint, Uri};
 
-use tokio_stream::{StreamExt};
+use tokio_stream::StreamExt;
 
 use tower::service_fn;
 
@@ -41,9 +41,17 @@ impl BlockingClient {
         // as the request to the `MakeConnection`.
         let channel = rt.block_on(ch)?;
 
-        let client = KvsClient::new(channel);
+        // set the maximum message size possible for a record: 128MiB for memory namespaces, with overhead
+        let client = KvsClient::new(channel).max_decoding_message_size(130 * 1024 * 1024);
 
         Ok(Self { client, rt })
+    }
+
+    pub fn version(
+        &mut self,
+        request: impl tonic::IntoRequest<proto::AerospikeVersionRequest>,
+    ) -> Result<tonic::Response<proto::AerospikeVersionResponse>, tonic::Status> {
+        self.rt.block_on(self.client.version(request))
     }
 
     pub fn get(
@@ -259,22 +267,23 @@ impl BlockingClient {
     pub fn scan(
         &mut self,
         request: impl tonic::IntoRequest<proto::AerospikeScanRequest>,
-    ) -> Result<tonic::Response<tonic::Streaming<proto::AerospikeStreamResponse>>, tonic::Status> {
+    ) -> Result<tonic::Response<tonic::Streaming<proto::AerospikeStreamResponse>>, tonic::Status>
+    {
         self.rt.block_on(self.client.scan(request))
     }
 
     pub fn query(
         &mut self,
         request: impl tonic::IntoRequest<proto::AerospikeQueryRequest>,
-    ) -> Result<tonic::Response<tonic::Streaming<proto::AerospikeStreamResponse>>, tonic::Status> {
+    ) -> Result<tonic::Response<tonic::Streaming<proto::AerospikeStreamResponse>>, tonic::Status>
+    {
         self.rt.block_on(self.client.query(request))
     }
 
     pub fn next_record(
         &mut self,
-        rs: &mut tonic::Streaming<proto::AerospikeStreamResponse>
+        rs: &mut tonic::Streaming<proto::AerospikeStreamResponse>,
     ) -> Option<Result<proto::AerospikeStreamResponse, tonic::Status>> {
         self.rt.block_on(rs.next())
     }
-
 }

@@ -2,6 +2,8 @@
 
 namespace Aerospike;
 
+$namespace = 'test';
+$set = 'test';
 ////////////////////////////////////////////////////////////////////////////////
 //
 //	Creating Client, persisting in permanent storage, retriving from there
@@ -105,7 +107,6 @@ $timeInMillis = 3000;
 $rp->timeout = $timeInMillis;
 
 for ($x = 0; $x <= 1000; $x++) {
-	$client = Aerospike($cp, "localhost:3000");
 	$record = $client->get($rp, $key, ["bin1"]);
 }
 
@@ -139,11 +140,11 @@ var_dump($record->bin("bin2"));
 
 $brp = new BatchReadPolicy();
 
-$brkey = new Key(self::$namespace, self::$set, 1);
+$brkey = new Key($namespace, $set, 1);
 $batchRead = new BatchRead($brp, $brkey, []);
 
 $bp = new BatchPolicy();
-$recs = self::$client->batch($bp, [$batchRead]);
+$recs = $client->batch($bp, [$batchRead]);
 
 foreach ($recs->bins as $rec) {
 	var_dump($rec);
@@ -178,7 +179,7 @@ var_dump($exists);
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client->dropIndex("test", "test", "test.test.bin1");
+$client->dropIndex($wp, "test", "test", "test.test.bin1");
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -186,7 +187,7 @@ $client->dropIndex("test", "test", "test.test.bin1");
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-$client->createIndex("test", "test", "bin1", "test.test.bin1", IndexType::Numeric());
+$client->createIndex($wp, "test", "test", "bin1", "test.test.bin1", IndexType::Numeric());
 
 sleep(1);
 
@@ -199,6 +200,3 @@ sleep(1);
 
 $geoVal = Value::geoJson("{\"type\":\"Point\",\"coordinates\":[-80.590003, 28.60009]}");
 $geoBin = new Bin("Geo_Location", $geoVal); 
-
-
-$client->close();

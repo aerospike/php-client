@@ -32,6 +32,7 @@ use std::time::SystemTime;
 use byteorder::{ByteOrder, NetworkEndian};
 use ripemd160::digest::Digest;
 use ripemd160::Ripemd160;
+use version_compare::{Cmp, Version};
 
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::convert::IntoZendObject;
@@ -63,6 +64,7 @@ lazy_static! {
 
 pub type AsResult<T = ()> = std::result::Result<T, AerospikeException>;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
 const PARTITIONS: u16 = 4096;
 const CITRUSLEAF_EPOCH: u64 = 1262304000;
 
@@ -1595,7 +1597,7 @@ impl GenerationPolicy {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 const NAMESPACE_DEFAULT: u32 = 0x0000_0000;
-const NEVER_EXPIRE: u32 = 0xFFFF_FFFF; /// -1 as i32
+const NEVER_EXPIRE: u32 = 0xFFFF_FFFF; // -1 as i32
 const DONT_UPDATE: u32 = 0xFFFF_FFFE;
 
 /// Record expiration, also known as time-to-live (TTL).
@@ -2036,7 +2038,7 @@ impl CDTContext {
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-/// `ReadPolicy` excapsulates parameters for transaction policy attributes
+/// `ReadPolicy` encapsulates parameters for transaction policy attributes
 /// used in all database operation calls.
 #[php_class(name = "Aerospike\\ReadPolicy")]
 pub struct ReadPolicy {
@@ -2131,6 +2133,31 @@ impl ReadPolicy {
     #[setter]
     pub fn set_socket_timeout(&mut self, timeout_millis: u64) {
         self._as.socket_timeout = timeout_millis;
+    }
+
+    /// ReadTouchTTLPercent determines how record TTL (time to live) is affected on reads. When enabled, the server can
+    /// efficiently operate as a read-based LRU cache where the least recently used records are expired.
+    /// The value is expressed as a percentage of the TTL sent on the most recent write such that a read
+    /// within this interval of the record’s end of life will generate a touch.
+    ///
+    /// For example, if the most recent write had a TTL of 10 hours and read_touch_ttl_percent is set to
+    /// 80, the next read within 8 hours of the record's end of life (equivalent to 2 hours after the most
+    /// recent write) will result in a touch, resetting the TTL to another 10 hours.
+    ///
+    /// Values:
+    ///
+    /// 0 : Use server config default-read-touch-ttl-pct for the record's namespace/set.
+    /// -1 : Do not reset record TTL on reads.
+    /// 1 - 100 : Reset record TTL on reads when within this percentage of the most recent write TTL.
+    /// Default: 0
+    #[getter]
+    pub fn get_read_touch_ttl_percent(&self) -> i32 {
+        self._as.read_touch_ttl_percent
+    }
+
+    #[setter]
+    pub fn set_read_touch_ttl_percent(&mut self, percent: i32) {
+        self._as.read_touch_ttl_percent = percent;
     }
 
     /// SendKey determines to whether send user defined key in addition to hash digest on both reads and writes.
@@ -2254,6 +2281,7 @@ impl Default for ReadPolicy {
                 filter_expression: None,
                 sleep_between_retries: 1,
                 replica_policy: 1,
+                read_touch_ttl_percent: 0,
             },
         }
     }
@@ -4562,6 +4590,31 @@ impl BatchReadPolicy {
     pub fn set_read_mode_sc(&mut self, read_mode_sc: ReadModeSC) {
         self._as.read_mode_sc = read_mode_sc._as.into();
     }
+
+    /// ReadTouchTTLPercent determines how record TTL (time to live) is affected on reads. When enabled, the server can
+    /// efficiently operate as a read-based LRU cache where the least recently used records are expired.
+    /// The value is expressed as a percentage of the TTL sent on the most recent write such that a read
+    /// within this interval of the record’s end of life will generate a touch.
+    ///
+    /// For example, if the most recent write had a TTL of 10 hours and read_touch_ttl_percent is set to
+    /// 80, the next read within 8 hours of the record's end of life (equivalent to 2 hours after the most
+    /// recent write) will result in a touch, resetting the TTL to another 10 hours.
+    ///
+    /// Values:
+    ///
+    /// 0 : Use server config default-read-touch-ttl-pct for the record's namespace/set.
+    /// -1 : Do not reset record TTL on reads.
+    /// 1 - 100 : Reset record TTL on reads when within this percentage of the most recent write TTL.
+    /// Default: 0
+    #[getter]
+    pub fn get_read_touch_ttl_percent(&self) -> i32 {
+        self._as.read_touch_ttl_percent
+    }
+
+    #[setter]
+    pub fn set_read_touch_ttl_percent(&mut self, percent: i32) {
+        self._as.read_touch_ttl_percent = percent;
+    }
 }
 
 impl Default for BatchReadPolicy {
@@ -4571,6 +4624,7 @@ impl Default for BatchReadPolicy {
                 filter_expression: None,
                 read_mode_ap: proto::ReadModeAp::One.into(),
                 read_mode_sc: proto::ReadModeSc::Session.into(),
+                read_touch_ttl_percent: 0,
             },
         }
     }
@@ -9642,6 +9696,23 @@ impl Client {
         trace!("Creating a new Aerospike Client object for {}", socket);
 
         let c = Arc::new(Mutex::new(new_aerospike_client(&socket)?));
+
+        // check if version numbers match
+        let request = tonic::Request::new(proto::AerospikeVersionRequest {});
+        let grpcClient = c.clone();
+        let mut client = grpcClient.lock().unwrap();
+        let res = client.version(request).map_err(|e| e.to_string())?;
+        // Or match the comparison operators
+        let vClient = Version::from(VERSION).unwrap();
+        let vServer = Version::from(&res.get_ref().version).unwrap();
+        if vServer.compare(&vClient) != Cmp::Eq {
+            return Err(format!(
+                "Rust Client version `{}` does not match the connection manager version `{}`",
+                vClient, vServer,
+            )
+            .into());
+        };
+
         persist_client(socket, c)?;
 
         match get_persisted_client(socket) {
