@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2024-06-04
+- **Download package**
+  - https://aerospike.com/download/?software=client-php
+  
+- **New Features**:
+
+  - [CLIENT-2834] Added support for readTouchTTlPercent to support Aerospike 7.1 
+  - [CLIENT-2969] Added support for LongValue in KVS service
+  - [CLIENT-2989] Added support version check between connection manager and php client
+
+ - **Improvements**: 
+  - [CLIENT-2990] Added support for big records (128 MiB for memory namespaces)
+
+- **Fixes**:
+
+  - [CLIENT-2991] Fix deb and rpm post install script.
+
+## [1.0.2] - 2024-05-01
+- **Download package**
+  - https://aerospike.com/download/?software=client-php
+  
+- **New Features**:
+
+  - [CLIENT-2844] Added support for environment variables and file for the client configuration.
+  - [CLIENT-2846] Added support for building from deb and rpm packages.
+  
+
+- **Fixes**:
+
+  - [CLIENT-2906] Cleaned up the build for Aerospike PHP client and Aerospike connection manager.
 
 ## [1.0.1] - 2024-04-16
 
