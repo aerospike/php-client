@@ -1,42 +1,22 @@
-# Aerospike Connection manager Daemon Setup Guide
+# Aerospike Connection Manager Setup
 
-This guide provides step-by-step instructions on setting up the aerospike-connection-manager.
+This guide provides step-by-step instructions on setting up the Aerospike Connection Manager (ACM).  The ACM can be run directly on the command line (test mode) or as a daemon process. 
 
-## Prerequisites
+### Prerequisites
 
-- Go programming language installed on your system.
-- `make` utility installed.
+**IMPORTANT**: If you have already installed the PHP Client and ACM via the provided installation scripts, the prerequisites should already be satisfied and there is no need to build anything.
 
-## Setup Instructions
+- Go programming language installed on your system
+- `make` utility installed
 
-1. **Change Directory**: Navigate into the `php-client/aerospike-connection-manager` directory:
-   ```bash
-   cd php-client/aerospike-connection-manager
-   ```
+### Configuration Instructions
+Aerospike's client policy allows for flexible control over read and write operations, including optimistic concurrency, time-to-live settings, and conditional writes based on record existence. The policy may be configured in the existing asld.toml file or you may create a custom toml file.  An example asld template toml file is provided below, for reference.
 
-2. **Run Makefile**: Execute the Makefile to build the aerospike-connection-manager:
-   ```bash
-   sudo make
-   ```
-
-3. **Verify Build**: Successful build logs should resemble the following:
-```bash
-rm -f asld
-rm -f memprofile.out profile.out
-rm -rf proto asld_kvs.pb.go asld_kvs_grpc.pb.go
-find . -name "*.coverprofile" -exec rm {} +
-protoc --go-grpc_out=. --go_out=. asld_kvs.proto --experimental_allow_proto3_optional
-go build -o asld -v .
-github.com/aerospike/php-client/asld
-./asld
-2024/02/13 10:41:30 grpc ran on unix socket protocol /tmp/asld_grpc.sock
-```
-
-## Running the connection manager daemon and Configuring Client Policy 
-Aerospike's client policy allows for flexible control over read and write operations, including optimistic concurrency, time-to-live settings, and conditional writes based on record existence.
-
-1. **Using the existing asld.toml file to configure the client policy:**: 
+1. **Using the existing asld.toml file to configure the client policy:**
     - Change directory to php-client/aerospike-connection-manager
+       ```shell
+       cd php-client/aerospike-connection-manager
+       ```
     - Edit the asld.toml file to change the client policy to your custom values
 
 2. **Using a custom custom_client_policy.toml file as your client policy**: 
@@ -44,14 +24,44 @@ Aerospike's client policy allows for flexible control over read and write operat
     - Make the changes you desire.
     - Change directory to `php-client/aerospike-connection-manager` and copy the custom_client_policy.toml file into this directory
     - In the make under the run  section change asld.toml to the path of your custom config file.
-```bash
-run: clean proto
-$(GOBUILD) -o $(BINARY_NAME) -v .
-./$(BINARY_NAME) -config-file <path-to-your-.toml-file>
-```
+        ```shell
+        run: clean proto
+        $(GOBUILD) -o $(BINARY_NAME) -v .
+        ./$(BINARY_NAME) -config-file <path-to-your-.toml-file>
+        ```
 
-- Config.toml.template
-~~~bash 
+### Execution Instructions
+
+1. **Change Directory**: Navigate into the `php-client/aerospike-connection-manager` directory:
+   ```shell
+   cd php-client/aerospike-connection-manager
+   ```
+
+2. **Run Makefile**: Execute the default target of the Makefile to build & runthe aerospike-connection-manager:
+   ```shell
+   make
+   ```
+
+3. **Verify Build**: Successful build output should resemble the following:
+    ```shell
+    rm -f asld
+    rm -f memprofile.out profile.out
+    rm -rf proto asld_kvs.pb.go asld_kvs_grpc.pb.go
+    find . -name "*.coverprofile" -exec rm {} +
+    protoc --go-grpc_out=. --go_out=. asld_kvs.proto --experimental_allow_proto3_optional
+    go build -o asld -v .
+    github.com/aerospike/php-client/asld
+    ./asld
+    2024/02/13 10:41:30 grpc ran on unix socket protocol /tmp/asld_grpc.sock
+    ```
+
+4. **Install Service**: Once the build is verified, linux users who want to install the ACM as a service can execute this command:
+    ```shell
+    sudo make daemonize
+    ```
+&nbsp;
+### Example asld.toml file:
+~~~ini 
 # -----------------------------------------------------
 #
 # Aerospike Local Daemon configuration file.
