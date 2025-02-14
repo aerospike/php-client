@@ -154,6 +154,5 @@ cd $SCRIPT_PATH/$PROJ_FOLDER/aerospike-connection-manager
 make
 
 #note: you should see "ResultCode: INVALID_NODE_ERROR" which just means you need to
-# configure your Aerspike Server in asdl.toml.  Once configured run the ACM again with
+# configure your Aerspike Server in asdl.toml.  Once configured, run the ACM again with
 # make run
-

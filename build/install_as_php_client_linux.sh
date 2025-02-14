@@ -160,3 +160,9 @@ make
 #build and run the ACM
 cd $SCRIPT_PATH/$PROJ_FOLDER/aerospike-connection-manager
 make
+
+#note: you should see "ResultCode: INVALID_NODE_ERROR" which just means you need to
+# configure your Aerspike Server in asdl.toml.  Once configured run the ACM again with
+# make run
+# when ready to deploy as a service run this:
+# sudo make demonize
