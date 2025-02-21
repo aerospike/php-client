@@ -42,9 +42,9 @@ brew update
 wait
 
 
-#install PHP 8.3 via Homebrew & fix up env (zsh shown), if needed 
-if ! php -v | grep -q 'PHP 8.3'; then
-  printf 'PHP 8.3 was not installed.\n '
+#install PHP 8 via Homebrew & fix up env (zsh shown), if needed
+if ! php -v | grep -q 'PHP 8'; then
+  printf 'PHP 8.4 was not installed.\n '
   if ! which curl | grep -q 'homebrew'; then
     printf 'Installing brew curl...\n'
       brew install curl
@@ -52,13 +52,13 @@ if ! php -v | grep -q 'PHP 8.3'; then
       echo 'export PATH=~/homebrew/opt/curl/bin:$PATH' >> ~/.zshrc
       source ~/.zshrc
   fi
-  printf 'Installing PHP 8.3...\n'
-  brew install php@8.3
+  printf 'Installing PHP 8.4...\n'
+  brew install php@8.4
   wait
-  echo 'export PATH=~/homebrew/opt/php@8.3/bin:$PATH' >> ~/.zshrc
-  echo 'export PATH=~/homebrew/opt/php@8.3/sbin:$PATH' >> ~/.zshrc
+  echo 'export PATH=~/homebrew/opt/php@8.4/bin:$PATH' >> ~/.zshrc
+  echo 'export PATH=~/homebrew/opt/php@8.4/sbin:$PATH' >> ~/.zshrc
 else
-  printf 'PHP 8.3 was already installed!\n'
+  printf 'PHP 8 was already installed!\n'
 fi
 
 
@@ -113,11 +113,13 @@ fi
 #NOTE:  For ARM-based macs, the following must be done for Cargo to be able to build successfully:
 mkdir -p ~/.cargo
 touch ~/.cargo/config.toml
-printf '[target.aarch64-apple-darwin]
-rustflags = [
-  "-C", "link-arg=-undefined",
-  "-C", "link-arg=dynamic_lookup",
-]\n' >> ~/.cargo/config.toml
+if ! cat ~/.cargo/config.toml | grep -q 'aarch64'; then
+  printf '[target.aarch64-apple-darwin]
+  rustflags = [
+    "-C", "link-arg=-undefined",
+    "-C", "link-arg=dynamic_lookup",
+  ]\n' >> ~/.cargo/config.toml
+fi
 
 
 #Install go and fix up env (zsh example shown), if needed:
