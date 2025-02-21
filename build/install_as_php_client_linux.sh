@@ -23,20 +23,27 @@ fi
 
 
 #clone repo & cd into project folder:
+printf 'Cloning repo...'
 if ! git clone https://github.com/aerospike/php-client.git "${PROJ_FOLDER}" 2>/dev/null && [ -d "${PROJ_FOLDER}" ] ; then
   printf 'Git clone failed. Target folder exists. Assuming clone was already completed & continuing...\n'
 fi
 cd ${SCRIPT_PATH}/${PROJ_FOLDER}
 
 
-#install PHP 8.3 if needed
-if ! php -v | grep -q 'PHP 8.3'; then
-  printf 'PHP 8.3 was not installed.\n'
-  printf 'Installing PHP 8.3...\n'
-  apt -y install php8.3
-  wait
+#install PHP 8 if needed
+if ! php -v | grep -q 'PHP 8'; then
+  printf 'PHP 8 was not installed.\n'
+  if apt-cache search php8.4 | grep -q 'php8.4'; then
+    printf 'Installing PHP 8.4...\n'
+    apt -y install php8.4
+    wait
+  elif apt-cache search php8.3 | grep -q 'php8.3'; then
+    printf 'Installing PHP 8.3...\n'
+    apt -y install php8.3
+    wait
+  fi
 else
-  printf 'PHP 8.3 was already installed!\n'
+  printf 'PHP 8 was already installed!\n'
 fi
 
 
@@ -138,7 +145,7 @@ go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 wait
 go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 wait
-go get -u google.golang.org/grpc
+go get google.golang.org/grpc
 wait
 
 #fix up the protobuf symlinkage, if needed
