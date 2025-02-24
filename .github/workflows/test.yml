@@ -10,6 +10,6 @@ jobs:
     # TODO: this should be committed in repo
     - name: Build client
       run: |
-        chmod u+x ./install_as_php_client_linux.sh
-        ./install_as_php_client_linux.sh
+        chmod +x ./install_as_php_client_linux.sh
+        sudo ./install_as_php_client_linux.sh
       working-directory: build
