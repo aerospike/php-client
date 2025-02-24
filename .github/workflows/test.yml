@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
-    - run: docker run -d --name aerospike -p 3000:3000 -p aerospike/aerospike-server
+    - run: docker run -d --name aerospike -p 3000:3000 aerospike/aerospike-server
     - name: Build client
       run: ./install_as_php_client_linux.sh
       working-directory: build
