@@ -5,4 +5,4 @@ jobs:
     build:
         runs-on: ubuntu-24.04
         steps:
-        - uses: aerospike/aerospike-client-python/actions/run-ee-server@eccd551778bd62b7356dd09d683322d38c2b7355
+        - uses: aerospike/aerospike-client-python/.github/actions/run-ee-server@eccd551778bd62b7356dd09d683322d38c2b7355
