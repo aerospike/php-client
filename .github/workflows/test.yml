@@ -23,7 +23,5 @@ jobs:
     - run: docker run -d --name aerospike -p 3000:3000 aerospike/aerospike-server
     # TODO: this should be committed in repo
     - name: Build client
-      run: |
-        chmod +x ./${{ matrix.os[1] }}
-        sudo ./${{ matrix.os[1] }}
+      run: sudo ./${{ matrix.os[1] }}
       working-directory: build
