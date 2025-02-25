@@ -22,9 +22,11 @@ jobs:
       if: ${{ runner.os == 'macOS' }}
     - run: docker run -d --name aerospike -p 3000:3000 aerospike/aerospike-server
     # TODO: this should be committed in repo
-    - name: Build client on mac
+    - if: ${{ runner.os == 'macOS' }}
+      name: Build client on mac
       run: ./install_as_php_client_mac.zsh
       working-directory: build
-    - name: Build client on linux
+    - if: ${{ runner.os == 'Linux' }}
+      name: Build client on linux
       run: sudo ./install_as_php_client_linux.sh
       working-directory: build
