@@ -6,9 +6,9 @@ jobs:
     strategy:
       matrix:
         os: [
-          # runner os, script suffix
-          [ubuntu-24.04, linux],
-          [macos-13, mac]
+          # runner os, script name
+          [ubuntu-24.04, install_as_php_client_linux.sh],
+          [macos-13, install_as_php_client_mac.zsh]
         ]
       fail-fast: false
     runs-on: ${{ matrix.os[0] }}
@@ -24,6 +24,6 @@ jobs:
     # TODO: this should be committed in repo
     - name: Build client
       run: |
-        chmod +x ./install_as_php_client_${{ matrix.os[1] }}.sh
-        sudo ./install_as_php_client_${{ matrix.os[1] }}.sh
+        chmod +x ./${{ matrix.os[1] }}
+        sudo ./${{ matrix.os[1] }}
       working-directory: build
