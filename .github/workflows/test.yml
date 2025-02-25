@@ -13,6 +13,12 @@ jobs:
     runs-on: ${{ matrix.os[0] }}
     steps:
     - uses: actions/checkout@v4
+    - run: brew install docker
+      if: ${{ matrix.os[1] == 'mac' }}
+    - run: brew install colima
+      if: ${{ matrix.os[1] == 'mac' }}
+    - run: colima start
+      if: ${{ matrix.os[1] == 'mac' }}
     - run: docker run -d --name aerospike -p 3000:3000 aerospike/aerospike-server
     # TODO: this should be committed in repo
     - name: Build client
