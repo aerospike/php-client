@@ -3,13 +3,20 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        os: [
+          # runner os, script suffix
+          [ubuntu-24.04, linux],
+          [macos-13, mac]
+        ]
+    runs-on: ${{ matrix.os[0] }}
     steps:
     - uses: actions/checkout@v4
     - run: docker run -d --name aerospike -p 3000:3000 aerospike/aerospike-server
     # TODO: this should be committed in repo
     - name: Build client
       run: |
-        chmod +x ./install_as_php_client_linux.sh
-        sudo ./install_as_php_client_linux.sh
+        chmod +x ./install_as_php_client_${{ matrix.os[1] }}.sh
+        sudo ./install_as_php_client_${{ matrix.os[1] }}.sh
       working-directory: build
