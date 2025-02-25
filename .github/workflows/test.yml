@@ -6,9 +6,9 @@ jobs:
     strategy:
       matrix:
         os: [
-          # runner os, script name
-          [ubuntu-24.04, install_as_php_client_linux.sh],
-          [macos-13, install_as_php_client_mac.zsh]
+          # runner os,
+          ubuntu-24.04,
+          macos-13
         ]
       fail-fast: false
     runs-on: ${{ matrix.os[0] }}
@@ -22,6 +22,9 @@ jobs:
       if: ${{ runner.os == 'macOS' }}
     - run: docker run -d --name aerospike -p 3000:3000 aerospike/aerospike-server
     # TODO: this should be committed in repo
-    - name: Build client
-      run: sudo ./${{ matrix.os[1] }}
+    - name: Build client on mac
+      run: ./install_as_php_client_mac.zsh
+      working-directory: build
+    - name: Build client on linux
+      run: sudo ./install_as_php_client_linux.sh
       working-directory: build
