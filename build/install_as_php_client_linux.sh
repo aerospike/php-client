@@ -27,7 +27,7 @@ fi
 # if ! git clone https://github.com/aerospike/php-client.git "${PROJ_FOLDER}" 2>/dev/null && [ -d "${PROJ_FOLDER}" ] ; then
 #   printf 'Git clone failed. Target folder exists. Assuming clone was already completed & continuing...\n'
 # fi
-# cd ${SCRIPT_PATH}/${PROJ_FOLDER}
+cd ${SCRIPT_PATH}/${PROJ_FOLDER}
 
 
 #install PHP 8 if needed
