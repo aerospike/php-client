@@ -166,6 +166,7 @@ make
 
 #build and run the ACM
 cd $SCRIPT_PATH/$PROJ_FOLDER/aerospike-connection-manager
+cat ./asld.toml
 make
 
 #note: you should see "ResultCode: INVALID_NODE_ERROR" which just means you need to
