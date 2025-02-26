@@ -14,7 +14,7 @@ host = "127.0.0.1:3000"
 # ClusterName sets the expected cluster ID.  If not nil, server nodes must return this cluster ID in order to
 # join the client's view of the cluster. Should only be set when connecting to servers that
 # support the "cluster-name" info command. (v3.10+)
-cluster-name = ""
+cluster-name = "docker"
 
 # Initial host connection timeout duration. The timeout when opening a connection
 # to the server host for the first time.
