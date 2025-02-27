@@ -3,17 +3,13 @@ on:
 
 jobs:
   build-php-client:
-    defaults:
-      run:
-        # Linux installation requires root access
-        shell: bash -e sudo {0}
     runs-on: ubuntu-24.04
     steps:
     - name: Get list of all packages
-      run: apt update
+      run: sudo apt update
     - name: Install prerequisites
       run: |
-        apt -y install \
+        sudo apt -y install \
           php-dev \
           phpunit \
           build-essential \
