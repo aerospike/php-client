@@ -30,5 +30,8 @@ jobs:
       working-directory: build
     - if: ${{ runner.os == 'Linux' }}
       name: Build client on linux
-      run: sudo ./build_on_linux.bash
+      # On Github Actions, we don't want this script to fail
+      # but for users running the script manually, it should be idempotent and allowed to fail in case
+      # they want to rerun it
+      run: sudo bash -e ./build_on_linux.bash
       working-directory: build
