@@ -13,7 +13,7 @@ jobs:
             php-dev \
             phpunit \
             build-essential \
-            protoc \
+            protoc
       - name: Install prerequisites using go
         run: |
           go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
