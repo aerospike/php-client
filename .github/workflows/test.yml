@@ -36,5 +36,5 @@ jobs:
         go get google.golang.org/grpc
       working-directory: aerospike-connection-manager
     - name: Build and run ACM
-      run: make
+      run: sudo make
       working-directory: aerospike-connection-manager
