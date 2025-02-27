@@ -5,6 +5,8 @@ jobs:
   build-php-client:
       runs-on: ubuntu-24.04
       steps:
+      - name: Get list of all packages
+        run: sudo apt update
       - name: Install prerequisites
         run: |
           sudo apt -y install \
