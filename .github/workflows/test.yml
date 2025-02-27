@@ -14,12 +14,6 @@ jobs:
             phpunit \
             build-essential \
             protobuf-compiler
-      - uses: actions/checkout@v4
-      - name: Install prerequisites using go
-        run: |
-          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-          go get google.golang.org/grpc
       - name: Fix symlinkage of protobuf
         run: |
           which protoc-gen-go
@@ -31,9 +25,14 @@ jobs:
           else
             printf "protobuf was already installed!\n"
           fi
-
       - name: Build and install PHP client
         run: make
+      - uses: actions/checkout@v4
+      - name: Install prerequisites using go
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          go get google.golang.org/grpc
       - name: Build and run ACM
         run: make
         working-directory: aerospike-connection-manager
