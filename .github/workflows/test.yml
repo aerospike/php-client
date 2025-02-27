@@ -8,12 +8,14 @@ jobs:
     - name: Get list of all packages
       run: sudo apt update
     - name: Install prerequisites
+    # rustup works without sudo, but we need to run make with sudo
       run: |
         sudo apt -y install \
           php-dev \
           phpunit \
           build-essential \
-          protobuf-compiler
+          protobuf-compiler \
+          rustup
     - name: Fix symlinkage of protobuf
       # Binaries aren't available in PATH by default
       run: |
