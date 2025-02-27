@@ -22,8 +22,6 @@ jobs:
           sudo ln -s /root/go/bin/protoc-gen-go /usr/bin/
           sudo ln -s /root/go/bin/protoc-gen-go-grpc /usr/bin/
     - uses: actions/checkout@v4
-    - name: Allow sudo to find cargo
-      run: sudo ln -s $(which cargo) /usr/bin/
     - name: Download and install latest Rust
       run: sudo rustup default stable
     - name: Build and install PHP client
