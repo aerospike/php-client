@@ -22,6 +22,8 @@ jobs:
       if: ${{ runner.os == 'macOS' }}
     - run: docker run -d --name aerospike -p 3000:3000 aerospike/aerospike-server
     # TODO: this should be committed in repo
+    - run: cat asld.toml asld.toml.template
+      working-directory: aerospike-connection-manager
     - if: ${{ runner.os == 'macOS' }}
       name: Build client on mac
       run: ./install_as_php_client_mac.zsh
