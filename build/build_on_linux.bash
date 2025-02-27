@@ -1,15 +1,9 @@
 #!/bin/bash -m
 
 set +e
-set +x
-
-SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-
-PROJ_FOLDER="php-client"
-
+set -x
 
 apt update
-
 
 #install git, if needed
 which -s git
@@ -20,15 +14,6 @@ if [[ $? != 0 ]] ; then
 else
   printf 'git was already installed!\n'
 fi
-
-
-#clone repo & cd into project folder:
-# printf 'Cloning repo...'
-# if ! git clone https://github.com/aerospike/php-client.git "${PROJ_FOLDER}" 2>/dev/null && [ -d "${PROJ_FOLDER}" ] ; then
-#   printf 'Git clone failed. Target folder exists. Assuming clone was already completed & continuing...\n'
-# fi
-cd ${SCRIPT_PATH}/${PROJ_FOLDER}
-
 
 #install PHP 8 if needed
 if ! php -v | grep -q 'PHP 8'; then
@@ -127,7 +112,7 @@ fi
 
 
 # cd to Aerospike Conenction Manager folder:
-cd $SCRIPT_PATH/$PROJ_FOLDER/aerospike-connection-manager 
+cd ../aerospike-connection-manager
 
 
 #install protobuf, if needed
@@ -161,12 +146,11 @@ fi
 
 
 #Build & install PHP client
-cd $SCRIPT_PATH/$PROJ_FOLDER
+cd ..
 make
 
 #build and run the ACM
-cd $SCRIPT_PATH/$PROJ_FOLDER/aerospike-connection-manager
-cat ./asld.toml
+cd ./aerospike-connection-manager
 make
 
 #note: you should see "ResultCode: INVALID_NODE_ERROR" which just means you need to
