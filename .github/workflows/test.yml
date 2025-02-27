@@ -28,5 +28,5 @@ jobs:
       working-directory: build
     - if: ${{ runner.os == 'Linux' }}
       name: Build client on linux
-      run: sudo ./install_as_php_client_linux.sh
+      run: sudo ./build_on_linux.bash
       working-directory: build
