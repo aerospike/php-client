@@ -6,7 +6,7 @@ jobs:
     defaults:
       run:
         # Linux installation requires root access
-        shell: sudo bash -e {0}
+        shell: bash -e sudo {0}
     runs-on: ubuntu-24.04
     steps:
     - name: Get list of all packages
