@@ -23,7 +23,7 @@ jobs:
     - name: Allow sudo to find cargo
       run: sudo ln -s $(which cargo) /usr/bin/
     - name: Download and install latest Rust
-      run: rustup default stable
+      run: sudo rustup default stable
     - name: Build and install PHP client
       # sudo required for install step
       run: sudo make
