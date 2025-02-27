@@ -33,8 +33,8 @@ jobs:
     - name: Fix symlinkage of protobuf
       # Binaries aren't available in PATH by default
       run: |
-          sudo ln -s /root/go/bin/protoc-gen-go /usr/bin/protoc-gen-go
-          sudo ln -s /root/go/bin/protoc-gen-go-grpc /usr/bin/protoc-gen-go-grpc
+          sudo ln -ws /root/go/bin/protoc-gen-go /usr/bin/protoc-gen-go
+          sudo ln -ws /root/go/bin/protoc-gen-go-grpc /usr/bin/protoc-gen-go-grpc
     - name: Build and run ACM
       run: sudo make
       working-directory: aerospike-connection-manager
