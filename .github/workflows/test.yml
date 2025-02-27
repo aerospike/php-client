@@ -17,8 +17,8 @@ jobs:
     - name: Fix symlinkage of protobuf
       # Binaries aren't available in PATH by default
       run: |
-          ln -s /root/go/bin/protoc-gen-go /usr/bin/
-          ln -s /root/go/bin/protoc-gen-go-grpc /usr/bin/
+          sudo ln -s /root/go/bin/protoc-gen-go /usr/bin/
+          sudo ln -s /root/go/bin/protoc-gen-go-grpc /usr/bin/
     - uses: actions/checkout@v4
     - name: Build and install PHP client
       run: make
