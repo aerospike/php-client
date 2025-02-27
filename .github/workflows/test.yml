@@ -14,6 +14,7 @@ jobs:
             phpunit \
             build-essential \
             protobuf-compiler
+      - uses: actions/checkout@v4
       - name: Install prerequisites using go
         run: |
           go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
@@ -31,7 +32,6 @@ jobs:
             printf "protobuf was already installed!\n"
           fi
 
-      - uses: actions/checkout@v4
       - name: Build and install PHP client
         run: make
       - name: Build and run ACM
