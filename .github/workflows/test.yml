@@ -21,8 +21,8 @@ jobs:
     - name: Fix symlinkage of protobuf
       # Binaries aren't available in PATH by default
       run: |
-          sudo ln -s /root/go/bin/protoc-gen-go /usr/bin/
-          sudo ln -s /root/go/bin/protoc-gen-go-grpc /usr/bin/
+          sudo ln -s /root/go/bin/protoc-gen-go /usr/bin/protoc-gen-go
+          sudo ln -s /root/go/bin/protoc-gen-go-grpc /usr/bin/protoc-gen-go-grpc
     - uses: actions/checkout@v4
     - name: Download and install latest Rust
       run: sudo rustup default stable
