@@ -38,3 +38,5 @@ jobs:
         make daemonize
       shell: sudo bash -e {0}
       working-directory: aerospike-connection-manager
+    - name: Run tests
+      run: make test
