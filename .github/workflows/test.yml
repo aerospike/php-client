@@ -15,7 +15,7 @@ jobs:
           .github
     - name: run-ee-server code relies on relative paths. We cannot call using ./aerospike-client-python/.github/...
       run: mv aerospike-client-python/.github .
-    - uses: .github/actions/run-ee-server
+    - uses: ./.github/actions/run-ee-server
     - name: Checkout PHP client repo
       uses: actions/checkout@v4
       with:
