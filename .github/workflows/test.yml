@@ -5,13 +5,12 @@ jobs:
   build-php-client:
     runs-on: ubuntu-24.04
     steps:
+    - uses: actions/checkout@v4
     - name: Run EE server with security enabled
       run: docker run -tid -v $(pwd)/configs:/opt/aerospike/etc -p 3000:3000 --name aerospike aerospike/aerospike-server-enterprise asd --config-file /opt/aerospike/etc/aerospike.conf
       working-directory: .github/workflows
     - name: Add superuser for testing
       run: docker exec aerospike asadm --user admin --password admin --enable -e "manage acl create user superuser password superuser roles read-write-udf sys-admin user-admin data-admin"
-    - name: Checkout PHP client repo
-      uses: actions/checkout@v4
     - name: Get list of all packages
       run: sudo apt update
     - name: Install prerequisites
