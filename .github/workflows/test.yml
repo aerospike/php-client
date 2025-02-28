@@ -35,5 +35,6 @@ jobs:
         make daemonize
       shell: sudo bash -e {0}
       working-directory: aerospike-connection-manager
+    - run: sudo systemctl status aerospike-connection-manager
     - name: Build and install PHP client, then run tests
       run: sudo make test
