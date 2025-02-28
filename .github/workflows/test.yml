@@ -33,7 +33,7 @@ jobs:
       shell: sudo bash -e {0}
     - name: Build and run ACM
       run: |
-        export PATH="$PATH:$(go env GOPATH)/bin" >> $GITHUB_ENV
+        export PATH="$PATH:$(go env GOPATH)/bin"
         make
       shell: sudo bash -e {0}
       working-directory: aerospike-connection-manager
