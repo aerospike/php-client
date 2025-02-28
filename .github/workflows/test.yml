@@ -12,7 +12,7 @@ jobs:
         ref: 30a4b09b300865d0b47bcabad25f88a7d0057632
         sparse-checkout: |
           .github
-    - uses: .github/actions/run-ee-server
+    - uses: ./.github/actions/run-ee-server
 
     - name: Checkout PHP client repo
       uses: actions/checkout@v4
