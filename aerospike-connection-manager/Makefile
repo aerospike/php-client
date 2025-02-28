@@ -6,9 +6,9 @@ BINARY_NAME=asld
 SERVICE_NAME=aerospike-connection-manager.service
 
 .PHONY: test test-rest lint lint-insane clean docs deps modtidy check
-all: run
+all: build
 
-proto:
+proto: clean
 	protoc --go-grpc_out=. --go_out=. asld_kvs.proto --experimental_allow_proto3_optional
 
 check:
@@ -23,11 +23,11 @@ clean:
 build:
 	$(GOBUILD) .
 
-run: clean proto
+run: clean
 	$(GOBUILD) -v .
 	./$(BINARY_NAME) -config-file asld.toml
 
-daemonize: clean proto
+daemonize: clean
 	$(GOBUILD) -o $(BINARY_NAME) -v .
 	sudo cp $(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
 	sudo cp asld.toml /etc/$(BINARY_NAME).toml
