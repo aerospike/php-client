@@ -14,9 +14,10 @@ jobs:
         sparse-checkout: |
           .github
     - uses: ./.github/actions/run-ee-server
-
     - name: Checkout PHP client repo
       uses: actions/checkout@v4
+      with:
+        path: main
     - name: Get list of all packages
       run: sudo apt update
     - name: Install prerequisites
@@ -30,7 +31,6 @@ jobs:
           build-essential \
           protobuf-compiler \
           rustup
-    - uses: actions/checkout@v4
     - name: Download and install latest Rust
       run: sudo rustup default stable
     - name: Install prerequisites using go
