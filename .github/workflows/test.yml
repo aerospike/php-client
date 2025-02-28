@@ -9,7 +9,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: aerospike/aerospike-client-python
-        ref: 6db93eb
+        ref: 6db93eb752ee4158b33130de3d42586f14fe41b9
         path: aerospike-client-python
         sparse-checkout: |
           .github
