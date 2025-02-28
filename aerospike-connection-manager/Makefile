@@ -1,5 +1,6 @@
 GOCMD=go
-VERSION=$(shell git describe --tags --abbrev=0 | cut -c 2-)
+# VERSION=$(shell git describe --tags --abbrev=0 | cut -c 2-)
+VERSION=1.1.0
 GOBUILD=$(GOCMD) build -ldflags="-X 'main.version=$(VERSION)'" -o asld
 GOGET=$(GOCMD) get -u
 BINARY_NAME=asld
