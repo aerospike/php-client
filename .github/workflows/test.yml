@@ -13,7 +13,7 @@ jobs:
         path: aerospike-client-python
         sparse-checkout: |
           .github
-    - uses: ./.github/actions/run-ee-server
+    - uses: ./aerospike-client-python/.github/actions/run-ee-server
     - name: Checkout PHP client repo
       uses: actions/checkout@v4
       with:
