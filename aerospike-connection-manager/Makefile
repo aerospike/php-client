@@ -30,7 +30,7 @@ run: clean proto
 daemonize: clean proto
 	$(GOBUILD) -o $(BINARY_NAME) -v .
 	cp $(BINARY_NAME) /usr/local/bin/$(BINARY_NAME)
-	cp asld.toml /etc/$(BINARY_NAME).toml
+	cp asld.toml /etc/$(SERVICE_NAME)/$(BINARY_NAME).toml
 	cp $(SERVICE_NAME).service /etc/systemd/system/$(SERVICE_NAME).service
 	systemctl daemon-reload
 	systemctl enable $(SERVICE_NAME)
