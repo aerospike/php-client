@@ -35,6 +35,6 @@ jobs:
     - name: Build and run ACM
       run: |
         export PATH="$PATH:$(go env GOPATH)/bin"
-        make
+        make daemonize
       shell: sudo bash -e {0}
       working-directory: aerospike-connection-manager
