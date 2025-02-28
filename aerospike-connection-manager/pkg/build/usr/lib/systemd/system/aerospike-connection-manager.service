@@ -5,7 +5,7 @@ Wants=network.target
 After=network-online.target
 
 [Service]
-ExecStart=/usr/bin/aerospike-connection-manager --config /etc/aerospike-connection-manager/asld.toml
+ExecStart=/usr/bin/aerospike-connection-manager --config-file /etc/aerospike-connection-manager/asld.toml
 
 [Install]
 WantedBy=multi-user.target
