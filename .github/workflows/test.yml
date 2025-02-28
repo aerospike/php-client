@@ -31,6 +31,7 @@ jobs:
         go get google.golang.org/grpc
       working-directory: aerospike-connection-manager
       shell: sudo bash -e {0}
+    - run: docker run -d -p 3000:3000 aerospike/aerospike-server
     - name: Build and run ACM
       run: |
         export PATH="$PATH:$(go env GOPATH)/bin"
