@@ -7,7 +7,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Run EE server with security enabled
-      run: docker run -tid --mount type=bind,src=$(pwd)/configs,dst=/opt/aerospike/etc -p 3000:3000 --name aerospike aerospike/aerospike-server-enterprise asd --config-file /opt/aerospike/etc/aerospike.conf
+      run: docker run -d --mount type=bind,src=$(pwd)/configs,dst=/opt/aerospike/etc -p 3000:3000 --name aerospike aerospike/aerospike-server-enterprise asd --config-file /opt/aerospike/etc/aerospike.conf
       working-directory: .github/workflows
     - name: Wait for server to start
       run: sleep 3
