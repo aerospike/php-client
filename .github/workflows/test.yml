@@ -5,6 +5,17 @@ jobs:
   build-php-client:
     runs-on: ubuntu-24.04
     steps:
+    # TODO: run EE server from shared repo, not the Python client repo
+    - uses: actions/checkout@v4
+      with:
+        repository: aerospike/aerospike-client-python
+        ref: 30a4b09b300865d0b47bcabad25f88a7d0057632
+        sparse-checkout: |
+          .github
+    - uses: .github/actions/run-ee-server
+
+    - name: Checkout PHP client repo
+      uses: actions/checkout@v4
     - name: Get list of all packages
       run: sudo apt update
     - name: Install prerequisites
@@ -28,7 +39,6 @@ jobs:
         go get google.golang.org/grpc
       working-directory: aerospike-connection-manager
       shell: sudo bash -e {0}
-    - run: docker run -d -p 3000:3000 aerospike/aerospike-server
     - name: Build and run ACM
       run: |
         export PATH="$PATH:$(go env GOPATH)/bin"
