@@ -7,9 +7,9 @@
 [cluster]
 socket = "/tmp/asld_grpc.sock"
 host = "127.0.0.1:3000"
-#user = "default-user"
-#password = "default-password"
-#auth = "EXTERNAL"
+user = "superuser"
+password = "superuser"
+auth = "INTERNAL"
 
 # ClusterName sets the expected cluster ID.  If not nil, server nodes must return this cluster ID in order to
 # join the client's view of the cluster. Should only be set when connecting to servers that

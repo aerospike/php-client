@@ -5,21 +5,13 @@ jobs:
   build-php-client:
     runs-on: ubuntu-24.04
     steps:
-    # TODO: run EE server from shared repo, not the Python client repo
-    - uses: actions/checkout@v4
-      with:
-        repository: aerospike/aerospike-client-python
-        ref: 6db93eb752ee4158b33130de3d42586f14fe41b9
-        path: aerospike-client-python
-        sparse-checkout: |
-          .github
-    - name: run-ee-server code relies on relative paths. We cannot call using ./aerospike-client-python/.github/...
-      run: mv aerospike-client-python/.github .
-    - uses: ./.github/actions/run-ee-server
+    - name: Run EE server with security enabled
+      run: docker run -tid -v $(pwd)/configs:/opt/aerospike/etc -p 3000:3000 --name aerospike aerospike/aerospike-server-enterprise asd --config-file /opt/aerospike/etc/aerospike.conf
+      working-directory: .github/workflows
+    - name: Add superuser for testing
+      run: docker exec aerospike asadm --user admin --password admin --enable -e "manage acl create user superuser password superuser roles read-write-udf sys-admin user-admin data-admin"
     - name: Checkout PHP client repo
       uses: actions/checkout@v4
-      with:
-        path: main
     - name: Get list of all packages
       run: sudo apt update
     - name: Install prerequisites
