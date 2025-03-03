@@ -30,7 +30,7 @@ jobs:
         working-directory: aerospike-connection-manager
       - run: |
           export PATH="$PATH:$(go env GOPATH)/bin"
-          make
+          make build
         working-directory: aerospike-connection-manager
 
   build-linux:
