@@ -10,7 +10,8 @@ jobs:
           brew install \
             phpunit \
             go \
-            protobuf
+            protobuf \
+            php@8.4
       - uses: actions/checkout@v4
       - name: Build PHP client
         run: make
