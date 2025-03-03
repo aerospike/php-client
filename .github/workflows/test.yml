@@ -16,7 +16,7 @@ jobs:
       - name: Build PHP client
         run: make
         env:
-          # By default we would build for macos 11.0
+          # By default the compiler tries to build for macos 11.0
           MACOSX_DEPLOYMENT_TARGET: 14.7
           # Linker will report errors about some symbols not existing
           # But some symbols are dynamically loaded by PHP
