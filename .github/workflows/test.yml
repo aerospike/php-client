@@ -13,9 +13,6 @@ jobs:
             protobuf \
             php@8.4
       - uses: actions/checkout@v4
-      # - name: Tell rust compiler to ignore missing symbols that will be dynamically loaded
-      #   run: |
-      #     cp .github/workflows/configs/cargo.toml ~/.cargo/
       - name: Build PHP client
         run: make
         env:
