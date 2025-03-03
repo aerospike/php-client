@@ -2,7 +2,28 @@ on:
   push:
 
 jobs:
-  build-php-client:
+  build-macos:
+    runs-on: macos-14
+    steps:
+      - name: Install dependencies
+        run: |
+          brew install \
+            phpunit \
+            go \
+            protobuf
+      - uses: actions/checkout@v4
+      - name: Build PHP client
+        run: make
+      - name: Install dependencies for ACM
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          go get -u google.golang.org/grpc
+        working-directory: aerospike-connection-manager
+      - run: make
+        working-directory: aerospike-connection-manager
+
+  build-linux:
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
