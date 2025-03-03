@@ -15,11 +15,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build PHP client
         run: make
-        # Linker will report errors about some symbols not existing
-        # But some symbols are dynamically loaded by PHP
-        # https://davidcole1340.github.io/ext-php-rs/getting-started/hello_world.html#cargoconfigtoml
         env:
+          # By default we would build for macos 11.0
           MACOSX_DEPLOYMENT_TARGET: 14.7
+          # Linker will report errors about some symbols not existing
+          # But some symbols are dynamically loaded by PHP
+          # https://davidcole1340.github.io/ext-php-rs/getting-started/hello_world.html#cargoconfigtoml
           RUSTFLAGS: "-C link-arg=-Wl,-undefined,dynamic_lookup"
       - name: Install dependencies for ACM
         run: |
