@@ -3,11 +3,15 @@ on:
 
 jobs:
   build-macos:
-    runs-on: [
-      macos-14-xlarge,
-      # ARM64
-      macos-14
-    ]
+    strategy:
+      matrix:
+        os: [
+          # x86_64
+          macos-14-xlarge,
+          # ARM64
+          macos-14
+        ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Install dependencies
         run: |
