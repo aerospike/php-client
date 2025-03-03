@@ -15,7 +15,6 @@ jobs:
       - uses: actions/checkout@v4
       - name: Tell rust compiler to ignore missing symbols that will be dynamically loaded
         run: |
-          mkdir ~/.cargo
           cp .github/workflows/configs/cargo.toml ~/.cargo/
       - name: Build PHP client
         run: make
