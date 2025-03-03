@@ -20,7 +20,7 @@ jobs:
         run: make
         env:
           MACOSX_DEPLOYMENT_TARGET: 14.7
-          CARGO_TARGET_AARCH64_APPLE_DARWIN: "-C,link-arg=-Wl,-undefined,dynamic_lookup"
+          RUSTFLAGS: "-C link-arg=-Wl,-undefined,dynamic_lookup"
       - name: Install dependencies for ACM
         run: |
           go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
