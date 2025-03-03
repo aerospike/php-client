@@ -4,6 +4,7 @@ on:
 jobs:
   build-macos:
     strategy:
+      fail-fast: false
       matrix:
         os: [
           # x86_64
@@ -43,6 +44,7 @@ jobs:
 
   build-linux:
     strategy:
+      fail-fast: false
       matrix:
         os: [
           ubuntu-24.04, # x86_64
