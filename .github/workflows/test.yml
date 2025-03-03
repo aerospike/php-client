@@ -13,13 +13,14 @@ jobs:
             protobuf \
             php@8.4
       - uses: actions/checkout@v4
-      - name: Tell rust compiler to ignore missing symbols that will be dynamically loaded
-        run: |
-          cp .github/workflows/configs/cargo.toml ~/.cargo/
+      # - name: Tell rust compiler to ignore missing symbols that will be dynamically loaded
+      #   run: |
+      #     cp .github/workflows/configs/cargo.toml ~/.cargo/
       - name: Build PHP client
         run: make
         env:
           MACOSX_DEPLOYMENT_TARGET: 14.7
+          CARGO_TARGET_AARCH64_APPLE_DARWIN: "-C,link-arg=-Wl,-undefined,dynamic_lookup"
       - name: Install dependencies for ACM
         run: |
           go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
