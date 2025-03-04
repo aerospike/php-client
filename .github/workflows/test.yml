@@ -54,17 +54,11 @@ jobs:
     steps:
     # The PHP client security and non-security tests need to be run on separate server instances
     # since currently the security tests are brittle and may interfere with the non-security tests.
-    # Also, run this at the top so the server is ready by the time we run the tests
+    # Just run the server here so it should be ready by the time we run the tests
+    - name: Run CE server
+      run: docker run -d -p 3000:3000 aerospike/aerospike-server
+
     - uses: actions/checkout@v4
-    - name: Run EE server with security enabled
-      run: docker run -d --mount type=bind,src=$(pwd)/configs,dst=/opt/aerospike/etc -p 3000:3000 --name aerospike aerospike/aerospike-server-enterprise asd --config-file /opt/aerospike/etc/aerospike.conf
-      working-directory: .github/workflows
-    - name: Wait for server to start
-      run: sleep 3
-    - name: Show logs for debugging
-      run: docker logs aerospike
-    - name: Add superuser for testing
-      run: docker exec aerospike asadm --user admin --password admin --enable -e "manage acl create user superuser password superuser roles read-write-udf sys-admin user-admin data-admin"
 
     - name: Get list of all packages
       run: sudo apt update
@@ -81,7 +75,7 @@ jobs:
           rustup
     - name: Download and install latest Rust
       run: sudo rustup default stable
-    - name: Install prerequisites using go
+    - name: Install more ACM build prerequisites
       run: |
         go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
         go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
@@ -95,11 +89,12 @@ jobs:
       shell: sudo bash -e {0}
       working-directory: aerospike-connection-manager
     - run: sudo systemctl status aerospike-connection-manager
+
     - name: Build and install PHP client
       run: sudo make install
 
-    - name: Run only security tests
-      run: sudo phpunit --testsuite security_tests
+    - name: Run only non-security tests
+      run: sudo phpunit --testsuite non_security_tests
 
     - name: Tear down server
       run: |
@@ -108,7 +103,6 @@ jobs:
     - name: Stop ACM
       run: sudo systemctl stop aerospike-connection-manager
 
-    - run: pip install tomli-w
     - name: Tell ACM to connect to server using admin credentials
       run: |
         import tomllib
@@ -121,12 +115,19 @@ jobs:
           tomli_w.dump(tomlDict, f)
       shell: python
       working-directory: aerospike-connection-manager
+    - name: Run EE server with security enabled
+      run: docker run -d --mount type=bind,src=$(pwd)/configs,dst=/opt/aerospike/etc -p 3000:3000 --name aerospike aerospike/aerospike-server-enterprise asd --config-file /opt/aerospike/etc/aerospike.conf
+      working-directory: .github/workflows
+    - name: Wait for server to start
+      run: sleep 3
+    - name: Show logs for debugging
+      run: docker logs aerospike
+    - name: Add superuser for testing
+      run: docker exec aerospike asadm --user admin --password admin --enable -e "manage acl create user superuser password superuser roles read-write-udf sys-admin user-admin data-admin"
     - name: Rerun ACM
       run: sudo make daemonize
       working-directory: aerospike-connection-manager
-    - name: Run CE server
-      run: docker run -d -p 3000:3000 aerospike/aerospike-server
-      working-directory: .github/workflows
+
     - name: Wait for server to start
       run: sleep 5
     - name: Run only non-security tests
