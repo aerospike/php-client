@@ -32,6 +32,8 @@ jobs:
           echo /opt/homebrew/opt/php@${{ matrix.php-version }}/sbin >> $GITHUB_PATH
       - run: echo MACOS_VERSION=$(sw_vers --productVersion | cut -f 2- -d'.') >> $GITHUB_ENV
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Build PHP client
         run: make
         env:
@@ -75,6 +77,8 @@ jobs:
       run: docker run -d -p 3000:3000 --name aerospike aerospike/aerospike-server
 
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Get list of all packages
       run: sudo apt update
