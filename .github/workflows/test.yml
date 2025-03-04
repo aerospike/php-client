@@ -58,6 +58,12 @@ jobs:
           ubuntu-24.04, # x86_64
           ubuntu-24.04-arm
         ]
+        php-version: [
+          '8.1',
+          '8.2',
+          '8.3',
+          '8.4'
+        ]
     runs-on: ${{ matrix.os }}
     steps:
     # The PHP client security and non-security tests need to be run on separate server instances
@@ -70,6 +76,9 @@ jobs:
 
     - name: Get list of all packages
       run: sudo apt update
+    - uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
     - name: Install prerequisites
     # Rust is already installed, as well as rustup
     # But it doesn't work when we run `make sudo` later on, so we have to reinstall
