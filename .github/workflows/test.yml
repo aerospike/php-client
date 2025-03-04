@@ -27,6 +27,8 @@ jobs:
             go \
             protobuf \
             php@${{ matrix.php-version }}
+          echo 'export PATH="/opt/homebrew/opt/php@8.3/bin:$PATH"' >> /Users/runner/.bash_profile
+          echo 'export PATH="/opt/homebrew/opt/php@8.3/sbin:$PATH"' >> /Users/runner/.bash_profile
       - uses: actions/checkout@v4
       - name: Build PHP client
         run: make
