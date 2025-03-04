@@ -82,11 +82,10 @@ jobs:
         go get google.golang.org/grpc
       working-directory: aerospike-connection-manager
       shell: sudo bash -e {0}
+    - name: Add Go packages to PATH
+      run: export PATH="$PATH:$(go env GOPATH)/bin" >> $GITHUB_ENV
     - name: Build and run ACM
-      run: |
-        export PATH="$PATH:$(go env GOPATH)/bin"
-        make daemonize
-      shell: sudo bash -e {0}
+      run: sudo make daemonize
       working-directory: aerospike-connection-manager
     - run: sudo systemctl status aerospike-connection-manager
 
