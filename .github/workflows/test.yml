@@ -99,7 +99,7 @@ jobs:
       run: sudo make install
 
     - name: Run only security tests
-      run: phpunit --testsuite security_tests
+      run: sudo phpunit --testsuite security_tests
 
     - name: Tear down server
       run: |
