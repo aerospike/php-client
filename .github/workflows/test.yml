@@ -105,7 +105,25 @@ jobs:
       run: |
         docker stop aerospike
         docker container prune -f
+    - name: Stop ACM
+      run: sudo systemctl stop aerospike-connection-manager
 
+    - run: pip install tomli-w
+    - name: Tell ACM to connect to server using admin credentials
+      run: |
+        import tomllib
+        import tomli_w
+        tomlDict = tomllib.load('asld.toml')
+        tomlDict['cluster']['user'] = 'superuser'
+        tomlDict['cluster']['password'] = 'superuser'
+        tomlDict['cluster']['auth'] = 'INTERNAL'
+        with open("asld.toml", "wb") as f:
+          tomli_w.dump(tomlDict, f)
+      shell: python
+      working-directory: aerospike-connection-manager
+    - name: Rerun ACM
+      run: sudo make daemonize
+      working-directory: aerospike-connection-manager
     - name: Run CE server
       run: docker run -d -p 3000:3000 aerospike/aerospike-server
       working-directory: .github/workflows
