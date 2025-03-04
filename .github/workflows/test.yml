@@ -133,6 +133,7 @@ jobs:
         export PATH="$PATH:$(go env GOPATH)/bin"
         make daemonize
       shell: sudo bash -e {0}
+      working-directory: aerospike-connection-manager
 
     - name: Wait for server to start
       run: sleep 5
