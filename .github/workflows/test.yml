@@ -12,6 +12,12 @@ jobs:
           # ARM64
           macos-14
         ]
+        php-version: [
+          '8.1',
+          '8.2',
+          '8.3',
+          '8.4'
+        ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Install dependencies
@@ -20,7 +26,7 @@ jobs:
             phpunit \
             go \
             protobuf \
-            php@8.4
+            php@${{ matrix.php-version }}
       - uses: actions/checkout@v4
       - name: Build PHP client
         run: make
