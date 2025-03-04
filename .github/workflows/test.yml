@@ -108,10 +108,13 @@ jobs:
       run: |
         import tomllib
         import tomli_w
-        tomlDict = tomllib.load('asld.toml')
+        with open("asld.toml", "rb") as f:
+          tomlDict = tomllib.load(f)
+
         tomlDict['cluster']['user'] = 'superuser'
         tomlDict['cluster']['password'] = 'superuser'
         tomlDict['cluster']['auth'] = 'INTERNAL'
+
         with open("asld.toml", "wb") as f:
           tomli_w.dump(tomlDict, f)
       shell: python
