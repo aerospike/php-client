@@ -90,6 +90,8 @@ jobs:
       working-directory: aerospike-connection-manager
     - run: sudo systemctl status aerospike-connection-manager
 
+    # TODO: build once, then send to two separate jobs
+
     - name: Build and install PHP client
       run: sudo make install
 
