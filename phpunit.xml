@@ -5,7 +5,6 @@
     <testsuite name="non_security_tests">
         <directory>tests/*</directory>
         <exclude>tests/CDTBitwiseOpTest.php</exclude>
-        <!-- Exclude slow tests -->
         <exclude>tests/SecurityTest.php</exclude>
     </testsuite>
 </testsuites>
