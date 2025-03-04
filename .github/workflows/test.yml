@@ -52,6 +52,20 @@ jobs:
         ]
     runs-on: ${{ matrix.os }}
     steps:
+    # The PHP client security and non-security tests need to be run on separate server instances
+    # since currently the security tests are brittle and may interfere with the non-security tests.
+    # Also, run this at the top so the server is ready by the time we run the tests
+
+    - name: Run EE server with security enabled
+      run: docker run -d --mount type=bind,src=$(pwd)/configs,dst=/opt/aerospike/etc -p 3000:3000 --name aerospike aerospike/aerospike-server-enterprise asd --config-file /opt/aerospike/etc/aerospike.conf
+      working-directory: .github/workflows
+    - name: Wait for server to start
+      run: sleep 3
+    - name: Show logs for debugging
+      run: docker logs aerospike
+    - name: Add superuser for testing
+      run: docker exec aerospike asadm --user admin --password admin --enable -e "manage acl create user superuser password superuser roles read-write-udf sys-admin user-admin data-admin"
+
     - uses: actions/checkout@v4
     - name: Get list of all packages
       run: sudo apt update
@@ -84,19 +98,6 @@ jobs:
     - run: sudo systemctl status aerospike-connection-manager
     - name: Build and install PHP client
       run: sudo make install
-
-    # The PHP client security and non-security tests need to be run on separate server instances
-    # since currently the security tests are brittle and may interfere with the non-security tests.
-
-    - name: Run EE server with security enabled
-      run: docker run -d --mount type=bind,src=$(pwd)/configs,dst=/opt/aerospike/etc -p 3000:3000 --name aerospike aerospike/aerospike-server-enterprise asd --config-file /opt/aerospike/etc/aerospike.conf
-      working-directory: .github/workflows
-    - name: Wait for server to start
-      run: sleep 3
-    - name: Show logs for debugging
-      run: docker logs aerospike
-    - name: Add superuser for testing
-      run: docker exec aerospike asadm --user admin --password admin --enable -e "manage acl create user superuser password superuser roles read-write-udf sys-admin user-admin data-admin"
 
     - name: Run only security tests
       run: phpunit --testsuite security_tests
