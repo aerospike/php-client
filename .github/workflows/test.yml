@@ -81,7 +81,7 @@ jobs:
         php-version: ${{ matrix.php-version }}
     - name: Install prerequisites
     # Rust is already installed, as well as rustup
-    # But it doesn't work when we run `make sudo` later on, so we have to reinstall
+    # But it doesn't work when we run `sudo make` later on, so we have to reinstall
     # with apt
       run: |
         sudo apt -y install \
