@@ -56,7 +56,7 @@ jobs:
     # since currently the security tests are brittle and may interfere with the non-security tests.
     # Just run the server here so it should be ready by the time we run the tests
     - name: Run CE server
-      run: docker run -d -p 3000:3000 aerospike/aerospike-server
+      run: docker run -d -p 3000:3000 --name aerospike aerospike/aerospike-server
 
     - uses: actions/checkout@v4
 
