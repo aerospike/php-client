@@ -130,11 +130,10 @@ jobs:
       run: docker logs aerospike
     - name: Add superuser for testing
       run: docker exec aerospike asadm --user admin --password admin --enable -e "manage acl create user superuser password superuser roles read-write-udf sys-admin user-admin data-admin"
-    - name: Rebuild and run ACM
+    - name: Rerun ACM with new config
       run: |
-        export PATH="$PATH:$(go env GOPATH)/bin"
-        make daemonize
-      shell: sudo bash -e {0}
+        sudo cp asld.toml /etc/aerospike-connection-manager/
+        sudo systemctl start aerospike-connection-manager
       working-directory: aerospike-connection-manager
 
     - name: Wait for server to start
