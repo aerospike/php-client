@@ -69,7 +69,7 @@ jobs:
     steps:
     # The PHP client security and non-security tests need to be run on separate server instances
     # since currently the security tests are brittle and may interfere with the non-security tests.
-    # Just run the server here so it should be ready by the time we run the tests
+    # Also, just run the server here so it should be ready by the time we run the tests
     - name: Run CE server
       run: docker run -d -p 3000:3000 --name aerospike aerospike/aerospike-server
 
@@ -148,6 +148,8 @@ jobs:
       run: docker logs aerospike
     - name: Add superuser for testing
       run: docker exec aerospike asadm --user admin --password admin --enable -e "manage acl create user superuser password superuser roles read-write-udf sys-admin user-admin data-admin"
+    # Rerunning `make daemonize` with the new config will lead to an error
+    # because it is not idempotent
     - name: Rerun ACM with new config
       run: |
         sudo cp asld.toml /etc/aerospike-connection-manager/
