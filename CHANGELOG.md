@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2025-02-28
+
+ - **Improvements**: 
+  - [CLIENT-3351] Update ext-php-rs to v0.13.0 to support PHP v8.4.
+  - [CLIENT-3334] Old PHP client encodes boolean and null values improperly.
+    Updates the Go client to v7.9.0 that supports decoding the old PHP7 improperly encoded boolean and null values.
+
 ## [1.1.0] - 2024-06-04
 - **Download package**
   - https://aerospike.com/download/?software=client-php

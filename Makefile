@@ -23,7 +23,7 @@ ifeq ($(shell awk 'BEGIN{ print ("$(PHP_VERSION)" >= "8.0") }'), 0)
 endif
 
 .PHONY: build install test clean
-all: lint build install clean
+all: lint build install
 
 lint:
 	cargo clippy
