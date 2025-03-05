@@ -8,7 +8,7 @@ jobs:
       matrix:
         os: [
           # x86_64
-          macos-14-xlarge,
+          macos-14-large,
           # ARM64
           macos-14
         ]
