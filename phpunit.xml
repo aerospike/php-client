@@ -4,7 +4,7 @@
     </testsuite>
     <testsuite name="non_security_tests">
         <directory>tests/*</directory>
-        <exclude>tests/CDTBitwiseOpTest.php</exclude>
+        <exclude>tests/CdtTests/CDTBitwiseOpTest.php</exclude>
         <exclude>tests/SecurityTest.php</exclude>
     </testsuite>
 </testsuites>
