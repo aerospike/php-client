@@ -18,7 +18,7 @@ class ScanTest extends TestCase
     protected static $keyCount = 100;
     protected static $bins;
     protected static $set;
-    protected static $keys = []; 
+    protected static $keys = [];
 
     public static function setUpBeforeClass(): void
     {
@@ -38,7 +38,7 @@ class ScanTest extends TestCase
         self::$keys = [];
         $wp = new WritePolicy();
         self::$set = self::randomString(random_int(5, 50));
-        
+
         $ip = new InfoPolicy();
         self::$client->truncate($ip, self::$namespace, self::$set);
 
@@ -53,9 +53,9 @@ class ScanTest extends TestCase
     private function checkResults($recordset, $cancelCount): int {
         $counter = 0;
         $this->assertNotNull($recordset);
-        while($rec = $recordset->next()) {  
+        while($rec = $recordset->next()) {
             $keyString = $rec->key->digest;
-            
+
             $this->assertEquals($rec->bins['AerospikeBin1'], 23);
             $this->assertEquals($rec->bins['AerospikeBin2'], "randomString");
             unset(self::$keys[$keyString]);
@@ -86,11 +86,11 @@ class ScanTest extends TestCase
 
             $recs = self::checkResults($recordset, 0);
             $this->assertLessThanOrEqual($recs, $sp->maxRecords);
-            
+
             $received += $recs;
         }
-        $this->assertLessThanOrEqual($recs, $sp->maxRecords); 
-        $this->assertEquals(count(self::$keys), 0); 
+        $this->assertLessThanOrEqual($recs, $sp->maxRecords);
+        $this->assertEquals(count(self::$keys), 0);
     }
 
     public function testScanAllPartitionsOneByOne(){
@@ -108,7 +108,7 @@ class ScanTest extends TestCase
             $recs = self::checkResults($recordset, 0);
             $this->assertLessThanOrEqual($recs, $sp->maxRecords);
             $received += $recs;
-        } 
+        }
     }
 
     public function testScanAllPartitions(){
@@ -123,9 +123,9 @@ class ScanTest extends TestCase
             $recordset = self::$client->scan($sp, $pf, self::$namespace, self::$set);
             $this->assertNotNull($recordset);
 
-            self::checkResults($recordset, 0);
+            $recs = self::checkResults($recordset, 0);
             $received += $recs;
-        } 
+        }
     }
 
     public function testScanMustCancel(){
@@ -140,19 +140,19 @@ class ScanTest extends TestCase
             $recordset = self::$client->scan($sp, $pf, self::$namespace, self::$set);
             $this->assertNotNull($recordset);
 
-            self::checkResults($recordset, self::$keyCount/2);
+            $recs = self::checkResults($recordset, self::$keyCount/2);
             $received += $recs;
-        } 
+        }
     }
 
     function randomString($length) {
         $randomBytes = random_bytes($length);
-    
+
         $randomString = base64_encode($randomBytes);
 
         $randomString = preg_replace('/[^a-zA-Z0-9]/', '', $randomString);
         $randomString = substr($randomString, 0, $length);
-    
+
         return $randomString;
     }
 
