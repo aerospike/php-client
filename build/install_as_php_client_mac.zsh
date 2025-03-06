@@ -1,9 +1,11 @@
 #!/bin/zsh -m
+# Aerospike PHP8 install and build script for MacOS (darwin)
 
 set +e
-set +x
 
 SCRIPT_PATH="${0:A:h}"
+PROJ_FOLDER="php-client"
+
 
 #install XCode command-line developer tools, if needed:
 xcode-select -p 1>/dev/null
@@ -21,13 +23,30 @@ else
 fi
 
 
-PROJ_FOLDER="php-client"
-#clone repo & cd into project folder:
-if ! git clone https://github.com/aerospike/php-client.git "${PROJ_FOLDER}" 2>/dev/null && [ -d "${PROJ_FOLDER}" ] ; then
-  printf 'Git clone failed. Target folder exists. Assuming clone was already completed & continuing...\n'
+#determine if the script is being run via direct download or from within the repo
+if [[ $SCRIPT_PATH == *$PROJ_FOLDER* ]]; then
+  echo "script is in the repo - no need to clone"
+else
+  echo "script is NOT in the repo - cloning..."
+  #clone repo & cd into project folder:
+  if ! git clone https://github.com/aerospike/php-client.git "$PROJ_FOLDER" 2>/dev/null && [ -d "$PROJ_FOLDER" ] ; then
+    printf 'Git clone failed. Target folder exists. Assuming clone was already completed & continuing...\n'
+  fi
+  cd $SCRIPT_PATH/$PROJ_FOLDER
 fi
-cd $SCRIPT_PATH/$PROJ_FOLDER
 
+
+if [[ $PWD != *$PROJ_FOLDER* && -d $PROJ_FOLDER ]]; then
+  cd $PROJ_FOLDER
+else
+  if [[ $PWD == *build ]]; then
+    echo "running in build directory!"
+    cd ..
+  fi
+fi
+
+pwd
+#NOTE: we should now be in the project root, regardless of where the script is or where it was run from
 
 # Install Homebrew if not already installed
 which -s brew
@@ -44,7 +63,7 @@ wait
 
 #install PHP 8 via Homebrew & fix up env (zsh shown), if needed
 if ! php -v | grep -q 'PHP 8'; then
-  printf 'PHP 8.4 was not installed.\n '
+  printf 'PHP 8 was not installed.\n '
   if ! which curl | grep -q 'homebrew'; then
     printf 'Installing brew curl...\n'
       brew install curl
@@ -136,7 +155,7 @@ fi
 
 
 # Install protocol buffer compiler & plugins & latest grpc package
-cd $SCRIPT_PATH/$PROJ_FOLDER/aerospike-connection-manager
+cd aerospike-connection-manager
 brew install protobuf
 wait
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
@@ -148,13 +167,16 @@ wait
 
 
 #Build & install PHP client
-cd $SCRIPT_PATH/$PROJ_FOLDER
+cd ..
 make
-
 #build and run the ACM
-cd $SCRIPT_PATH/$PROJ_FOLDER/aerospike-connection-manager
+cd aerospike-connection-manager
 make
 
-#note: you should see "ResultCode: INVALID_NODE_ERROR" which just means you need to
-# configure your Aerspike Server in asdl.toml.  Once configured, run the ACM again with
+echo "Installation complete!"
+
+printf "# TODO:
+# configure your Aerspike Server in php-client/aerospike-connection-manager/asld.toml
+# Once configured, run the ACM again with:
+# cd php-client/aerospike-connection-manager
 # make run

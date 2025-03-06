@@ -1,7 +1,8 @@
 #!/bin/bash -m
 
+# Aerospike PHP8 install and build script for linux
+
 set +e
-set +x
 
 SCRIPT_PATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 
@@ -22,12 +23,30 @@ else
 fi
 
 
-#clone repo & cd into project folder:
-printf 'Cloning repo...'
-if ! git clone https://github.com/aerospike/php-client.git "${PROJ_FOLDER}" 2>/dev/null && [ -d "${PROJ_FOLDER}" ] ; then
-  printf 'Git clone failed. Target folder exists. Assuming clone was already completed & continuing...\n'
+#determine if the script is being run via direct download or from within the repo
+if [[ ${SCRIPT_PATH} == *${PROJ_FOLDER}* ]]; then
+  echo "script is in the repo - no need to clone"
+else
+  echo "script is NOT in the repo - cloning..."
+  #clone repo & cd into project folder:
+  if ! git clone https://github.com/aerospike/php-client.git "${PROJ_FOLDER}" 2>/dev/null && [ -d "${PROJ_FOLDER}" ] ; then
+    printf 'Git clone failed. Target folder exists. Assuming clone was already completed & continuing...\n'
+  fi
+  cd ${SCRIPT_PATH}/${PROJ_FOLDER}
 fi
-cd ${SCRIPT_PATH}/${PROJ_FOLDER}
+
+
+if [[ ${PWD} != *${PROJ_FOLDER}* && -d ${PROJ_FOLDER} ]]; then
+  cd ${PROJ_FOLDER}
+else
+  if [[ ${PWD} == *build ]]; then
+    echo "running in build directory!"
+    cd ..
+  fi
+fi
+
+pwd
+#NOTE: we should now be in the project root, regardless of where the script is or where it was run from
 
 
 #install PHP 8 if needed
@@ -127,7 +146,7 @@ fi
 
 
 # cd to Aerospike Conenction Manager folder:
-cd $SCRIPT_PATH/$PROJ_FOLDER/aerospike-connection-manager 
+cd aerospike-connection-manager 
 
 
 #install protobuf, if needed
@@ -161,15 +180,19 @@ fi
 
 
 #Build & install PHP client
-cd $SCRIPT_PATH/$PROJ_FOLDER
+cd ..
 make
 
 #build and run the ACM
-cd $SCRIPT_PATH/$PROJ_FOLDER/aerospike-connection-manager
+cd aerospike-connection-manager
 make
 
-#note: you should see "ResultCode: INVALID_NODE_ERROR" which just means you need to
-# configure your Aerspike Server in asdl.toml.  Once configured run the ACM again with
+echo "Installation complete!\n"
+
+printf "# TODO:
+# configure your Aerspike Server in php-client/aerospike-connection-manager/asld.toml
+# Once configured, run the ACM again with:
+# cd php-client/aerospike-connection-manager
 # make run
 # when ready to deploy as a service run this:
-# sudo make demonize
+# sudo make demonize\n"
