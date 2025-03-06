@@ -1,50 +1,69 @@
-[![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client) 
-# Aerospike PHP 8 Client (v1.0.0)
+[![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client)
+# Aerospike PHP 8 Client (v1.1.0)
 
 An [Aerospike](https://www.aerospike.com/) client library for PHP 8
 
-## PHP-Client Introduction 
+## PHP-Client Introduction
 
-This is the documentation for the Aerospike `PHP-Client`. The `PHP-Client` comprises of two essential components. Firstly, we have a robust `PHP-Client` written in Rust and then we have a connection manager (the "Aerospike Connection Manager" or "ACM") written in Go which serves as a shared resource among PHP processes. The ACM efficiently handles all requests and responses between the PHP processes and the Aerospike server, and can be configured to run as a daemonized service.
-
+This is the documentation for the Aerospike `PHP-Client`. The `PHP-Client` comprises of two essential components: 
+* the client itself, written in Rust as a PHP extension
+* the connection manager (the "Aerospike Connection Manager" or "ACM") written in Go which serves as a shared resource among PHP processes. The ACM efficiently handles all requests and responses between the PHP processes and the Aerospike server, and can be configured to run as a daemonized service.
 
 ## Dependencies
 ***NOTE:*** Any missing dependencies will be installed by the installation script
 
-* PHP (v8.1-8.3)
+* PHP (v8.1-8.4)
 * Cargo (Rust package manager)
 * Aerospike server
-* Linux or MacOS (Darwin) 
-* PHPUnit 
-* rustc (Rust compiler) >= v1.74 
+* Linux or MacOS (Darwin)
+* PHPUnit
+* rustc (Rust compiler) >= v1.74
 * Go Toolchain [Go Toolchains - The Go Programming Language](https://go.dev/doc/toolchain)
 * Protobuf Compiler [protoc-gen-go command - google.golang.org/protobuf/cmd/protoc-gen-go - Go Packages](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go)
-* ext-php-rs (PHP extension) v0.12.0 [github repository link](https://github.com/davidcole1340/ext-php-rs/tree/master)
+* ext-php-rs (PHP extension) v0.13.1 [github repository link](https://github.com/davidcole1340/ext-php-rs/tree/master)
 
-## Download and execute the installation script:
+## Build & Installation
+There are 2 ways to build and install the `PHP-Client`:
+1. direct script download and execution (also clones the repo for you)
+2. manually clone the repo first and then run script from there
+
+The install script builds both the `PHP-Client` and the ACM, as well as installing all of the dependencies.
+### Direct script download and execution the installation script:
 The installation script will clone the repo into a subfolder so execute this command directly above where you want the repo to go
 
-For MacOS (Darwin): 
+For MacOS (Darwin):
 ```shell
 curl -O https://raw.githubusercontent.com/aerospike/php-client/refs/heads/main/build/install_as_php_client_mac.zsh; chmod +x install_as_php_client_mac.zsh; ./install_as_php_client_mac.zsh
 ```
 ***NOTE***: the default MacOS installation is an all user-local installation, requiring no root or sudo access
 
-For Linux: 
+For Linux:
 ```shell
 curl -O https://raw.githubusercontent.com/aerospike/php-client/refs/heads/main/build/install_as_php_client_linux.sh; chmod +x install_as_php_client_linux.sh; sudo ./install_as_php_client_linux.sh
 ```
+### Direct script download and execution the installation script:
+1. Clone the repo
+2. Run the installation script for your system:
+
+    for MacOS (darwin):
+	```shell
+	. ./php-client/build/install_as_php_client_mac.zsh
+	 ```
+	 or for linux:
+	```shell
+	. ./php-client/build/install_as_php_client_linux.sh
+	 ```
+
 ***NOTE***: the default linux installation contains system-wide installations and will require root / sudo access 
 
 After the installation script completes, re-source your shell env config files to make sure your `PATH` is updated.  Eg, on MacOS:
 ```shell
 . ~/.zshrc
-``` 
+```
 
 If you encounter errors during installation, you can try running the install script again as the install scripts attempt to be idempotent.  As a last resort, the script commands can be run manually one-by-one as needed.
 
 
-The install script builds both the `PHP-Client` and the ACM.
 
 ### Configuring the Aerospike Connection Manager: 
 
@@ -52,7 +71,7 @@ The install script builds both the `PHP-Client` and the ACM.
 
 ***NOTE:*** You should have an [Aerospike server](https://aerospike.com/download/) up and running to test against.
 
-### Build and Install the PHP-Client
+### Manual Build and Install of the PHP-Client (optional)
 
 In case the installation script fails to build the `PHP-Client`, or if you just want to run specific build commands, you may do so manually:
 * To manually build and install the `PHP-Client` in the default paths run the makefile
@@ -60,7 +79,7 @@ In case the installation script fails to build the `PHP-Client`, or if you just 
 	Note: sudo is only needed when running a system-wide php installation, which is not the default install for MacOS (although it could be)
 	```shell
 	cd php-client
-	sudo make
+	make
 	```
 * To build and install the `PHP-Client` in manually, run the following commands:
 	```shell 
