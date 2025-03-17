@@ -51,7 +51,7 @@ curl -O https://raw.githubusercontent.com/aerospike/php-client/refs/heads/main/b
 	 ```
 	 or for linux:
 	```shell
-	. ./php-client/build/install_as_php_client_linux.sh
+	sudo ./php-client/build/install_as_php_client_linux.sh
 	 ```
 
 ***NOTE***: the default linux installation contains system-wide installations and will require root / sudo access 
@@ -65,7 +65,7 @@ If you encounter errors during installation, you can try running the install scr
 
 
 
-### Configuring the Aerospike Connection Manager: 
+### Configuring the Aerospike Connection Manager:
 
 ***NOTE:*** Please view the README.md in the [`php-client/aerospike-connection-manager`](./aerospike-connection-manager/README.md) directory for more information about the setting up the aerospike-connection-manager  and configuring the client policy.
 

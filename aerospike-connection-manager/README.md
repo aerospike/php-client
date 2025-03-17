@@ -1,6 +1,6 @@
 # Aerospike Connection Manager Setup
 
-This guide provides step-by-step instructions on setting up the Aerospike Connection Manager (ACM).  The ACM can be run directly on the command line (test mode) or as a daemon process. 
+This guide provides step-by-step instructions on setting up the Aerospike Connection Manager (ACM).  The ACM can be run directly on the command line (test mode) or as a daemon process.
 
 ### Prerequisites
 
@@ -19,7 +19,7 @@ Aerospike's client policy allows for flexible control over read and write operat
        ```
     - Edit the asld.toml file to change the client policy to your custom values
 
-2. **Using a custom custom_client_policy.toml file as your client policy**: 
+2. **Using a custom custom_client_policy.toml file as your client policy**:
     - Copy the template from `/php-client/aerospike-connection-manager/asld.toml.template` to your `custom_client_policy.toml`
     - Make the changes you desire.
     - Change directory to `php-client/aerospike-connection-manager` and copy the custom_client_policy.toml file into this directory
@@ -61,7 +61,7 @@ Aerospike's client policy allows for flexible control over read and write operat
     ```
 &nbsp;
 ### Example asld.toml file:
-~~~ini 
+~~~toml
 # -----------------------------------------------------
 #
 # Aerospike Local Daemon configuration file.
