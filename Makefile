@@ -1,9 +1,10 @@
-# Build the Aerospike Connection manager
+# Build the Aerospike PHP extension
 
 # Determine the operating system
 UNAME_S := $(shell uname -s)
 EXT_DIR_PATH := $(shell php -r 'echo ini_get("extension_dir");')
 PHP_INI_PATH := $(shell php -r 'echo php_ini_loaded_file();')
+PHP_INI_CONTENT := $(shell cat ${PHP_INI_PATH})
 
 ifeq ($(UNAME_S),Darwin)
     EXTENSION := .dylib
@@ -36,11 +37,16 @@ build:
 
 install-dev: build-dev
 	cp -f target/debug/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
+ifeq (,$(findstring libaerospike_php,$(PHP_INI_CONTENT)))
 	echo "extension=libaerospike_php$(EXTENSION)" | tee -a $(PHP_INI_PATH)
+endif
+
 
 install: build
 	cp -f target/release/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
+ifeq (,$(findstring libaerospike_php,$(PHP_INI_CONTENT)))
 	echo "extension=libaerospike_php$(EXTENSION)" | tee -a $(PHP_INI_PATH)
+endif
 
 restart: install
 	$(RESTART_COMMAND)

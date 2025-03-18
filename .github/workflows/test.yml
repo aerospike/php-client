@@ -1,0 +1,169 @@
+on:
+  push:
+
+jobs:
+  build-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [
+          # x86_64
+          macos-14-large,
+          # ARM64
+          macos-14
+        ]
+        php-version: [
+          '8.1',
+          '8.2',
+          '8.3',
+          '8.4'
+        ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install dependencies
+        run: |
+          brew install \
+            phpunit \
+            go \
+            protobuf \
+            php@${{ matrix.php-version }}
+          # php executable isn't accessible in PATH by default
+          echo /opt/homebrew/opt/php@${{ matrix.php-version }}/bin >> $GITHUB_PATH
+          echo /opt/homebrew/opt/php@${{ matrix.php-version }}/sbin >> $GITHUB_PATH
+      - name: Get only major and minor version to target build
+        run: echo MACOS_VERSION=$(sw_vers --productVersion | cut -f -2 -d'.') >> $GITHUB_ENV
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build PHP client
+        run: make
+        env:
+          # By default the compiler tries to build for macos 11.0
+          MACOSX_DEPLOYMENT_TARGET: ${{ env.MACOS_VERSION }}
+          # Linker will report errors about some symbols not existing
+          # But some symbols are dynamically loaded by PHP
+          # https://davidcole1340.github.io/ext-php-rs/getting-started/hello_world.html#cargoconfigtoml
+          RUSTFLAGS: "-C link-arg=-Wl,-undefined,dynamic_lookup"
+      - name: Install dependencies for ACM
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          go get -u google.golang.org/grpc
+        working-directory: aerospike-connection-manager
+      - name: Build ACM
+        run: |
+          export PATH="$PATH:$(go env GOPATH)/bin"
+          make build
+        working-directory: aerospike-connection-manager
+
+  build-linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [
+          ubuntu-24.04, # x86_64
+          ubuntu-24.04-arm
+        ]
+        php-version: [
+          '8.1',
+          '8.2',
+          '8.3',
+          '8.4'
+        ]
+    runs-on: ${{ matrix.os }}
+    steps:
+    # The PHP client security and non-security tests need to be run on separate server instances
+    # since currently the security tests are brittle and may interfere with the non-security tests.
+    # Also, just run the server here so it should be ready by the time we run the tests
+    - name: Run CE server
+      run: docker run -d -p 3000:3000 --name aerospike aerospike/aerospike-server
+
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get list of all packages
+      run: sudo apt update
+    - uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+    - name: Install prerequisites
+    # Rust is already installed, as well as rustup
+    # But it doesn't work when we run `sudo make` later on, so we have to reinstall
+    # with apt
+      run: |
+        sudo apt -y install \
+          php-dev \
+          phpunit \
+          build-essential \
+          protobuf-compiler \
+          rustup
+    - name: Download and install latest Rust
+      run: sudo rustup default stable
+    - name: Install more ACM build prerequisites
+      run: |
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+        go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+        go get google.golang.org/grpc
+      working-directory: aerospike-connection-manager
+      shell: sudo bash -e {0}
+    - name: Build and run ACM
+      run: |
+        export PATH="$PATH:$(go env GOPATH)/bin"
+        make daemonize
+      shell: sudo bash -e {0}
+      working-directory: aerospike-connection-manager
+    - run: sudo systemctl status aerospike-connection-manager
+
+    # TODO: build once, then send to two separate jobs
+
+    - name: Build and install PHP client
+      run: sudo make install
+
+    - name: Run only non-security tests
+      run: sudo phpunit --testsuite non_security_tests
+
+    - name: Tear down server
+      run: |
+        docker stop aerospike
+        docker container prune -f
+    - name: Stop ACM
+      run: sudo systemctl stop aerospike-connection-manager
+
+    - run: pip install tomli-w
+    - name: Tell ACM to connect to server using admin credentials
+      run: |
+        import tomllib
+        import tomli_w
+        with open("asld.toml", "rb") as f:
+          tomlDict = tomllib.load(f)
+
+        tomlDict['cluster']['user'] = 'superuser'
+        tomlDict['cluster']['password'] = 'superuser'
+        tomlDict['cluster']['auth'] = 'INTERNAL'
+
+        with open("asld.toml", "wb") as f:
+          tomli_w.dump(tomlDict, f)
+      shell: python
+      working-directory: aerospike-connection-manager
+    - name: Run EE server with security enabled
+      run: docker run -d --mount type=bind,src=$(pwd)/configs,dst=/opt/aerospike/etc -p 3000:3000 --name aerospike aerospike/aerospike-server-enterprise asd --config-file /opt/aerospike/etc/aerospike.conf
+      working-directory: .github/workflows
+    - name: Wait for server to start
+      run: sleep 3
+    - name: Show logs for debugging
+      run: docker logs aerospike
+    - name: Add superuser for testing
+      run: docker exec aerospike asadm --user admin --password admin --enable -e "manage acl create user superuser password superuser roles read-write-udf sys-admin user-admin data-admin"
+    # Rerunning `make daemonize` with the new config will lead to an error
+    # because it is not idempotent
+    - name: Rerun ACM with new config
+      run: |
+        sudo cp asld.toml /etc/aerospike-connection-manager/
+        sudo systemctl start aerospike-connection-manager
+      working-directory: aerospike-connection-manager
+
+    - name: Wait for server to start
+      run: sleep 5
+    - name: Run only security tests
+      run: sudo phpunit --testsuite security_tests
