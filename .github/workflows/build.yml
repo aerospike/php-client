@@ -102,13 +102,13 @@ jobs:
               ls pkg/deb/
               rm -rf pkg/deb/aerospike-php-client-deb*
           - name: Move DEB x86_64 to artifacts
-            uses: actions/upload-artifact@v2
+            uses: actions/upload-artifact@v4
             with:
               name: aerospike-php-client-deb-x86_64
               path: pkg/deb/aerospike-php-client-${{ steps.get_tag.outputs.tag }}-x86_64.deb
               
           - name: Move DEB aarch64 to artifacts
-            uses: actions/upload-artifact@v2
+            uses: actions/upload-artifact@v4
             with:
               name: aerospike-php-client-deb-aarch64
               path: pkg/deb/aerospike-php-client-${{ steps.get_tag.outputs.tag }}-aarch64.deb
