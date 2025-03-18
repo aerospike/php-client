@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
   - [CLIENT-3351] Update ext-php-rs to v0.13.0 to support PHP v8.4.
   - [CLIENT-3334] Old PHP client encodes boolean and null values improperly.
     Updates the Go client to v7.9.0 that supports decoding the old PHP7 improperly encoded boolean and null values.
+  - [CLIENT-3230] Create new build / install scripts, improve READMEs, add test pipelines
 
 ## [1.1.0] - 2024-06-04
 - **Download package**
