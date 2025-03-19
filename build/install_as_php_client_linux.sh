@@ -189,8 +189,8 @@ make
 
 echo "Installation complete!\n"
 
-printf "# TODO:
-# configure your Aerspike Server in php-client/aerospike-connection-manager/asld.toml
+# TODO:
+# configure your Aerospike Server in php-client/aerospike-connection-manager/asld.toml
 # Once configured, run the ACM again with:
 # cd php-client/aerospike-connection-manager
 # make run
