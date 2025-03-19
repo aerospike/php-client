@@ -7,6 +7,7 @@ aerospike-rust-client.sublime-project
 aerospike-rust-client.sublime-workspace
 /log
 .idea/
+.vscode/
 .DS_Store
 src/com.aerospike.daemon.rs
 aerospike-connection-manager/asld
