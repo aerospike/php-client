@@ -28,7 +28,7 @@ There are 2 ways to build and install the `PHP-Client`:
 2. manually clone the repo first and then run script from there
 
 The install script builds both the `PHP-Client` and the ACM, as well as installing all of the dependencies.
-### Direct script download and execution the installation script:
+## Automatic Method: Direct download and execution of installation script:
 The installation script will clone the repo into a subfolder so execute this command directly above where you want the repo to go
 
 For MacOS (Darwin):
@@ -41,7 +41,7 @@ For Linux:
 ```shell
 curl -O https://raw.githubusercontent.com/aerospike/php-client/refs/heads/main/build/install_as_php_client_linux.sh; chmod +x install_as_php_client_linux.sh; sudo ./install_as_php_client_linux.sh
 ```
-### Direct script download and execution the installation script:
+### Manual method: repo clone followed by execution of the installation script:
 1. Clone the repo
 2. Run the installation script for your system:
 
