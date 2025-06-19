@@ -59,6 +59,22 @@ final class ClientTest extends TestCase
         $this->assertIsInt($binGet["integerBin"]);
     }
 
+    public function testPutGetBinary()
+    {
+        $binary = "\x41\x42\xFF\x43\x00\x7F\x80\xE2\x98\x85";
+        $binBinary = new Bin("binaryBin", $binary);
+        $newKey = new Key(self::$namespace, self::$set, 4);
+        $wp = new WritePolicy();
+        self::$client->put($wp, $newKey, [$binBinary]);
+
+        $rp = new ReadPolicy();
+        $record = self::$client->get($rp, $newKey, ["binaryBin"]);
+        $binGet = $record->getBins();
+
+        $this->assertIsString($binGet["binaryBin"]);
+        $this->assertSame($binary, $binGet["binaryBin"]);
+    }
+
     public function testPutGetLists()
     {
         // Prepare a list (array) bin
