@@ -29,18 +29,18 @@ lint:
 	cargo clippy
 
 build-dev:
-	cargo build
+	cargo build --locked
 
 build:
 	cargo build --release
 
 install-dev: build-dev
-	cp -f target/debug/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
-	echo "extension=libaerospike_php$(EXTENSION)" | tee -a $(PHP_INI_PATH)
+	sudo cp -f target/debug/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
+	echo "extension=libaerospike_php$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
 
 install: build
-	cp -f target/release/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
-	echo "extension=libaerospike_php$(EXTENSION)" | tee -a $(PHP_INI_PATH)
+	sudo cp -f target/release/libaerospike_php$(EXTENSION) $(EXT_DIR_PATH)
+	echo "extension=libaerospike_php$(EXTENSION)" | sudo tee -a $(PHP_INI_PATH)
 
 restart: install
 	$(RESTART_COMMAND)

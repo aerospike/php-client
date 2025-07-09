@@ -3,7 +3,7 @@ VERSION=$(shell git describe --tags --abbrev=0 | cut -c 2-)
 GOBUILD=$(GOCMD) build -ldflags="-X 'main.version=$(VERSION)'" -o asld
 GOGET=$(GOCMD) get -u
 BINARY_NAME=asld
-SERVICE_NAME=aerospike-connection-manager.service
+SERVICE_NAME=aerospike-connection-manager
 
 .PHONY: test test-rest lint lint-insane clean docs deps modtidy check
 all: build

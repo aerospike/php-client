@@ -4154,6 +4154,7 @@ impl Recordset {
 
 /// Container object for a record bin, comprising a name and a value.
 #[php_class(name = "Aerospike\\Bin")]
+#[derive(Debug)]
 pub struct Bin {
     _as: proto::Bin,
 }
@@ -4161,10 +4162,11 @@ pub struct Bin {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Bin {
-    pub fn __construct(name: &str, value: PHPValue) -> Self {
+    pub fn __construct(name: &str, value: &Zval) -> Self {
+        let v: PHPValue = from_zval(value).expect("YUH");
         let _as = proto::Bin {
             name: name.into(),
-            value: Some(value.into()),
+            value: Some(v.into()),
         };
         Bin { _as: _as }
     }
@@ -10991,6 +10993,58 @@ impl FromZval<'_> for Wildcard {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
+//  BLOB
+//
+////////////////////////////////////////////////////////////////////////////////////////////
+
+/// Implementation of the BLOB data structure for Aerospike.
+#[php_class(name = "Aerospike\\BLOB")]
+pub struct BLOB {
+    v: Vec<u8>,
+}
+
+impl FromZval<'_> for BLOB {
+    const TYPE: DataType = DataType::Mixed;
+
+    fn from_zval(zval: &Zval) -> Option<Self> {
+        let f: &BLOB = zval.extract()?;
+
+        Some(BLOB { v: f.v.clone() })
+    }
+}
+
+#[php_impl]
+#[derive(ZvalConvert)]
+impl BLOB {
+    #[getter]
+    pub fn get_value(&self) -> Vec<u8> {
+        self.v.clone()
+    }
+
+    #[setter]
+    pub fn set_value(&mut self, blob: Vec<u8>) {
+        self.v = blob
+    }
+
+    /// Returns a string representation of the value.
+    pub fn as_string(&self) -> String {
+        PHPValue::Blob(self.v.clone()).as_string()
+    }
+
+    /// Returns a string representation of the value.
+    pub fn equals(&self, other: &Self) -> bool {
+        self.v == other.v
+    }
+}
+
+impl fmt::Display for BLOB {
+    fn fmt(&self, f: &mut fmt::Formatter) -> std::result::Result<(), fmt::Error> {
+        write!(f, "{}", self.as_string())
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//
 //  HLL
 //
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -11139,7 +11193,7 @@ impl PHPValue {
             PHPValue::Float(ref val) => val.to_string(),
             PHPValue::String(ref val) => val.to_string(),
             PHPValue::GeoJSON(ref val) => format!("GeoJSON('{}')", val.to_string()),
-            PHPValue::Blob(ref val) => format!("{:?}", val),
+            PHPValue::Blob(ref val) => format!("Blob({:?})", val),
             PHPValue::HLL(ref val) => format!("HLL('{:?}')", val),
             PHPValue::List(ref val) => format!("{:?}", val),
             PHPValue::HashMap(ref val) => format!("{:?}", val),
@@ -11210,7 +11264,7 @@ impl IntoZval for PHPValue {
             PHPValue::UInt(ui) => zv.set_long(ui as i64),
             PHPValue::Float(f) => zv.set_double(f),
             PHPValue::String(s) => zv.set_string(&s, persistent)?,
-            PHPValue::Blob(b) => zv.set_binary(b),
+            // PHPValue::Blob(b) => zv.set_binary(b),
             PHPValue::List(l) => zv.set_array(l)?,
             PHPValue::Json(h) => {
                 let mut arr = ZendHashTable::with_capacity(h.len() as u32);
@@ -11233,6 +11287,11 @@ impl IntoZval for PHPValue {
             PHPValue::GeoJSON(s) => {
                 let geo = GeoJSON { v: s };
                 let zo: ZBox<ZendObject> = geo.into_zend_object()?;
+                zv.set_object(zo.into_raw());
+            }
+            PHPValue::Blob(b) => {
+                let blob = BLOB { v: b };
+                let zo: ZBox<ZendObject> = blob.into_zend_object()?;
                 zv.set_object(zo.into_raw());
             }
             PHPValue::HLL(b) => {
@@ -11258,6 +11317,22 @@ impl IntoZval for PHPValue {
 
 fn from_zval(zval: &Zval) -> Option<PHPValue> {
     match zval.get_type() {
+        DataType::Object(_) => {
+            if let Some(o) = zval.extract::<BLOB>() {
+                return Some(PHPValue::Blob(o.v));
+            } else if let Some(o) = zval.extract::<HLL>() {
+                return Some(PHPValue::HLL(o.v));
+            } else if let Some(o) = zval.extract::<GeoJSON>() {
+                return Some(PHPValue::GeoJSON(o.v));
+            } else if let Some(_) = zval.extract::<Infinity>() {
+                return Some(PHPValue::Infinity);
+            } else if let Some(_) = zval.extract::<Wildcard>() {
+                return Some(PHPValue::Wildcard);
+            }
+            let error = AerospikeException::new("Invalid Object");
+            let _ = throw_object(error.into_zval(true).unwrap());
+            None
+        }
         // DataType::Undef => Some(PHPValue::Nil),
         DataType::Null => Some(PHPValue::Nil),
         DataType::False => Some(PHPValue::Bool(false)),
@@ -11300,20 +11375,6 @@ fn from_zval(zval: &Zval) -> Option<PHPValue> {
                     PHPValue::HashMap(h)
                 }
             })
-        }
-        DataType::Object(_) => {
-            if let Some(o) = zval.extract::<GeoJSON>() {
-                return Some(PHPValue::GeoJSON(o.v));
-            } else if let Some(o) = zval.extract::<HLL>() {
-                return Some(PHPValue::HLL(o.v));
-            } else if let Some(_) = zval.extract::<Infinity>() {
-                return Some(PHPValue::Infinity);
-            } else if let Some(_) = zval.extract::<Wildcard>() {
-                return Some(PHPValue::Wildcard);
-            }
-            let error = AerospikeException::new("Invalid Object");
-            let _ = throw_object(error.into_zval(true).unwrap());
-            None
         }
         _ => unreachable!(),
     }

@@ -1734,6 +1734,12 @@ func fromValue(in any) *pb.Value {
 		return &pb.Value{V: &pb.Value_Wildcard{Wildcard: true}}
 	case aero.InfinityValue:
 		return &pb.Value{V: &pb.Value_Infinity{Infinity: true}}
+	case aero.OpResults:
+		l := make([]*pb.Value, len(v))
+		for i := range v {
+			l[i] = fromValue(v[i])
+		}
+		return &pb.Value{V: &pb.Value_L{L: &pb.List{L: l}}}
 	}
 
 	panic(UNREACHABLE)
