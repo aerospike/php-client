@@ -1,95 +1,123 @@
-[![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client) 
-# Aerospike PHP 8+ Client (v1.0.0)
+[![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client)
+# Aerospike PHP 8 Client (v1.2.0)
 
-An [Aerospike](https://www.aerospike.com/) client library for PHP 8+.
+An [Aerospike](https://www.aerospike.com/) client library for PHP 8
 
-## PHP-Client Introduction 
+## PHP-Client Introduction
 
-This is the documentation for the Aerospike PHP Client. The PHP client comprises of two essential components. Firstly, we have a robust PHP client written in Rust and a connection manager written in Go, serving as a shared resource among PHP processes. The connection manager daemon efficiently handles all requests and responses between the PHP processes and the Aerospike server.
+This is the documentation for the Aerospike `PHP-Client`. The `PHP-Client` comprises of two essential components: 
+* the client itself, written in Rust as a PHP extension
+* the connection manager (the "Aerospike Connection Manager" or "ACM") written in Go which serves as a shared resource among PHP processes. The ACM efficiently handles all requests and responses between the PHP processes and the Aerospike server, and can be configured to run as a daemonized service.
 
+## Dependencies
+***NOTE:*** Any missing dependencies will be installed by the installation script
 
-## Requirements
-
-* PHP v8.1+
-* Cargo
+* PHP (v8.1-8.4)
+* Cargo (Rust package manager)
 * Aerospike server
-* Linux or Darwin 
-* PHPUnit v10
-* Rustc >= v1.74 
+* Linux or MacOS (Darwin)
+* PHPUnit
+* rustc (Rust compiler) >= v1.74
 * Go Toolchain [Go Toolchains - The Go Programming Language](https://go.dev/doc/toolchain)
 * Protobuf Compiler [protoc-gen-go command - google.golang.org/protobuf/cmd/protoc-gen-go - Go Packages](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go)
-* ext-php-rs v0.12.0 [github repository link](https://github.com/davidcole1340/ext-php-rs/tree/master)
-NOTE: Please see instruction for setting up ext-php-rs for windows [here] 
+* ext-php-rs (PHP extension) v0.13.1 [github repository link](https://github.com/davidcole1340/ext-php-rs/tree/master)
 
-## Setup
+## Build & Installation
+There are 2 ways to build and install the `PHP-Client`:
+1. direct script download and execution (also clones the repo for you)
+2. manually clone the repo first and then run script from there
 
-* Clone the PHP-Client repository
-```bash https://github.com/aerospike/php-client.git
-cd php-client
+The install script builds both the `PHP-Client` and the ACM, as well as installing all of the dependencies.
+## Automatic Method: Direct download and execution of installation script:
+The installation script will clone the repo into a subfolder so execute this command directly above where you want the repo to go
+
+For MacOS (Darwin):
+```shell
+curl -O https://raw.githubusercontent.com/aerospike/php-client/refs/heads/main/build/install_as_php_client_mac.zsh; chmod +x install_as_php_client_mac.zsh; ./install_as_php_client_mac.zsh
+```
+***NOTE***: the default MacOS installation is an all user-local installation, requiring no root or sudo access
+
+For Linux:
+```shell
+curl -O https://raw.githubusercontent.com/aerospike/php-client/refs/heads/main/build/install_as_php_client_linux.sh; chmod +x install_as_php_client_linux.sh; sudo ./install_as_php_client_linux.sh
+```
+### Manual method: repo clone followed by execution of the installation script:
+1. Clone the repo
+2. Run the installation script for your system:
+
+    for MacOS (darwin):
+	```shell
+	. ./php-client/build/install_as_php_client_mac.zsh
+	 ```
+	 or for linux:
+	```shell
+	sudo ./php-client/build/install_as_php_client_linux.sh
+	 ```
+
+***NOTE***: the default linux installation contains system-wide installations and will require root / sudo access 
+
+After the installation script completes, re-source your shell env config files to make sure your `PATH` is updated.  Eg, on MacOS:
+```shell
+. ~/.zshrc
 ```
 
-### Setting up the Aerospike client connection manager: 
+If you encounter errors during installation, you can try running the install script again as the install scripts attempt to be idempotent.  As a last resort, the script commands can be run manually one-by-one as needed.
 
-#### Installing up the dependencies and Running the Aerospike Connection manager
-1. Make sure the go toolchain has been installed. Download the package from [The Go Programming Language](https://golang.org/dl/). Follow the steps to correctly install Go.
-   **NOTE:** Ensure that the PATH variable has been updated with the GOBIN path.
-2. Install protobuf compiler:
-```bash
-   go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-```
-3. Change directory into php-client/aerospike-connection-manager 
-```bash 
-cd php-client/aerospike-connection-manager 
-```
-4. Build and run the aerospike-connection-manager 
-```bash
-sudo make
-```
-**NOTE:** Please view the README.md in the [`php-client/aerospike-connection-manager`](./aerospike-connection-manager/README.md) directory for more information about the setting up the aerospike-connection-manager  and configuring the client policy.
 
-### Build and Install the PHP-Client
-* Check the php version 
-```bash 
-php -v
-```
-* Install and setup the Aerospike [Aerospike server](https://aerospike.com/download/) 
-* To build and install the `PHP-Client` in the default paths run the makefile
-```bash
-cd php-client
-sudo make
-```
+
+### Configuring the Aerospike Connection Manager:
+
+***NOTE:*** Please view the README.md in the [`php-client/aerospike-connection-manager`](./aerospike-connection-manager/README.md) directory for more information about the setting up the aerospike-connection-manager  and configuring the client policy.
+
+***NOTE:*** You should have an [Aerospike server](https://aerospike.com/download/) up and running to test against.
+
+### Manual Build and Install of the PHP-Client (optional)
+
+In case the installation script fails to build the `PHP-Client`, or if you just want to run specific build commands, you may do so manually:
+* To manually build and install the `PHP-Client` in the default paths run the makefile
+
+	Note: sudo is only needed when running a system-wide php installation, which is not the default install for MacOS (although it could be)
+	```shell
+	cd php-client
+	make
+	```
 * To build and install the `PHP-Client` in manually, run the following commands:
-```bash 
-cd php-client
-cargo clean && cargo build --release
-```
-- Once the build is successful copy the file from `target/release/libaerospike$(EXTENSION)` [$EXTENSION = .so for Linux and .dylib for Mac and Windows] to the PHP extension directory path. 
+	```shell 
+	cd php-client
+	cargo clean && cargo build --release
+	```
+
+- Once the build is successful, copy the file from `target/release/libaerospike$(EXTENSION)` [$EXTENSION = .so for Linux and .dylib for Mac and Windows] to the PHP extension directory path. 
 - Add `extension=libaerospike$(EXTENSION)` to your `php.ini` file. 
-- Run  `phpunit tests/` to ensure the setup and build was successful. 
+- Run  `phpunit tests/` to ensure the setup and build were successful. 
 
 ***NOTE***: The Aerospike server must be running for the tests to run successfully. 
 
 ### Running your PHP Project
 
-1. Running your PHP script:
-  - Before running your script pre-requisites are Aerospike connection manager and Aerospike Server must be running.  
-  - Once the build is successful and all the pre-requisites are met, import the Aerospike namespace to your PHP script. 
-  - To connect to the Aerospike connection manager add:
-```PHP
+  - Before running your project PHP scripts, the following must be running:
+  	- An Aerospike Connection Manager (ACM)
+	- An Aerospike Server that the ACM can connect to 
+  - Once the build is successful and all the pre-requisites are met, import the Aerospike namespace to your PHP script:
+	```PHP
+	namespace Aerospike;
+	```
+  - To connect to the Aerospike server via the ACM add:
+	```PHP
 	$socket = "/tmp/asld_grpc.sock";
 	$client = Client::connect($socket); 
-```
+	```
   - Run the php script
   If there are no Errors then you have successfully connected to the Aerospike DB. 
 
-***NOTE:*** If the connection manager daemon crashes, you will have to manually remove the file `/tmp/asld_grpc.sock` from its path.
-```bash 
-sudo rm -r /tmp/asld_grpc.soc
-```
+	***NOTE:*** If the connection manager daemon crashes, you will have to manually remove the file `/tmp/asld_grpc.sock` from its path.
+	```shell
+	sudo rm -r /tmp/asld_grpc.sock
+	```
 
-   - Configuring policies: Configuring Policies (Read, Write, Batch and Info) - These policies can be set via getters and setter in the php code. On creating an object of that policy class, the default values are initialized for that policy. For example: 
+  - Policy Configuration (Read, Write, Batch and Info) - These policies can be set via getters and setter in the php code. On creation of an object of that policy class (eg, WritePolicy), the default values are initialized for that policy & can be overidden with associated setters. For example: 
 
-```php
+	```php
 	// Instantiate the WritePolicy object
 	$writePolicy = new WritePolicy();
 
@@ -98,7 +126,7 @@ sudo rm -r /tmp/asld_grpc.soc
 	$writePolicy->setExpiration(Expiration::seconds(3600)); // Expiring in 1 hour
 	$writePolicy->setMaxRetries(3);
 	$writePolicy->setSocketTimeout(5000);
-```
+	```
 
 ## Documentation
 

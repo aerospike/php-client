@@ -19,7 +19,6 @@ class ScanTest extends TestCase
     protected static $bins;
     protected static $set;
     protected static $keys = [];
-    protected static $recs;
 
     public static function setUpBeforeClass(): void
     {
