@@ -1,6 +1,7 @@
-<?php 
+<?php
 
 namespace Aerospike;
+
 use PHPUnit\Framework\TestCase;
 
 /* This test needs to have security enabled in aerospike.conf.
@@ -32,7 +33,7 @@ final class SecurityTest extends TestCase
 
 
     //Change this to TRUE when you enable security and want to test connections.
-    protected static $authRequired = TRUE;
+    protected static $authRequired = false;
 
     protected function isSecurityEnabled()
     {
@@ -41,7 +42,7 @@ final class SecurityTest extends TestCase
 
     public function testAerospikeConnectionWithAuthEnabled()
     {
-        if(!$this->isSecurityEnabled()){
+        if (!$this->isSecurityEnabled()) {
             $this->markTestSkipped("Enable Security in Aerospike.conf");
         }
         self::$client = Client::connect(self::$socket);
@@ -52,7 +53,7 @@ final class SecurityTest extends TestCase
 
     public function testCreateUser()
     {
-        if(!$this->isSecurityEnabled()){
+        if (!$this->isSecurityEnabled()) {
             $this->markTestSkipped("Enable Security in Aerospike.conf");
         }
         $this->expectNotToPerformAssertions();
@@ -63,7 +64,7 @@ final class SecurityTest extends TestCase
 
     public function testDropUser()
     {
-        if(!$this->isSecurityEnabled()){
+        if (!$this->isSecurityEnabled()) {
             $this->markTestSkipped("Enable Security in Aerospike.conf");
         }
         $this->expectNotToPerformAssertions();
@@ -73,7 +74,7 @@ final class SecurityTest extends TestCase
 
     public function testChangePassword()
     {
-        if(!$this->isSecurityEnabled()){
+        if (!$this->isSecurityEnabled()) {
             $this->markTestSkipped("Enable Security in Aerospike.conf");
         }
         $this->expectNotToPerformAssertions();
@@ -85,7 +86,7 @@ final class SecurityTest extends TestCase
 
     public function testChangePasswordOfUnknownUser()
     {
-        if(!$this->isSecurityEnabled()){
+        if (!$this->isSecurityEnabled()) {
             $this->markTestSkipped("Enable Security in Aerospike.conf");
         }
 
@@ -101,7 +102,7 @@ final class SecurityTest extends TestCase
 
     public function testQueryUsers()
     {
-        if(!$this->isSecurityEnabled()){
+        if (!$this->isSecurityEnabled()) {
             $this->markTestSkipped("Enable Security in Aerospike.conf");
         }
         $this->expectNotToPerformAssertions();
