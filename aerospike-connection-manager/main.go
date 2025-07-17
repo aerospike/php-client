@@ -88,11 +88,12 @@ func cleanUp(conf map[string]*client.AerospikeConfig) {
 
 func launchServer(name string, ac *client.AerospikeConfig) {
 	cp, err := ac.NewClientPolicy()
-	if cp.ConnectionQueueSize == 0 {
-		cp.ConnectionQueueSize = 32
-	}
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	if cp.ConnectionQueueSize == 0 {
+		cp.ConnectionQueueSize = 32
 	}
 
 	seeds := ac.NewHosts()
