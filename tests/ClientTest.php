@@ -36,6 +36,8 @@ final class ClientTest extends TestCase
             Value::list([1, "hello world", true, 3.14]),
             Value::map(array(1 => true, 2 => false, "hello" => "world", "nil" => Value::nil())),
             Value::blob([1, 3, 5, 7, 9, 24, 255]),
+            Value::blob("\x41\x42\xFF\x43\x00\x7F\x80\xE2\x98\x85"),
+            Value::blob("strings should also work!"),
             Value::geoJson("{ \"type\": \"AeroCircle\", \"coordinates\": [[0.0, 0.0], 3000.0 ] }"),
         ];
 
@@ -301,5 +303,20 @@ final class ClientTest extends TestCase
         $rp->setReadTouchTtlPercent(80);
         $record = self::$client->get($rp, $stringKey);
         $this->assertEquals($record->getTtl(), 1);
+    }
+
+    public function testPutGetBinary()
+    {
+        $binary = Value::blob("\x41\x42\xFF\x43\x00\x7F\x80\xE2\x98\x85");
+        $binBinary = new Bin("binaryBin", $binary);
+        $newKey = new Key(self::$namespace, self::$set, 4);
+        $wp = new WritePolicy();
+        self::$client->put($wp, $newKey, [$binBinary]);
+
+        $rp = new ReadPolicy();
+        $record = self::$client->get($rp, $newKey, ["binaryBin"]);
+        $binGet = $record->getBins();
+
+        $this->assertEquals($binary, $binGet["binaryBin"]);
     }
 }

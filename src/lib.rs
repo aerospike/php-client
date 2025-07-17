@@ -34,6 +34,7 @@ use ripemd160::digest::Digest;
 use ripemd160::Ripemd160;
 use version_compare::{Cmp, Version};
 
+use ext_php_rs::binary::Binary;
 use ext_php_rs::boxed::ZBox;
 use ext_php_rs::convert::IntoZendObject;
 use ext_php_rs::convert::{FromZval, IntoZval};
@@ -4162,13 +4163,18 @@ pub struct Bin {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Bin {
-    pub fn __construct(name: &str, value: &Zval) -> Self {
-        let v: PHPValue = from_zval(value).expect("YUH");
-        let _as = proto::Bin {
-            name: name.into(),
-            value: Some(v.into()),
-        };
-        Bin { _as: _as }
+    pub fn __construct(name: &str, value: &Zval) -> PhpResult<Self> {
+        let v_op: Option<PHPValue> = from_zval(value);
+        match v_op {
+            Some(v) => {
+                let _as = proto::Bin {
+                    name: name.into(),
+                    value: Some(v.into()),
+                };
+                Ok(Bin { _as: _as })
+            }
+            _ => Err(format!("Invalid input for argument `value`").into()),
+        }
     }
 }
 
@@ -11017,6 +11023,11 @@ impl FromZval<'_> for BLOB {
 #[derive(ZvalConvert)]
 impl BLOB {
     #[getter]
+    pub fn get_binary(&self) -> Binary<u8> {
+        self.v.clone().into_iter().collect::<Binary<_>>()
+    }
+
+    #[getter]
     pub fn get_value(&self) -> Vec<u8> {
         self.v.clone()
     }
@@ -11568,8 +11579,46 @@ impl Value {
         }
     }
 
-    pub fn blob(val: Vec<u8>) -> PHPValue {
-        PHPValue::Blob(val)
+    pub fn blob(zval: &Zval) -> PhpResult<PHPValue> {
+        match zval.get_type() {
+            DataType::String => {
+                if zval.binary::<u8>().is_some() {
+                    Ok(zval.binary().map(|v| PHPValue::Blob(v.into())).unwrap())
+                } else {
+                    Ok(zval.string().map(|v| PHPValue::Blob(v.into())).unwrap())
+                }
+            }
+            DataType::Array => {
+                if let Some(arr) = zval.array() {
+                    if arr.has_sequential_keys() {
+                        // it's an array
+                        let val_arr: Vec<u8> = arr
+                            .iter()
+                            .map(|(_, v)| match from_zval(v) {
+                                Some(PHPValue::Int(b)) if b >= 0 && b <= 255 => b as u8,
+                                Some(PHPValue::Int(b)) if b < 0 && b > 255 => {
+                                    let msg = format!("Invalid value {} in array for Value::blob. Must be an array of integers [0, 255]", b);
+                                    let error = AerospikeException::new(&msg);
+                                    throw_object(error.into_zval(true).unwrap()).unwrap();
+                                    0
+                                },
+                                _ => {
+                                    let error = AerospikeException::new("Invalid array for Value::blob. Must be an array of integers [0, 255]");
+                                    throw_object(error.into_zval(true).unwrap()).unwrap();
+                                    0
+                                },
+                            })
+                            .collect();
+                        return Ok(PHPValue::Blob(val_arr));
+                    }
+                };
+                return Err(format!(
+                    "Invalid Array type for Value::blob. Must be an array of integers [0, 255]"
+                )
+                .into());
+            }
+            _ => return Err(format!("Nah").into()),
+        }
     }
 
     pub fn geo_json(val: String) -> PHPValue {
