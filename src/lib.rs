@@ -11596,7 +11596,7 @@ impl Value {
                             .iter()
                             .map(|(_, v)| match from_zval(v) {
                                 Some(PHPValue::Int(b)) if b >= 0 && b <= 255 => b as u8,
-                                Some(PHPValue::Int(b)) if b < 0 && b > 255 => {
+                                Some(PHPValue::Int(b)) if b < 0 || b > 255 => {
                                     let msg = format!("Invalid value {} in array for Value::blob. Must be an array of integers [0, 255]", b);
                                     let error = AerospikeException::new(&msg);
                                     throw_object(error.into_zval(true).unwrap()).unwrap();

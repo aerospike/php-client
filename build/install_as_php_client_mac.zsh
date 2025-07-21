@@ -164,6 +164,8 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 wait
 go get -u google.golang.org/grpc
 wait
+go get github.com/aerospike/aerospike-client-go/v7@v7.9.0
+wait
 
 
 #Build & install PHP client
