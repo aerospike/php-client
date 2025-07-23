@@ -11617,7 +11617,12 @@ impl Value {
                 )
                 .into());
             }
-            _ => return Err(format!("Nah").into()),
+            _ => {
+                return Err(format!(
+                    "Invalid Array type for Value::blob. Must be an array of integers [0, 255]"
+                )
+                .into())
+            }
         }
     }
 
