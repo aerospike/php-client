@@ -1,5 +1,5 @@
 [![PHP version](https://img.shields.io/badge/php-%3E%3D%208.1-8892BF.svg)](https://github.com/aerospike/php-client)
-# Aerospike PHP 8 Client (v1.2.0)
+# Aerospike PHP 8 Client (v1.3.0)
 
 An [Aerospike](https://www.aerospike.com/) client library for PHP 8
 
