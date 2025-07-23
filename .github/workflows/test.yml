@@ -93,10 +93,7 @@ jobs:
     # with apt
       run: |
         sudo apt -y install \
-          dom \
-          mbstring \
-          xml \
-          xmlwriter \
+          php-mbstring \
           php-dev \
           phpunit \
           build-essential \
