@@ -24,6 +24,46 @@ final class ClientTest extends TestCase
         }
     }
 
+
+    public function testPutGetValues()
+    {
+        $values = [
+            Value::int(-1),
+            Value::uint(1),
+            Value::float(3.14),
+            Value::bool(true),
+            Value::string("hello world!"),
+            Value::list([1, "hello world", true, 3.14]),
+            Value::map(array(1 => true, 2 => false, "hello" => "world", "nil" => Value::nil())),
+            Value::blob([1, 3, 5, 7, 9, 24, 255]),
+            Value::blob("\x41\x42\xFF\x43\x00\x7F\x80\xE2\x98\x85"),
+            Value::blob("strings should also work!"),
+            Value::geoJson("{ \"type\": \"AeroCircle\", \"coordinates\": [[0.0, 0.0], 3000.0 ] }"),
+        ];
+
+        foreach ($values as $value) {
+
+            // Prepare a bin with an integer value
+            $bin = new Bin("binName", $value);
+            // var_dump($value);
+
+            // Create a new key for the test
+            $newKey = new Key(self::$namespace, self::$set, 0);
+
+            // // Write the bin to the record
+            $wp = new WritePolicy();
+            self::$client->put($wp, $newKey, [$bin]);
+
+            // // Read the bin back from the record
+            $rp = new ReadPolicy();
+            $record = self::$client->get($rp, $newKey, ["binName"]);
+            $binGet = $record->getBins();
+
+            // // Assert that the value associated with "binName" is an integer
+            $this->assertEquals($binGet["binName"], $value);
+        }
+    }
+
     public function testPutGetString()
     {
         $binString = new Bin("stringBin", "StringData");
@@ -263,5 +303,20 @@ final class ClientTest extends TestCase
         $rp->setReadTouchTtlPercent(80);
         $record = self::$client->get($rp, $stringKey);
         $this->assertEquals($record->getTtl(), 1);
+    }
+
+    public function testPutGetBinary()
+    {
+        $binary = Value::blob("\x41\x42\xFF\x43\x00\x7F\x80\xE2\x98\x85");
+        $binBinary = new Bin("binaryBin", $binary);
+        $newKey = new Key(self::$namespace, self::$set, 4);
+        $wp = new WritePolicy();
+        self::$client->put($wp, $newKey, [$binBinary]);
+
+        $rp = new ReadPolicy();
+        $record = self::$client->get($rp, $newKey, ["binaryBin"]);
+        $binGet = $record->getBins();
+
+        $this->assertEquals($binary, $binGet["binaryBin"]);
     }
 }

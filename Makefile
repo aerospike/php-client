@@ -30,7 +30,7 @@ lint:
 	cargo clippy
 
 build-dev:
-	cargo build
+	cargo build --locked
 
 build:
 	cargo build --release

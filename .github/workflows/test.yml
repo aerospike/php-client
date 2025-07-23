@@ -93,6 +93,8 @@ jobs:
     # with apt
       run: |
         sudo apt -y install \
+          php-mbstring \
+          php-xml \
           php-dev \
           phpunit \
           build-essential \

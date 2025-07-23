@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2025-02-23
+
+- **New Features**:
+  - [CLIENT_3542] Support inserting binary data as `Value::blob`.
+
 ## [1.2.0] - 2025-02-28
 
  - **Improvements**: 
