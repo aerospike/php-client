@@ -4214,8 +4214,10 @@ impl Record {
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
-            0 => NEVER_EXPIRE.into(),
-            secs => secs.into(),
+            NAMESPACE_DEFAULT => Expiration::Namespace_Default(),
+            NEVER_EXPIRE => Expiration::Never(),
+            DONT_UPDATE => Expiration::Dont_Update(),
+            secs => Expiration::Seconds(secs),
         }
     }
 
