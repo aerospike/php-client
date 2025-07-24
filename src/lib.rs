@@ -27,7 +27,6 @@ use std::hash::{Hash, Hasher};
 use std::io::Cursor;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::time::SystemTime;
 
 use byteorder::{ByteOrder, NetworkEndian};
 use ripemd160::digest::Digest;
@@ -67,7 +66,6 @@ pub type AsResult<T = ()> = std::result::Result<T, AerospikeException>;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const PARTITIONS: u16 = 4096;
-const CITRUSLEAF_EPOCH: u64 = 1262304000;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -4224,24 +4222,10 @@ impl Record {
     /// Expiration is TTL (Time-To-Live).
     /// Number of seconds until record expires.
     #[getter]
-    pub fn get_ttl(&self) -> Option<u32> {
+    pub fn get_ttl(&self) -> Option<i32> {
         match self._as.expiration {
-            0 => NEVER_EXPIRE.into(),
-            secs => {
-                let expiration = CITRUSLEAF_EPOCH + (secs as u64);
-                let now = SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs();
-
-                // Record may not have expired on server, but delay or clock differences may
-                // cause it to look expired on client. Floor at 1, not 0, to avoid old
-                // "never expires" interpretation.
-                if expiration > now {
-                    return (((expiration as u64) - now) as u32).into();
-                }
-                return (1 as u32).into();
-            }
+            0 => (NEVER_EXPIRE as i32).into(),
+            secs => (secs as i32).into(),
         }
     }
 
