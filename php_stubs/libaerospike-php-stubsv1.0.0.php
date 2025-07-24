@@ -4278,6 +4278,7 @@ namespace Aerospike {
         /**
          * Expiration is TTL (Time-To-Live).
          * Number of seconds until record expires.
+         * Returns NULL if TTL is set to Never Expire.
          */
         public function getTtl(): ?int {}
 

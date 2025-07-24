@@ -4224,10 +4224,10 @@ impl Record {
     /// Expiration is TTL (Time-To-Live).
     /// Number of seconds until record expires.
     #[getter]
-    pub fn get_ttl(&self) -> Option<i32> {
+    pub fn get_ttl(&self) -> Option<u32> {
         match self._as.expiration {
-            NEVER_EXPIRE => (NEVER_EXPIRE as i32).into(),
-            secs => (secs as i32).into(),
+            NEVER_EXPIRE => None,
+            secs => (secs as u32).into(),
         }
     }
 
