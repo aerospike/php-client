@@ -1657,6 +1657,12 @@ impl Expiration {
             _as: _Expiration::DontUpdate,
         }
     }
+
+	/// Answers with the expiration's configured value in units of seconds.
+	#[getter]
+	pub fn in_seconds(&self) -> u32 {
+		self.into()
+	}
 }
 
 impl From<&Expiration> for u32 {
@@ -9744,6 +9750,7 @@ impl Client {
     /// Write record bin(s). The policy specifies the transaction timeout, record expiration and
     /// how the transaction is handled when the record already exists.
     pub fn put(&self, policy: &WritePolicy, key: &Key, bins: Vec<&Bin>) -> PhpResult<()> {
+		eprintln!("LBPUT001 put() entered");
         let bins: Vec<proto::Bin> = bins.into_iter().map(|b| b.into()).collect();
 
         let request = tonic::Request::new(proto::AerospikePutRequest {
@@ -9761,6 +9768,7 @@ impl Client {
             } => Ok(()),
             pe => {
                 let error: AerospikeException = pe.into();
+				eprintln!("LBPUT002 Error detected: {:?}", error);
                 throw_object(error.into_zval(true)?)?;
                 Ok(())
             }

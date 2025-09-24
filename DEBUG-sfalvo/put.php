@@ -1,0 +1,97 @@
+<?php
+
+namespace Aerospike;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+//	Creating Client, persisting in permanent storage, retriving from there
+//
+////////////////////////////////////////////////////////////////////////////////
+
+$socket = "/tmp/asld_grpc.sock";
+
+$client = Client::connect($socket);
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Key object
+//
+////////////////////////////////////////////////////////////////////////////////
+
+$key = new Key("test", "test", 1);
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// client->truncate
+//
+////////////////////////////////////////////////////////////////////////////////
+
+// $ip = new InfoPolicy();
+// $client->truncate($ip, "test", "test");
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// client->put
+//
+////////////////////////////////////////////////////////////////////////////////
+
+echo "============= PUT ===============\n";
+
+$wp = new WritePolicy();
+$wp->setExpiration(Expiration::Seconds(10));
+
+$bin1 = new Bin("bin1", 111);
+
+for ($x = 0; $x < 10; $x++) {
+	$key = new Key("test", "test", $x);
+	$bin1 = new Bin("bin1", $x);
+	echo "/";
+	$client->put($wp, $key, [$bin1]);
+}
+echo "\n";
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// client->get
+//
+////////////////////////////////////////////////////////////////////////////////
+
+echo "============= GET ===============\n";
+
+$rp = new ReadPolicy();
+
+$rp->setMaxRetries(3);
+$timeInMillis = 3000;
+$rp->timeout = $timeInMillis;
+
+var_dump($rp);
+
+for ($x = 0; $x <= 10; $x++) {
+	sleep(1);
+	$record = $client->get($rp, $key, ["bin1"]);
+	if ($record) {
+		echo "RECORD " . $x . " TTL = " . ($record->getTtl()) . "\n";
+		echo "RECORD " . $x . " EXP = " . ($record->getExpiration()->inSeconds()) . "\n";
+	}
+	else {
+		echo "Record " . $x . " expired.\n";
+	}
+}
+
+$record = $client->get($rp, $key);
+var_dump($record->bins);
+var_dump($record->generation);
+var_dump($record->key);
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// $client->delete
+//
+////////////////////////////////////////////////////////////////////////////////
+
+$deleted = $client->delete($wp, $key);
+var_dump($deleted);
+
+$exists = $client->exists($rp, $key);
+var_dump($exists);
+
