@@ -24,7 +24,6 @@ final class ClientTest extends TestCase
         }
     }
 
-
     public function testPutGetValues()
     {
         $values = [
@@ -318,5 +317,56 @@ final class ClientTest extends TestCase
         $binGet = $record->getBins();
 
         $this->assertEquals($binary, $binGet["binaryBin"]);
+    }
+
+    public function testReadTtlExpires()
+    {
+        $stringKey = new Key(self::$namespace, self::$set, "new_key");
+        $wp = new WritePolicy();
+        $wp->setExpiration(Expiration::Seconds(3));
+        self::$client->put($wp, $stringKey, [new Bin("record", "expires_in_3")]);
+        sleep(5);
+        $rp = new ReadPolicy();
+        $record = self::$client->get($rp, $stringKey);
+        $this->assertEquals($record, null);
+    }
+
+    public function testReadTtlNoExpires()
+    {
+        $stringKey = new Key(self::$namespace, self::$set, "new_key");
+        $wp = new WritePolicy();
+        $wp->setExpiration(Expiration::Seconds(3));
+        self::$client->put($wp, $stringKey, [new Bin("record", "expires_in_3")]);
+        sleep(1);
+        $rp = new ReadPolicy();
+        $record = self::$client->get($rp, $stringKey);
+        $this->assertEquals($record->getTtl(), 2);
+    }
+
+    public function testReadTtlNotUpdated()
+    {
+        $stringKey = new Key(self::$namespace, self::$set, "new_key");
+        $wp = new WritePolicy();
+        $wp->setExpiration(Expiration::Seconds(3));
+        self::$client->put($wp, $stringKey, [new Bin("record", "expires_in_3")]);
+        sleep(1);
+        $wp->setExpiration(Expiration::DontUpdate());
+        $this->assertFalse($wp->getExpiration()->willUpdateExpiration());
+        self::$client->put($wp, $stringKey, [new Bin("record", "expires_in_2_hopefully")]);
+        $rp = new ReadPolicy();
+        $record = self::$client->get($rp, $stringKey);
+        $this->assertEquals($record->getTtl(), 2);
+    }
+
+    public function testReadTtlNeverExpires()
+    {
+        $stringKey = new Key(self::$namespace, self::$set, "new_key");
+        $wp = new WritePolicy();
+        $wp->setExpiration(Expiration::Never());
+        self::$client->put($wp, $stringKey, [new Bin("record", "records_are_forever")]);
+        $rp = new ReadPolicy();
+        $record = self::$client->get($rp, $stringKey);
+        $this->assertEquals($record->getTtl(), null);
+        $this->assertTrue($record->getExpiration()->willNeverExpire());
     }
 }

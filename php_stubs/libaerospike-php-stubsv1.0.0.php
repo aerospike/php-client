@@ -3205,26 +3205,58 @@ namespace Aerospike {
      */
     class Expiration {
         /**
-         * Set the record to expire X seconds from now
+         * Set the record to expire X seconds from now.  See also `getTtl()`.
          */
         public static function Seconds(int $seconds): \Aerospike\Expiration {}
 
         /**
-         * Set the record's expiry time using the default time-to-live (TTL) value for the namespace
+         * Answers with the expiration's current time to live in units of
+         * seconds, excluding any special values.  If the expiration is set to
+         * the namespace default, is configured to never update, or is configured
+         * to never expire, this method returns null.  See also `Seconds()`.
+         */
+        public function get_ttl(): ?int {}
+
+        /**
+         * Set the record's expiry time using the default time-to-live (TTL) value
+         * for the namespace.  See also `isNamespaceDefault()`.
          */
         public static function NamespaceDefault(): \Aerospike\Expiration {}
 
         /**
+         * Answers true only if the expiration is set to use the namespace default.
+         * See also `NamespaceDefault()`.
+         */
+        public function isNamespaceDefault(): bool {}
+
+        /**
          * Set the record to never expire. Requires Aerospike 2 server version 2.7.2 or later or
          * Aerospike 3 server version 3.1.4 or later. Do not use with older servers.
+         * See also `willNeverExpire()`.
          */
         public static function Never(): \Aerospike\Expiration {}
 
         /**
-         * Do not change the record's expiry time when updating the record; requires Aerospike server
-         * version 3.10.1 or later.
+         * Answers true only if the expiration is set to never expire.
+         * See also `Never()`.
+         */
+        public function willNeverExpire(): bool {}
+
+        /**
+         * Do not change the record's expiry time when updating the record;
+         * requires Aerospike server version 3.10.1 or later.
+         * See also `willUpdateExpiration()`.
          */
         public static function DontUpdate(): \Aerospike\Expiration {}
+
+        /**
+         * Answers *true* if the expiration is configured to somehow change during
+         * a record update.  This can be as simple as an explicit time-to-live, or
+         * an instruction to use the namespace's default expiration, etc.  Answers
+         * *false* if the expiration will *not* be changed during a record update
+         * (e.g., the expiration was constructed with DontUpdate().)
+         */
+        public function willUpdateExpiration(): bool {}
     }
 
     /**
