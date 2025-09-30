@@ -123,7 +123,7 @@ In case the installation script fails to build the `PHP-Client`, or if you just 
 
 	$writePolicy->setRecordExistsAction(RecordExistsAction::Update);
 	$writePolicy->setGenerationPolicy(GenerationPolicy::ExpectGenEqual);
-	$writePolicy->setExpiration(Expiration::seconds(3600)); // Expiring in 1 hour
+	$writePolicy->setExpiration(Expiration::Seconds(3600)); // Expiring in 1 hour
 	$writePolicy->setMaxRetries(3);
 	$writePolicy->setSocketTimeout(5000);
 	```
@@ -145,11 +145,12 @@ If there are any bugs, feature requests or feedback -> please create an issue on
 <?php
 namespace Aerospike;
 
-try{
+try {
   $socket = "/tmp/asld_grpc.sock";
   $client = Client::connect($socket);
   var_dump($client->socket);
-}catch(AerospikeException $e){
+}
+catch(AerospikeException $e) {
   var_dump($e);
 }
 
