@@ -93,9 +93,9 @@ jobs:
     # with apt
       run: |
         sudo apt -y install \
-          php-mbstring \
-          php-xml \
-          php-dev \
+          php${{ matrix.php-version }}-mbstring \
+          php${{ matrix.php-version }}-xml \
+          php${{ matrix.php-version }}-dev \
           phpunit \
           build-essential \
           protobuf-compiler \
