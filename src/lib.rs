@@ -11319,27 +11319,27 @@ impl IntoZval for PHPValue {
             PHPValue::GeoJSON(s) => {
                 let geo = GeoJSON { v: s };
                 let zo: ZBox<ZendObject> = geo.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
             PHPValue::Blob(b) => {
                 let blob = BLOB { v: b };
                 let zo: ZBox<ZendObject> = blob.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
             PHPValue::HLL(b) => {
                 let hll = HLL { v: b };
                 let zo: ZBox<ZendObject> = hll.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
             PHPValue::Infinity => {
                 let inf = Infinity {};
                 let zo: ZBox<ZendObject> = inf.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
             PHPValue::Wildcard => {
                 let inf = Wildcard {};
                 let zo: ZBox<ZendObject> = inf.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
         }
 
@@ -12145,7 +12145,7 @@ fn get_persisted_client(key: &str) -> Option<Zval> {
 
     let mut zval = Zval::new();
     let zo: ZBox<ZendObject> = client.into_zend_object().ok()?;
-    zval.set_object(zo.into_raw());
+    zo.set_zval(&mut zval, false).ok()?;
     Some(zval)
 }
 
