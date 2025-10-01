@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2025-10-01
+
+- **Fixes**
+  - [CLIENT-3777] Fix anomalous getTtl() behavior.
+
+- **Improvements**
+  - [CLIENT-3777] Introduce getters on Expiration class objects.
+
 ## [1.3.0] - 2025-02-23
 
 - **New Features**:
