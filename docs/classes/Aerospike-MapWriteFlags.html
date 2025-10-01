@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -117,8 +117,11 @@
 
             <p class="phpdocumentor-summary">Map write bit flags.</p>
 
+
     <section class="phpdocumentor-description"><p>Requires server versions &gt;= 4.3.</p>
 </section>
+
+
 
 
 
@@ -146,28 +149,28 @@
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-MapWriteFlags.html#method_CreateOnly">CreateOnly()</a>
+    <a class="" href="classes/Aerospike-MapWriteFlags.html#method_CreateOnly">CreateOnly()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-MapWriteFlags.html"><abbr title="\Aerospike\MapWriteFlags">MapWriteFlags</abbr></a>    </span>
 </dt>
 <dd>MapWriteFlagsCreateOnly means: If the key already exists, the item will be denied.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-MapWriteFlags.html#method_Default">Default()</a>
+    <a class="" href="classes/Aerospike-MapWriteFlags.html#method_Default">Default()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-MapWriteFlags.html"><abbr title="\Aerospike\MapWriteFlags">MapWriteFlags</abbr></a>    </span>
 </dt>
 <dd>MapWriteFlagsDefault is the Default. Allow create or update.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-MapWriteFlags.html#method_NoFail">NoFail()</a>
+    <a class="" href="classes/Aerospike-MapWriteFlags.html#method_NoFail">NoFail()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-MapWriteFlags.html"><abbr title="\Aerospike\MapWriteFlags">MapWriteFlags</abbr></a>    </span>
 </dt>
 <dd>MapWriteFlagsNoFail means: Do not raise error if a map item is denied due to write flag constraints.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-MapWriteFlags.html#method_Partial">Partial()</a>
+    <a class="" href="classes/Aerospike-MapWriteFlags.html#method_Partial">Partial()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-MapWriteFlags.html"><abbr title="\Aerospike\MapWriteFlags">MapWriteFlags</abbr></a>    </span>
 </dt>
@@ -175,14 +178,13 @@
 write flag constraints.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-MapWriteFlags.html#method_UpdateOnly">UpdateOnly()</a>
+    <a class="" href="classes/Aerospike-MapWriteFlags.html#method_UpdateOnly">UpdateOnly()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-MapWriteFlags.html"><abbr title="\Aerospike\MapWriteFlags">MapWriteFlags</abbr></a>    </span>
 </dt>
 <dd>MapWriteFlagsUpdateOnly means: If the key already exists, the item will be overwritten.</dd>
 
     </dl>
-
 
 
 
@@ -222,10 +224,13 @@ write flag constraints.</dd>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>If the key does not exist, a new item will be created.</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -263,6 +268,9 @@ write flag constraints.</dd>
     
     
     
+    
+
+    
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -298,6 +306,9 @@ write flag constraints.</dd>
         </div>
     
     
+    
+    
+
     
 
             <section>
@@ -336,6 +347,9 @@ write flag constraints.</p>
     
     
     
+    
+
+    
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -369,10 +383,13 @@ write flag constraints.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>If the key does not exist, the item will be denied.</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -419,6 +436,8 @@ write flag constraints.</p>
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -494,11 +513,11 @@ write flag constraints.</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-MapWriteFlags.html#method_CreateOnly">CreateOnly()</a></li>
-                                            <li><a href="classes/Aerospike-MapWriteFlags.html#method_Default">Default()</a></li>
-                                            <li><a href="classes/Aerospike-MapWriteFlags.html#method_NoFail">NoFail()</a></li>
-                                            <li><a href="classes/Aerospike-MapWriteFlags.html#method_Partial">Partial()</a></li>
-                                            <li><a href="classes/Aerospike-MapWriteFlags.html#method_UpdateOnly">UpdateOnly()</a></li>
+                                            <li class=""><a href="classes/Aerospike-MapWriteFlags.html#method_CreateOnly">CreateOnly()</a></li>
+                                            <li class=""><a href="classes/Aerospike-MapWriteFlags.html#method_Default">Default()</a></li>
+                                            <li class=""><a href="classes/Aerospike-MapWriteFlags.html#method_NoFail">NoFail()</a></li>
+                                            <li class=""><a href="classes/Aerospike-MapWriteFlags.html#method_Partial">Partial()</a></li>
+                                            <li class=""><a href="classes/Aerospike-MapWriteFlags.html#method_UpdateOnly">UpdateOnly()</a></li>
                                     </ul>
             </li>
                     </ul>

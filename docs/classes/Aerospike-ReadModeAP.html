@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -117,9 +117,12 @@
 
             <p class="phpdocumentor-summary">ReadModeAP is the read policy in AP (availability) mode namespaces.</p>
 
+
     <section class="phpdocumentor-description"><p>It indicates how duplicates should be consulted in a read operation.
 Only makes a difference during migrations and only applicable in AP mode.</p>
 </section>
+
+
 
 
 
@@ -147,7 +150,7 @@ Only makes a difference during migrations and only applicable in AP mode.</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-ReadModeAP.html#method_all">all()</a>
+    <a class="" href="classes/Aerospike-ReadModeAP.html#method_all">all()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-ReadModeAP.html"><abbr title="\Aerospike\ReadModeAP">ReadModeAP</abbr></a>    </span>
 </dt>
@@ -155,14 +158,13 @@ Only makes a difference during migrations and only applicable in AP mode.</p>
 the read operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-ReadModeAP.html#method_one">one()</a>
+    <a class="" href="classes/Aerospike-ReadModeAP.html#method_one">one()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-ReadModeAP.html"><abbr title="\Aerospike\ReadModeAP">ReadModeAP</abbr></a>    </span>
 </dt>
 <dd>ReadModeAPOne indicates that a single node should be involved in the read operation.</dd>
 
     </dl>
-
 
 
 
@@ -206,6 +208,9 @@ the read operation.</p>
     
     
     
+    
+
+    
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -241,6 +246,9 @@ the read operation.</p>
         </div>
     
     
+    
+    
+
     
 
             <section>
@@ -287,6 +295,8 @@ the read operation.</p>
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -362,8 +372,8 @@ the read operation.</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-ReadModeAP.html#method_all">all()</a></li>
-                                            <li><a href="classes/Aerospike-ReadModeAP.html#method_one">one()</a></li>
+                                            <li class=""><a href="classes/Aerospike-ReadModeAP.html#method_all">all()</a></li>
+                                            <li class=""><a href="classes/Aerospike-ReadModeAP.html#method_one">one()</a></li>
                                     </ul>
             </li>
                     </ul>

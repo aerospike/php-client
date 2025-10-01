@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -117,10 +117,13 @@
 
             <p class="phpdocumentor-summary">Instantiate a Client instance to access an Aerospike database cluster and perform database operations.</p>
 
+
     <section class="phpdocumentor-description"><p>The client is thread-safe. Only one client instance should be used per cluster. Multiple threads should share this cluster instance.
 Your application uses this class' API to perform database operations such as writing and reading records, and selecting sets of records. Write operations include specialized functionality such as append/prepend and arithmetic addition.
 Each record may have multiple bins, unless the Aerospike server nodes are configured as &quot;single-bin&quot;. In &quot;multi-bin&quot; mode, partial records may be written or read by specifying the relevant subset of bins.</p>
 </section>
+
+
 
 
 
@@ -147,7 +150,7 @@ Each record may have multiple bins, unless the Aerospike server nodes are config
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a href="classes/Aerospike-Client.html#property_socket">$socket</a>
+    <a class="" href="classes/Aerospike-Client.html#property_socket">$socket</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
@@ -161,7 +164,7 @@ Each record may have multiple bins, unless the Aerospike server nodes are config
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_add">add()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_add">add()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
@@ -170,7 +173,7 @@ timeout, record expiration and how the transaction is handled when the record al
 exists. This call only works for integer values.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_append">append()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_append">append()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
@@ -179,42 +182,42 @@ transaction timeout, record expiration and how the transaction is handled when t
 already exists. This call only works for string values.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_batch">batch()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_batch">batch()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 <dd>BatchExecute will read/write multiple records for specified batch keys in one batch call.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_changePassword">changePassword()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_changePassword">changePassword()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>ChangePassword changes a user&#039;s password. Clear-text password will be hashed using bcrypt before sending to server.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_connect">connect()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_connect">connect()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>Connects to the Aerospike database using the provided socket address.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_createIndex">createIndex()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_createIndex">createIndex()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>CreateIndex creates a secondary index.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_createRole">createRole()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_createRole">createRole()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>CreateRole creates a user-defined role.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_createUser">createUser()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_createUser">createUser()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
@@ -222,49 +225,49 @@ already exists. This call only works for string values.</dd>
 before sending to server.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_delete">delete()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_delete">delete()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
 <dd>Delete record for specified key. The policy specifies the transaction timeout.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_dropIndex">dropIndex()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_dropIndex">dropIndex()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>DropIndex deletes a secondary index. It will block until index is dropped on all nodes.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_dropRole">dropRole()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_dropRole">dropRole()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>DropRole removes a user-defined role.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_dropUdf">dropUdf()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_dropUdf">dropUdf()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>DropUDF removes a package containing user defined functions in the server.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_dropUser">dropUser()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_dropUser">dropUser()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>DropUser removes a user from the cluster.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_exists">exists()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_exists">exists()</a>
     <span>
                                 &nbsp;: bool    </span>
 </dt>
 <dd>Determine if a record key exists. The policy can be used to specify timeouts.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_get">get()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_get">get()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Record.html"><abbr title="\Aerospike\Record">Record</abbr></a>    </span>
 </dt>
@@ -273,7 +276,7 @@ only selected record bins or only the record headers will be returned. The polic
 used to specify timeouts.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_getHeader">getHeader()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_getHeader">getHeader()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Record.html"><abbr title="\Aerospike\Record">Record</abbr></a>    </span>
 </dt>
@@ -282,28 +285,28 @@ only selected record bins or only the record headers will be returned. The polic
 used to specify timeouts.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_grantPrivileges">grantPrivileges()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_grantPrivileges">grantPrivileges()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>GrantPrivileges grant privileges to a user-defined role.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_grantRoles">grantRoles()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_grantRoles">grantRoles()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>GrantRoles adds roles to user&#039;s list of roles.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_listUdf">listUdf()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_listUdf">listUdf()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 <dd>ListUDF lists all packages containing user defined functions in the server.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_prepend">prepend()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_prepend">prepend()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
@@ -312,7 +315,7 @@ transaction timeout, record expiration and how the transaction is handled when t
 already exists. This call only works for string values.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_put">put()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_put">put()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
@@ -320,7 +323,7 @@ already exists. This call only works for string values.</dd>
 how the transaction is handled when the record already exists.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_query">query()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_query">query()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Recordset.html"><abbr title="\Aerospike\Recordset">Recordset</abbr></a>    </span>
 </dt>
@@ -329,42 +332,42 @@ records on a queue in separate threads. The calling thread concurrently pops rec
 the queue through the record iterator.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_queryRoles">queryRoles()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_queryRoles">queryRoles()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 <dd>QueryRole retrieves privileges for a given role.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_queryUsers">queryUsers()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_queryUsers">queryUsers()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 <dd>QueryUser retrieves roles for a given user.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_registerUdf">registerUdf()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_registerUdf">registerUdf()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>RegisterUDF registers a package containing user defined functions with server.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_revokePrivileges">revokePrivileges()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_revokePrivileges">revokePrivileges()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>RevokePrivileges revokes privileges from a user-defined role.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_revokeRoles">revokeRoles()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_revokeRoles">revokeRoles()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>RevokeRoles removes roles from user&#039;s list of roles.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_scan">scan()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_scan">scan()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Recordset.html"><abbr title="\Aerospike\Recordset">Recordset</abbr></a>    </span>
 </dt>
@@ -375,28 +378,28 @@ nodes are scanned in parallel. If concurrent nodes is set to zero, the server no
 read in series.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_setAllowlist">setAllowlist()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_setAllowlist">setAllowlist()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>SetAllowlist sets IP address whitelist for a role. If whitelist is nil or empty, it removes existing whitelist from role.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_setQuotas">setQuotas()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_setQuotas">setQuotas()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>SetQuotas sets maximum reads/writes per second limits for a role.  If a quota is zero, the limit is removed.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_socket">socket()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_socket">socket()</a>
     <span>
                                 &nbsp;: string    </span>
 </dt>
 <dd>Retrieves the socket address associated with this client.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_touch">touch()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_touch">touch()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
@@ -404,21 +407,20 @@ read in series.</dd>
 not exist.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_truncate">truncate()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_truncate">truncate()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>Removes all records in the specified namespace/set efficiently.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Client.html#method_udfExecute">udfExecute()</a>
+    <a class="" href="classes/Aerospike-Client.html#method_udfExecute">udfExecute()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>Execute executes a user defined function on server and return results.</dd>
 
     </dl>
-
 
 
 
@@ -436,14 +438,14 @@ not exist.</dd>
             phpdocumentor-element
             -property
             -public
-                                                        "
+                                                                    "
 >
     <h4 class="phpdocumentor-element__name" id="property_socket">
         $socket
         <a href="classes/Aerospike-Client.html#property_socket" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
-                                </span>
+                                            </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
@@ -453,14 +455,19 @@ not exist.</dd>
     </aside>
 
     
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$socket</span>
     </code>
 
     
     
+    
+
+    
+
     
 
 </article>
@@ -501,6 +508,7 @@ exists. This call only works for integer values.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -525,6 +533,8 @@ exists. This call only works for integer values.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -559,6 +569,7 @@ already exists. This call only works for string values.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -583,6 +594,8 @@ already exists. This call only works for string values.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -614,6 +627,7 @@ already exists. This call only works for string values.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>This method allows different namespaces/bins for each key in the batch.
 The returned records are located in the same list.</p>
 <p>BatchRecord can be *BatchRead, *BatchWrite, *BatchDelete or *BatchUDF.</p>
@@ -637,6 +651,8 @@ The returned records are located in the same list.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -673,6 +689,7 @@ The returned records are located in the same list.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -697,6 +714,8 @@ The returned records are located in the same list.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -728,17 +747,16 @@ The returned records are located in the same list.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>If a persisted client object is found for the given socket address, it is returned.
 Otherwise, a new client object is created, persisted, and returned.</p>
 <h1>Arguments</h1>
 <ul>
-<li>
-<code class="prettyprint">socket</code> - A string representing the socket address of the Aerospike database.</li>
+<li><code class="prettyprint">socket</code> - A string representing the socket address of the Aerospike database.</li>
 </ul>
 <h1>Returns</h1>
 <ul>
-<li>
-<code class="prettyprint">Err(&quot;Error connecting to the database&quot;.into())</code> - If an error occurs during connection.</li>
+<li><code class="prettyprint">Err(&quot;Error connecting to the database&quot;.into())</code> - If an error occurs during connection.</li>
 </ul>
 </section>
 
@@ -752,6 +770,8 @@ Otherwise, a new client object is created, persisted, and returned.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -783,6 +803,7 @@ Otherwise, a new client object is created, persisted, and returned.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>This asynchronous server call will return before the command is complete.
 The user can optionally wait for command completion by using the returned
 IndexTask instance.
@@ -853,6 +874,8 @@ If the policy is nil, the default relevant policy will be used.</p>
     
 
     
+
+    
 </article>
                     <article
         class="phpdocumentor-element
@@ -880,6 +903,7 @@ If the policy is nil, the default relevant policy will be used.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Quotas require server security configuration &quot;enable-quotas&quot; to be set to true.
 Pass 0 for quota values for no limit.</p>
 </section>
@@ -933,6 +957,8 @@ Pass 0 for quota values for no limit.</p>
     
 
     
+
+    
 </article>
                     <article
         class="phpdocumentor-element
@@ -961,6 +987,7 @@ before sending to server.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
     
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
@@ -997,6 +1024,8 @@ before sending to server.</p>
     
 
     
+
+    
 </article>
                     <article
         class="phpdocumentor-element
@@ -1024,6 +1053,7 @@ before sending to server.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>The call returns <code class="prettyprint">true</code> if the record existed on the server before deletion.</p>
 </section>
 
@@ -1044,6 +1074,8 @@ before sending to server.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1079,6 +1111,7 @@ before sending to server.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>This method is only supported by Aerospike 3+ servers.
 If the policy is nil, the default relevant policy will be used.</p>
 </section>
@@ -1118,6 +1151,8 @@ If the policy is nil, the default relevant policy will be used.</p>
     
 
     
+
+    
 </article>
                     <article
         class="phpdocumentor-element
@@ -1146,6 +1181,7 @@ If the policy is nil, the default relevant policy will be used.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1163,6 +1199,8 @@ If the policy is nil, the default relevant policy will be used.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1194,6 +1232,7 @@ If the policy is nil, the default relevant policy will be used.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>This asynchronous server call will return before command is complete.
 The user can optionally wait for command completion by using the returned
 RemoveTask instance.</p>
@@ -1218,6 +1257,8 @@ If the policy is nil, the default relevant policy will be used.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1250,6 +1291,7 @@ If the policy is nil, the default relevant policy will be used.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1267,6 +1309,8 @@ If the policy is nil, the default relevant policy will be used.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1299,6 +1343,7 @@ If the policy is nil, the default relevant policy will be used.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1316,6 +1361,8 @@ If the policy is nil, the default relevant policy will be used.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1354,6 +1401,7 @@ used to specify timeouts.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1378,6 +1426,8 @@ used to specify timeouts.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1416,6 +1466,7 @@ used to specify timeouts.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1433,6 +1484,8 @@ used to specify timeouts.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1469,6 +1522,7 @@ used to specify timeouts.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1493,6 +1547,8 @@ used to specify timeouts.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1525,6 +1581,7 @@ used to specify timeouts.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1549,6 +1606,8 @@ used to specify timeouts.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1580,6 +1639,7 @@ used to specify timeouts.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>This method is only supported by Aerospike 3+ servers.
 If the policy is nil, the default relevant policy will be used.</p>
 </section>
@@ -1594,6 +1654,8 @@ If the policy is nil, the default relevant policy will be used.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1632,6 +1694,7 @@ already exists. This call only works for string values.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1656,6 +1719,8 @@ already exists. This call only works for string values.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1689,6 +1754,7 @@ how the transaction is handled when the record already exists.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1713,6 +1779,8 @@ how the transaction is handled when the record already exists.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1747,6 +1815,7 @@ the queue through the record iterator.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1771,6 +1840,8 @@ the queue through the record iterator.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1807,6 +1878,7 @@ the queue through the record iterator.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1824,6 +1896,8 @@ the queue through the record iterator.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1860,6 +1934,7 @@ the queue through the record iterator.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -1877,6 +1952,8 @@ the queue through the record iterator.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -1912,6 +1989,7 @@ the queue through the record iterator.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>This asynchronous server call will return before command is complete.
 The user can optionally wait for command completion by using the returned
 RegisterTask instance.</p>
@@ -1954,6 +2032,8 @@ If the policy is nil, the default relevant policy will be used.</p>
     
 
     
+
+    
 </article>
                     <article
         class="phpdocumentor-element
@@ -1982,6 +2062,7 @@ If the policy is nil, the default relevant policy will be used.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2006,6 +2087,8 @@ If the policy is nil, the default relevant policy will be used.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -2038,6 +2121,7 @@ If the policy is nil, the default relevant policy will be used.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2062,6 +2146,8 @@ If the policy is nil, the default relevant policy will be used.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -2097,6 +2183,7 @@ read in series.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
     
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
@@ -2139,6 +2226,8 @@ read in series.</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Recordset.html"><abbr title="\Aerospike\Recordset">Recordset</abbr></a></span>
@@ -2172,6 +2261,7 @@ read in series.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2196,6 +2286,8 @@ read in series.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -2227,6 +2319,7 @@ read in series.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Quotas require server security configuration &quot;enable-quotas&quot; to be set to true.
 Pass 0 for quota values for no limit.</p>
 </section>
@@ -2266,6 +2359,8 @@ Pass 0 for quota values for no limit.</p>
     
 
     
+
+    
 </article>
                     <article
         class="phpdocumentor-element
@@ -2293,11 +2388,14 @@ Pass 0 for quota values for no limit.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><h1>Returns</h1>
 <p>A string representing the socket address.</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -2334,6 +2432,7 @@ not exist.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -2351,6 +2450,8 @@ not exist.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -2382,6 +2483,7 @@ not exist.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
     
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
@@ -2418,6 +2520,8 @@ not exist.</p>
     
 
     
+
+    
 </article>
                     <article
         class="phpdocumentor-element
@@ -2445,6 +2549,7 @@ not exist.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>The function operates on a single record.
 The package name is used to locate the udf file location:</p>
 <p>udf file = <server udf dir>/<package name>.lua</p>
@@ -2494,6 +2599,8 @@ If the policy is nil, the default relevant policy will be used.</p>
     
 
     
+
+    
 </article>
             </section>
 
@@ -2533,6 +2640,8 @@ If the policy is nil, the default relevant policy will be used.</p>
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -2608,47 +2717,47 @@ If the policy is nil, the default relevant policy will be used.</p>
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li><a href="classes/Aerospike-Client.html#property_socket">$socket<a href="classes/Aerospike-Client.html"></li>
+                                                    <li class=""><a href="classes/Aerospike-Client.html#property_socket">$socket</a></li>
                                             </ul>
                 </li>
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-Client.html#method_add">add()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_append">append()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_batch">batch()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_changePassword">changePassword()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_connect">connect()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_createIndex">createIndex()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_createRole">createRole()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_createUser">createUser()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_delete">delete()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_dropIndex">dropIndex()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_dropRole">dropRole()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_dropUdf">dropUdf()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_dropUser">dropUser()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_exists">exists()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_get">get()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_getHeader">getHeader()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_grantPrivileges">grantPrivileges()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_grantRoles">grantRoles()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_listUdf">listUdf()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_prepend">prepend()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_put">put()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_query">query()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_queryRoles">queryRoles()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_queryUsers">queryUsers()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_registerUdf">registerUdf()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_revokePrivileges">revokePrivileges()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_revokeRoles">revokeRoles()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_scan">scan()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_setAllowlist">setAllowlist()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_setQuotas">setQuotas()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_socket">socket()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_touch">touch()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_truncate">truncate()</a></li>
-                                            <li><a href="classes/Aerospike-Client.html#method_udfExecute">udfExecute()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_add">add()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_append">append()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_batch">batch()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_changePassword">changePassword()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_connect">connect()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_createIndex">createIndex()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_createRole">createRole()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_createUser">createUser()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_delete">delete()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_dropIndex">dropIndex()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_dropRole">dropRole()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_dropUdf">dropUdf()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_dropUser">dropUser()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_exists">exists()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_get">get()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_getHeader">getHeader()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_grantPrivileges">grantPrivileges()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_grantRoles">grantRoles()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_listUdf">listUdf()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_prepend">prepend()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_put">put()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_query">query()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_queryRoles">queryRoles()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_queryUsers">queryUsers()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_registerUdf">registerUdf()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_revokePrivileges">revokePrivileges()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_revokeRoles">revokeRoles()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_scan">scan()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_setAllowlist">setAllowlist()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_setQuotas">setQuotas()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_socket">socket()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_touch">touch()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_truncate">truncate()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Client.html#method_udfExecute">udfExecute()</a></li>
                                     </ul>
             </li>
                     </ul>

@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -123,6 +123,9 @@ thread pool.</p>
 
 
 
+
+
+
 <h3 id="toc">
     Table of Contents
     <a href="classes/Aerospike-Concurrency.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
@@ -145,7 +148,7 @@ thread pool.</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Concurrency.html#method_MaxThreads">MaxThreads()</a>
+    <a class="" href="classes/Aerospike-Concurrency.html#method_MaxThreads">MaxThreads()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Concurrency.html"><abbr title="\Aerospike\Concurrency">Concurrency</abbr></a>    </span>
 </dt>
@@ -155,7 +158,7 @@ being created for large cluster implementations. The downside is extra threads w
 need to be created (or taken from a thread pool).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Concurrency.html#method_Parallel">Parallel()</a>
+    <a class="" href="classes/Aerospike-Concurrency.html#method_Parallel">Parallel()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Concurrency.html"><abbr title="\Aerospike\Concurrency">Concurrency</abbr></a>    </span>
 </dt>
@@ -164,7 +167,7 @@ extremely large batch sizes because each node can process the request immediatel
 downside is extra threads will need to be created (or takedn from a thread pool).</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Concurrency.html#method_Sequential">Sequential()</a>
+    <a class="" href="classes/Aerospike-Concurrency.html#method_Sequential">Sequential()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Concurrency.html"><abbr title="\Aerospike\Concurrency">Concurrency</abbr></a>    </span>
 </dt>
@@ -172,7 +175,6 @@ downside is extra threads will need to be created (or takedn from a thread pool)
 medium sized batch sizes because requests can be issued in the main transaction thread.</dd>
 
     </dl>
-
 
 
 
@@ -215,6 +217,7 @@ need to be created (or taken from a thread pool).</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>E.g. if there are 16 nodes/namespace combinations requested and concurrency is set to
 <code class="prettyprint">MaxThreads(8)</code>, then batch requests will be made for 8 node/namespace combinations in
 parallel threads. When a request completes, a new request will be issued until all 16
@@ -231,6 +234,8 @@ requests are complete.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -271,6 +276,9 @@ downside is extra threads will need to be created (or takedn from a thread pool)
     
     
     
+    
+
+    
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -305,10 +313,13 @@ medium sized batch sizes because requests can be issued in the main transaction 
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>This is the default.</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -355,6 +366,8 @@ medium sized batch sizes because requests can be issued in the main transaction 
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -430,9 +443,9 @@ medium sized batch sizes because requests can be issued in the main transaction 
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-Concurrency.html#method_MaxThreads">MaxThreads()</a></li>
-                                            <li><a href="classes/Aerospike-Concurrency.html#method_Parallel">Parallel()</a></li>
-                                            <li><a href="classes/Aerospike-Concurrency.html#method_Sequential">Sequential()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Concurrency.html#method_MaxThreads">MaxThreads()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Concurrency.html#method_Parallel">Parallel()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Concurrency.html#method_Sequential">Sequential()</a></li>
                                     </ul>
             </li>
                     </ul>

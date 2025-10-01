@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -117,8 +117,11 @@
 
             <p class="phpdocumentor-summary">ReadModeSC is the read policy in SC (strong consistency) mode namespaces.</p>
 
+
     <section class="phpdocumentor-description"><p>Determines SC read consistency options.</p>
 </section>
+
+
 
 
 
@@ -146,14 +149,14 @@
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-ReadModeSC.html#method_AllowReplica">AllowReplica()</a>
+    <a class="" href="classes/Aerospike-ReadModeSC.html#method_AllowReplica">AllowReplica()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-ReadModeSC.html"><abbr title="\Aerospike\ReadModeSC">ReadModeSC</abbr></a>    </span>
 </dt>
 <dd>ReadModeSCAllowReplica indicates that the server may read from master or any full (non-migrating) replica.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-ReadModeSC.html#method_AllowUnavailable">AllowUnavailable()</a>
+    <a class="" href="classes/Aerospike-ReadModeSC.html#method_AllowUnavailable">AllowUnavailable()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-ReadModeSC.html"><abbr title="\Aerospike\ReadModeSC">ReadModeSC</abbr></a>    </span>
 </dt>
@@ -161,21 +164,20 @@
 partitions.  Increasing sequence of record versions is not guaranteed.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-ReadModeSC.html#method_Linearize">Linearize()</a>
+    <a class="" href="classes/Aerospike-ReadModeSC.html#method_Linearize">Linearize()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-ReadModeSC.html"><abbr title="\Aerospike\ReadModeSC">ReadModeSC</abbr></a>    </span>
 </dt>
 <dd>ReadModeSCLinearize ensures ALL clients will only see an increasing sequence of record versions.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-ReadModeSC.html#method_Session">Session()</a>
+    <a class="" href="classes/Aerospike-ReadModeSC.html#method_Session">Session()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-ReadModeSC.html"><abbr title="\Aerospike\ReadModeSC">ReadModeSC</abbr></a>    </span>
 </dt>
 <dd>ReadModeSCSession ensures this client will only see an increasing sequence of record versions.</dd>
 
     </dl>
-
 
 
 
@@ -215,10 +217,13 @@ partitions.  Increasing sequence of record versions is not guaranteed.</dd>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Increasing sequence of record versions is not guaranteed.</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -257,6 +262,9 @@ partitions.  Increasing sequence of record versions is not guaranteed.</p>
     
     
     
+    
+
+    
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -290,10 +298,13 @@ partitions.  Increasing sequence of record versions is not guaranteed.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server only reads from master.</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -328,10 +339,13 @@ partitions.  Increasing sequence of record versions is not guaranteed.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server only reads from master.  This is the default.</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -378,6 +392,8 @@ partitions.  Increasing sequence of record versions is not guaranteed.</p>
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -453,10 +469,10 @@ partitions.  Increasing sequence of record versions is not guaranteed.</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-ReadModeSC.html#method_AllowReplica">AllowReplica()</a></li>
-                                            <li><a href="classes/Aerospike-ReadModeSC.html#method_AllowUnavailable">AllowUnavailable()</a></li>
-                                            <li><a href="classes/Aerospike-ReadModeSC.html#method_Linearize">Linearize()</a></li>
-                                            <li><a href="classes/Aerospike-ReadModeSC.html#method_Session">Session()</a></li>
+                                            <li class=""><a href="classes/Aerospike-ReadModeSC.html#method_AllowReplica">AllowReplica()</a></li>
+                                            <li class=""><a href="classes/Aerospike-ReadModeSC.html#method_AllowUnavailable">AllowUnavailable()</a></li>
+                                            <li class=""><a href="classes/Aerospike-ReadModeSC.html#method_Linearize">Linearize()</a></li>
+                                            <li class=""><a href="classes/Aerospike-ReadModeSC.html#method_Session">Session()</a></li>
                                     </ul>
             </li>
                     </ul>

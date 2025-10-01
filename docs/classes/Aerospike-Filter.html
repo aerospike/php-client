@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -118,8 +118,11 @@
             <p class="phpdocumentor-summary">Query filter definition. Currently, only one filter is allowed in a Statement, and must be on a
 bin which has a secondary index defined.</p>
 
+
     <section class="phpdocumentor-description"><p>Filter instances should be instantiated using one of the provided macros.</p>
 </section>
+
+
 
 
 
@@ -147,56 +150,55 @@ bin which has a secondary index defined.</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Filter.html#method_contains">contains()</a>
+    <a class="" href="classes/Aerospike-Filter.html#method_contains">contains()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a>    </span>
 </dt>
 <dd>NewContainsFilter creates a contains filter for query on collection index.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Filter.html#method_containsRange">containsRange()</a>
+    <a class="" href="classes/Aerospike-Filter.html#method_containsRange">containsRange()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a>    </span>
 </dt>
 <dd>NewContainsRangeFilter creates a contains filter for query on ranges of data in a collection index.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Filter.html#method_equal">equal()</a>
+    <a class="" href="classes/Aerospike-Filter.html#method_equal">equal()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a>    </span>
 </dt>
 <dd>NewEqualFilter creates a new equality filter instance for query.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Filter.html#method_range">range()</a>
+    <a class="" href="classes/Aerospike-Filter.html#method_range">range()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a>    </span>
 </dt>
 <dd>NewRangeFilter creates a range filter for query.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Filter.html#method_regionsContainingPoint">regionsContainingPoint()</a>
+    <a class="" href="classes/Aerospike-Filter.html#method_regionsContainingPoint">regionsContainingPoint()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a>    </span>
 </dt>
 <dd>NewGeoRegionsContainingPointFilter creates a geospatial &quot;containing point&quot; filter for query.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Filter.html#method_withinRadius">withinRadius()</a>
+    <a class="" href="classes/Aerospike-Filter.html#method_withinRadius">withinRadius()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a>    </span>
 </dt>
 <dd>NewGeoWithinRegionForCollectionFilter creates a geospatial &quot;within region&quot; filter for query on collection index.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Filter.html#method_withinRegion">withinRegion()</a>
+    <a class="" href="classes/Aerospike-Filter.html#method_withinRegion">withinRegion()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a>    </span>
 </dt>
 <dd>NewGeoWithinRegionFilter creates a geospatial &quot;within region&quot; filter for query.</dd>
 
     </dl>
-
 
 
 
@@ -236,6 +238,7 @@ bin which has a secondary index defined.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Value can be an integer, string or a blob (byte array). Byte arrays are only supported on server v7+.</p>
 </section>
 
@@ -273,6 +276,8 @@ bin which has a secondary index defined.</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a></span>
@@ -305,6 +310,7 @@ bin which has a secondary index defined.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
     
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
@@ -347,6 +353,8 @@ bin which has a secondary index defined.</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a></span>
@@ -379,6 +387,7 @@ bin which has a secondary index defined.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Value can be an integer, string or a blob (byte array). Byte arrays are only supported on server v7+.</p>
 </section>
 
@@ -406,6 +415,8 @@ bin which has a secondary index defined.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -441,6 +452,7 @@ bin which has a secondary index defined.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Range arguments must be int64 values.
 String ranges are not supported.</p>
 </section>
@@ -479,6 +491,8 @@ String ranges are not supported.</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a></span>
@@ -511,6 +525,7 @@ String ranges are not supported.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Argument must be a valid GeoJSON point.</p>
 </section>
 
@@ -555,6 +570,8 @@ String ranges are not supported.</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a></span>
@@ -587,6 +604,7 @@ String ranges are not supported.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Argument must be a valid GeoJSON region.</p>
 </section>
 
@@ -638,6 +656,8 @@ String ranges are not supported.</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Filter.html"><abbr title="\Aerospike\Filter">Filter</abbr></a></span>
@@ -670,6 +690,7 @@ String ranges are not supported.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Argument must be a valid GeoJSON region.</p>
 </section>
 
@@ -704,6 +725,8 @@ String ranges are not supported.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -751,6 +774,8 @@ String ranges are not supported.</p>
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -826,13 +851,13 @@ String ranges are not supported.</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-Filter.html#method_contains">contains()</a></li>
-                                            <li><a href="classes/Aerospike-Filter.html#method_containsRange">containsRange()</a></li>
-                                            <li><a href="classes/Aerospike-Filter.html#method_equal">equal()</a></li>
-                                            <li><a href="classes/Aerospike-Filter.html#method_range">range()</a></li>
-                                            <li><a href="classes/Aerospike-Filter.html#method_regionsContainingPoint">regionsContainingPoint()</a></li>
-                                            <li><a href="classes/Aerospike-Filter.html#method_withinRadius">withinRadius()</a></li>
-                                            <li><a href="classes/Aerospike-Filter.html#method_withinRegion">withinRegion()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Filter.html#method_contains">contains()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Filter.html#method_containsRange">containsRange()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Filter.html#method_equal">equal()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Filter.html#method_range">range()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Filter.html#method_regionsContainingPoint">regionsContainingPoint()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Filter.html#method_withinRadius">withinRadius()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Filter.html#method_withinRegion">withinRegion()</a></li>
                                     </ul>
             </li>
                     </ul>

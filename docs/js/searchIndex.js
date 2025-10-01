@@ -3173,23 +3173,43 @@ Search.appendIndex(
         },                {
             "fqsen": "\\Aerospike\\Expiration\u003A\u003ASeconds\u0028\u0029",
             "name": "Seconds",
-            "summary": "Set\u0020the\u0020record\u0020to\u0020expire\u0020X\u0020seconds\u0020from\u0020now",
+            "summary": "Set\u0020the\u0020record\u0020to\u0020expire\u0020X\u0020seconds\u0020from\u0020now.\u0020\u0020See\u0020also\u0020\u0060getTtl\u0028\u0029\u0060.",
             "url": "classes/Aerospike-Expiration.html#method_Seconds"
+        },                {
+            "fqsen": "\\Aerospike\\Expiration\u003A\u003Aget_ttl\u0028\u0029",
+            "name": "get_ttl",
+            "summary": "Answers\u0020with\u0020the\u0020expiration\u0027s\u0020current\u0020time\u0020to\u0020live\u0020in\u0020units\u0020of\nseconds,\u0020excluding\u0020any\u0020special\u0020values.\u0020\u0020If\u0020the\u0020expiration\u0020is\u0020set\u0020to\nthe\u0020namespace\u0020default,\u0020is\u0020configured\u0020to\u0020never\u0020update,\u0020or\u0020is\u0020configured\nto\u0020never\u0020expire,\u0020this\u0020method\u0020returns\u0020null.\u0020\u0020See\u0020also\u0020\u0060Seconds\u0028\u0029\u0060.",
+            "url": "classes/Aerospike-Expiration.html#method_get_ttl"
         },                {
             "fqsen": "\\Aerospike\\Expiration\u003A\u003ANamespaceDefault\u0028\u0029",
             "name": "NamespaceDefault",
-            "summary": "Set\u0020the\u0020record\u0027s\u0020expiry\u0020time\u0020using\u0020the\u0020default\u0020time\u002Dto\u002Dlive\u0020\u0028TTL\u0029\u0020value\u0020for\u0020the\u0020namespace",
+            "summary": "Set\u0020the\u0020record\u0027s\u0020expiry\u0020time\u0020using\u0020the\u0020default\u0020time\u002Dto\u002Dlive\u0020\u0028TTL\u0029\u0020value\nfor\u0020the\u0020namespace.\u0020\u0020See\u0020also\u0020\u0060isNamespaceDefault\u0028\u0029\u0060.",
             "url": "classes/Aerospike-Expiration.html#method_NamespaceDefault"
+        },                {
+            "fqsen": "\\Aerospike\\Expiration\u003A\u003AisNamespaceDefault\u0028\u0029",
+            "name": "isNamespaceDefault",
+            "summary": "Answers\u0020true\u0020only\u0020if\u0020the\u0020expiration\u0020is\u0020set\u0020to\u0020use\u0020the\u0020namespace\u0020default.",
+            "url": "classes/Aerospike-Expiration.html#method_isNamespaceDefault"
         },                {
             "fqsen": "\\Aerospike\\Expiration\u003A\u003ANever\u0028\u0029",
             "name": "Never",
             "summary": "Set\u0020the\u0020record\u0020to\u0020never\u0020expire.\u0020Requires\u0020Aerospike\u00202\u0020server\u0020version\u00202.7.2\u0020or\u0020later\u0020or\nAerospike\u00203\u0020server\u0020version\u00203.1.4\u0020or\u0020later.\u0020Do\u0020not\u0020use\u0020with\u0020older\u0020servers.",
             "url": "classes/Aerospike-Expiration.html#method_Never"
         },                {
+            "fqsen": "\\Aerospike\\Expiration\u003A\u003AwillNeverExpire\u0028\u0029",
+            "name": "willNeverExpire",
+            "summary": "Answers\u0020true\u0020only\u0020if\u0020the\u0020expiration\u0020is\u0020set\u0020to\u0020never\u0020expire.",
+            "url": "classes/Aerospike-Expiration.html#method_willNeverExpire"
+        },                {
             "fqsen": "\\Aerospike\\Expiration\u003A\u003ADontUpdate\u0028\u0029",
             "name": "DontUpdate",
-            "summary": "Do\u0020not\u0020change\u0020the\u0020record\u0027s\u0020expiry\u0020time\u0020when\u0020updating\u0020the\u0020record\u003B\u0020requires\u0020Aerospike\u0020server\nversion\u00203.10.1\u0020or\u0020later.",
+            "summary": "Do\u0020not\u0020change\u0020the\u0020record\u0027s\u0020expiry\u0020time\u0020when\u0020updating\u0020the\u0020record\u003B\nrequires\u0020Aerospike\u0020server\u0020version\u00203.10.1\u0020or\u0020later.",
             "url": "classes/Aerospike-Expiration.html#method_DontUpdate"
+        },                {
+            "fqsen": "\\Aerospike\\Expiration\u003A\u003AwillUpdateExpiration\u0028\u0029",
+            "name": "willUpdateExpiration",
+            "summary": "Answers\u0020\u002Atrue\u002A\u0020if\u0020the\u0020expiration\u0020is\u0020configured\u0020to\u0020somehow\u0020change\u0020during\na\u0020record\u0020update.\u0020\u0020This\u0020can\u0020be\u0020as\u0020simple\u0020as\u0020an\u0020explicit\u0020time\u002Dto\u002Dlive,\u0020or\nan\u0020instruction\u0020to\u0020use\u0020the\u0020namespace\u0027s\u0020default\u0020expiration,\u0020etc.\u0020\u0020Answers\n\u002Afalse\u002A\u0020if\u0020the\u0020expiration\u0020will\u0020\u002Anot\u002A\u0020be\u0020changed\u0020during\u0020a\u0020record\u0020update\n\u0028e.g.,\u0020the\u0020expiration\u0020was\u0020constructed\u0020with\u0020DontUpdate\u0028\u0029.\u0029",
+            "url": "classes/Aerospike-Expiration.html#method_willUpdateExpiration"
         },                {
             "fqsen": "\\Aerospike\\MapOp",
             "name": "MapOp",
