@@ -37,12 +37,14 @@ Aerospike's client policy allows for flexible control over read and write operat
    cd php-client/aerospike-connection-manager
    ```
 
-2. **Run Makefile**: Execute the default target of the Makefile to build & runthe aerospike-connection-manager:
+2. **Configure the connection manager.**  At a minimum, edit the `asld.toml` file to reflect your Aerospike server's current connection information.
+
+3. **Run Makefile**: Use the `run` target to run the aerospike-connection-manager:
    ```shell
-   make
+   make run
    ```
 
-3. **Verify Build**: Successful build output should resemble the following:
+4. **Verify Build**: Successful build output should resemble the following:
     ```shell
     rm -f asld
     rm -f memprofile.out profile.out
@@ -55,7 +57,7 @@ Aerospike's client policy allows for flexible control over read and write operat
     2024/02/13 10:41:30 grpc ran on unix socket protocol /tmp/asld_grpc.sock
     ```
 
-4. **Install Service**: Once the build is verified, linux users who want to install the ACM as a service can execute this command:
+5. **Install Service**: Once the build is verified, linux users who want to install the ACM as a service can execute this command:
     ```shell
     sudo make daemonize
     ```

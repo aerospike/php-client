@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -122,6 +122,9 @@
 
 
 
+
+
+
 <h3 id="toc">
     Table of Contents
     <a href="classes/Aerospike-Expiration.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
@@ -144,22 +147,40 @@
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Expiration.html#method_DontUpdate">DontUpdate()</a>
+    <a class="" href="classes/Aerospike-Expiration.html#method_DontUpdate">DontUpdate()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Expiration.html"><abbr title="\Aerospike\Expiration">Expiration</abbr></a>    </span>
 </dt>
-<dd>Do not change the record&#039;s expiry time when updating the record; requires Aerospike server
-version 3.10.1 or later.</dd>
+<dd>Do not change the record&#039;s expiry time when updating the record;
+requires Aerospike server version 3.10.1 or later.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Expiration.html#method_NamespaceDefault">NamespaceDefault()</a>
+    <a class="" href="classes/Aerospike-Expiration.html#method_get_ttl">get_ttl()</a>
+    <span>
+                                &nbsp;: int|null    </span>
+</dt>
+<dd>Answers with the expiration&#039;s current time to live in units of
+seconds, excluding any special values.  If the expiration is set to
+the namespace default, is configured to never update, or is configured
+to never expire, this method returns null.  See also `Seconds()`.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Aerospike-Expiration.html#method_isNamespaceDefault">isNamespaceDefault()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Answers true only if the expiration is set to use the namespace default.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Aerospike-Expiration.html#method_NamespaceDefault">NamespaceDefault()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Expiration.html"><abbr title="\Aerospike\Expiration">Expiration</abbr></a>    </span>
 </dt>
-<dd>Set the record&#039;s expiry time using the default time-to-live (TTL) value for the namespace</dd>
+<dd>Set the record&#039;s expiry time using the default time-to-live (TTL) value
+for the namespace.  See also `isNamespaceDefault()`.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Expiration.html#method_Never">Never()</a>
+    <a class="" href="classes/Aerospike-Expiration.html#method_Never">Never()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Expiration.html"><abbr title="\Aerospike\Expiration">Expiration</abbr></a>    </span>
 </dt>
@@ -167,14 +188,31 @@ version 3.10.1 or later.</dd>
 Aerospike 3 server version 3.1.4 or later. Do not use with older servers.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Expiration.html#method_Seconds">Seconds()</a>
+    <a class="" href="classes/Aerospike-Expiration.html#method_Seconds">Seconds()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Expiration.html"><abbr title="\Aerospike\Expiration">Expiration</abbr></a>    </span>
 </dt>
-<dd>Set the record to expire X seconds from now</dd>
+<dd>Set the record to expire X seconds from now.  See also `getTtl()`.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Aerospike-Expiration.html#method_willNeverExpire">willNeverExpire()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Answers true only if the expiration is set to never expire.</dd>
+
+            <dt class="phpdocumentor-table-of-contents__entry -method -public">
+    <a class="" href="classes/Aerospike-Expiration.html#method_willUpdateExpiration">willUpdateExpiration()</a>
+    <span>
+                                &nbsp;: bool    </span>
+</dt>
+<dd>Answers *true* if the expiration is configured to somehow change during
+a record update.  This can be as simple as an explicit time-to-live, or
+an instruction to use the namespace&#039;s default expiration, etc.  Answers
+*false* if the expiration will *not* be changed during a record update
+(e.g., the expiration was constructed with DontUpdate().)</dd>
 
     </dl>
-
 
 
 
@@ -202,12 +240,12 @@ Aerospike 3 server version 3.1.4 or later. Do not use with older servers.</dd>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">3227</span>
+    <span class="phpdocumentor-element-found-in__line">3250</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Do not change the record&#039;s expiry time when updating the record; requires Aerospike server
-version 3.10.1 or later.</p>
+        <p class="phpdocumentor-summary">Do not change the record&#039;s expiry time when updating the record;
+requires Aerospike server version 3.10.1 or later.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -216,12 +254,100 @@ version 3.10.1 or later.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+        <section class="phpdocumentor-description"><p>See also <code class="prettyprint">willUpdateExpiration()</code>.</p>
+</section>
+
     
+    
+
     
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Expiration.html"><abbr title="\Aerospike\Expiration">Expiration</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_get_ttl">
+        get_ttl()
+        <a href="classes/Aerospike-Expiration.html#method_get_ttl" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">3218</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Answers with the expiration&#039;s current time to live in units of
+seconds, excluding any special values.  If the expiration is set to
+the namespace default, is configured to never update, or is configured
+to never expire, this method returns null.  See also `Seconds()`.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">get_ttl</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">int|null</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">int|null</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_isNamespaceDefault">
+        isNamespaceDefault()
+        <a href="classes/Aerospike-Expiration.html#method_isNamespaceDefault" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">3230</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Answers true only if the expiration is set to use the namespace default.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">isNamespaceDefault</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>See also <code class="prettyprint">NamespaceDefault()</code>.</p>
+</section>
+
+    
+    
+
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
             </section>
 
 </article>
@@ -239,11 +365,12 @@ version 3.10.1 or later.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">3215</span>
+    <span class="phpdocumentor-element-found-in__line">3224</span>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Set the record&#039;s expiry time using the default time-to-live (TTL) value for the namespace</p>
+        <p class="phpdocumentor-summary">Set the record&#039;s expiry time using the default time-to-live (TTL) value
+for the namespace.  See also `isNamespaceDefault()`.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -253,6 +380,9 @@ version 3.10.1 or later.</p>
         </div>
     
     
+    
+    
+
     
 
             <section>
@@ -275,7 +405,7 @@ version 3.10.1 or later.</p>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
     :
-    <span class="phpdocumentor-element-found-in__line">3221</span>
+    <span class="phpdocumentor-element-found-in__line">3237</span>
 
     </aside>
 
@@ -289,7 +419,12 @@ Aerospike 3 server version 3.1.4 or later. Do not use with older servers.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+        <section class="phpdocumentor-description"><p>See also <code class="prettyprint">willNeverExpire()</code>.</p>
+</section>
+
     
+    
+
     
 
             <section>
@@ -316,7 +451,7 @@ Aerospike 3 server version 3.1.4 or later. Do not use with older servers.</p>
 
     </aside>
 
-        <p class="phpdocumentor-summary">Set the record to expire X seconds from now</p>
+        <p class="phpdocumentor-summary">Set the record to expire X seconds from now.  See also `getTtl()`.</p>
 
     <code class="phpdocumentor-code phpdocumentor-signature ">
     <span class="phpdocumentor-signature__visibility">public</span>
@@ -324,6 +459,7 @@ Aerospike 3 server version 3.1.4 or later. Do not use with older servers.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
     
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
@@ -338,9 +474,95 @@ Aerospike 3 server version 3.1.4 or later. Do not use with older servers.</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Expiration.html"><abbr title="\Aerospike\Expiration">Expiration</abbr></a></span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_willNeverExpire">
+        willNeverExpire()
+        <a href="classes/Aerospike-Expiration.html#method_willNeverExpire" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">3243</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Answers true only if the expiration is set to never expire.</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">willNeverExpire</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+        <section class="phpdocumentor-description"><p>See also <code class="prettyprint">Never()</code>.</p>
+</section>
+
+    
+    
+
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
+            </section>
+
+</article>
+                    <article
+        class="phpdocumentor-element
+            -method
+            -public
+                                                        "
+>
+    <h4 class="phpdocumentor-element__name" id="method_willUpdateExpiration">
+        willUpdateExpiration()
+        <a href="classes/Aerospike-Expiration.html#method_willUpdateExpiration" class="headerlink"><i class="fas fa-link"></i></a>
+
+    </h4>
+    <aside class="phpdocumentor-element-found-in">
+    <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
+    :
+    <span class="phpdocumentor-element-found-in__line">3259</span>
+
+    </aside>
+
+        <p class="phpdocumentor-summary">Answers *true* if the expiration is configured to somehow change during
+a record update.  This can be as simple as an explicit time-to-live, or
+an instruction to use the namespace&#039;s default expiration, etc.  Answers
+*false* if the expiration will *not* be changed during a record update
+(e.g., the expiration was constructed with DontUpdate().)</p>
+
+    <code class="phpdocumentor-code phpdocumentor-signature ">
+    <span class="phpdocumentor-signature__visibility">public</span>
+                    <span class="phpdocumentor-signature__name">willUpdateExpiration</span><span>(</span><span>)</span><span> : </span><span class="phpdocumentor-signature__response_type">bool</span></code>
+
+    <div class="phpdocumentor-label-line">
+        </div>
+    
+    
+    
+    
+
+    
+
+            <section>
+        <h5 class="phpdocumentor-return-value__heading">Return values</h5>
+        <span class="phpdocumentor-signature__response_type">bool</span>
             </section>
 
 </article>
@@ -382,6 +604,8 @@ Aerospike 3 server version 3.1.4 or later. Do not use with older servers.</p>
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -457,10 +681,14 @@ Aerospike 3 server version 3.1.4 or later. Do not use with older servers.</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-Expiration.html#method_DontUpdate">DontUpdate()</a></li>
-                                            <li><a href="classes/Aerospike-Expiration.html#method_NamespaceDefault">NamespaceDefault()</a></li>
-                                            <li><a href="classes/Aerospike-Expiration.html#method_Never">Never()</a></li>
-                                            <li><a href="classes/Aerospike-Expiration.html#method_Seconds">Seconds()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Expiration.html#method_DontUpdate">DontUpdate()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Expiration.html#method_get_ttl">get_ttl()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Expiration.html#method_isNamespaceDefault">isNamespaceDefault()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Expiration.html#method_NamespaceDefault">NamespaceDefault()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Expiration.html#method_Never">Never()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Expiration.html#method_Seconds">Seconds()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Expiration.html#method_willNeverExpire">willNeverExpire()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Expiration.html#method_willUpdateExpiration">willUpdateExpiration()</a></li>
                                     </ul>
             </li>
                     </ul>

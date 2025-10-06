@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -123,6 +123,9 @@ where variable bins are needed for each key.</p>
 
 
 
+
+
+
 <h3 id="toc">
     Table of Contents
     <a href="classes/Aerospike-BatchRead.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
@@ -145,27 +148,26 @@ where variable bins are needed for each key.</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BatchRead.html#method___construct">__construct()</a>
+    <a class="" href="classes/Aerospike-BatchRead.html#method___construct">__construct()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BatchRead.html#method_header">header()</a>
+    <a class="" href="classes/Aerospike-BatchRead.html#method_header">header()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-BatchRead.html"><abbr title="\Aerospike\BatchRead">BatchRead</abbr></a>    </span>
 </dt>
 <dd>Ops specifies the operations to perform for every key.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BatchRead.html#method_ops">ops()</a>
+    <a class="" href="classes/Aerospike-BatchRead.html#method_ops">ops()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-BatchRead.html"><abbr title="\Aerospike\BatchRead">BatchRead</abbr></a>    </span>
 </dt>
 <dd>Optional read policy.</dd>
 
     </dl>
-
 
 
 
@@ -205,6 +207,7 @@ where variable bins are needed for each key.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -229,6 +232,8 @@ where variable bins are needed for each key.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -260,6 +265,7 @@ where variable bins are needed for each key.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Ops are mutually exclusive with BinNames.
 A binName can be emulated with <code class="prettyprint">GetOp(binName)</code>
 Supported by server v5.6.0+.</p>
@@ -282,6 +288,8 @@ Supported by server v5.6.0+.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -318,6 +326,7 @@ Supported by server v5.6.0+.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -342,6 +351,8 @@ Supported by server v5.6.0+.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -389,6 +400,8 @@ Supported by server v5.6.0+.</p>
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -464,9 +477,9 @@ Supported by server v5.6.0+.</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-BatchRead.html#method___construct">__construct()</a></li>
-                                            <li><a href="classes/Aerospike-BatchRead.html#method_header">header()</a></li>
-                                            <li><a href="classes/Aerospike-BatchRead.html#method_ops">ops()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BatchRead.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BatchRead.html#method_header">header()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BatchRead.html#method_ops">ops()</a></li>
                                     </ul>
             </li>
                     </ul>

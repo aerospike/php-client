@@ -27,7 +27,6 @@ use std::hash::{Hash, Hasher};
 use std::io::Cursor;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::time::SystemTime;
 
 use byteorder::{ByteOrder, NetworkEndian};
 use ripemd160::digest::Digest;
@@ -67,7 +66,6 @@ pub type AsResult<T = ()> = std::result::Result<T, AerospikeException>;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const PARTITIONS: u16 = 4096;
-const CITRUSLEAF_EPOCH: u64 = 1262304000;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1602,7 +1600,7 @@ const NEVER_EXPIRE: u32 = 0xFFFF_FFFF; // -1 as i32
 const DONT_UPDATE: u32 = 0xFFFF_FFFE;
 
 /// Record expiration, also known as time-to-live (TTL).
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum _Expiration {
     Seconds(u32),
     NamespaceDefault,
@@ -1628,34 +1626,72 @@ impl FromZval<'_> for Expiration {
 #[php_impl]
 #[derive(ZvalConvert)]
 impl Expiration {
-    /// Set the record to expire X seconds from now
+    /// Set the record to expire X seconds from now.  See also `getTtl()`.
     pub fn Seconds(seconds: u32) -> Self {
         Expiration {
             _as: _Expiration::Seconds(seconds),
         }
     }
 
-    /// Set the record's expiry time using the default time-to-live (TTL) value for the namespace
+    /// Answers with the expiration's current time to live in units of
+    /// seconds, excluding any special values.  If the expiration is set to
+    /// the namespace default, is configured to never update, or is configured
+    /// to never expire, this method returns null.  See also `Seconds()`.
+    #[getter]
+    pub fn get_ttl(&self) -> Option<u32> {
+        match self._as {
+            _Expiration::Seconds(secs) => Some(secs),
+            _ => None,
+        }
+    }
+
+    /// Set the record's expiry time using the default time-to-live (TTL) value
+    /// for the namespace.  See also `isNamespaceDefault()`.
     pub fn Namespace_Default() -> Self {
         Expiration {
             _as: _Expiration::NamespaceDefault,
         }
     }
 
+    /// Answers true only if the expiration is set to use the namespace default.
+    /// See also `NamespaceDefault()`.
+    #[getter]
+    pub fn is_namespace_default(&self) -> bool {
+        self._as == _Expiration::NamespaceDefault
+    }
+
     /// Set the record to never expire. Requires Aerospike 2 server version 2.7.2 or later or
     /// Aerospike 3 server version 3.1.4 or later. Do not use with older servers.
+    /// See also `willNeverExpire()`.
     pub fn Never() -> Self {
         Expiration {
             _as: _Expiration::Never,
         }
     }
 
-    /// Do not change the record's expiry time when updating the record; requires Aerospike server
-    /// version 3.10.1 or later.
+    /// Answers true only if the expiration is set to never expire.
+    /// See also `Never()`.
+    pub fn will_never_expire(&self) -> bool {
+        self._as == _Expiration::Never
+    }
+
+    /// Do not change the record's expiry time when updating the record;
+    /// requires Aerospike server version 3.10.1 or later.
+    /// See also `willUpdateExpiration()`.
     pub fn Dont_Update() -> Self {
         Expiration {
             _as: _Expiration::DontUpdate,
         }
+    }
+
+    /// Answers *true* if the expiration is configured to somehow change during
+    /// a record update.  This can be as simple as an explicit time-to-live, or
+    /// an instruction to use the namespace's default expiration, etc.  Answers
+    /// *false* if the expiration will *not* be changed during a record update
+    /// (e.g., the expiration was constructed with DontUpdate().)
+    #[getter]
+    pub fn will_update_expiration(&self) -> bool {
+        self._as != _Expiration::DontUpdate
     }
 }
 
@@ -4211,8 +4247,9 @@ impl Record {
         Some(self._as.generation)
     }
 
-    /// Expiration is TTL (Time-To-Live).
-    /// Number of seconds until record expires.
+    /// Expiration indicates when a record will expire (Time-To-Live).
+    /// To determine a record's time to live, use the `getTtl()` method on the
+    /// Expiration or, equivalently, on the record.
     #[getter]
     pub fn get_expiration(&self) -> Expiration {
         match self._as.expiration {
@@ -4221,28 +4258,12 @@ impl Record {
         }
     }
 
-    /// Expiration is TTL (Time-To-Live).
-    /// Number of seconds until record expires.
+    /// Answer with the record's TTL (Time-To-Live), or null if not
+    /// possible.  Expressed in number of seconds until record expires.
+    /// Equivalent to `$this->getExpiration()->getTtl()`.
     #[getter]
     pub fn get_ttl(&self) -> Option<u32> {
-        match self._as.expiration {
-            0 => NEVER_EXPIRE.into(),
-            secs => {
-                let expiration = CITRUSLEAF_EPOCH + (secs as u64);
-                let now = SystemTime::now()
-                    .duration_since(SystemTime::UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs();
-
-                // Record may not have expired on server, but delay or clock differences may
-                // cause it to look expired on client. Floor at 1, not 0, to avoid old
-                // "never expires" interpretation.
-                if expiration > now {
-                    return (((expiration as u64) - now) as u32).into();
-                }
-                return (1 as u32).into();
-            }
-        }
+        self.get_expiration().get_ttl()
     }
 
     /// Key is the record's key.
@@ -11298,27 +11319,27 @@ impl IntoZval for PHPValue {
             PHPValue::GeoJSON(s) => {
                 let geo = GeoJSON { v: s };
                 let zo: ZBox<ZendObject> = geo.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
             PHPValue::Blob(b) => {
                 let blob = BLOB { v: b };
                 let zo: ZBox<ZendObject> = blob.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
             PHPValue::HLL(b) => {
                 let hll = HLL { v: b };
                 let zo: ZBox<ZendObject> = hll.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
             PHPValue::Infinity => {
                 let inf = Infinity {};
                 let zo: ZBox<ZendObject> = inf.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
             PHPValue::Wildcard => {
                 let inf = Wildcard {};
                 let zo: ZBox<ZendObject> = inf.into_zend_object()?;
-                zv.set_object(zo.into_raw());
+                zo.set_zval(zv, persistent)?;
             }
         }
 
@@ -12124,7 +12145,7 @@ fn get_persisted_client(key: &str) -> Option<Zval> {
 
     let mut zval = Zval::new();
     let zo: ZBox<ZendObject> = client.into_zend_object().ok()?;
-    zval.set_object(zo.into_raw());
+    zo.set_zval(&mut zval, false).ok()?;
     Some(zval)
 }
 

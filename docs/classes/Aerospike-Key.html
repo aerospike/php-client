@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -118,9 +118,12 @@
             <p class="phpdocumentor-summary">Key is the unique record identifier. Records can be identified using a specified namespace,
 an optional set name, and a user defined key which must be unique within a set.</p>
 
+
     <section class="phpdocumentor-description"><p>Records can also be identified by namespace/digest which is the combination used
 on the server.</p>
 </section>
+
+
 
 
 
@@ -147,31 +150,31 @@ on the server.</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a href="classes/Aerospike-Key.html#property_digest">$digest</a>
+    <a class="" href="classes/Aerospike-Key.html#property_digest">$digest</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a href="classes/Aerospike-Key.html#property_namespace">$namespace</a>
+    <a class="" href="classes/Aerospike-Key.html#property_namespace">$namespace</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a href="classes/Aerospike-Key.html#property_partition_id">$partition_id</a>
+    <a class="" href="classes/Aerospike-Key.html#property_partition_id">$partition_id</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a href="classes/Aerospike-Key.html#property_setname">$setname</a>
+    <a class="" href="classes/Aerospike-Key.html#property_setname">$setname</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -property -public">
-    <a href="classes/Aerospike-Key.html#property_value">$value</a>
+    <a class="" href="classes/Aerospike-Key.html#property_value">$value</a>
     <span>
                         &nbsp;: mixed            </span>
 </dt>
@@ -185,62 +188,61 @@ on the server.</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Key.html#method___construct">__construct()</a>
+    <a class="" href="classes/Aerospike-Key.html#method___construct">__construct()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Key.html#method_computeDigest">computeDigest()</a>
+    <a class="" href="classes/Aerospike-Key.html#method_computeDigest">computeDigest()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 <dd>Generate unique server hash value from set name, key type and user defined key.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Key.html#method_getDigest">getDigest()</a>
+    <a class="" href="classes/Aerospike-Key.html#method_getDigest">getDigest()</a>
     <span>
                                 &nbsp;: string    </span>
 </dt>
 <dd>get_digest returns key digest as string.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Key.html#method_getDigestBytes">getDigestBytes()</a>
+    <a class="" href="classes/Aerospike-Key.html#method_getDigestBytes">getDigestBytes()</a>
     <span>
                                 &nbsp;: array&lt;string|int, mixed&gt;    </span>
 </dt>
 <dd>get_digest_bytes returns key digest as byte array.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Key.html#method_getNamespace">getNamespace()</a>
+    <a class="" href="classes/Aerospike-Key.html#method_getNamespace">getNamespace()</a>
     <span>
                                 &nbsp;: string    </span>
 </dt>
 <dd>namespace. Equivalent to database name.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Key.html#method_getSetname">getSetname()</a>
+    <a class="" href="classes/Aerospike-Key.html#method_getSetname">getSetname()</a>
     <span>
                                 &nbsp;: string    </span>
 </dt>
 <dd>Optional set name. Equivalent to database table.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Key.html#method_getValue">getValue()</a>
+    <a class="" href="classes/Aerospike-Key.html#method_getValue">getValue()</a>
     <span>
                                 &nbsp;: mixed    </span>
 </dt>
 <dd>getValue() returns key&#039;s value.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-Key.html#method_partitionId">partitionId()</a>
+    <a class="" href="classes/Aerospike-Key.html#method_partitionId">partitionId()</a>
     <span>
                                 &nbsp;: int|null    </span>
 </dt>
 <dd>PartitionId returns the partition that the key belongs to.</dd>
 
     </dl>
-
 
 
 
@@ -258,14 +260,14 @@ on the server.</p>
             phpdocumentor-element
             -property
             -public
-                                                        "
+                                                                    "
 >
     <h4 class="phpdocumentor-element__name" id="property_digest">
         $digest
         <a href="classes/Aerospike-Key.html#property_digest" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
-                                </span>
+                                            </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
@@ -275,14 +277,19 @@ on the server.</p>
     </aside>
 
     
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$digest</span>
     </code>
 
     
     
+    
+
+    
+
     
 
 </article>
@@ -291,14 +298,14 @@ on the server.</p>
             phpdocumentor-element
             -property
             -public
-                                                        "
+                                                                    "
 >
     <h4 class="phpdocumentor-element__name" id="property_namespace">
         $namespace
         <a href="classes/Aerospike-Key.html#property_namespace" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
-                                </span>
+                                            </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
@@ -308,14 +315,19 @@ on the server.</p>
     </aside>
 
     
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$namespace</span>
     </code>
 
     
     
+    
+
+    
+
     
 
 </article>
@@ -324,14 +336,14 @@ on the server.</p>
             phpdocumentor-element
             -property
             -public
-                                                        "
+                                                                    "
 >
     <h4 class="phpdocumentor-element__name" id="property_partition_id">
         $partition_id
         <a href="classes/Aerospike-Key.html#property_partition_id" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
-                                </span>
+                                            </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
@@ -341,14 +353,19 @@ on the server.</p>
     </aside>
 
     
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$partition_id</span>
     </code>
 
     
     
+    
+
+    
+
     
 
 </article>
@@ -357,14 +374,14 @@ on the server.</p>
             phpdocumentor-element
             -property
             -public
-                                                        "
+                                                                    "
 >
     <h4 class="phpdocumentor-element__name" id="property_setname">
         $setname
         <a href="classes/Aerospike-Key.html#property_setname" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
-                                </span>
+                                            </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
@@ -374,14 +391,19 @@ on the server.</p>
     </aside>
 
     
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$setname</span>
     </code>
 
     
     
+    
+
+    
+
     
 
 </article>
@@ -390,14 +412,14 @@ on the server.</p>
             phpdocumentor-element
             -property
             -public
-                                                        "
+                                                                    "
 >
     <h4 class="phpdocumentor-element__name" id="property_value">
         $value
         <a href="classes/Aerospike-Key.html#property_value" class="headerlink"><i class="fas fa-link"></i></a>
 
         <span class="phpdocumentor-element__modifiers">
-                                </span>
+                                            </span>
     </h4>
     <aside class="phpdocumentor-element-found-in">
     <abbr class="phpdocumentor-element-found-in__file" title="php_stubs/libaerospike-php-stubsv1.0.0.php"><a href="files/php-stubs-libaerospike-php-stubsv1-0-0.html"><abbr title="php_stubs/libaerospike-php-stubsv1.0.0.php">libaerospike-php-stubsv1.0.0.php</abbr></a></abbr>
@@ -407,14 +429,19 @@ on the server.</p>
     </aside>
 
     
+    
     <code class="phpdocumentor-code phpdocumentor-signature ">
-    <span class="phpdocumentor-signature__visibility">public</span>
-        <span class="phpdocumentor-signature__type">mixed</span>
+        <span class="phpdocumentor-signature__visibility">public</span>
+            <span class="phpdocumentor-signature__type">mixed</span>
     <span class="phpdocumentor-signature__name">$value</span>
     </code>
 
     
     
+    
+
+    
+
     
 
 </article>
@@ -452,6 +479,7 @@ on the server.</p>
     <div class="phpdocumentor-label-line">
         </div>
     
+    
         <h5 class="phpdocumentor-argument-list__heading">Parameters</h5>
     <dl class="phpdocumentor-argument-list">
                     <dt class="phpdocumentor-argument-list__entry">
@@ -476,6 +504,8 @@ on the server.</p>
                 
             </dd>
             </dl>
+
+    
 
     
 
@@ -507,10 +537,13 @@ on the server.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>The hash function is RIPEMD-160 (a 160 bit hash).</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -548,6 +581,9 @@ on the server.</p>
     
     
     
+    
+
+    
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -583,6 +619,9 @@ on the server.</p>
         </div>
     
     
+    
+    
+
     
 
             <section>
@@ -620,6 +659,9 @@ on the server.</p>
     
     
     
+    
+
+    
 
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
@@ -655,6 +697,9 @@ on the server.</p>
         </div>
     
     
+    
+    
+
     
 
             <section>
@@ -692,6 +737,9 @@ on the server.</p>
     
     
     
+    
+
+    
 
     
 </article>
@@ -723,6 +771,9 @@ on the server.</p>
         </div>
     
     
+    
+    
+
     
 
             <section>
@@ -769,6 +820,8 @@ on the server.</p>
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -844,25 +897,25 @@ on the server.</p>
                             <li class="phpdocumentor-on-this-page-section__title">Properties</li>
                 <li>
                     <ul class="phpdocumentor-list -clean">
-                                                    <li><a href="classes/Aerospike-Key.html#property_digest">$digest<a href="classes/Aerospike-Key.html"></li>
-                                                    <li><a href="classes/Aerospike-Key.html#property_namespace">$namespace<a href="classes/Aerospike-Key.html"></li>
-                                                    <li><a href="classes/Aerospike-Key.html#property_partition_id">$partition_id<a href="classes/Aerospike-Key.html"></li>
-                                                    <li><a href="classes/Aerospike-Key.html#property_setname">$setname<a href="classes/Aerospike-Key.html"></li>
-                                                    <li><a href="classes/Aerospike-Key.html#property_value">$value<a href="classes/Aerospike-Key.html"></li>
+                                                    <li class=""><a href="classes/Aerospike-Key.html#property_digest">$digest</a></li>
+                                                    <li class=""><a href="classes/Aerospike-Key.html#property_namespace">$namespace</a></li>
+                                                    <li class=""><a href="classes/Aerospike-Key.html#property_partition_id">$partition_id</a></li>
+                                                    <li class=""><a href="classes/Aerospike-Key.html#property_setname">$setname</a></li>
+                                                    <li class=""><a href="classes/Aerospike-Key.html#property_value">$value</a></li>
                                             </ul>
                 </li>
             
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-Key.html#method___construct">__construct()</a></li>
-                                            <li><a href="classes/Aerospike-Key.html#method_computeDigest">computeDigest()</a></li>
-                                            <li><a href="classes/Aerospike-Key.html#method_getDigest">getDigest()</a></li>
-                                            <li><a href="classes/Aerospike-Key.html#method_getDigestBytes">getDigestBytes()</a></li>
-                                            <li><a href="classes/Aerospike-Key.html#method_getNamespace">getNamespace()</a></li>
-                                            <li><a href="classes/Aerospike-Key.html#method_getSetname">getSetname()</a></li>
-                                            <li><a href="classes/Aerospike-Key.html#method_getValue">getValue()</a></li>
-                                            <li><a href="classes/Aerospike-Key.html#method_partitionId">partitionId()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Key.html#method___construct">__construct()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Key.html#method_computeDigest">computeDigest()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Key.html#method_getDigest">getDigest()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Key.html#method_getDigestBytes">getDigestBytes()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Key.html#method_getNamespace">getNamespace()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Key.html#method_getSetname">getSetname()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Key.html#method_getValue">getValue()</a></li>
+                                            <li class=""><a href="classes/Aerospike-Key.html#method_partitionId">partitionId()</a></li>
                                     </ul>
             </li>
                     </ul>

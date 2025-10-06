@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -117,6 +117,7 @@
 
             <p class="phpdocumentor-summary">Bit operations. Create bit operations used by client operate command.</p>
 
+
     <section class="phpdocumentor-description"><p>Offset orientation is left-to-right.  Negative offsets are supported.
 If the offset is negative, the offset starts backwards from end of the bitmap.
 If an offset is out of bounds, a parameter error will be returned.</p>
@@ -126,6 +127,8 @@ Resize first bitmap (in a list of bitmaps) to 3 bytes.
 BitOperation.resize(&quot;bin&quot;, 3, BitResizeFlags.DEFAULT, CTX.listIndex(0))
 bin result = [[0b00000001, 0b01000010, 0b00000000],[0b01011010]]</p>
 </section>
+
+
 
 
 
@@ -153,133 +156,132 @@ bin result = [[0b00000001, 0b01000010, 0b00000000],[0b01011010]]</p>
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_add">add()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_add">add()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitAddOp creates bit &quot;add&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_and">and()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_and">and()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitAndOp creates bit &quot;and&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_count">count()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_count">count()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitCountOp creates bit &quot;count&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_get">get()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_get">get()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitGetOp creates bit &quot;get&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_getInt">getInt()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_getInt">getInt()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitGetIntOp creates bit &quot;get integer&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_insert">insert()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_insert">insert()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitInsertOp creates byte &quot;insert&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_lscan">lscan()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_lscan">lscan()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitLScanOp creates bit &quot;left scan&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_lshift">lshift()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_lshift">lshift()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitLShiftOp creates bit &quot;left shift&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_not">not()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_not">not()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitNotOp creates bit &quot;not&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_or">or()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_or">or()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitOrOp creates bit &quot;or&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_remove">remove()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_remove">remove()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitRemoveOp creates byte &quot;remove&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_resize">resize()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_resize">resize()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitResizeOp creates byte &quot;resize&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_rscan">rscan()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_rscan">rscan()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitRScanOp creates bit &quot;right scan&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_rshift">rshift()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_rshift">rshift()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitRShiftOp creates bit &quot;right shift&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_set">set()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_set">set()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitSetOp creates bit &quot;set&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_setInt">setInt()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_setInt">setInt()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitSetIntOp creates bit &quot;setInt&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_subtract">subtract()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_subtract">subtract()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitSubtractOp creates bit &quot;subtract&quot; operation.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-BitwiseOp.html#method_xor">xor()</a>
+    <a class="" href="classes/Aerospike-BitwiseOp.html#method_xor">xor()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a>    </span>
 </dt>
 <dd>BitXorOp creates bit &quot;exclusive or&quot; operation.</dd>
 
     </dl>
-
 
 
 
@@ -319,6 +321,7 @@ bin result = [[0b00000001, 0b01000010, 0b00000000],[0b01011010]]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server adds value to []byte bin starting at bitOffset for bitSize. BitSize must be &lt;= 64.
 Signed indicates if bits should be treated as a signed number.
 If add overflows/underflows, BitOverflowAction is used.
@@ -394,6 +397,8 @@ bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b10000101]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -426,6 +431,7 @@ bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b10000101]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server performs bitwise &quot;and&quot; on value and []byte bin at bitOffset for bitSize.
 Server does not return a value.
 Example:</p>
@@ -484,6 +490,8 @@ bin result = [0b00000001, 0b01000010, 0b00000010, 0b00000000, 0b00000101]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -516,6 +524,7 @@ bin result = [0b00000001, 0b01000010, 0b00000010, 0b00000000, 0b00000101]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server returns integer count of set bits from []byte bin starting at bitOffset for bitSize.
 Example:</p>
 <p>bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
@@ -558,6 +567,8 @@ returns 2</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -590,6 +601,7 @@ returns 2</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server returns bits from []byte bin starting at bitOffset for bitSize.
 Example:</p>
 <p>bin = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00000101]
@@ -632,6 +644,8 @@ returns [0b1000000]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -664,6 +678,7 @@ returns [0b1000000]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server returns integer from []byte bin starting at bitOffset for bitSize.
 Signed indicates if bits should be treated as a signed number.
 Example:</p>
@@ -715,6 +730,8 @@ returns 16899</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -747,6 +764,7 @@ returns 16899</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server inserts value bytes into []byte bin at byteOffset.
 Server does not return a value.
 Example:</p>
@@ -797,6 +815,8 @@ $bin result = [0b00000001, 0b11111111, 0b11000111, 0b01000010, 0b00000011, 0b000
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -829,6 +849,7 @@ $bin result = [0b00000001, 0b11111111, 0b11000111, 0b01000010, 0b00000011, 0b000
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server returns integer bit offset of the first specified value bit in []byte bin
 starting at bitOffset for bitSize.
 Example:</p>
@@ -880,6 +901,8 @@ returns 5</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -912,6 +935,7 @@ returns 5</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server shifts left []byte bin starting at bitOffset for bitSize.
 Server does not return a value.
 Example:</p>
@@ -970,6 +994,8 @@ bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00101000]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1002,6 +1028,7 @@ bin result = [0b00000001, 0b01000010, 0b00000011, 0b00000100, 0b00101000]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server negates []byte bin starting at bitOffset for bitSize.
 Server does not return a value.
 Example:</p>
@@ -1052,6 +1079,8 @@ bin result = [0b00000001, 0b01000010, 0b00000011, 0b01111010, 0b00000101]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1084,6 +1113,7 @@ bin result = [0b00000001, 0b01000010, 0b00000011, 0b01111010, 0b00000101]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server performs bitwise &quot;or&quot; on value and []byte bin at bitOffset for bitSize.
 Server does not return a value.
 Example:</p>
@@ -1142,6 +1172,8 @@ bin result = [0b00000001, 0b01000010, 0b01010111, 0b00000100, 0b00000101]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1174,6 +1206,7 @@ bin result = [0b00000001, 0b01000010, 0b01010111, 0b00000100, 0b00000101]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server removes bytes from []byte bin at byteOffset for byteSize.
 Server does not return a value.
 Example:</p>
@@ -1224,6 +1257,8 @@ $bin result = [0b00000001, 0b01000010]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1256,6 +1291,7 @@ $bin result = [0b00000001, 0b01000010]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server resizes []byte to byteSize according to resizeFlags (See BitResizeFlags).
 Server does not return a value.
 Example:</p>
@@ -1306,6 +1342,8 @@ $bin result = [0b00000001, 0b01000010, 0b00000000, 0b00000000]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1338,6 +1376,7 @@ $bin result = [0b00000001, 0b01000010, 0b00000000, 0b00000000]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server returns integer bit offset of the last specified value bit in []byte bin
 starting at bitOffset for bitSize.
 Example:</p>
@@ -1389,6 +1428,8 @@ returns 7</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1421,6 +1462,7 @@ returns 7</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server shifts right []byte bin starting at bitOffset for bitSize.
 Server does not return a value.
 Example:</p>
@@ -1479,6 +1521,8 @@ bin result = [0b00000000, 0b11000010, 0b00000011, 0b00000100, 0b00000101]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1511,6 +1555,7 @@ bin result = [0b00000000, 0b11000010, 0b00000011, 0b00000100, 0b00000101]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server sets value on []byte bin at bitOffset for bitSize.
 Server does not return a value.
 Example:</p>
@@ -1569,6 +1614,8 @@ $bin result = [0b00000001, 0b01000111, 0b00000011, 0b00000100, 0b00000101]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1601,6 +1648,7 @@ $bin result = [0b00000001, 0b01000111, 0b00000011, 0b00000100, 0b00000101]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server sets value to []byte bin starting at bitOffset for bitSize. Size must be &lt;= 64.
 Server does not return a value.
 Example:</p>
@@ -1659,6 +1707,8 @@ bin result = [0b00111111, 0b11000010, 0b00000011, 0b0000100, 0b00000101]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1691,6 +1741,7 @@ bin result = [0b00111111, 0b11000010, 0b00000011, 0b0000100, 0b00000101]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server subtracts value from []byte bin starting at bitOffset for bitSize. BitSize must be &lt;= 64.
 Signed indicates if bits should be treated as a signed number.
 If add overflows/underflows, BitOverflowAction is used.
@@ -1766,6 +1817,8 @@ bin result = [0b00000001, 0b01000010, 0b00000011, 0b0000011, 0b10000101]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1798,6 +1851,7 @@ bin result = [0b00000001, 0b01000010, 0b00000011, 0b0000011, 0b10000101]</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Server performs bitwise &quot;xor&quot; on value and []byte bin at bitOffset for bitSize.
 Server does not return a value.
 Example:</p>
@@ -1856,6 +1910,8 @@ bin result = [0b00000001, 0b01000010, 0b01010101, 0b00000100, 0b00000101]</p>
 
     
 
+    
+
             <section>
         <h5 class="phpdocumentor-return-value__heading">Return values</h5>
         <span class="phpdocumentor-signature__response_type"><a href="classes/Aerospike-Operation.html"><abbr title="\Aerospike\Operation">Operation</abbr></a></span>
@@ -1900,6 +1956,8 @@ bin result = [0b00000001, 0b01000010, 0b01010101, 0b00000100, 0b00000101]</p>
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -1975,24 +2033,24 @@ bin result = [0b00000001, 0b01000010, 0b01010101, 0b00000100, 0b00000101]</p>
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_add">add()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_and">and()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_count">count()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_get">get()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_getInt">getInt()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_insert">insert()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_lscan">lscan()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_lshift">lshift()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_not">not()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_or">or()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_remove">remove()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_resize">resize()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_rscan">rscan()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_rshift">rshift()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_set">set()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_setInt">setInt()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_subtract">subtract()</a></li>
-                                            <li><a href="classes/Aerospike-BitwiseOp.html#method_xor">xor()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_add">add()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_and">and()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_count">count()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_get">get()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_getInt">getInt()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_insert">insert()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_lscan">lscan()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_lshift">lshift()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_not">not()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_or">or()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_remove">remove()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_resize">resize()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_rscan">rscan()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_rshift">rshift()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_set">set()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_setInt">setInt()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_subtract">subtract()</a></li>
+                                            <li class=""><a href="classes/Aerospike-BitwiseOp.html#method_xor">xor()</a></li>
                                     </ul>
             </li>
                     </ul>

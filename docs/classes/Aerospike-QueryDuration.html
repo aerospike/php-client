@@ -54,14 +54,14 @@
     Menu
 </label>
 <aside class="phpdocumentor-column -three phpdocumentor-sidebar">
-                    <section class="phpdocumentor-sidebar__category">
+                    <section class="phpdocumentor-sidebar__category -namespaces">
             <h2 class="phpdocumentor-sidebar__category-header">Namespaces</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="namespaces/aerospike.html" class="">Aerospike</a>
 </h4>
 
                         </section>
-                <section class="phpdocumentor-sidebar__category">
+                <section class="phpdocumentor-sidebar__category -packages">
             <h2 class="phpdocumentor-sidebar__category-header">Packages</h2>
                                     <h4 class="phpdocumentor-sidebar__root-namespace">
     <a href="packages/Application.html" class="">Application</a>
@@ -69,14 +69,14 @@
 
                         </section>
             
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -reports">
         <h2 class="phpdocumentor-sidebar__category-header">Reports</h2>
                 <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/deprecated.html">Deprecated</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/errors.html">Errors</a></h3>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="reports/markers.html">Markers</a></h3>
     </section>
 
-    <section class="phpdocumentor-sidebar__category">
+    <section class="phpdocumentor-sidebar__category -indices">
         <h2 class="phpdocumentor-sidebar__category-header">Indices</h2>
         <h3 class="phpdocumentor-sidebar__root-package"><a href="indices/files.html">Files</a></h3>
     </section>
@@ -122,6 +122,9 @@
 
 
 
+
+
+
 <h3 id="toc">
     Table of Contents
     <a href="classes/Aerospike-QueryDuration.html#toc" class="headerlink"><i class="fas fa-link"></i></a>
@@ -144,7 +147,7 @@
 </h4>
 <dl class="phpdocumentor-table-of-contents">
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-QueryDuration.html#method_long">long()</a>
+    <a class="" href="classes/Aerospike-QueryDuration.html#method_long">long()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a>    </span>
 </dt>
@@ -152,14 +155,14 @@
 the following ways:</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-QueryDuration.html#method_longRelaxAP">longRelaxAP()</a>
+    <a class="" href="classes/Aerospike-QueryDuration.html#method_longRelaxAP">longRelaxAP()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a>    </span>
 </dt>
 <dd>LongRelaxAP will treat query as a LONG query, but relax read consistency for AP namespaces.</dd>
 
             <dt class="phpdocumentor-table-of-contents__entry -method -public">
-    <a href="classes/Aerospike-QueryDuration.html#method_short">short()</a>
+    <a class="" href="classes/Aerospike-QueryDuration.html#method_short">short()</a>
     <span>
                                 &nbsp;: <a href="classes/Aerospike-QueryDuration.html"><abbr title="\Aerospike\QueryDuration">QueryDuration</abbr></a>    </span>
 </dt>
@@ -168,7 +171,6 @@ the following ways:
 Always run the query in one thread and ignore the server&#039;s query threading configuration.</dd>
 
     </dl>
-
 
 
 
@@ -209,6 +211,7 @@ the following ways:</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Allow query to be run in multiple threads using the server's query threading configuration.
 Do not relax read consistency for AP namespaces.
 Add the query to the server's query monitor.
@@ -217,6 +220,8 @@ Do not allow server timeouts.</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -251,10 +256,13 @@ Do not allow server timeouts.</p>
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>This value is treated exactly like LONG for server versions &lt; 7.1.</p>
 </section>
 
     
+    
+
     
 
             <section>
@@ -291,6 +299,7 @@ Always run the query in one thread and ignore the server&#039;s query threading 
 
     <div class="phpdocumentor-label-line">
         </div>
+    
         <section class="phpdocumentor-description"><p>Allow query to be inlined directly on the server's service thread.
 Relax read consistency for AP namespaces.
 Do not add the query to the server's query monitor.
@@ -299,6 +308,8 @@ Allow server timeouts. The default server timeout for a short query is 1 second.
 </section>
 
     
+    
+
     
 
             <section>
@@ -345,6 +356,8 @@ Allow server timeouts. The default server timeout for a short query is 1 second.
                         if (xhr.status < 400 && xhr.responseText) {
                             code.textContent = xhr.responseText;
                             Prism.highlightElement(code);
+                            d=document.getElementsByClassName("line-numbers");
+                            d[0].scrollTop = d[0].children[1].offsetTop;
                             return;
                         }
 
@@ -420,9 +433,9 @@ Allow server timeouts. The default server timeout for a short query is 1 second.
                         <li class="phpdocumentor-on-this-page-section__title">Methods</li>
             <li>
                 <ul class="phpdocumentor-list -clean">
-                                            <li><a href="classes/Aerospike-QueryDuration.html#method_long">long()</a></li>
-                                            <li><a href="classes/Aerospike-QueryDuration.html#method_longRelaxAP">longRelaxAP()</a></li>
-                                            <li><a href="classes/Aerospike-QueryDuration.html#method_short">short()</a></li>
+                                            <li class=""><a href="classes/Aerospike-QueryDuration.html#method_long">long()</a></li>
+                                            <li class=""><a href="classes/Aerospike-QueryDuration.html#method_longRelaxAP">longRelaxAP()</a></li>
+                                            <li class=""><a href="classes/Aerospike-QueryDuration.html#method_short">short()</a></li>
                                     </ul>
             </li>
                     </ul>
