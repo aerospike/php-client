@@ -6,9 +6,11 @@ All notable changes to this project will be documented in this file.
 
 - **Fixes**
   - [CLIENT-3777] Fix anomalous getTtl() behavior.
+  - Properly set object without leaking a reference. PR #68, thanks to [Martynas Žaliaduonis](https://github.com/martynaszaliaduonis).
 
 - **Improvements**
   - [CLIENT-3777] Introduce getters on Expiration class objects.
+  - Add send key setter and getter to `BatchWritePolicy`, PR #65 thanks to [Asparuh Nestorov](https://github.com/anestorov).
 
 ## [1.3.0] - 2025-02-23
 
