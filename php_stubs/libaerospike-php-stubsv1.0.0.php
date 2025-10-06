@@ -3809,6 +3809,8 @@ namespace Aerospike {
 
         public $record_exists_action;
 
+        public $send_key;
+
         public function __construct() {}
 
         /**
@@ -3889,6 +3891,16 @@ namespace Aerospike {
         public function getDurableDelete(): bool {}
 
         public function setDurableDelete(bool $durable_delete) {}
+
+        /**
+         * SendKey determines to whether send user defined key in addition to hash digest on both reads and writes.
+         * If the key is sent on a write, the key will be stored with the record on
+         * the server.
+         * The default is to not send the user defined key.
+         */
+        public function getSendKey(): bool {}
+
+        public function setSendKey(bool $send_key) {}
     }
 
     /**

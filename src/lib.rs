@@ -4817,6 +4817,16 @@ impl BatchWritePolicy {
     pub fn set_durable_delete(&mut self, durable_delete: bool) {
         self._as.durable_delete = durable_delete;
     }
+
+    #[getter]
+    pub fn get_send_key(&self) -> bool {
+        self._as.send_key
+    }
+
+    #[setter]
+    pub fn set_send_key(&mut self, send_key: bool) {
+        self._as.send_key = send_key;
+    }
 }
 
 impl Default for BatchWritePolicy {
