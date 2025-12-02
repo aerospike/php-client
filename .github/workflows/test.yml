@@ -20,6 +20,11 @@ jobs:
         ]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Harden the runner (Audit all outbound calls)
+        uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+        with:
+          egress-policy: audit
+
       - name: Install dependencies
         run: |
           brew install \
@@ -32,7 +37,7 @@ jobs:
           echo /opt/homebrew/opt/php@${{ matrix.php-version }}/sbin >> $GITHUB_PATH
       - name: Get only major and minor version to target build
         run: echo MACOS_VERSION=$(sw_vers --productVersion | cut -f -2 -d'.') >> $GITHUB_ENV
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0
       - name: Build PHP client
@@ -75,16 +80,21 @@ jobs:
     # The PHP client security and non-security tests need to be run on separate server instances
     # since currently the security tests are brittle and may interfere with the non-security tests.
     # Also, just run the server here so it should be ready by the time we run the tests
+    - name: Harden the runner (Audit all outbound calls)
+      uses: step-security/harden-runner@df199fb7be9f65074067a9eb93f12bb4c5547cf2 # v2.13.3
+      with:
+        egress-policy: audit
+
     - name: Run CE server
       run: docker run -d -p 3000:3000 --name aerospike aerospike/aerospike-server
 
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
       with:
         fetch-depth: 0
 
     - name: Get list of all packages
       run: sudo apt update
-    - uses: shivammathur/setup-php@v2
+    - uses: shivammathur/setup-php@44454db4f0199b8b9685a5d763dc37cbf79108e1 # v2
       with:
         php-version: ${{ matrix.php-version }}
     - name: Install prerequisites
