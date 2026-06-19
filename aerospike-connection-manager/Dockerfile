@@ -1,22 +1,19 @@
-FROM golang:1.20-alpine AS builder
+FROM golang:1.23-alpine AS builder
 
 ARG VERSION=1.10.0
 
-ADD . $GOPATH/src/github.com/aerospike/php-client/asld
-WORKDIR $GOPATH/src/github.com/aerospike/php-client/asld
-RUN go build -ldflags="-X 'main.version=$VERSION'" -o aerospike-connection-manager . \
-    && cp aerospike-connection-manager /aerospike-connection-manager
+WORKDIR /src
+COPY . .
+RUN go build -ldflags="-X 'main.version=$VERSION'" -o /aerospike-connection-manager .
 
 FROM alpine:latest
 
 COPY --from=builder /aerospike-connection-manager /usr/bin/aerospike-connection-manager
+COPY asld.toml /etc/aerospike-connection-manager/asld.toml
 COPY asld.toml.template /etc/aerospike-connection-manager/asld.toml.template
-COPY docker-entrypoint.sh /docker-entrypoint.sh
 
-RUN apk add gettext libintl \
-    && chmod +x /docker-entrypoint.sh
-
+# Management HTTP server (metrics, health/readiness) default port.
 EXPOSE 9145
 
-ENTRYPOINT [ "/docker-entrypoint.sh" ]
-CMD ["aerospike-connection-manager", "--config", "/etc/aerospike-connection-manager/asld.toml"]
+ENTRYPOINT ["aerospike-connection-manager"]
+CMD ["-config-file", "/etc/aerospike-connection-manager/asld.toml"]

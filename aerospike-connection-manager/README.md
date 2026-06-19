@@ -12,6 +12,19 @@ This guide provides step-by-step instructions on setting up the Aerospike Connec
 ### Configuration Instructions
 Aerospike's client policy allows for flexible control over read and write operations, including optimistic concurrency, time-to-live settings, and conditional writes based on record existence. The policy may be configured in the existing asld.toml file or you may create a custom toml file.  An example asld template toml file is provided below, for reference.
 
+Each Aerospike cluster is declared under a `[clusters.<name>]` table:
+
+```toml
+[clusters.cluster]
+socket = "/tmp/asld_grpc.sock"
+host = "127.0.0.1:3000"
+```
+
+Declaring a cluster as a top-level table (e.g. `[cluster]`) is **deprecated** but
+still supported; the daemon logs a notice at startup when it reads one, so
+existing configs keep working while you migrate. Process-global operational
+settings live in the `[management]` section (see [OBSERVABILITY.md](OBSERVABILITY.md)).
+
 1. **Using the existing asld.toml file to configure the client policy:**
     - Change directory to php-client/aerospike-connection-manager
        ```shell
@@ -61,6 +74,24 @@ Aerospike's client policy allows for flexible control over read and write operat
     ```shell
     sudo make daemonize
     ```
+&nbsp;
+### Monitoring and Health Checks
+
+ACM runs a management HTTP server (default `:9145`) that exposes Prometheus
+metrics and Kubernetes-style health probes alongside the gRPC data path:
+
+- `/metrics` — Go runtime, process, gRPC and Aerospike connection-pool metrics
+- `/livez` — liveness (cheap, dependency-free)
+- `/readyz` — readiness (fails while an Aerospike cluster is disconnected)
+- `/healthz` — aggregate of the two
+- `/debug/pprof/` — profiling (opt-in, off by default)
+
+Every endpoint can be enabled, disabled or re-pathed, and the whole server can
+be turned off. Settings are resolved with the precedence
+`CLI flag > environment variable > config file > default`. See
+[OBSERVABILITY.md](OBSERVABILITY.md) for the full configuration reference,
+metrics catalogue and Kubernetes examples.
+
 &nbsp;
 ### Example asld.toml file:
 ~~~toml

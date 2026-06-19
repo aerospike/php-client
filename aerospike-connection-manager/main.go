@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
+	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"net"
 	"os"
 	"os/signal"
@@ -14,7 +17,7 @@ import (
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/health"
+	grpchealth "google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
@@ -23,138 +26,219 @@ import (
 
 	"github.com/aerospike/php-client/asld/common/client"
 	"github.com/aerospike/php-client/asld/common/config"
+	mgmtconfig "github.com/aerospike/php-client/asld/internal/config"
+	"github.com/aerospike/php-client/asld/internal/health"
+	"github.com/aerospike/php-client/asld/internal/management"
+	"github.com/aerospike/php-client/asld/internal/metrics"
 	pb "github.com/aerospike/php-client/asld/proto"
 )
 
 var (
-	version    = "0.1.0"
-	revision   = "N/A"
-	lastCommit time.Time
+	version  = "0.1.0"
+	revision = "N/A"
 )
 
-// TODO: Finish logging and make sure logs have prefixes for different clusters
+// shutdownTimeout bounds the graceful shutdown of the management server before
+// the process forces its way down.
+const shutdownTimeout = 15 * time.Second
+
+// defaultConnectionQueueSize is applied when the cluster policy leaves the
+// connection queue unset, matching the historical asld default.
+const defaultConnectionQueueSize = 32
+
+// clusterServer bundles everything needed to serve and later tear down a single
+// Aerospike cluster's gRPC endpoint.
+type clusterServer struct {
+	name     string
+	grpc     *grpc.Server
+	listener net.Listener
+	client   *aero.Client
+}
 
 func main() {
-	var (
-		configFile  = flag.String("config-file", "/etc/aerospike-connection-manager/asld.toml", "Config File")
-		showUsage   = flag.Bool("h", false, "Show usage information")
-		showVersion = flag.Bool("v", false, "Print version")
-	)
+	configFile := flag.String("config-file", "/etc/aerospike-connection-manager/asld.toml", "Config File")
+	showUsage := flag.Bool("h", false, "Show usage information")
+	showVersion := flag.Bool("v", false, "Print version")
+	collectManagementFlags := mgmtconfig.RegisterFlags(flag.CommandLine)
 
 	flag.Parse()
 	if *showUsage {
 		flag.Usage()
 		os.Exit(0)
 	}
-
 	if *showVersion {
-		println(version)
+		fmt.Println(version)
 		os.Exit(0)
 	}
 
-	log.Printf("Aerospike Local Proxy `%s`.", version)
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	slog.SetDefault(logger)
+	logger.Info("starting Aerospike Connection Manager", "version", version, "revision", revision)
 
-	conf, err := config.Read(*configFile)
+	clusters, legacyClusters, err := config.Read(*configFile)
 	if err != nil {
-		log.Fatalln(err)
-	}
-	defer cleanUp(conf)
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		cleanUp(conf)
+		logger.Error("failed to read config", "file", *configFile, "err", err)
 		os.Exit(1)
-	}()
-
-	for cluster, ac := range conf {
-		go launchServer(cluster, ac)
+	}
+	if len(clusters) == 0 {
+		logger.Error("no Aerospike clusters defined in config", "file", *configFile)
+		os.Exit(1)
+	}
+	if len(legacyClusters) > 0 {
+		logger.Warn("deprecated cluster configuration: declare clusters under [clusters.<name>]; "+
+			"top-level cluster tables are deprecated and support will be removed in a future release",
+			"legacy_clusters", legacyClusters)
 	}
 
-	e := make(chan struct{}, 1)
-	<-e
-}
+	managementCfg, err := mgmtconfig.Load(*configFile, collectManagementFlags)
+	if err != nil {
+		logger.Error("failed to resolve management config", "err", err)
+		os.Exit(1)
+	}
 
-func cleanUp(conf map[string]*client.AerospikeConfig) {
-	for _, ac := range conf {
-		log.Printf("cleaning up socket `%s`.", ac.Socket)
-		err := os.Remove(ac.Socket)
-		if err != nil && err != os.ErrNotExist && err != fs.ErrNotExist {
-			log.Printf("Socket %s was not cleaned up: %s.", ac.Socket, err)
+	m := metrics.New()
+	checker := health.NewChecker()
+
+	servers := make([]*clusterServer, 0, len(clusters))
+	for name, ac := range clusters {
+		cs, err := setupCluster(name, ac, m, logger)
+		if err != nil {
+			logger.Error("failed to set up cluster", "cluster", name, "err", err)
+			shutdownServers(servers)
+			cleanUp(clusters, logger)
+			os.Exit(1)
 		}
+		checker.AddReadiness(name, health.Connected(cs.client))
+		m.RegisterAerospike(name, aerospikeStats{cs.client})
+		servers = append(servers, cs)
 	}
+
+	managementSrv := management.New(managementCfg, m.Handler(), checker, logger)
+	if err := managementSrv.Start(); err != nil {
+		logger.Error("failed to start management server", "err", err)
+		shutdownServers(servers)
+		cleanUp(clusters, logger)
+		os.Exit(1)
+	}
+
+	serveErr := make(chan error, len(servers))
+	for _, cs := range servers {
+		cs := cs
+		go func() {
+			logger.Info("serving cluster", "cluster", cs.name, "socket", cs.listener.Addr().String())
+			if err := cs.grpc.Serve(cs.listener); err != nil && !errors.Is(err, grpc.ErrServerStopped) {
+				serveErr <- fmt.Errorf("cluster %q: %w", cs.name, err)
+			}
+		}()
+	}
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	select {
+	case <-ctx.Done():
+		logger.Info("shutdown signal received, draining")
+	case err := <-serveErr:
+		logger.Error("gRPC server failed, shutting down", "err", err)
+	}
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+	if err := managementSrv.Shutdown(shutdownCtx); err != nil {
+		logger.Error("management server shutdown error", "err", err)
+	}
+	shutdownServers(servers)
+	cleanUp(clusters, logger)
+	logger.Info("shutdown complete")
 }
 
-func launchServer(name string, ac *client.AerospikeConfig) {
+// setupCluster builds, but does not start, the gRPC server for a single
+// cluster. The Aerospike client, the unix socket listener and the gRPC server
+// (with metrics and panic-recovery interceptors) are all created here so that
+// any failure is reported to the caller before serving begins.
+func setupCluster(name string, ac *client.AerospikeConfig, m *metrics.Metrics, logger *slog.Logger) (*clusterServer, error) {
 	cp, err := ac.NewClientPolicy()
 	if err != nil {
-		log.Fatalln(err)
+		return nil, fmt.Errorf("client policy: %w", err)
 	}
-
 	if cp.ConnectionQueueSize == 0 {
-		cp.ConnectionQueueSize = 32
+		cp.ConnectionQueueSize = defaultConnectionQueueSize
 	}
 
-	seeds := ac.NewHosts()
-
-	client, err := aero.NewClientWithPolicyAndHost(cp, seeds...)
-	if err != nil {
-		log.Fatalln(err)
+	c, aerr := aero.NewClientWithPolicyAndHost(cp, ac.NewHosts()...)
+	if aerr != nil {
+		return nil, fmt.Errorf("connect: %w", aerr)
 	}
-	client.WarmUp(-1)
+	if _, werr := c.WarmUp(-1); werr != nil {
+		logger.Warn("connection pool warm-up incomplete", "cluster", name, "err", werr)
+	}
 
-	log.Printf("Server is Initializing for cluster `%s`. There will be cake...", name)
 	ln, err := net.Listen("unix", ac.Socket)
 	if err != nil {
-		log.Printf("Server initialization failed: %s", err)
-		log.Fatalln("The cake was a lie!")
+		c.Close()
+		return nil, fmt.Errorf("listen on socket %s: %w", ac.Socket, err)
 	}
 
-	defer os.Remove(ac.Socket)
-
-	// tcpLn, err := net.Listen(PROTOCOL_TCP, ADDR)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	grpcPanicRecoveryHandler := func(p any) (err error) {
-		log.Println("recovered from panic", "panic", p, "stack", string(debug.Stack()))
+	recoveryHandler := func(p any) error {
+		logger.Error("recovered from panic", "cluster", name, "panic", p, "stack", string(debug.Stack()))
 		return status.Errorf(codes.Internal, "%s", p)
 	}
 
 	srv := grpc.NewServer(
-		// set the maximum message size possible for a record: 128MiB for memory namespaces, with overhead
+		// Allow the largest record possible: 128MiB for memory namespaces, with overhead.
 		grpc.MaxRecvMsgSize(130*1024*1024),
 		grpc.MaxSendMsgSize(130*1024*1024),
-		grpc.ChainUnaryInterceptor(recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))),
-		grpc.ChainStreamInterceptor(recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(grpcPanicRecoveryHandler))),
+		grpc.ChainUnaryInterceptor(
+			m.UnaryServerInterceptor(),
+			recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(recoveryHandler)),
+		),
+		grpc.ChainStreamInterceptor(
+			m.StreamServerInterceptor(),
+			recovery.StreamServerInterceptor(recovery.WithRecoveryHandler(recoveryHandler)),
+		),
 	)
 
-	grpc_health_v1.RegisterHealthServer(srv, health.NewServer())
-	pb.RegisterKVSServer(srv, &server{client: client})
+	grpc_health_v1.RegisterHealthServer(srv, grpchealth.NewServer())
+	pb.RegisterKVSServer(srv, &server{client: c})
 	reflection.Register(srv)
+	m.InitializeServer(srv)
 
-	// go func() {
-	// 	log.Printf("grpc ran on tcp protocol %s", ADDR)
-	// 	log.Fatal(srv.Serve(tcpLn))
-	// }()
+	return &clusterServer{name: name, grpc: srv, listener: ln, client: c}, nil
+}
 
-	log.Printf("Cake is ready for unix socket protocol: %s", ac.Socket)
-	log.Println(srv.Serve(ln))
+// shutdownServers gracefully stops the gRPC servers and closes their Aerospike
+// clients, draining in-flight RPCs.
+func shutdownServers(servers []*clusterServer) {
+	for _, cs := range servers {
+		cs.grpc.GracefulStop()
+		cs.client.Close()
+	}
+}
+
+func cleanUp(conf map[string]*client.AerospikeConfig, logger *slog.Logger) {
+	for _, ac := range conf {
+		if err := os.Remove(ac.Socket); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, fs.ErrNotExist) {
+			logger.Warn("socket was not cleaned up", "socket", ac.Socket, "err", err)
+		}
+	}
+}
+
+// aerospikeStats adapts *aero.Client onto metrics.StatsProvider. The Aerospike
+// client returns its own error type, so a thin wrapper is needed to satisfy the
+// standard-error interface used by the metrics package.
+type aerospikeStats struct {
+	c *aero.Client
+}
+
+func (a aerospikeStats) Stats() (map[string]interface{}, error) {
+	return a.c.Stats()
 }
 
 func init() {
 	if info, ok := debug.ReadBuildInfo(); ok {
 		for _, kv := range info.Settings {
-			if kv.Value == "" {
-				continue
-			}
-			switch kv.Key {
-			case "vcs.revision":
+			if kv.Key == "vcs.revision" && kv.Value != "" {
 				revision = kv.Value
-			case "vcs.time":
-				lastCommit, _ = time.Parse(time.RFC3339, kv.Value)
 			}
 		}
 	}
