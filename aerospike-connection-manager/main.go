@@ -54,9 +54,13 @@ func main() {
 
 	log.Printf("Aerospike Local Proxy `%s`.", version)
 
-	conf, err := config.Read(*configFile)
+	conf, legacyClusters, err := config.Read(*configFile)
 	if err != nil {
 		log.Fatalln(err)
+	}
+	if len(legacyClusters) > 0 {
+		log.Printf("WARNING: deprecated cluster configuration: declare clusters under [clusters.<name>]; "+
+			"top-level cluster tables are deprecated and support will be removed in a future release (legacy clusters: %v)", legacyClusters)
 	}
 	defer cleanUp(conf)
 
