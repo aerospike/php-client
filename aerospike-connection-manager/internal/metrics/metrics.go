@@ -9,6 +9,8 @@
 //   - gRPC server metrics (per-method request counts and a latency histogram)
 //     via a server interceptor.
 //
+// Per-cluster Aerospike connection-pool metrics are added by RegisterAerospike.
+//
 // The instrumentation is always collected; whether it is exposed is decided by
 // the management server, which only mounts Handler when the metrics endpoint is
 // enabled.
@@ -40,6 +42,7 @@ var grpcLatencyBuckets = []float64{
 type Metrics struct {
 	registry    *prometheus.Registry
 	grpcMetrics *grpcprom.ServerMetrics
+	aerospike   *aerospikeCollector
 }
 
 // New constructs a Metrics instance with the Go runtime, process and gRPC
@@ -58,9 +61,13 @@ func New() *Metrics {
 	)
 	registry.MustRegister(grpcMetrics)
 
+	aerospike := newAerospikeCollector()
+	registry.MustRegister(aerospike)
+
 	return &Metrics{
 		registry:    registry,
 		grpcMetrics: grpcMetrics,
+		aerospike:   aerospike,
 	}
 }
 
@@ -85,6 +92,13 @@ func (m *Metrics) StreamServerInterceptor() grpc.StreamServerInterceptor {
 // method has been exercised for the first time.
 func (m *Metrics) InitializeServer(srv *grpc.Server) {
 	m.grpcMetrics.InitializeMetrics(srv)
+}
+
+// RegisterAerospike adds a cluster's client to the connection-pool collector.
+// Stats are read lazily on each scrape, so this only needs to be called once
+// per cluster before the metrics endpoint starts serving.
+func (m *Metrics) RegisterAerospike(cluster string, provider StatsProvider) {
+	m.aerospike.register(cluster, provider)
 }
 
 // Handler returns the HTTP handler that serves the registry in the Prometheus
