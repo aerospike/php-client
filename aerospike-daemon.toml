@@ -1,0 +1,370 @@
+# Aerospike PHP daemon — example configuration.
+#
+# Copy to `aerospike-daemon.toml` (or pass `--config <path>`) and edit. Check a
+# file without starting anything:
+#
+#     aerospike-php-daemon --config aerospike-daemon.toml --check
+#
+# Unknown keys are a startup error, not a warning: a typo that silently did
+# nothing would be worse than a daemon that refuses to start.
+#
+# The PHP extension must be **exactly the same version** as this daemon: the
+# shared-memory service name has the version in it, so a mismatched extension
+# cannot attach at all. The version is logged when the daemon starts serving,
+# and PHP can read it with `Aerospike\Client::ping()->version()`.
+
+# ===========================================================================
+# [daemon] — how this process runs. Nothing here is cluster-specific.
+# ===========================================================================
+[daemon]
+
+# IPC service instance name. It is part of the shared-memory service name, so
+# it is what pairs this daemon with the workers meant to talk to it, and two
+# daemons on one host must not share it. PHP's `instance` setting must match.
+instance = "default"
+
+# Tokio worker threads. Commented out means one per core, which is right unless
+# the daemon shares a host with something that needs the cores more.
+# worker_threads = 4
+
+# Applied to a request that declares no timeout of its own. Durations accept
+# "30s", "1s500ms", "250ms" or a bare number of milliseconds.
+default_timeout = "1s"
+
+# error | warn | info | debug | trace. RUST_LOG, if set, wins — so a running
+# daemon can be turned up without editing this file.
+log_level = "info"
+
+# --- Scan and query paging --------------------------------------------------
+#
+# A scan or query returns one page per round trip, and a page is held in this
+# process before it is sent — so these bound memory, not preference.
+
+# Records per page when the caller asks for no particular size. PHP overrides it
+# per query with `new QueryPolicy(pageSize: …)`. Capped at 100000.
+# page_size = 1000
+
+# How long a scan cursor may sit unused before it is reclaimed. This is what
+# bounds the cost of a PHP worker killed mid-scan: its cursor is never closed,
+# so it has to expire. A cursor holds no connection or server-side resource
+# between pages — only the record of where the traversal had got to.
+# cursor_idle_timeout = "60s"
+
+# How many scan cursors may be open at once, across every worker. A backstop
+# rather than a tuning knob: reaching it means workers are abandoning
+# traversals faster than they expire, and the next query is refused instead of
+# the daemon growing without bound.
+# max_cursors = 1024
+
+# --- Multi-record transactions ----------------------------------------------
+
+# How long a transaction may sit unused before the daemon **aborts** it — not
+# merely forgets it. An open transaction holds record locks on the server, so
+# every other writer of those records waits behind an abandoned one. Shorter than
+# `cursor_idle_timeout` for exactly that reason: an idle cursor costs memory, an
+# idle transaction costs other writers.
+#
+# The server's own transaction timeout is the backstop if this daemon dies too.
+# txn_idle_timeout = "30s"
+
+# How many transactions may be open at once, across every worker. As with
+# cursors this is a backstop, and reaching it means workers are abandoning
+# transactions — but here each one is holding locks, so refusing the next is the
+# kinder failure.
+# max_transactions = 1024
+
+# --- The IPC serving loop ---------------------------------------------------
+
+# How many PHP workers may be attached at once. THE ONE TO RAISE ON A BUSY HOST.
+#
+# It is the iceoryx2 service's client limit, fixed when the service is created,
+# so a pool larger than this leaves the extra workers unable to attach at all —
+# and raising it means restarting the daemon with no worker attached. A PHP-FPM
+# pool of 200 needs at least 200 here; the default suits development.
+#
+# It needs no headroom for workers that die: a process killed outright runs no
+# destructors, but its slot is reclaimed when the next worker starts, so set this
+# to the pool size rather than padding it. Verified in ext/tests/concurrency.php.
+# max_workers = 64
+
+# How many requests one turn of the serving loop accepts before it goes back to
+# writing replies. Bounds how long a burst of arrivals can starve the replies
+# for work already finished: larger favours throughput, smaller favours latency
+# fairness.
+# accept_batch = 64
+
+# How long a shutdown waits for work already in flight before abandoning it. A
+# request nobody answers leaves its worker to time out, which is worse than a
+# bounded wait and better than never exiting.
+# drain_timeout = "10s"
+
+# How many per-worker event notifiers to keep open. Only the default (event)
+# build uses them — opening one costs a syscall, so they are cached and the
+# oldest is evicted past this size. No effect under `shm-poll`, where nothing is
+# notified.
+# notifier_cache = 256
+
+# ===========================================================================
+# [daemon.receive-backoff] — how the serving loop waits when idle.
+#
+# The daemon's wait is NOT the worker's. A worker waits for one reply and can
+# block on an event; iceoryx2 request/response ports cannot be attached to a
+# WaitSet, so this loop has no choice but to poll. Measured, that costs ~255us
+# of CPU per operation whichever wakeup mode the workers use — which is exactly
+# why it is tunable separately from PHP's own `aerospike.*` ini settings.
+#
+# The ladder: spin `spin_iters` times, then yield `yield_iters` times, then
+# sleep starting at `initial_sleep_us` and doubling up to `max_sleep_us`. The
+# defaults were tuned against a ~180us local round trip — spin long enough to
+# cover one, and treat sleeping as a last resort.
+#
+# Raise the sleep tiers for a REMOTE cluster, where a round trip is milliseconds
+# and spinning through it wastes a core. Lower `max_sleep_us` to shorten how
+# long an idle daemon can take to notice a request.
+#
+# Microseconds, not milliseconds: the tiers are tens of microseconds, so a value
+# that could only say "1ms" could not express the default.
+# ===========================================================================
+# [daemon.receive-backoff]
+# spin_iters = 50000
+# yield_iters = 100
+# initial_sleep_us = 10
+# max_sleep_us = 50
+
+# ===========================================================================
+# [defaults] — any cluster key, inherited by every [cluster.*] below unless
+# that cluster sets it itself. Handy when several clusters share credentials
+# or timeouts.
+# ===========================================================================
+# [defaults]
+# timeout = "30s"
+# connection-queue-size = 300
+
+# ===========================================================================
+# [cluster.<name>] — one section per cluster. <name> is what PHP asks for;
+# `default` is used when PHP names none.
+#
+# A bare `[cluster]` section holding these keys directly is also accepted and
+# means `[cluster.default]`.
+# ===========================================================================
+[cluster.default]
+
+# --- Seeds ------------------------------------------------------------------
+
+# Seed host(s). "host", "host:port" and "host:tls-name:port" are all accepted;
+# the default port is 3000. Several seeds may be comma-separated. Seeds are
+# only a way in: the client discovers the rest of the cluster by itself, so
+# listing two or three is enough for the daemon to start when one is down.
+host = "127.0.0.1:3100"
+
+# The same thing as an array, appended after `host`. Use whichever reads
+# better; duplicates are dropped.
+# hosts = ["127.0.0.1:3000", "127.0.0.1:3010"]
+
+# --- Authentication ---------------------------------------------------------
+
+# Credentials for a security-enabled cluster. Leave unset for a cluster
+# without security.
+user = "admin"
+password = "admin"
+
+# INTERNAL           — password hashed on the server. The default when a user
+#                      is set, and the right answer unless LDAP is in play.
+# EXTERNAL           — LDAP and friends. Sends the password to the server, so it
+#                      requires a [cluster.<name>.tls] section below.
+# EXTERNAL_INSECURE  — external auth without TLS. Sends the password in the
+#                      clear: testing only.
+# PKI                — the client certificate identifies the user. Requires a
+#                      tls section with `cert-file` AND `key-file`; there is no
+#                      user name, because the certificate is the identity.
+# auth = "INTERNAL"
+
+# Expected cluster name. A node that reports a different one is not joined,
+# which is a cheap guard against pointing at the wrong environment. Empty
+# means "do not check".
+# cluster-name = ""
+
+# --- TLS --------------------------------------------------------------------
+#
+# The section's PRESENCE enables TLS. There is no `enabled` flag: an empty
+# section would then be ambiguous, and the CA is not optional in any deployment
+# worth calling configured.
+#
+# The TLS *name* a certificate is verified against belongs to the seed, not
+# here, because different nodes can legitimately have different ones:
+#
+#     host = "node1:node1.cluster.example:4333"
+#
+# Not offered, deliberately: cipher-suite and protocol selection (rustls picks
+# safe defaults and refuses unsafe ones, so there is nothing useful to choose),
+# and any "skip verification" switch — a daemon that can be configured not to
+# check certificates is one whose TLS means nothing.
+#
+# [cluster.default.tls]
+#
+# The certificate authority — or chain — that signed the cluster's certificates.
+# Required unless `use-platform-roots` is set: an empty trust store would reject
+# every node. Read when the configuration is validated, so `--check` catches a
+# path that is wrong.
+# ca-file = "/etc/aerospike/certs/ca.pem"
+#
+# Also trust the platform's bundled roots, for a cluster whose certificate came
+# from a public CA. An Aerospike cluster normally uses a private one, which needs
+# only `ca-file` — so this is off by default, and turning it on widens what the
+# daemon will trust.
+# use-platform-roots = false
+#
+# The certificate this daemon presents. Needed for mutual TLS, and REQUIRED for
+# `auth = "PKI"`, where the server reads the user's identity from it. Both keys
+# go together: half an identity is refused rather than treated as none.
+# cert-file = "/etc/aerospike/certs/client.pem"
+# key-file  = "/etc/aerospike/certs/client.key"
+
+# --- Timeouts ---------------------------------------------------------------
+
+# Socket timeout for one info/admin command: the requests the tend loop issues
+# every cycle, and the client's own info calls.
+# timeout = "30s"
+
+# Timeout for OPENING a connection, as distinct from using one. 0 means "use
+# `timeout`". Worth setting separately on a link where the TCP handshake — and
+# the TLS one — is slow but established connections are not.
+# connect-timeout = "0"
+
+# How long an idle connection may sit in the pool before it is closed. Must
+# stay below the server's `proto-fd-idle-ms`, or the server will close
+# connections the client still believes in. 0 disables client-side reaping.
+# idle-timeout = "0"
+
+# Timeout for the login/authentication exchange. Only relevant with security
+# enabled; it is separate from `timeout` because authentication can be much
+# slower than an info command when LDAP is involved.
+# login-timeout = "5s"
+
+# Interval between cluster tends. Minimum 250ms. Shorter means faster reaction
+# to a node coming or going, at the cost of more info traffic.
+# tend-interval = "1s"
+
+# How often the client re-reads dynamic server configuration. 0 disables it.
+# config-interval = "0"
+
+# --- Connection pooling -----------------------------------------------------
+
+# Maximum connections per node (the client's `max_conns_per_node`). This is a
+# per-node ceiling, so the real budget is this times the number of nodes; it
+# must stay within the server's `proto-fd-max`.
+# connection-queue-size = 100
+
+# Connections kept open per node even while idle, so a burst does not have to
+# pay for a handshake. 0 means connections are opened on demand.
+# min-connections-per-node = 0
+
+# Independent connection pools per node. More pools means less contention
+# between threads competing for a connection, at the cost of more idle sockets:
+# the per-node ceiling above is divided between them. 1 is right unless a
+# profile shows pool contention.
+# conn-pools-per-node = 1
+
+# How many connection opens may be in flight to one node before further
+# callers wait for one of them instead of starting another. Keeps a cold pool
+# from answering a burst with a connection storm. 0 means no limit.
+# opening-connection-threshold = 0
+
+# Whether the client refuses to start when it cannot reach any seed. `false`
+# lets the daemon come up before the cluster does, and requests fail until
+# tending finds a node.
+# fail-if-not-connected = true
+
+# --- Health and topology ----------------------------------------------------
+
+# Errors tolerated against one node inside one `error-rate-window` before the
+# client trips that node's circuit breaker and fails fast instead of queueing
+# behind a sick node. 0 disables the breaker.
+# max-error-rate = 100
+
+# Tend iterations after which a node's error counter resets. Smaller is
+# stricter; larger is more forgiving of a brief spike.
+# error-rate-window = 1
+
+# Use the `services-alternate` node list while tending, i.e. the addresses the
+# server was configured to advertise externally. Needed when the daemon
+# reaches the cluster through a different address than the nodes use among
+# themselves (containers, NAT).
+use-services-alternate = true
+
+# Restrict the cluster view to the seeds and disable peer discovery. Only for
+# deployments where the client must not be told about other nodes.
+# seed-only-cluster = false
+
+# --- Rack awareness ---------------------------------------------------------
+
+# Preferred racks, in preference order: reads try a replica in the first rack
+# listed, then the second, before falling back to any node. Lowers cross-zone
+# traffic and its cloud bill. Requires the server to be rack-configured and a
+# rack-preferring read policy.
+# rack-ids = [1]
+
+# The client has no separate rack-awareness switch — it infers it from
+# `rack-ids` — so this key exists only to fold into that: `false` clears
+# `rack-ids`, and `true` without a non-empty `rack-ids` is a configuration
+# error rather than a setting that quietly does nothing.
+# rack-aware = false
+
+# --- Buffers ----------------------------------------------------------------
+#
+# Command buffers are the client's largest per-connection allocation. Leave all
+# of this alone unless a profile points at it.
+
+# Whether commands take their buffers from the shared tiered pool rather than
+# allocating per command.
+# use-buffer-pool = true
+
+# Size above which a command's read buffer is released instead of kept for
+# reuse, in bytes. Bounds the memory one unusually large record can pin per
+# connection.
+# buffer-reclaim-threshold = 65536
+
+# The pool's size bounds, in bytes. BOTH MUST BE POWERS OF TWO — the pool
+# indexes its tiers by bit width, and anything else is a startup error naming
+# the key.
+# buffer-pool-min-size = 8192
+# buffer-pool-max-size = 1048576
+
+# Total bytes the pool may hold per size tier.
+# buffer-pool-tier-bytes = 4194304
+
+# --- Addressing and identity ------------------------------------------------
+
+# Rewrite discovered node addresses. For a cluster reached through different
+# addresses than the nodes advertise to each other, where
+# `use-services-alternate` is not enough — a NAT with per-node mappings.
+# [cluster.default.ip-map]
+# "10.0.0.1" = "127.0.0.1"
+
+# What this client calls itself in the server's connection statistics. Purely
+# descriptive: it changes nothing about behaviour, and it is what makes this
+# daemon identifiable in a server-side connection list.
+# application-id = "php-daemon"
+# custom-client-id = "web-1"
+
+# --- Accepted but not implemented -------------------------------------------
+#
+# These two are parsed so that a configuration carrying them still validates,
+# and the daemon logs one line at startup naming each one it saw. They have no
+# effect:
+#
+#   limit-connections-to-queue-size — the client always treats
+#       `connection-queue-size` as a hard per-node ceiling.
+#   ignore-other-subnet-aliases     — the client does not filter discovered
+#       node addresses by subnet.
+#
+# limit-connections-to-queue-size = true
+# ignore-other-subnet-aliases = false
+
+# ===========================================================================
+# A second cluster, reached by name from PHP. Inherits [defaults].
+# ===========================================================================
+# [cluster.analytics]
+# host = "analytics-1:3000,analytics-2:3000"
+# timeout = "10s"
+# rack-ids = [2]

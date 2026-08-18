@@ -1,0 +1,57 @@
+[package]
+name = "aerospike-php-daemon"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Local daemon that owns the Aerospike client and serves PHP workers over shared memory."
+homepage.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+# The daemon is both a binary and a library: the library half is what the
+# integration tests drive, so the iceoryx2 server loop can be exercised
+# in-process against a real client over real shared memory, with no PHP
+# involved.
+[lib]
+name = "aerospike_php_daemon"
+path = "src/lib.rs"
+
+[[bin]]
+name = "aerospike-php-daemon"
+path = "src/main.rs"
+
+[dependencies]
+# Declared in the workspace root, which is where the path-versus-git choice lives —
+# there is exactly one line to change when this directory moves out on its own. The
+# `tls` feature it carries is what makes `EXTERNAL` and `PKI` authentication possible:
+# both send or prove credentials over the wire, and the client refuses either without a
+# TLS configuration. See `config::TlsConfig`.
+#aerospike-core = { workspace = true }
+aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust", branch = "v3", features = ["rt-tokio", "tls"] }
+aerospike-php-ipc = { path = "../ipc" }
+# The daemon builds the `rustls::ClientConfig` the client policy carries, from the
+# PEM files named in its own configuration file.
+rustls = "0.23.42"
+# The platform's trusted roots, for a cluster whose certificate came from a public
+# CA. A private CA — which is the usual Aerospike deployment — needs only
+# `tls_ca_file`, so this is opt-in through `tls_use_platform_roots`.
+webpki-roots = "1.0"
+iceoryx2 = { workspace = true }
+# A recordset is a `futures::Stream`, which is how a scan's page is drained.
+futures = "0.3"
+tokio = { version = "1.53.0", features = ["rt-multi-thread", "macros", "signal", "time"] }
+toml = "0.9"
+serde = { workspace = true }
+clap = { version = "4", features = ["derive"] }
+log = "0.4.33"
+env_logger = "0.11.11"
+
+[features]
+default = []
+# Leave a waiting worker polling shared memory instead of waking it through an
+# iceoryx2 event port. Forwards to the contract crate: both ends must be built
+# the same way, since this is what decides whether the daemon has anything to
+# notify. See `aerospike_php_ipc::wakeup`.
+shm-poll = ["aerospike-php-ipc/shm-poll"]

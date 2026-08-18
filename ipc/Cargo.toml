@@ -1,0 +1,30 @@
+[package]
+name = "aerospike-php-ipc"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Shared-memory IPC contract between the Aerospike PHP extension and its local daemon."
+homepage.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+# Depends on neither the Aerospike client nor PHP: this crate is the wire
+# contract, so both sides can be exercised without either. iceoryx2 is here
+# only for the ZeroCopySend derive on the typed user headers.
+[dependencies]
+iceoryx2 = { workspace = true }
+postcard = { version = "1", features = ["alloc"] }
+serde = { workspace = true }
+
+[features]
+# By default a waiting worker blocks on an iceoryx2 event port: near-zero CPU
+# while waiting, one syscall per wakeup. Payloads always travel through shared
+# memory; only this wakeup path uses a unix datagram socket.
+default = []
+# Wait by polling shared memory instead, so that nothing but shared memory is
+# involved. Measured at ~10us less latency for ~17x the CPU in the waiting
+# process (bench/README.md), so it is opt-in: right for low worker concurrency
+# or a hard shared-memory-only requirement, wrong for a busy FPM pool.
+shm-poll = []

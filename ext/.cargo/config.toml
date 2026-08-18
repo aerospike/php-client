@@ -1,0 +1,14 @@
+# A PHP extension is a shared object that PHP dlopen's, so every Zend symbol
+# it references (`zend_throw_exception`, `_zval_ptr_dtor`, ...) is resolved
+# from the already-loaded PHP binary at load time, not at link time.
+#
+# ELF linkers allow that by default. Apple's linker does not: it insists on
+# resolving every symbol when the dylib is built, and without the flags below
+# the build fails with a long list of "Undefined symbols ... _zend_*". This
+# is the standard ext-php-rs macOS setup, not a workaround for anything in
+# this crate.
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]
+
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-undefined", "-C", "link-arg=dynamic_lookup"]

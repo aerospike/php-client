@@ -1,0 +1,13 @@
+{
+    "name": "aerospike/php-compat",
+    "description": "Compatibility layer for code written against the 1.x Aerospike PHP client",
+    "type": "library",
+    "license": "Apache-2.0",
+    "require": {
+        "php": ">=8.1",
+        "ext-aerospike-php": "*"
+    },
+    "autoload": {
+        "files": ["src/bootstrap.php"]
+    }
+}

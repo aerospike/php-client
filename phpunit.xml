@@ -1,9 +1,0 @@
-<testsuites>
-    <testsuite name="security_tests">
-        <file>tests/SecurityTest.php</file>
-    </testsuite>
-    <testsuite name="non_security_tests">
-        <directory>tests/*</directory>
-        <exclude>tests/SecurityTest.php</exclude>
-    </testsuite>
-</testsuites>

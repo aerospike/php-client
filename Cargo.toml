@@ -1,38 +1,76 @@
-[package]
-name = "aerospike_php"
-version = "1.4.0"
+# Aerospike for PHP — the workspace root.
+#
+# This directory is a **self-contained cargo workspace**, so it can be lifted out of
+# the Rust client's repository and become its own without editing anything but the
+# `aerospike-core` dependency below. Everything inside it builds from here:
+#
+#     cargo build --release -p aerospike-php-daemon     # the daemon
+#     cd ext && cargo build --release                   # the extension
+#
+# or `make build`, which does both.
+#
+# # Why `ext` is excluded rather than a member
+#
+# The extension is a `cdylib` that links the Zend API, so building it needs PHP 8.1+
+# headers and `php-config` on `PATH`. Keeping it out of the workspace means a plain
+# `cargo build` here never requires a PHP toolchain — the wire contract and the daemon
+# can be built and tested on a machine with no PHP at all, which is the whole point of
+# the contract crate depending on neither PHP nor the database client.
+#
+# The cost is that an excluded package cannot inherit `[workspace.package]` fields:
+# `ext/Cargo.toml` spells its version out. That duplication is deliberate and it is
+# guarded — both halves assert at compile time that their version equals the contract's
+# (`ipc::VERSION`), so a bump that touches only one of them fails to build rather than
+# producing two libraries that cannot talk to each other.
+[workspace]
+resolver = "2"
+members = ["ipc", "daemon"]
+exclude = ["ext"]
+
+[workspace.package]
+# One version for the whole client. There is no negotiation between the daemon and the
+# extension and no compatibility window — the shared-memory service name embeds this
+# string, so a mismatched pair cannot meet at all. Bump it here **and** in
+# `ext/Cargo.toml`; the compile-time assertion in both halves catches it if you don't.
+version = "2.0.0-alpha.1"
 edition = "2021"
-authors = ["Khosrow Afroozeh <khosrow@aerospike.com>", "Sachin Venkatesha Murthy <smurthy@aerospike.com>"]
+rust-version = "1.87"
+authors = ["Khosrow Afroozeh <khosrow@aerospike.com>"]
+license = "Apache-2.0"
+homepage = "https://www.aerospike.com/"
+repository = "https://github.com/aerospike/client-php/"
 
-[lib]
-crate-type = ["cdylib"]
+# Dependencies shared by more than one crate here, so their versions cannot drift.
+#
+# `iceoryx2` is the one that matters most: its `ZeroCopySend` user-header types cross
+# the boundary between the contract crate, the daemon and the extension, so all three
+# must build against the **same** version. `ext` is excluded from this workspace and
+# therefore names its own — see the note there.
+[workspace.dependencies]
+iceoryx2 = "0.9.3"
+serde = { version = "1", features = ["derive"] }
 
-[dependencies]
-version-compare = "0.2.0"
-ordered-float = { version = "3", default-features = false }
-ext-php-rs = "0.13.1"
-colored = "2.0.0"
-hex = "0.4"
-log = "0.4"
-env_logger = "0.9.3"
-chrono = "0.4"
-lazy_static = "1.1.1"
-tokio = { version = "1.0", features = ["rt-multi-thread", "macros"] }
-tokio-stream = { version = "0.1" }
-prost = "0.12"
-tonic = "0.10"
-tower = { version = "0.4.13", features = ["util"] }
-byteorder = "1.3"
-rand="0.8.5"
-ripemd160 = "0.8"
-
-[build-dependencies]
-tonic-build = { version = "0.10", features = ["prost"] }
-
-[dev-dependencies]
-uuid = { version = "1.2.2", features = ["v4", "fast-rng"] }
-futures-util = "0.3.25"
-anyhow = "1"
+# ---------------------------------------------------------------------------
+# The Aerospike Rust client
+# ---------------------------------------------------------------------------
+#
+# This is the one line to change when this directory moves out on its own. It is a
+# path dependency while the two live in the same repository; once they are separate,
+# point it at the published crate or at the branch this client tracks:
+#
+#     aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust", branch = "v3", features = ["rt-tokio", "tls"] }
+#
+# The `tls` feature is not optional in practice: `EXTERNAL` and `PKI` authentication
+# both send or prove credentials over the wire, and the client refuses either without a
+# TLS configuration. See `daemon/src/config.rs`.
+#
+# To work against a local checkout of the client while depending on git, uncomment the
+# patch below rather than editing the dependency — that way the manifest keeps saying
+# what the release builds against.
+aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust", branch = "v3", features = ["rt-tokio", "tls"] }
 
 [profile.release]
-strip = "debuginfo"
+# The daemon is long-lived and the extension is `dlopen`ed into every PHP worker, so
+# link-time optimisation is paid once at build time and repaid on every request.
+lto = true
+codegen-units = 1

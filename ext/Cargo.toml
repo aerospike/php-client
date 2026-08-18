@@ -1,0 +1,54 @@
+[package]
+name = "aerospike-php"
+version = "2.0.0-alpha.1"
+edition = "2021"
+rust-version = "1.87"
+authors = ["Khosrow Afroozeh <khosrow@aerospike.com>"]
+license = "Apache-2.0"
+description = "PHP extension exposing Aerospike through a local shared-memory daemon."
+homepage = "https://www.aerospike.com/"
+repository = "https://github.com/aerospike/aerospike-client-rust/"
+publish = false
+
+# Deliberately NOT a member of the repository's workspace: this crate links
+# the Zend API, so building it needs PHP headers and `php-config` on PATH.
+# The root `Cargo.toml` lists it under `exclude` so that a plain
+# `cargo build` at the repository root never requires a PHP toolchain, which
+# is why this directory carries its own `Cargo.toml` and `Cargo.lock`.
+# Build it from here: `cd aerospike-php/ext && cargo build --release`.
+
+[lib]
+name = "aerospike_php"
+crate-type = ["cdylib"]
+
+[dependencies]
+# The frozen wire contract. Shared with the daemon, which is what makes the
+# compiler — rather than an IDL — responsible for keeping the two in step.
+aerospike-php-ipc = { path = "../ipc" }
+ext-php-rs = "0.15.15"
+# Must be the same major/minor as the version `aerospike-php-ipc` builds
+# against, since the typed user headers cross the crate boundary.
+iceoryx2 = "0.9.3"
+
+[features]
+# By default a waiting worker blocks on an iceoryx2 event port, so an idle
+# worker costs essentially no CPU.
+default = []
+# Wait by polling shared memory instead, so nothing but shared memory is
+# involved. Purely a forward to the contract crate: both ends must agree, so
+# the daemon has to be built with the matching feature.
+shm-poll = ["aerospike-php-ipc/shm-poll"]
+# Define the PHP globals the Zend shim refers to, so the built `cdylib` can be
+# `dlopen`ed by something that is not PHP. Needed by `cargo php stubs`, which loads
+# the library to enumerate its classes — see `php_globals_for_tests` in `src/lib.rs`.
+#
+# **Never enable this for a library PHP will load.** The slabs would shadow PHP's
+# own globals, and the extension would read zeroes where the engine's state should
+# be. `make stubs` builds it into a throwaway target directory for that reason.
+stub-gen = []
+
+[profile.release]
+# A PHP extension is dlopen'd into a long-running worker; the extra link-time
+# optimisation is paid once at build time.
+lto = true
+codegen-units = 1
