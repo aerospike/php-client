@@ -22,6 +22,8 @@ This is the documentation for the Aerospike `PHP-Client`. The `PHP-Client` compr
 * Protobuf Compiler [protoc-gen-go command - google.golang.org/protobuf/cmd/protoc-gen-go - Go Packages](https://pkg.go.dev/google.golang.org/protobuf/cmd/protoc-gen-go)
 * ext-php-rs (PHP extension) v0.13.1 [github repository link](https://github.com/davidcole1340/ext-php-rs/tree/master)
 
+***NOTE:*** Only run the `PHP-Client` on a PHP release that includes the fixes for CVE-2026-109618 and CVE-2026-109619: PHP 8.2.35, 8.3.36, 8.4.27 or later, or a PHP 8.1 release with the backported fixes. The installation scripts do not upgrade an existing PHP installation, so check your installed version with `php -v` and upgrade it if needed. Linux distributions often backport security fixes without changing the PHP version number, so if you use your distribution's PHP packages, check its security advisories instead. Upgrading to a newer patch release of the same PHP minor version (e.g. 8.3.x to 8.3.36) does not require rebuilding or reinstalling the `PHP-Client`.
+
 ## Build & Installation
 There are 2 ways to build and install the `PHP-Client`:
 1. direct script download and execution (also clones the repo for you)
