@@ -13,14 +13,14 @@
 //!
 //! | form | built by | needs |
 //! | --- | --- | --- |
-//! | [`WireExpression::Ael`](crate::op::WireExpression::Ael) | the **server**, from text | server 8.1.3+ |
+//! | [`WireExpression::Ael`](crate::op::WireExpression::Ael) | the **server**, from text | server 8.2.0+ |
 //! | [`WireExpression::Base64`](crate::op::WireExpression::Base64) | another client, already packed | nothing |
 //! | [`WireExpression::Tree`](crate::op::WireExpression::Tree) | the **daemon**, from this module | nothing |
 //!
 //! # Why a tree and not more text
 //!
 //! The text form is smaller and the server does the parsing, so it was the only
-//! form this contract had at first. But it is only available from server 8.1.3,
+//! form this contract had at first. But it is only available from server 8.2.0,
 //! and expressions are the one part of the API where that matters most: a filter
 //! is how a caller avoids reading records they do not want, and needing a very
 //! recent server to express one at all is a hard limit rather than a missing
@@ -361,7 +361,7 @@ pub enum WireExp {
     /// An operation on a HyperLogLog sketch.
     Hll(Box<WireExpHll>),
 
-    /// An operation on a string. Needs server 8.1.3+, which the daemon checks.
+    /// An operation on a string. Needs server 8.2.0+, which the daemon checks.
     Str(Box<WireExpStr>),
 
     /// An operation over *every* node a path selects. Needs server 8.1.1+.
@@ -2309,7 +2309,7 @@ pub enum WireStringNumericType {
 
 /// A string expression: an operation on a string, evaluated by the server.
 ///
-/// Needs **server 8.1.3 or later**, which is the same requirement the string
+/// Needs **server 8.2.0 or later**, which is the same requirement the string
 /// *operations* carry — the server opcodes are the same ones. The daemon checks
 /// and refuses rather than letting an older server reject the operation obscurely.
 ///

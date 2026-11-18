@@ -32,6 +32,7 @@ use aerospike_core::expressions::{
     self as exps, bitwise as exp_bits, hll as exp_hll, lists as exp_lists, maps as exp_maps,
     string as exp_strings, ExpType, Expression,
 };
+use aerospike_core::RegexFlags;
 use aerospike_core::expressions::LoopVarPart;
 use aerospike_core::operations::path::{ModifyFlag, SelectFlag};
 use aerospike_core::operations::string::{
@@ -81,17 +82,20 @@ fn build(exp: &WireExp, caps: &Capabilities) -> Result<Expression, OpError> {
         WireExp::Key(exp_type) => exps::key(exp_type_of(*exp_type)),
         WireExp::DigestModulo(modulo) => exps::digest_modulo(*modulo),
 
-        // `device_size` and `memory_size` are deprecated in the client in favour
-        // of `record_size`, but they are still distinct server opcodes and a
-        // caller on an older server needs them — so the contract carries all
-        // three and this reaches them.
-        #[allow(deprecated)]
+        // `device_size` and `memory_size` were removed from aerospike-core 3.0.
+        // The contract still names them so an older caller gets a clear refusal
+        // rather than a record_size opcode it did not ask for.
         WireExp::Meta(meta) => match meta {
             WireExpMeta::KeyExists => exps::key_exists(),
             WireExpMeta::SetName => exps::set_name(),
             WireExpMeta::RecordSize => exps::record_size(),
-            WireExpMeta::DeviceSize => exps::device_size(),
-            WireExpMeta::MemorySize => exps::memory_size(),
+            WireExpMeta::DeviceSize | WireExpMeta::MemorySize => {
+                return Err(OpError::Unsupported(
+                    "device_size and memory_size were removed from aerospike-core 3.0; use \
+                     record_size, which the server has supported since 7.0"
+                        .to_string(),
+                ));
+            }
             WireExpMeta::LastUpdate => exps::last_update(),
             WireExpMeta::SinceUpdate => exps::since_update(),
             WireExpMeta::VoidTime => exps::void_time(),
@@ -160,7 +164,7 @@ fn build(exp: &WireExp, caps: &Capabilities) -> Result<Expression, OpError> {
         }
 
         WireExp::Regex { regex, flags, bin } => {
-            exps::regex_compare(regex.clone(), *flags, build(bin, caps)?)
+            exps::regex_compare(regex.clone(), RegexFlags::from_bits(*flags), build(bin, caps)?)
         }
 
         WireExp::Def { name, value } => exps::def(name.clone(), build(value, caps)?),
@@ -688,7 +692,7 @@ fn build_hll(node: &WireExpHll, caps: &Capabilities) -> Result<Expression, OpErr
 /// Build a string expression.
 ///
 /// The only family with a version requirement: these are the string operations,
-/// which need server 8.1.3 or later. Gated here rather than at each of the
+/// which need server 8.2.0 or later. Gated here rather than at each of the
 /// forty-two constructors — the refusal is the same for all of them, and an older
 /// server's own answer says nothing about why.
 fn build_str(node: &WireExpStr, caps: &Capabilities) -> Result<Expression, OpError> {
@@ -703,37 +707,37 @@ fn build_str(node: &WireExpStr, caps: &Capabilities) -> Result<Expression, OpErr
             }
             WireExpStrOp::CharAt { index } => {
                 let index = build(index, caps)?;
-                exp_strings::char_at(index, src)
+                exp_strings::char_at(src, index)
             }
             WireExpStrOp::Substr { start } => {
                 let start = build(start, caps)?;
-                exp_strings::substr(start, src)
+                exp_strings::substr(src, start)
             }
             WireExpStrOp::SubstrRange { start, end } => {
                 let start = build(start, caps)?;
                 let end = build(end, caps)?;
-                exp_strings::substr_range(start, end, src)
+                exp_strings::substr_range(src, start, end)
             }
             WireExpStrOp::Find { needle } => {
                 let needle = build(needle, caps)?;
-                exp_strings::find(needle, src)
+                exp_strings::find(src, needle)
             }
             WireExpStrOp::FindNth { needle, occurrence } => {
                 let needle = build(needle, caps)?;
                 let occurrence = build(occurrence, caps)?;
-                exp_strings::find_nth(needle, occurrence, src)
+                exp_strings::find_nth(src, needle, occurrence)
             }
             WireExpStrOp::Contains { needle } => {
                 let needle = build(needle, caps)?;
-                exp_strings::contains(needle, src)
+                exp_strings::contains(src, needle)
             }
             WireExpStrOp::StartsWith { prefix } => {
                 let prefix = build(prefix, caps)?;
-                exp_strings::starts_with(prefix, src)
+                exp_strings::starts_with(src, prefix)
             }
             WireExpStrOp::EndsWith { suffix } => {
                 let suffix = build(suffix, caps)?;
-                exp_strings::ends_with(suffix, src)
+                exp_strings::ends_with(src, suffix)
             }
             WireExpStrOp::IsUpper => {
                 exp_strings::is_upper(src)
@@ -745,7 +749,7 @@ fn build_str(node: &WireExpStr, caps: &Capabilities) -> Result<Expression, OpErr
                 exp_strings::is_numeric(src)
             }
             WireExpStrOp::IsNumericTyped { numeric_type } => {
-                exp_strings::is_numeric_typed(numeric_type_of(*numeric_type), src)
+                exp_strings::is_numeric_typed(src, numeric_type_of(*numeric_type))
             }
             WireExpStrOp::ToInteger => {
                 exp_strings::to_integer(src)
@@ -767,52 +771,56 @@ fn build_str(node: &WireExpStr, caps: &Capabilities) -> Result<Expression, OpErr
             }
             WireExpStrOp::SplitBySeparator { separator } => {
                 let separator = build(separator, caps)?;
-                exp_strings::split_by_separator(separator, src)
+                exp_strings::split_by_separator(src, separator)
             }
             WireExpStrOp::RegexCompare { pattern } => {
                 let pattern = build(pattern, caps)?;
-                exp_strings::regex_compare(pattern, src)
+                exp_strings::regex_compare(src, pattern)
             }
             WireExpStrOp::RegexCompareWithFlags { pattern, regex_flags } => {
                 let pattern = build(pattern, caps)?;
-                exp_strings::regex_compare_with_flags(pattern, StringRegexFlags(*regex_flags), src)
+                exp_strings::regex_compare_with_flags(
+                    src,
+                    pattern,
+                    StringRegexFlags::from_bits(*regex_flags),
+                )
             }
             WireExpStrOp::Insert { policy, index, value } => {
                 let index = build(index, caps)?;
                 let value = build(value, caps)?;
-                exp_strings::insert(&string_policy(*policy), index, value, src)
+                exp_strings::insert(&string_policy(*policy), src, index, value)
             }
             WireExpStrOp::Overwrite { policy, index, value } => {
                 let index = build(index, caps)?;
                 let value = build(value, caps)?;
-                exp_strings::overwrite(&string_policy(*policy), index, value, src)
+                exp_strings::overwrite(&string_policy(*policy), src, index, value)
             }
             WireExpStrOp::Concat { policy, values } => {
                 let values = build(values, caps)?;
-                exp_strings::concat(&string_policy(*policy), values, src)
+                exp_strings::concat(&string_policy(*policy), src, values)
             }
             WireExpStrOp::Append { policy, value } => {
                 let value = build(value, caps)?;
-                exp_strings::append(&string_policy(*policy), value, src)
+                exp_strings::append(&string_policy(*policy), src, value)
             }
             WireExpStrOp::Prepend { policy, value } => {
                 let value = build(value, caps)?;
-                exp_strings::prepend(&string_policy(*policy), value, src)
+                exp_strings::prepend(&string_policy(*policy), src, value)
             }
             WireExpStrOp::Snip { policy, start, end } => {
                 let start = build(start, caps)?;
                 let end = build(end, caps)?;
-                exp_strings::snip(&string_policy(*policy), start, end, src)
+                exp_strings::snip(&string_policy(*policy), src, start, end)
             }
             WireExpStrOp::Replace { policy, needle, replacement } => {
                 let needle = build(needle, caps)?;
                 let replacement = build(replacement, caps)?;
-                exp_strings::replace(&string_policy(*policy), needle, replacement, src)
+                exp_strings::replace(&string_policy(*policy), src, needle, replacement)
             }
             WireExpStrOp::ReplaceAll { policy, needle, replacement } => {
                 let needle = build(needle, caps)?;
                 let replacement = build(replacement, caps)?;
-                exp_strings::replace_all(&string_policy(*policy), needle, replacement, src)
+                exp_strings::replace_all(&string_policy(*policy), src, needle, replacement)
             }
             WireExpStrOp::Upper { policy } => {
                 exp_strings::upper(&string_policy(*policy), src)
@@ -838,28 +846,34 @@ fn build_str(node: &WireExpStr, caps: &Capabilities) -> Result<Expression, OpErr
             WireExpStrOp::PadStart { policy, target_length, pad_string } => {
                 let target_length = build(target_length, caps)?;
                 let pad_string = build(pad_string, caps)?;
-                exp_strings::pad_start(&string_policy(*policy), target_length, pad_string, src)
+                exp_strings::pad_start(&string_policy(*policy), src, target_length, pad_string)
             }
             WireExpStrOp::PadEnd { policy, target_length, pad_string } => {
                 let target_length = build(target_length, caps)?;
                 let pad_string = build(pad_string, caps)?;
-                exp_strings::pad_end(&string_policy(*policy), target_length, pad_string, src)
+                exp_strings::pad_end(&string_policy(*policy), src, target_length, pad_string)
             }
             WireExpStrOp::Repeat { policy, count } => {
                 let count = build(count, caps)?;
-                exp_strings::repeat(&string_policy(*policy), count, src)
+                exp_strings::repeat(&string_policy(*policy), src, count)
             }
             WireExpStrOp::RegexReplace { policy, pattern, replacement, regex_flags } => {
                 let pattern = build(pattern, caps)?;
                 let replacement = build(replacement, caps)?;
-                exp_strings::regex_replace(&string_policy(*policy), pattern, replacement, StringRegexFlags(*regex_flags), src)
+                exp_strings::regex_replace(
+                    &string_policy(*policy),
+                    src,
+                    pattern,
+                    replacement,
+                    StringRegexFlags::from_bits(*regex_flags),
+                )
             }
     })
 }
 /// Whether a cluster can run the string operations.
 ///
 /// The same shape as [`crate::policy::AelSupport`] and for the same reason: the
-/// string expressions are the string *operations*, which need server 8.1.3, and an
+/// string expressions are the string *operations*, which need server 8.2.0, and an
 /// older server answers a request carrying one with a parameter error that says
 /// nothing about strings. Asked once per request and passed down, because the
 /// answer costs a clone of the cluster's node list.
@@ -906,11 +920,11 @@ impl StringSupport {
         match self {
             StringSupport::Supported => Ok(()),
             StringSupport::Unsupported { node, version } => Err(OpError::Unsupported(format!(
-                "the string expressions need Aerospike 8.1.3 or later, but node '{node}' runs \
+                "the string expressions need Aerospike 8.2.0 or later, but node '{node}' runs \
                  {version}; upgrade the cluster or work on the string another way"
             ))),
             StringSupport::Unknown => Err(OpError::Unsupported(
-                "the string expressions need a server of 8.1.3 or later, and this instance has no \
+                "the string expressions need a server of 8.2.0 or later, and this instance has no \
                  connected node to check; retry once the cluster is reachable"
                     .to_string(),
             )),
@@ -1010,7 +1024,7 @@ fn build_path(node: &WireExpPath, caps: &Capabilities) -> Result<Expression, OpE
     let return_type = exp_type_of(node.return_type);
     Ok(match &node.op {
         WireExpPathOp::SelectByPath { flag } => {
-            exps::exp_select_by_path(return_type, SelectFlag(*flag), bin, ctx)
+            exps::exp_select_by_path(return_type, SelectFlag::from_bits(*flag), bin, ctx)
         }
         WireExpPathOp::SelectValues => exps::exp_select_values(return_type, bin, ctx),
         WireExpPathOp::SelectMapKeys => exps::exp_select_map_keys(return_type, bin, ctx),
@@ -1020,7 +1034,7 @@ fn build_path(node: &WireExpPath, caps: &Capabilities) -> Result<Expression, OpE
         }
         WireExpPathOp::ModifyByPath { flag, modify } => exps::exp_modify_by_path(
             return_type,
-            ModifyFlag(*flag),
+            ModifyFlag::from_bits(*flag),
             bin,
             build(modify, caps)?,
             ctx,
@@ -1041,7 +1055,7 @@ fn build_path(node: &WireExpPath, caps: &Capabilities) -> Result<Expression, OpE
 /// this is the mapping — and the reason it is a `match` here instead of a generic
 /// call is that those ten functions are the only way in.
 fn loop_var(exp_type: WireExpType, part: WireLoopVarPart) -> Expression {
-    let part = LoopVarPart(part.0);
+    let part = LoopVarPart::from_bits(part.0);
     match exp_type {
         WireExpType::Nil => exps::exp_nil_loop_var(part),
         WireExpType::Bool => exps::exp_bool_loop_var(part),
@@ -1149,16 +1163,16 @@ fn shape_of(value: &WireValue) -> &'static str {
 /// The contract's expression type, as the client's.
 const fn exp_type_of(exp_type: WireExpType) -> ExpType {
     match exp_type {
-        WireExpType::Nil => ExpType::NIL,
-        WireExpType::Bool => ExpType::BOOL,
-        WireExpType::Int => ExpType::INT,
-        WireExpType::Str => ExpType::STRING,
-        WireExpType::List => ExpType::LIST,
-        WireExpType::Map => ExpType::MAP,
-        WireExpType::Blob => ExpType::BLOB,
-        WireExpType::Float => ExpType::FLOAT,
-        WireExpType::Geo => ExpType::GEO,
-        WireExpType::Hll => ExpType::HLL,
+        WireExpType::Nil => ExpType::Nil,
+        WireExpType::Bool => ExpType::Bool,
+        WireExpType::Int => ExpType::Int,
+        WireExpType::Str => ExpType::String,
+        WireExpType::List => ExpType::List,
+        WireExpType::Map => ExpType::Map,
+        WireExpType::Blob => ExpType::Blob,
+        WireExpType::Float => ExpType::Float,
+        WireExpType::Geo => ExpType::Geo,
+        WireExpType::Hll => ExpType::Hll,
     }
 }
 
@@ -1303,8 +1317,6 @@ mod tests {
             WireExpMeta::KeyExists,
             WireExpMeta::SetName,
             WireExpMeta::RecordSize,
-            WireExpMeta::DeviceSize,
-            WireExpMeta::MemorySize,
             WireExpMeta::LastUpdate,
             WireExpMeta::SinceUpdate,
             WireExpMeta::VoidTime,

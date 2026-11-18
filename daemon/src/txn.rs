@@ -299,6 +299,9 @@ pub const fn to_state(state: TxnState) -> WireTxnState {
         TxnState::Verified => WireTxnState::Verified,
         TxnState::Committed => WireTxnState::Committed,
         TxnState::Aborted => WireTxnState::Aborted,
+        // In doubt: the commit may still be rolling forward. Not committed, and
+        // not abortable — a retry of the commit is the only way out.
+        TxnState::CommitFailed => WireTxnState::CommitFailed,
     }
 }
 
@@ -321,6 +324,8 @@ pub const fn to_abort_status(status: &AbortStatus) -> WireAbortStatus {
         AbortStatus::AlreadyAborted => WireAbortStatus::AlreadyAborted,
         AbortStatus::RollBackAbandoned => WireAbortStatus::RollBackAbandoned,
         AbortStatus::CloseAbandoned => WireAbortStatus::CloseAbandoned,
+        // The abort was refused. The transaction is still in doubt.
+        AbortStatus::CommitFailed => WireAbortStatus::CommitFailed,
     }
 }
 
@@ -452,6 +457,7 @@ mod tests {
         assert_eq!(to_state(TxnState::Verified), WireTxnState::Verified);
         assert_eq!(to_state(TxnState::Committed), WireTxnState::Committed);
         assert_eq!(to_state(TxnState::Aborted), WireTxnState::Aborted);
+        assert_eq!(to_state(TxnState::CommitFailed), WireTxnState::CommitFailed);
 
         assert_eq!(to_commit_status(&CommitStatus::Ok), WireCommitStatus::Ok);
         assert_eq!(
@@ -479,6 +485,10 @@ mod tests {
         assert_eq!(
             to_abort_status(&AbortStatus::CloseAbandoned),
             WireAbortStatus::CloseAbandoned
+        );
+        assert_eq!(
+            to_abort_status(&AbortStatus::CommitFailed),
+            WireAbortStatus::CommitFailed
         );
     }
 

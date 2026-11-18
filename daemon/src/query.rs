@@ -232,7 +232,7 @@ pub async fn page(
     drop(stream);
     recordset.close();
 
-    let Some(moved_on) = recordset.partition_filter().await else {
+    let Some(moved_on) = recordset.partition_filter() else {
         return Err(PageError::Invalid(
             "the client did not hand back a cursor for this page, so the traversal cannot be \
              resumed without risking records being read twice or not at all"
@@ -381,7 +381,7 @@ pub fn to_statement(
     };
     let mut built = Statement::new(&statement.namespace, &statement.set, bins);
     if let Some(filter) = &statement.filter {
-        built.add_filter(to_filter(filter, caps)?);
+        built.set_filter(to_filter(filter, caps)?);
     }
     Ok(built)
 }
@@ -435,20 +435,12 @@ pub fn to_filter(filter: &WireFilter, caps: &Capabilities) -> Result<Filter, OpE
             }
         }
 
-        // ----- geospatial. Each has a `_cit` form for a collection index -----
+        // ----- geospatial. A collection index is the same filter plus its type -----
         (WireFilterTarget::Bin(bin), WireFilterKind::GeoWithinRegion(region)) => {
-            if scalar {
-                Filter::geo_within_region(bin, region)
-            } else {
-                Filter::geo_within_region_cit(bin, region, cit)
-            }
+            with_collection(Filter::geo_within_region(bin, region), scalar, cit)
         }
         (WireFilterTarget::Index(index), WireFilterKind::GeoWithinRegion(region)) => {
-            if scalar {
-                Filter::geo_within_region_by_index(index, region)
-            } else {
-                Filter::geo_within_region_by_index_cit(index, region, cit)
-            }
+            with_collection(Filter::geo_within_region_by_index(index, region), scalar, cit)
         }
         (
             WireFilterTarget::Bin(bin),
@@ -457,13 +449,11 @@ pub fn to_filter(filter: &WireFilter, caps: &Capabilities) -> Result<Filter, OpE
                 latitude,
                 radius,
             },
-        ) => {
-            if scalar {
-                Filter::geo_within_radius(bin, *longitude, *latitude, *radius)
-            } else {
-                Filter::geo_within_radius_cit(bin, *longitude, *latitude, *radius, cit)
-            }
-        }
+        ) => with_collection(
+            Filter::geo_within_radius(bin, *longitude, *latitude, *radius),
+            scalar,
+            cit,
+        ),
         (
             WireFilterTarget::Index(index),
             WireFilterKind::GeoWithinRadius {
@@ -471,26 +461,16 @@ pub fn to_filter(filter: &WireFilter, caps: &Capabilities) -> Result<Filter, OpE
                 latitude,
                 radius,
             },
-        ) => {
-            if scalar {
-                Filter::geo_within_radius_by_index(index, *longitude, *latitude, *radius)
-            } else {
-                Filter::geo_within_radius_by_index_cit(index, *longitude, *latitude, *radius, cit)
-            }
-        }
+        ) => with_collection(
+            Filter::geo_within_radius_by_index(index, *longitude, *latitude, *radius),
+            scalar,
+            cit,
+        ),
         (WireFilterTarget::Bin(bin), WireFilterKind::GeoContains(point)) => {
-            if scalar {
-                Filter::geo_contains(bin, point)
-            } else {
-                Filter::geo_contains_cit(bin, point, cit)
-            }
+            with_collection(Filter::geo_contains(bin, point), scalar, cit)
         }
         (WireFilterTarget::Index(index), WireFilterKind::GeoContains(point)) => {
-            if scalar {
-                Filter::geo_contains_by_index(index, point)
-            } else {
-                Filter::geo_contains_by_index_cit(index, point, cit)
-            }
+            with_collection(Filter::geo_contains_by_index(index, point), scalar, cit)
         }
     };
 
@@ -551,10 +531,10 @@ fn to_wire_record(record: &Record) -> WireQueryRecord {
             user_key: None,
         },
         |key| WireRecordKey {
-            namespace: key.namespace.clone(),
-            set: key.set_name.clone(),
-            digest: key.digest,
-            user_key: key.user_key.as_ref().and_then(user_key_of),
+            namespace: key.namespace().to_owned(),
+            set: key.set_name().to_owned(),
+            digest: key.digest(),
+            user_key: key.user_key().and_then(user_key_of),
         },
     );
 
@@ -603,6 +583,16 @@ fn user_key_of(value: &Value) -> Option<aerospike_php_ipc::WireKey> {
 }
 
 /// The client's collection index type.
+/// A geospatial filter over a collection index is the scalar filter plus the
+/// collection it indexes. A scalar index leaves the filter unchanged.
+fn with_collection(filter: Filter, scalar: bool, cit: CollectionIndexType) -> Filter {
+    if scalar {
+        filter
+    } else {
+        filter.collection_type(cit)
+    }
+}
+
 const fn collection_index(collection: WireCollectionIndex) -> CollectionIndexType {
     match collection {
         WireCollectionIndex::Default => CollectionIndexType::Default,
@@ -778,7 +768,7 @@ mod tests {
             assert_eq!(statement.namespace, "test");
             assert_eq!(statement.set_name, "users");
             assert_eq!(format!("{:?}", statement.bins), format!("{expected:?}"));
-            assert!(statement.filters.is_none(), "a statement with no filter is a scan");
+            assert!(statement.filter.is_none(), "a statement with no filter is a scan");
         }
     }
 
@@ -905,7 +895,7 @@ mod tests {
     #[test]
     fn a_scanned_record_keeps_its_digest_and_its_stored_key() {
         let key = aerospike_core::Key::new("test", "users", Value::from("alice")).unwrap();
-        let digest = key.digest;
+        let digest = key.digest();
 
         let wire = to_wire_record(&scanned(Some(key.clone()), 0));
         assert_eq!(wire.key.namespace, "test");
@@ -918,12 +908,7 @@ mod tests {
 
         // A record whose key was not stored keeps its digest, which is the only
         // identity there is; inventing a user key from it is impossible.
-        let anonymous = aerospike_core::Key {
-            namespace: "test".into(),
-            set_name: String::new(),
-            user_key: None,
-            digest: [9u8; 20],
-        };
+        let anonymous = aerospike_core::Key::with_digest("test", "", None, [9u8; 20]);
         let wire = to_wire_record(&scanned(Some(anonymous), 0));
         assert_eq!(wire.key.digest, [9u8; 20]);
         assert_eq!(wire.key.user_key, None);
@@ -937,7 +922,7 @@ mod tests {
         // A record that does expire reports a TTL, and not the sentinel.
         let expires_in_an_hour = u32::try_from(
             std::time::SystemTime::now()
-                .duration_since(*aerospike_core::CITRUSLEAF_EPOCH)
+                .duration_since(aerospike_core::citrusleaf_epoch())
                 .expect("now is after 2010")
                 .as_secs()
                 + 3600,

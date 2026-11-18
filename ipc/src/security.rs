@@ -69,6 +69,9 @@ pub enum WirePrivilegeCode {
     ReadMasked,
     /// Write masked data.
     WriteMasked,
+    /// A code this build of the client does not name. A role read can carry it;
+    /// granting it is refused, because there is no privilege to grant.
+    Unknown,
 }
 
 /// One privilege: what may be done, and where.
@@ -338,6 +341,7 @@ mod tests {
             WirePrivilegeCode::MaskingAdmin,
             WirePrivilegeCode::ReadMasked,
             WirePrivilegeCode::WriteMasked,
+            WirePrivilegeCode::Unknown,
         ] {
             let bytes = encode_body(&code).unwrap();
             assert_eq!(decode_body::<WirePrivilegeCode>(&bytes).unwrap(), code);
@@ -363,6 +367,7 @@ mod tests {
             WirePrivilegeCode::UdfAdmin,
             WirePrivilegeCode::SIndexAdmin,
             WirePrivilegeCode::MaskingAdmin,
+            WirePrivilegeCode::Unknown,
         ] {
             assert!(!scopable(code), "{code:?} is global-only");
         }

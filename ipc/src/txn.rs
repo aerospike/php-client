@@ -139,6 +139,9 @@ pub enum WireTxnState {
     Committed,
     /// Aborted. Its writes are gone.
     Aborted,
+    /// A commit failed in doubt: the server may still be rolling the writes
+    /// forward. Retry the commit. An abort from here is refused.
+    CommitFailed,
 }
 
 /// How a commit ended.
@@ -164,8 +167,10 @@ pub enum WireCommitStatus {
 
 /// How an abort ended.
 ///
-/// As with a commit, every variant means the transaction is *not* going to land:
-/// the differences are only in how much tidying the server was left to do.
+/// Every variant except [`CommitFailed`](Self::CommitFailed) means the
+/// transaction is *not* going to land: the differences are only in how much
+/// tidying the server was left to do. `CommitFailed` means the abort was
+/// refused, because a commit already failed in doubt.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum WireAbortStatus {
     /// Aborted, and everything was tidied up.
@@ -176,6 +181,9 @@ pub enum WireAbortStatus {
     RollBackAbandoned,
     /// Rolled back, but the client gave up closing the monitor record.
     CloseAbandoned,
+    /// The abort was refused: a commit already failed in doubt, and rolling
+    /// back could discard writes the server is still committing.
+    CommitFailed,
 }
 
 #[cfg(test)]
@@ -229,6 +237,7 @@ mod tests {
             WireTxnState::Verified,
             WireTxnState::Committed,
             WireTxnState::Aborted,
+            WireTxnState::CommitFailed,
         ] {
             let bytes = encode_body(&state).unwrap();
             assert_eq!(decode_body::<WireTxnState>(&bytes).unwrap(), state);
@@ -247,6 +256,7 @@ mod tests {
             WireAbortStatus::AlreadyAborted,
             WireAbortStatus::RollBackAbandoned,
             WireAbortStatus::CloseAbandoned,
+            WireAbortStatus::CommitFailed,
         ] {
             let bytes = encode_body(&status).unwrap();
             assert_eq!(decode_body::<WireAbortStatus>(&bytes).unwrap(), status);

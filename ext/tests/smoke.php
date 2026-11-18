@@ -114,7 +114,7 @@ function fail(string $what, string $why): void
 /**
  * Something this build cannot exercise, as opposed to something that failed.
  *
- * Mostly the server: a filter needs 8.1.3, a durable delete needs Enterprise.
+ * Mostly the server: a filter needs 8.2.0, a durable delete needs Enterprise.
  * Reporting that as a failure would be a lie in one direction, and passing
  * silently would be a lie in the other.
  */
@@ -136,7 +136,7 @@ function unsupported(Aerospike\AerospikeException $e): bool
  * Whether every node runs at least $version.
  *
  * The server gates features by release — path expressions need 8.1.1, string
- * expressions 8.1.3 — so which of them this file may assert is the cluster's
+ * expressions 8.2.0 — so which of them this file may assert is the cluster's
  * answer, not a constant. Only the first three components are compared: the
  * fourth is a build number, which no feature gate is stated in.
  */
@@ -961,7 +961,7 @@ try {
     is_same('a server refusal is Status::Server', Status::Server, $e->getStatus());
 }
 
-// A filter, which needs server 8.1.3 or later. Filtered out is an *error* here —
+// A filter, which needs server 8.2.0 or later. Filtered out is an *error* here —
 // result code 27 — not an empty result, so it is control flow a caller catches.
 try {
     $matched = $client->get(new ReadPolicy(filter: '$.x == 1'), $guarded);
@@ -1755,7 +1755,7 @@ section('the expression builder');
 /*
  * `Aerospike\Exp` and its five collection siblings build an expression tree that
  * the **client** packs. That is the difference from `Expression::ael()`, which is
- * text the server compiles and needs server 8.1.3: a built expression works
+ * text the server compiles and needs server 8.2.0: a built expression works
  * against every server this client supports.
  *
  * These assertions run the expression as a policy filter and ask whether the read
@@ -1859,11 +1859,11 @@ is_true('bit getInt reads a field', $passes(Exp::eq(
     ExpBit::getInt(Exp::intVal(0), Exp::intVal(8), false, Exp::blobBin('flags')),
     Exp::intVal(15))));
 // The string operations are compiled by the server and it learned them in
-// 8.1.3, which answers an older cluster with INVALID_REQUEST rather than a
+// 8.2.0, which answers an older cluster with INVALID_REQUEST rather than a
 // filtered-out read — so this asks first instead of catching a fatal.
-$stringOpsSupported = server_at_least($client, '8.1.3');
+$stringOpsSupported = server_at_least($client, '8.2.0');
 if (!$stringOpsSupported) {
-    skip('string expressions', 'ExpStr needs server 8.1.3 or later');
+    skip('string expressions', 'ExpStr needs server 8.2.0 or later');
 } else {
     is_true('a string length', $passes(Exp::eq(
         ExpStr::strlen(Exp::stringBin('name')), Exp::intVal(9))));
@@ -2099,8 +2099,8 @@ try {
         );
     }
 } catch (Aerospike\AerospikeException $e) {
-    // AEL needs server 8.1.3; the daemon refuses an older cluster by name.
-    unsupported($e) || str_contains($e->getMessage(), '8.1.3')
+    // AEL needs server 8.2.0; the daemon refuses an older cluster by name.
+    unsupported($e) || str_contains($e->getMessage(), '8.2.0')
         ? skip('expression operations', $e->getMessage())
         : fail('expression operations', describe($e));
 }
@@ -2204,7 +2204,7 @@ try {
     is_same('a per-row CreateOnly is enforced', 5, $results[0]->resultCode());
     is_same('and the read row still ran', 1, $results[1]->record()->bin('n'));
 } catch (Aerospike\AerospikeException $e) {
-    str_contains($e->getMessage(), '8.1.3')
+    str_contains($e->getMessage(), '8.2.0')
         ? skip('per-row batch filters', $e->getMessage())
         : fail('per-row batch policies', describe($e));
 }
