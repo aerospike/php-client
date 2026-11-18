@@ -549,9 +549,9 @@ fn to_context(ctx: &WireCtx, caps: &Capabilities) -> Result<CdtContext, OpError>
         WireCtx::ListValue { value } => ctx_list_value(convert::to_value(value)?),
         WireCtx::MapIndex { index } => ctx_map_index(*index),
         WireCtx::MapRank { rank } => ctx_map_rank(*rank),
-        WireCtx::MapKey { key } => ctx_map_key(convert::to_value(key)?),
+        WireCtx::MapKey { key } => ctx_map_key(convert::to_map_key(key)?),
         WireCtx::MapKeyCreate { key, order } => {
-            ctx_map_key_create(convert::to_value(key)?, map_order(*order))
+            ctx_map_key_create(convert::to_map_key(key)?, map_order(*order))
         }
         WireCtx::MapValue { value } => ctx_map_value(convert::to_value(value)?),
 
@@ -791,6 +791,12 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
     let values = |vs: &Vec<aerospike_php_ipc::WireValue>| {
         vs.iter().map(convert::to_value).collect::<Result<Vec<_>, _>>()
     };
+    // A key is ordered and hashed. A foreign particle is not a key, even
+    // though it is a legal map value.
+    let map_key = |k| convert::to_map_key(k);
+    let map_keys = |ks: &Vec<aerospike_php_ipc::WireValue>| {
+        ks.iter().map(convert::to_map_key).collect::<Result<Vec<_>, _>>()
+    };
 
     Ok(match op {
         // Handled by `to_operation`, which has the path these two need.
@@ -801,7 +807,7 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
         WireMapOp::SetOrder { order } => maps::set_order(bin, map_order(*order)),
 
         WireMapOp::Put { policy, key, value: v } => {
-            maps::put(&map_policy(*policy), bin, value(key)?, value(v)?)
+            maps::put(&map_policy(*policy), bin, map_key(key)?, value(v)?)
         }
         WireMapOp::PutItems { policy, items } => {
             // An `IndexMap`, so the order the caller wrote survives: with an
@@ -810,23 +816,23 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
             // `HashMap` would throw the order away for no gain.
             let mut map = IndexMap::with_capacity(items.len());
             for (key, value) in items {
-                map.insert(convert::to_value(key)?, convert::to_value(value)?);
+                map.insert(convert::to_map_key(key)?, convert::to_value(value)?);
             }
             maps::put_items(&map_policy(*policy), bin, map)
         }
         WireMapOp::IncrementValue { policy, key, delta } => {
-            maps::increment_value(&map_policy(*policy), bin, value(key)?, value(delta)?)
+            maps::increment_value(&map_policy(*policy), bin, map_key(key)?, value(delta)?)
         }
         WireMapOp::DecrementValue { policy, key, delta } => {
-            maps::decrement_value(&map_policy(*policy), bin, value(key)?, value(delta)?)
+            maps::decrement_value(&map_policy(*policy), bin, map_key(key)?, value(delta)?)
         }
         WireMapOp::Clear => maps::clear(bin),
 
         WireMapOp::RemoveByKey { key, return_type } => {
-            maps::remove_by_key(bin, value(key)?, map_return(*return_type))
+            maps::remove_by_key(bin, map_key(key)?, map_return(*return_type))
         }
         WireMapOp::RemoveByKeyList { keys, return_type } => {
-            maps::remove_by_key_list(bin, values(keys)?, map_return(*return_type))
+            maps::remove_by_key_list(bin, map_keys(keys)?, map_return(*return_type))
         }
         WireMapOp::RemoveByKeyRange {
             begin,
@@ -846,14 +852,14 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
         } => match count {
             Some(count) => maps::remove_by_key_relative_index_range_count(
                 bin,
-                value(key)?,
+                map_key(key)?,
                 *index,
                 *count,
                 map_return(*return_type),
             ),
             None => maps::remove_by_key_relative_index_range(
                 bin,
-                value(key)?,
+                map_key(key)?,
                 *index,
                 map_return(*return_type),
             ),
@@ -921,10 +927,10 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
 
         WireMapOp::Size => maps::size(bin),
         WireMapOp::GetByKey { key, return_type } => {
-            maps::get_by_key(bin, value(key)?, map_return(*return_type))
+            maps::get_by_key(bin, map_key(key)?, map_return(*return_type))
         }
         WireMapOp::GetByKeyList { keys, return_type } => {
-            maps::get_by_key_list(bin, values(keys)?, map_return(*return_type))
+            maps::get_by_key_list(bin, map_keys(keys)?, map_return(*return_type))
         }
         WireMapOp::GetByKeyRange {
             begin,
@@ -944,14 +950,14 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
         } => match count {
             Some(count) => maps::get_by_key_relative_index_range_count(
                 bin,
-                value(key)?,
+                map_key(key)?,
                 *index,
                 *count,
                 map_return(*return_type),
             ),
             None => maps::get_by_key_relative_index_range(
                 bin,
-                value(key)?,
+                map_key(key)?,
                 *index,
                 map_return(*return_type),
             ),

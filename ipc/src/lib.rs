@@ -935,6 +935,20 @@ pub enum WireValue {
     Infinity,
     /// Matches any value, for CDT selections by example.
     Wildcard,
+    /// A particle type this build does not know how to decode, passed
+    /// through verbatim.
+    ///
+    /// Forwarding the bytes rather than failing means a newer server's
+    /// data type degrades to something inspectable instead of breaking the
+    /// whole read. A caller can also send one back, as a bin, a list element
+    /// or a map value, and the daemon writes the same particle-type code.
+    /// It is not a legal map key or record key: those have to be interpreted.
+    Unknown {
+        /// The server's particle type byte.
+        particle_type: u8,
+        /// The undecoded payload.
+        data: Vec<u8>,
+    },
 
     // ----- read-only shapes the server produces -----
     /// Several results for one bin name, in operation order. Produced when
@@ -945,18 +959,6 @@ pub enum WireValue {
     /// distinct from [`WireValue::Map`] because it is a *result* shape,
     /// not a stored one.
     KeyValueList(Vec<(WireValue, WireValue)>),
-    /// A particle type this build does not know how to decode, passed
-    /// through verbatim.
-    ///
-    /// Forwarding the bytes rather than failing means a newer server's
-    /// data type degrades to something inspectable instead of breaking the
-    /// whole read.
-    Unknown {
-        /// The server's particle type byte.
-        particle_type: u8,
-        /// The undecoded payload.
-        data: Vec<u8>,
-    },
 }
 
 impl WireValue {
@@ -970,7 +972,7 @@ impl WireValue {
     pub const fn is_result_only(&self) -> bool {
         matches!(
             self,
-            WireValue::MultiResult(_) | WireValue::KeyValueList(_) | WireValue::Unknown { .. }
+            WireValue::MultiResult(_) | WireValue::KeyValueList(_)
         )
     }
 }
@@ -1446,7 +1448,10 @@ mod tests {
         // core value to build for a MultiResult a caller invented.
         assert!(WireValue::MultiResult(vec![]).is_result_only());
         assert!(WireValue::KeyValueList(vec![]).is_result_only());
-        assert!(WireValue::Unknown { particle_type: 1, data: vec![] }.is_result_only());
+        // An undecoded particle can be written back, so it is not result-only.
+        // MultiResult and KeyValueList still are: the client has no value to
+        // send for those.
+        assert!(!WireValue::Unknown { particle_type: 1, data: vec![] }.is_result_only());
 
         for sendable in [
             WireValue::Nil,
@@ -1458,6 +1463,7 @@ mod tests {
             WireValue::Hll(vec![]),
             WireValue::Infinity,
             WireValue::Wildcard,
+            WireValue::Unknown { particle_type: 11, data: vec![1, 2] },
         ] {
             assert!(!sendable.is_result_only(), "{sendable:?}");
         }

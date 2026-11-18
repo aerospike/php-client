@@ -985,7 +985,8 @@ namespace Aerospike {
      * types. A PHP string is a byte string with no way to say whether it was meant
      * as text or as binary, so **every bare string is written as a text value**;
      * wrap bytes in `Aerospike\Blob` to write them as binary, and a GeoJSON
-     * document in `Aerospike\GeoJson` so the server indexes it as geometry. A
+     * document in `Aerospike\GeoJson` so the server indexes it as geometry.
+     * `Aerospike\Particle` is accepted on the write path the same way. A
      * string that is not valid UTF-8 is refused rather than written as text.
      *
      * Reading back, those shapes come back **as their wrapper class**, so a value
@@ -1002,7 +1003,7 @@ namespace Aerospike {
      * | map, sorted map | associative array |
      * | several results for one bin | packed array, in operation order |
      * | a map read that returned keys and values | list of `[key, value]` pairs |
-     * | a particle type this build cannot decode | `["particle_type" => int, "data" => Aerospike\Blob]` |
+     * | a particle type this build cannot decode | `Aerospike\Particle` |
      *
      * A **list round trips in order**, because its order is data. A **map comes
      * back in the server's key order**, not in PHP insertion order: Aerospike has
@@ -5908,6 +5909,50 @@ namespace Aerospike {
          * @return int
          */
         public function length(): int {}
+    }
+
+    /**
+     * A particle type this client does not decode, carried as raw bytes under
+     * the server's particle-type code.
+     *
+     * This is how a value written by an older client — a PHP-serialized object,
+     * for example — round trips without being reinterpreted as a plain blob.
+     * It can be a bin, a list element or a map value. It cannot be a map key
+     * or a record key.
+     *
+     * ```php
+     * $client->put("test", "legacy", "row", [
+     *     "flag" => new Aerospike\Particle(11, "b:1;"),
+     *     "items" => [new Aerospike\Particle(11, "O:8:\"stdClass\":0:{}")],
+     * ]);
+     * $again = $record["bins"]["flag"]; // Aerospike\Particle
+     * $again->particleType();           // 11
+     * ```
+     */
+    class Particle {
+        /**
+         * Wrap a particle-type code and its raw payload.
+         *
+         * `particle_type` is the Aerospike wire code, 0 through 255.
+         *
+         * @param int $particle_type
+         * @param string $bytes
+         */
+        public function __construct(int $particle_type, string $bytes) {}
+
+        /**
+         * The server's particle-type code (ext-php-rs camelCase for wire `particle_type`).
+         *
+         * @return int
+         */
+        public function particleType(): int {}
+
+        /**
+         * The undecoded payload, as a PHP string.
+         *
+         * @return string
+         */
+        public function bytes(): string {}
     }
 
     /**

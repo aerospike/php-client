@@ -16,12 +16,16 @@
 //! Three asymmetries remain, and they are all in the *shapes*, not in the
 //! coverage:
 //!
-//! - **Result-only shapes travel one way.** [`WireValue::MultiResult`],
-//!   [`WireValue::KeyValueList`] and [`WireValue::Unknown`] are things a server
-//!   produces. A caller sending one is a bug in the caller, so [`to_value`]
-//!   refuses it — flagged by the contract's own
-//!   [`WireValue::is_result_only`] — rather than inventing a client value for
-//!   it.
+//! - **Result-only shapes travel one way.** [`WireValue::MultiResult`] and
+//!   [`WireValue::KeyValueList`] are things a server produces. A caller sending
+//!   one is a bug in the caller, so [`to_value`] refuses it — flagged by the
+//!   contract's own [`WireValue::is_result_only`] — rather than inventing a
+//!   client value for it.
+//! - **An undecoded particle keeps its type code.** [`WireValue::Unknown`]
+//!   becomes [`Value::Unknown`] as a bin, as a list element and as a map
+//!   value, so a value written by an older client can be written back as the
+//!   same particle. It cannot be a map key or a record key: those have to be
+//!   interpreted.
 //! - **Maps travel as pairs.** The three map shapes are a vector of pairs, so
 //!   the order the server returned survives the trip and non-string keys stay
 //!   expressible.
@@ -45,8 +49,20 @@ pub struct ResultOnlyValue {
     pub shape: &'static str,
 }
 
+impl ResultOnlyValue {
+    /// A foreign particle used where a key would have to be ordered or hashed.
+    fn foreign_map_key() -> Self {
+        Self {
+            shape: "an undecoded foreign particle cannot be a map key",
+        }
+    }
+}
+
 impl fmt::Display for ResultOnlyValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.shape.contains("cannot be a map key") {
+            return f.write_str(self.shape);
+        }
         write!(
             f,
             "{} is a result shape the server produces; it cannot be sent to it",
@@ -76,6 +92,10 @@ impl std::error::Error for BadBin {}
 
 /// Convert a wire value into a client value.
 ///
+/// An [`WireValue::Unknown`] is kept: a bin, a list element and a map value
+/// all carry the original particle-type code. A map key does not — use
+/// [`to_map_key`] for one.
+///
 /// # Errors
 /// [`ResultOnlyValue`] when the value — or one nested inside it — is a shape
 /// only the server produces.
@@ -103,27 +123,30 @@ pub fn to_value(wire: &WireValue) -> Result<Value, ResultOnlyValue> {
             items.iter().map(to_value).collect::<Result<Vec<_>, _>>()?,
         )),
         // An unordered server map either way; the pair order given is the pair
-        // order packed.
+        // order packed. A foreign particle can be a value. It cannot be a key.
         WireValue::Map(pairs) | WireValue::OrderedMap(pairs) => {
             let mut map = IndexMap::with_capacity(pairs.len());
             for (key, value) in pairs {
-                map.insert(to_value(key)?, to_value(value)?);
+                map.insert(to_map_key(key)?, to_value(value)?);
             }
             Ok(Value::OrderedMap(map))
         }
         WireValue::SortedMap(pairs) => {
             let mut map = std::collections::BTreeMap::new();
             for (key, value) in pairs {
-                map.insert(to_value(key)?, to_value(value)?);
+                map.insert(to_map_key(key)?, to_value(value)?);
             }
             Ok(Value::SortedMap(map))
         }
-        // Refused above, and deliberately not given a client counterpart.
-        WireValue::MultiResult(_) | WireValue::KeyValueList(_) | WireValue::Unknown { .. } => {
-            Err(ResultOnlyValue {
-                shape: result_only_shape(wire),
-            })
+        // The bytes go back under `particle_type`, as a bin or nested in a
+        // collection. The client does not interpret them.
+        WireValue::Unknown { particle_type, data } => {
+            Ok(Value::Unknown(*particle_type, data.clone()))
         }
+        // Refused above, and deliberately not given a client counterpart.
+        WireValue::MultiResult(_) | WireValue::KeyValueList(_) => Err(ResultOnlyValue {
+            shape: result_only_shape(wire),
+        }),
     }
 }
 
@@ -192,13 +215,27 @@ where
         .collect()
 }
 
+/// Convert a map key. A foreign particle is refused: a key is hashed and
+/// ordered, which needs a type this client understands.
+///
+/// # Errors
+/// [`ResultOnlyValue`] when `wire` is a result-only shape or an undecoded
+/// particle.
+pub fn to_map_key(wire: &WireValue) -> Result<Value, ResultOnlyValue> {
+    if matches!(wire, WireValue::Unknown { .. }) {
+        return Err(ResultOnlyValue::foreign_map_key());
+    }
+    to_value(wire)
+}
+
 /// The contract's name for a result-only shape, for the refusal message.
 const fn result_only_shape(wire: &WireValue) -> &'static str {
     match wire {
         WireValue::MultiResult(_) => "a multi-operation result",
         WireValue::KeyValueList(_) => "a key/value result list",
+        // Sendable, so the early refusal never asks for this name. The arm
+        // stays so the match is exhaustive.
         WireValue::Unknown { .. } => "an undecoded foreign particle",
-        // Not reachable: only the three above are result-only.
         _ => "a result-only value",
     }
 }
@@ -465,10 +502,6 @@ mod tests {
         for wire in [
             WireValue::MultiResult(vec![WireValue::Int(1)]),
             WireValue::KeyValueList(vec![(WireValue::Int(1), WireValue::Int(2))]),
-            WireValue::Unknown {
-                particle_type: 9,
-                data: vec![1],
-            },
         ] {
             let err = to_value(&wire).unwrap_err();
             assert!(err.to_string().contains("result shape"), "{wire:?}: {err}");
@@ -478,14 +511,6 @@ mod tests {
         let in_list =
             WireValue::List(vec![WireValue::List(vec![WireValue::MultiResult(vec![])])]);
         assert!(to_value(&in_list).is_err());
-        let in_map = WireValue::Map(vec![(
-            WireValue::Str("k".into()),
-            WireValue::Unknown {
-                particle_type: 1,
-                data: vec![],
-            },
-        )]);
-        assert!(to_value(&in_map).is_err());
         // Including as a map key, where the recursion is on the other side.
         let as_key =
             WireValue::SortedMap(vec![(WireValue::KeyValueList(vec![]), WireValue::Int(1))]);
@@ -506,6 +531,43 @@ mod tests {
         assert_eq!(ok.len(), 1);
         assert_eq!(ok[0].name, "good");
         assert_eq!(ok[0].value, Value::Int(1));
+    }
+
+    /// A particle this client does not decode keeps its type code as a bin, as
+    /// a list element and as a map value. A map key is refused: a key has to
+    /// be ordered, and this client does not know how.
+    #[test]
+    fn an_unknown_particle_round_trips_as_a_bin_or_a_collection_value() {
+        let wire = WireValue::Unknown {
+            particle_type: 11,
+            data: vec![0x62, 0x3a, 0x31, 0x3b],
+        };
+        let bins = to_bins(&[("legacy".into(), wire.clone())]).unwrap();
+        assert_eq!(
+            bins[0].value,
+            Value::Unknown(11, vec![0x62, 0x3a, 0x31, 0x3b])
+        );
+        assert_eq!(from_value(&bins[0].value), wire);
+
+        let nested = WireValue::List(vec![wire.clone()]);
+        assert_eq!(
+            to_value(&nested).unwrap(),
+            Value::List(vec![Value::Unknown(11, vec![0x62, 0x3a, 0x31, 0x3b])])
+        );
+        let map = WireValue::Map(vec![(WireValue::Str("obj".into()), wire.clone())]);
+        match to_value(&map).unwrap() {
+            Value::OrderedMap(entries) => {
+                assert_eq!(
+                    entries.get(&Value::String("obj".into())),
+                    Some(&Value::Unknown(11, vec![0x62, 0x3a, 0x31, 0x3b]))
+                );
+            }
+            other => panic!("expected a map, got {other:?}"),
+        }
+
+        let as_key = WireValue::Map(vec![(wire, WireValue::Int(1))]);
+        let err = to_value(&as_key).unwrap_err();
+        assert!(err.to_string().contains("cannot be a map key"), "{err}");
     }
 
     #[test]

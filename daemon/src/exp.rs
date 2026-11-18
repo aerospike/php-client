@@ -47,7 +47,7 @@ use aerospike_php_ipc::exp::{
 };
 use aerospike_php_ipc::WireValue;
 
-use crate::convert::to_value;
+use crate::convert::{to_map_key, to_value};
 use crate::policy::Capabilities;
 use crate::ops::{
     bit_overflow, bit_policy, bit_resize, hll_policy, list_policy, list_return, list_sort,
@@ -1103,7 +1103,7 @@ fn literal(value: &WireValue) -> Result<Expression, OpError> {
             let mut map = IndexMap::with_capacity(pairs.len());
             for (key, value) in pairs {
                 map.insert(
-                    to_value(key).map_err(literal_error)?,
+                    to_map_key(key).map_err(literal_error)?,
                     to_value(value).map_err(literal_error)?,
                 );
             }
@@ -1113,7 +1113,7 @@ fn literal(value: &WireValue) -> Result<Expression, OpError> {
             let mut map = std::collections::BTreeMap::new();
             for (key, value) in pairs {
                 map.insert(
-                    to_value(key).map_err(literal_error)?,
+                    to_map_key(key).map_err(literal_error)?,
                     to_value(value).map_err(literal_error)?,
                 );
             }
