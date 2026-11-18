@@ -6,8 +6,9 @@ namespace Aerospike {
     /**
      * How an abort ended.
      *
-     * As with a commit, every case means the transaction's writes are not going to
+     * Every case except CommitFailed means the transaction's writes are not going to
      * land; the differences are only in how much tidying the server was left.
+     * CommitFailed means the abort was refused because a commit already failed in doubt.
      */
     enum AbortStatus: string {
     /**
@@ -26,6 +27,10 @@ namespace Aerospike {
      * Rolled back, but closing the monitor record was abandoned.
      */
       case CloseAbandoned = 'CLOSE_ABANDONED';
+    /**
+     * The abort was refused: a commit already failed in doubt.
+     */
+      case CommitFailed = 'COMMIT_FAILED';
     }
 
     /**
@@ -1012,7 +1017,7 @@ namespace Aerospike {
      * # Filters make a call throw
      *
      * `filter` on either policy is an expression in the Aerospike Expression
-     * Language, compiled by the server (which needs server 8.1.3 or later). **A
+     * Language, compiled by the server (which needs server 8.2.0 or later). **A
      * record the filter rejects makes the call fail**, on a read as much as on a
      * write: the result code is 27, `FILTERED_OUT`. So "no match" is control flow
      * a caller has to catch:
@@ -4300,7 +4305,7 @@ namespace Aerospike {
     /**
      * String expressions: `aerospike-core`'s `expressions::string`.
      *
-     * **Needs server 8.1.3 or later** — these are the string operations, and the
+     * **Needs server 8.2.0 or later** — these are the string operations, and the
      * daemon checks the cluster's versions rather than letting an older server refuse
      * them obscurely.
      *
@@ -4929,7 +4934,7 @@ namespace Aerospike {
      * | how | needs | notes |
      * | --- | --- | --- |
      * | `Aerospike\\Exp::*` | nothing | composed here, packed by the client |
-     * | `Expression::ael($text)` | server 8.1.3+ | shortest to write; the server parses it |
+     * | `Expression::ael($text)` | server 8.2.0+ | shortest to write; the server parses it |
      * | `Expression::base64($packed)` | nothing | one another client packed |
      *
      * **Prefer the builder** unless the text form is clearly more readable for what
@@ -7954,6 +7959,10 @@ namespace Aerospike {
      * Write masked data. May be confined.
      */
       case WriteMasked = 'WRITE_MASKED';
+    /**
+     * A code this build does not name. A role read can return it; granting it is refused.
+     */
+      case Unknown = 'UNKNOWN';
     }
 
     /**
@@ -9596,6 +9605,10 @@ namespace Aerospike {
      * Aborted. Its writes are gone.
      */
       case Aborted = 'ABORTED';
+    /**
+     * A commit failed in doubt. Retry commit(). abort() is refused.
+     */
+      case CommitFailed = 'COMMIT_FAILED';
     }
 
     /**

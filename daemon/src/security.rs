@@ -49,47 +49,52 @@ impl fmt::Display for BadPrivilege {
 impl std::error::Error for BadPrivilege {}
 
 /// The client's privilege code.
+///
+/// `None` for [`WirePrivilegeCode::Unknown`]: a code this build can report on a
+/// role and must not grant, because there is no privilege behind it.
 #[must_use]
-pub const fn privilege_code(code: WirePrivilegeCode) -> PrivilegeCode {
-    match code {
+pub const fn privilege_code(code: WirePrivilegeCode) -> Option<PrivilegeCode> {
+    Some(match code {
         WirePrivilegeCode::UserAdmin => PrivilegeCode::UserAdmin,
         WirePrivilegeCode::SysAdmin => PrivilegeCode::SysAdmin,
         WirePrivilegeCode::DataAdmin => PrivilegeCode::DataAdmin,
-        WirePrivilegeCode::UdfAdmin => PrivilegeCode::UDFAdmin,
-        WirePrivilegeCode::SIndexAdmin => PrivilegeCode::SIndexAdmin,
+        WirePrivilegeCode::UdfAdmin => PrivilegeCode::UdfAdmin,
+        WirePrivilegeCode::SIndexAdmin => PrivilegeCode::SindexAdmin,
         WirePrivilegeCode::Read => PrivilegeCode::Read,
         WirePrivilegeCode::ReadWrite => PrivilegeCode::ReadWrite,
-        WirePrivilegeCode::ReadWriteUdf => PrivilegeCode::ReadWriteUDF,
+        WirePrivilegeCode::ReadWriteUdf => PrivilegeCode::ReadWriteUdf,
         WirePrivilegeCode::Write => PrivilegeCode::Write,
         WirePrivilegeCode::Truncate => PrivilegeCode::Truncate,
         WirePrivilegeCode::MaskingAdmin => PrivilegeCode::MaskingAdmin,
         WirePrivilegeCode::ReadMasked => PrivilegeCode::ReadMasked,
         WirePrivilegeCode::WriteMasked => PrivilegeCode::WriteMasked,
-    }
+        WirePrivilegeCode::Unknown => return None,
+    })
 }
 
 /// The contract's privilege code.
 ///
 /// The inbound direction, for a role read back from the server. A code this build
 /// does not know cannot happen while the daemon and the client are one binary, but
-/// the match is exhaustive so an upstream addition is a compile error here rather
-/// than a silent mistranslation.
+/// `PrivilegeCode` is `non_exhaustive`, so a code added upstream arrives here as
+/// [`WirePrivilegeCode::Unknown`] rather than failing the whole role read.
 #[must_use]
 pub const fn from_privilege_code(code: &PrivilegeCode) -> WirePrivilegeCode {
     match code {
         PrivilegeCode::UserAdmin => WirePrivilegeCode::UserAdmin,
         PrivilegeCode::SysAdmin => WirePrivilegeCode::SysAdmin,
         PrivilegeCode::DataAdmin => WirePrivilegeCode::DataAdmin,
-        PrivilegeCode::UDFAdmin => WirePrivilegeCode::UdfAdmin,
-        PrivilegeCode::SIndexAdmin => WirePrivilegeCode::SIndexAdmin,
+        PrivilegeCode::UdfAdmin => WirePrivilegeCode::UdfAdmin,
+        PrivilegeCode::SindexAdmin => WirePrivilegeCode::SIndexAdmin,
         PrivilegeCode::Read => WirePrivilegeCode::Read,
         PrivilegeCode::ReadWrite => WirePrivilegeCode::ReadWrite,
-        PrivilegeCode::ReadWriteUDF => WirePrivilegeCode::ReadWriteUdf,
+        PrivilegeCode::ReadWriteUdf => WirePrivilegeCode::ReadWriteUdf,
         PrivilegeCode::Write => WirePrivilegeCode::Write,
         PrivilegeCode::Truncate => WirePrivilegeCode::Truncate,
         PrivilegeCode::MaskingAdmin => WirePrivilegeCode::MaskingAdmin,
         PrivilegeCode::ReadMasked => WirePrivilegeCode::ReadMasked,
         PrivilegeCode::WriteMasked => WirePrivilegeCode::WriteMasked,
+        _ => WirePrivilegeCode::Unknown,
     }
 }
 
@@ -115,8 +120,15 @@ pub fn to_privilege(privilege: &WirePrivilege) -> Result<Privilege, BadPrivilege
             privilege.code
         )));
     }
+    let Some(code) = privilege_code(privilege.code) else {
+        return Err(BadPrivilege(
+            "that privilege code is one this build of the client does not know; it can be read \
+             back on a role, and it cannot be granted"
+                .to_string(),
+        ));
+    };
     Ok(Privilege {
-        code: privilege_code(privilege.code),
+        code,
         namespace: privilege.namespace.clone(),
         set_name: privilege.set_name.clone(),
     })
@@ -287,11 +299,12 @@ mod tests {
             // A round trip through the client's type, which is what a role read
               // back from the server goes through.
             assert_eq!(
-                from_privilege_code(&privilege_code(code)),
+                from_privilege_code(&privilege_code(code).expect("a known code")),
                 code,
                 "{code:?} did not survive the round trip"
             );
         }
+        assert!(privilege_code(WirePrivilegeCode::Unknown).is_none());
     }
 
     #[test]

@@ -42,7 +42,7 @@
 //! wherever a filter is, and the version gate below is written once.
 //!
 //! Only the **text** form has a version requirement: it is compiled by the
-//! server, which only 8.1.3+ can do. Sending it to an older cluster gets a parameter error from
+//! server, which only 8.2.0+ can do. Sending it to an older cluster gets a parameter error from
 //! somewhere deep in the server with nothing to say about why, so [`AelSupport`]
 //! asks the cluster first — all nodes, since the filter travels with the command
 //! to whichever node owns the record — and an older cluster is refused with a
@@ -53,7 +53,7 @@ use std::time::Duration;
 
 use aerospike_core::policy::Replica;
 use aerospike_core::{
-    BasePolicy, Client, CommitLevel, Expiration, GenerationPolicy, ReadModeAP, ReadModeSC,
+    BasePolicy, Client, CommitLevel, Expiration, GenerationPolicy, ReadModeAp, ReadModeSc,
     ReadPolicy, RecordExistsAction, WritePolicy,
 };
 use aerospike_php_ipc::policy::{
@@ -91,7 +91,7 @@ impl std::error::Error for PolicyError {}
 /// Whether a cluster can compile Aerospike Expression Language text itself.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AelSupport {
-    /// Every node is new enough (8.1.3+).
+    /// Every node is new enough (8.2.0+).
     Supported,
     /// At least one node is not, named so the message can say which.
     Unsupported {
@@ -141,13 +141,13 @@ impl AelSupport {
         match self {
             AelSupport::Supported => Ok(()),
             AelSupport::Unsupported { node, version } => Err(PolicyError(format!(
-                "policy.filter is filter text the server compiles, which needs Aerospike 8.1.3 \
+                "policy.filter is filter text the server compiles, which needs Aerospike 8.2.0 \
                  or later, but node '{node}' runs {version}. Upgrade the cluster, drop the \
                  filter, or build it with Aerospike\\Exp instead — a built expression is \
                  packed by the client and needs nothing of the server"
             ))),
             AelSupport::Unknown => Err(PolicyError(
-                "policy.filter is filter text, which needs a server of 8.1.3 or later to \
+                "policy.filter is filter text, which needs a server of 8.2.0 or later to \
                  compile it, and this instance has no connected node to check; retry once the \
                  cluster is reachable, or build the expression with Aerospike\\Exp instead"
                     .to_string(),
@@ -159,8 +159,8 @@ impl AelSupport {
 /// What this cluster can do that an expression might need.
 ///
 /// Three gates travel together because they are asked at the same moment and
-/// answered from the same node list: filter *text* needs server 8.1.3 to compile,
-/// the string expressions need 8.1.3 to run, and a CDT path expression's fan-out
+/// answered from the same node list: filter *text* needs server 8.2.0 to compile,
+/// the string expressions need 8.2.0 to run, and a CDT path expression's fan-out
 /// needs 8.1.1. Bundling them is not tidiness — it means one walk of the cluster's
 /// nodes instead of three, and it means a new capability is a field here rather
 /// than another parameter threaded through every signature that leads to an
@@ -316,7 +316,7 @@ impl Defaults {
         let mut policy = self.read.clone();
         apply_shared(&mut policy.base_policy, wire, caps)?;
         if let Some(replica) = wire.replica {
-            policy.replica = replica_of(replica);
+            policy.base_policy.replica = replica_of(replica);
         }
         // `send_key` is deliberately not applied: a read stores nothing.
         Ok(policy)
@@ -339,7 +339,7 @@ impl Defaults {
         let mut policy = aerospike_core::BatchPolicy::default();
         policy.base_policy = self.read(wire, caps)?.base_policy;
         if let Some(replica) = wire.replica {
-            policy.replica = replica_of(replica);
+            policy.base_policy.replica = replica_of(replica);
         }
         Ok(policy)
     }
@@ -388,7 +388,7 @@ impl Defaults {
         let mut policy = aerospike_core::QueryPolicy::default();
         apply_shared(&mut policy.base_policy, wire, caps)?;
         if let Some(replica) = wire.replica {
-            policy.replica = replica_of(replica);
+            policy.base_policy.replica = replica_of(replica);
         }
         Ok(policy)
     }
@@ -418,7 +418,7 @@ impl Defaults {
         let mut policy = aerospike_core::TxnVerifyPolicy::default();
         apply_shared(&mut policy.batch_policy.base_policy, wire, caps)?;
         if let Some(replica) = wire.replica {
-            policy.batch_policy.replica = replica_of(replica);
+            policy.batch_policy.base_policy.replica = replica_of(replica);
         }
         Ok(policy)
     }
@@ -448,7 +448,7 @@ impl Defaults {
         let mut policy = aerospike_core::TxnRollPolicy::default();
         apply_shared(&mut policy.batch_policy.base_policy, wire, caps)?;
         if let Some(replica) = wire.replica {
-            policy.batch_policy.replica = replica_of(replica);
+            policy.batch_policy.base_policy.replica = replica_of(replica);
         }
         Ok(policy)
     }
@@ -554,16 +554,16 @@ fn apply_shared(
     }
     if let Some(mode) = wire.read_mode_ap {
         base.read_mode_ap = match mode {
-            WireReadModeAp::One => ReadModeAP::One,
-            WireReadModeAp::All => ReadModeAP::All,
+            WireReadModeAp::One => ReadModeAp::One,
+            WireReadModeAp::All => ReadModeAp::All,
         };
     }
     if let Some(mode) = wire.read_mode_sc {
         base.read_mode_sc = match mode {
-            WireReadModeSc::Session => ReadModeSC::Session,
-            WireReadModeSc::Linearize => ReadModeSC::Linearize,
-            WireReadModeSc::AllowReplica => ReadModeSC::AllowReplica,
-            WireReadModeSc::AllowUnavailable => ReadModeSC::AllowUnavailable,
+            WireReadModeSc::Session => ReadModeSc::Session,
+            WireReadModeSc::Linearize => ReadModeSc::Linearize,
+            WireReadModeSc::AllowReplica => ReadModeSc::AllowReplica,
+            WireReadModeSc::AllowUnavailable => ReadModeSc::AllowUnavailable,
         };
     }
     if let Some(compress) = wire.use_compression {
@@ -659,7 +659,7 @@ const fn expiration_of(expiration: WireExpiration) -> Expiration {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use aerospike_core::{Policy, Version};
+    use aerospike_core::Version;
 
     fn defaults() -> Defaults {
         Defaults::with_total_timeout(Duration::from_secs(2))
@@ -717,15 +717,15 @@ mod tests {
         assert_eq!(verify.batch_policy.base_policy.max_retries, 5);
         assert_eq!(
             verify.batch_policy.base_policy.read_mode_sc,
-            ReadModeSC::Linearize,
+            ReadModeSc::Linearize,
             "a verify batch reads linearizably, which is the point of verifying"
         );
-        assert_eq!(verify.batch_policy.replica, Replica::Master);
+        assert_eq!(verify.batch_policy.base_policy.replica, Replica::Master);
 
         let roll = defaults.txn_roll(&none, &Capabilities::all()).unwrap();
         assert_eq!(roll.batch_policy.base_policy.total_timeout, 10_000);
         assert_eq!(roll.batch_policy.base_policy.max_retries, 5);
-        assert_eq!(roll.batch_policy.replica, Replica::Master);
+        assert_eq!(roll.batch_policy.base_policy.replica, Replica::Master);
 
         // Overrides still land on top, which is what makes the pair worth carrying.
         let longer = WirePolicy {
@@ -737,13 +737,13 @@ mod tests {
         let verify = defaults.txn_verify(&longer, &Capabilities::all()).unwrap();
         assert_eq!(verify.batch_policy.base_policy.total_timeout, 30_000);
         assert_eq!(verify.batch_policy.base_policy.max_retries, 8);
-        assert_eq!(verify.batch_policy.replica, Replica::Sequence);
+        assert_eq!(verify.batch_policy.base_policy.replica, Replica::Sequence);
         // Untouched fields keep the client's tuning rather than reverting.
         assert_eq!(verify.batch_policy.base_policy.socket_timeout, 3_000);
 
         let roll = defaults.txn_roll(&longer, &Capabilities::all()).unwrap();
         assert_eq!(roll.batch_policy.base_policy.total_timeout, 30_000);
-        assert_eq!(roll.batch_policy.replica, Replica::Sequence);
+        assert_eq!(roll.batch_policy.base_policy.replica, Replica::Sequence);
     }
 
     /// Both refuse the fields that would mean nothing here, rather than ignoring
@@ -804,7 +804,7 @@ mod tests {
             base.base_policy.socket_timeout
         );
         assert_eq!(read.base_policy.max_retries, base.base_policy.max_retries);
-        assert_eq!(read.replica, base.replica);
+        assert_eq!(read.base_policy.replica, base.base_policy.replica);
         assert!(read.base_policy.filter_expression.is_none());
 
         let write = defaults.write(&empty, &Capabilities::all()).unwrap();
@@ -838,25 +838,22 @@ mod tests {
         };
 
         let read = defaults().read(&wire, &Capabilities::all()).unwrap();
-        assert_eq!(read.total_timeout(), 1_500);
-        assert_eq!(read.socket_timeout(), 250);
-        assert_eq!(read.max_retries(), 4);
-        assert_eq!(read.sleep_between_retries(), Some(Duration::from_millis(30)));
-        assert_eq!(read.read_mode_ap(), ReadModeAP::All);
-        assert_eq!(read.read_mode_sc(), ReadModeSC::Linearize);
-        assert!(read.use_compression());
+        assert_eq!(read.base_policy.total_timeout, 1_500);
+        assert_eq!(read.base_policy.socket_timeout, 250);
+        assert_eq!(read.base_policy.max_retries, 4);
+        assert_eq!(read.base_policy.sleep_between_retries, 30);
+        assert_eq!(read.base_policy.read_mode_ap, ReadModeAp::All);
+        assert_eq!(read.base_policy.read_mode_sc, ReadModeSc::Linearize);
+        assert!(read.base_policy.use_compression);
 
         let write = defaults().write(&wire, &Capabilities::all()).unwrap();
-        assert_eq!(write.total_timeout(), 1_500);
-        assert_eq!(write.socket_timeout(), 250);
-        assert_eq!(write.max_retries(), 4);
-        assert_eq!(
-            write.sleep_between_retries(),
-            Some(Duration::from_millis(30))
-        );
-        assert_eq!(write.read_mode_ap(), ReadModeAP::All);
-        assert_eq!(write.read_mode_sc(), ReadModeSC::Linearize);
-        assert!(write.use_compression());
+        assert_eq!(write.base_policy.total_timeout, 1_500);
+        assert_eq!(write.base_policy.socket_timeout, 250);
+        assert_eq!(write.base_policy.max_retries, 4);
+        assert_eq!(write.base_policy.sleep_between_retries, 30);
+        assert_eq!(write.base_policy.read_mode_ap, ReadModeAp::All);
+        assert_eq!(write.base_policy.read_mode_sc, ReadModeSc::Linearize);
+        assert!(write.base_policy.use_compression);
     }
 
     #[test]
@@ -940,7 +937,7 @@ mod tests {
                 ..WirePolicy::default()
             };
             let resolved = defaults().read(&policy, &Capabilities::all()).unwrap();
-            assert_eq!(resolved.replica, expected, "{wire:?}");
+            assert_eq!(resolved.base_policy.replica, expected, "{wire:?}");
         }
     }
 
@@ -1042,7 +1039,7 @@ mod tests {
             defaults().read(&wire, &old).unwrap_err(),
             defaults().write(&wire, &old).unwrap_err(),
         ] {
-            assert!(err.message().contains("8.1.3"), "{err}");
+            assert!(err.message().contains("8.2.0"), "{err}");
             assert!(err.message().contains("BB9040011AC4202"), "{err}");
             assert!(err.message().contains("8.1.2.0"), "{err}");
         }
@@ -1059,9 +1056,9 @@ mod tests {
 
     #[test]
     fn the_version_gate_is_the_clients_own() {
-        // Not a re-implementation of "8.1.3": the same predicate the rest of the
+        // Not a re-implementation of "8.2.0": the same predicate the rest of the
         // client uses, so the two cannot drift apart.
-        assert!(Version::new(8, 1, 3, 0).supports_server_compiled_ael());
-        assert!(!Version::new(8, 1, 2, 0).supports_server_compiled_ael());
+        assert!(Version::new(8, 2, 0, 0).supports_server_compiled_ael());
+        assert!(!Version::new(8, 1, 3, 0).supports_server_compiled_ael());
     }
 }

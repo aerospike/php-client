@@ -58,7 +58,7 @@ serde = { version = "1", features = ["derive"] }
 # path dependency while the two live in the same repository; once they are separate,
 # point it at the published crate or at the branch this client tracks:
 #
-#     aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust", branch = "v3", features = ["rt-tokio", "tls"] }
+#     aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust", rev = "7b0aeedef33454d80b0f85135f50ed5ff2cad45f", features = ["rt-tokio", "tls"] }
 #
 # The `tls` feature is not optional in practice: `EXTERNAL` and `PKI` authentication
 # both send or prove credentials over the wire, and the client refuses either without a
@@ -67,7 +67,7 @@ serde = { version = "1", features = ["derive"] }
 # To work against a local checkout of the client while depending on git, uncomment the
 # patch below rather than editing the dependency — that way the manifest keeps saying
 # what the release builds against.
-aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust", branch = "v3", features = ["rt-tokio", "tls"] }
+aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust", rev = "7b0aeedef33454d80b0f85135f50ed5ff2cad45f", features = ["rt-tokio", "tls"] }
 
 [profile.release]
 # The daemon is long-lived and the extension is `dlopen`ed into every PHP worker, so

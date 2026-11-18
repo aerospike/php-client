@@ -23,7 +23,7 @@
 //! it being sent at all.
 
 use aerospike_core::{
-    BatchDeletePolicy, BatchOperation, BatchReadPolicy, BatchRecord, BatchUDFPolicy,
+    BatchDeletePolicy, BatchOperation, BatchReadPolicy, BatchRecord, BatchUdfPolicy,
     BatchWritePolicy, Bins, Value,
 };
 use aerospike_php_ipc::batch::{
@@ -106,9 +106,7 @@ pub fn to_operation(row: &WireBatchRow, caps: &Capabilities) -> Result<BatchOper
                 key,
                 package,
                 function,
-                // `None` and an empty list mean the same thing to the server;
-                // sending `None` keeps the wire shorter for the common case.
-                if args.is_empty() { None } else { Some(args) },
+                args,
             )
         }
     })
@@ -125,8 +123,8 @@ pub fn to_operation(row: &WireBatchRow, caps: &Capabilities) -> Result<BatchOper
 #[must_use]
 pub fn to_result(record: &BatchRecord) -> WireBatchResult {
     let (in_doubt, server_message, found) =
-        (record.in_doubt, record.server_message(), record.record.as_ref());
-    match record.result_code {
+        (record.in_doubt(), record.server_message(), record.record.as_ref());
+    match record.result_code() {
         Some(code) if code != aerospike_core::ResultCode::Ok => WireBatchResult::failed(
             // The client's result code is an enum over the server's byte, and
             // `u8` is the conversion it offers; the contract carries an i32
@@ -244,8 +242,8 @@ fn delete_policy(
     Ok(built)
 }
 
-fn udf_policy(policy: &WireBatchUdfPolicy, caps: &Capabilities) -> Result<BatchUDFPolicy, OpError> {
-    let mut built = BatchUDFPolicy::default();
+fn udf_policy(policy: &WireBatchUdfPolicy, caps: &Capabilities) -> Result<BatchUdfPolicy, OpError> {
+    let mut built = BatchUdfPolicy::default();
     if let Some(level) = policy.commit_level {
         built.commit_level = crate::policy::commit_level(level);
     }
@@ -432,41 +430,14 @@ mod tests {
         )
     }
 
-    /// The three answers a row can give have to stay distinguishable: a failure,
-    /// a read that found nothing, and a read that found something.
+    /// A row the server answered and a row it has not yet answered have to stay
+    /// distinguishable. A failed row is the third answer, and it is no longer
+    /// buildable here: `BatchRecord`'s error is crate-private in aerospike-core
+    /// 3.0, filled in only by the batch call itself.
     #[test]
-    fn the_three_row_answers_are_distinct() {
-        // A failure: the result code travels, and no record comes with it.
-        let mut failed = row(false);
-        failed.result_code = Some(aerospike_core::ResultCode::KeyNotFoundError);
-        let failed = to_result(&failed);
-        assert!(!failed.is_ok());
-        assert_eq!(
-            failed.result_code,
-            Some(i32::from(u8::from(
-                aerospike_core::ResultCode::KeyNotFoundError
-            )))
-        );
-        assert!(failed.record.is_none());
-
-        // In doubt travels separately from the code: a write that may have landed
-        // is not the same answer as one that certainly did not. Note the
-        // `has_write` — a read row can never be in doubt, which is the client's
-        // rule and not this crate's.
-        let mut doubtful = row(true);
-        doubtful.result_code = Some(aerospike_core::ResultCode::Timeout);
-        doubtful.in_doubt = true;
-        doubtful.set_error_detail(Some(Box::new(aerospike_core::ServerErrorDetail {
-            sub_code: aerospike_core::server_error::sub_code::NONE,
-            message: "timed out".to_owned(),
-            ..Default::default()
-        })));
-        let doubtful = to_result(&doubtful);
-        assert!(doubtful.in_doubt);
-        assert_eq!(doubtful.message.as_deref(), Some("timed out"));
-
-        // A read that found nothing: a success, with no record. This is the answer
-        // most easily mistaken for a failure by a caller that only checks bins.
+    fn a_found_row_and_an_unanswered_row_are_distinct() {
+        // No result yet: a success with no record. This is the answer most
+        // easily mistaken for a failure by a caller that only checks bins.
         let missing = to_result(&row(false));
         assert!(missing.is_ok(), "no result code means the row succeeded");
         assert!(
@@ -477,7 +448,8 @@ mod tests {
         assert_eq!(missing.ttl, None);
 
         // A read that found something: bins, generation and a TTL come through.
-        // `0` for the expiration is the server's "never expires".
+        // `0` for the expiration is the server's "never expires". A record on
+        // the row is also what makes the result code `Ok`.
         let mut found = row(false);
         let mut bins = aerospike_core::IndexMap::new();
         bins.insert("n".to_owned(), aerospike_core::Value::Int(7));
@@ -488,10 +460,5 @@ mod tests {
         assert_eq!(found.ttl, None, "expiration 0 is never-expires, not a TTL");
         let body = found.record.expect("a found row carries its bins");
         assert_eq!(body.bins.len(), 1);
-
-        // `Ok` stated explicitly is a success, not a failure whose code is zero.
-        let mut explicit_ok = row(false);
-        explicit_ok.result_code = Some(aerospike_core::ResultCode::Ok);
-        assert!(to_result(&explicit_ok).is_ok());
     }
 }

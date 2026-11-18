@@ -646,14 +646,16 @@ impl Dispatcher {
             Err(outcome) => return outcome,
         };
 
-        let rows = match batch::to_operations(&request.rows, &Capabilities::of(&client)) {
+        let mut rows = match batch::to_operations(&request.rows, &Capabilities::of(&client)) {
             Ok(rows) => rows,
             Err(e) => return Outcome::error(StatusCode::INVALID_REQUEST, e.to_string()),
         };
 
-        match client.batch(&policy, &rows).await {
-            Ok(records) => Outcome::encoded(&WireBatchReply {
-                rows: records.iter().map(batch::to_result).collect(),
+        // 3.0 writes each row's outcome into the caller's operations instead of
+        // returning a new vector.
+        match client.batch(&policy, &mut rows).await {
+            Ok(()) => Outcome::encoded(&WireBatchReply {
+                rows: rows.iter().map(|op| batch::to_result(op.batch_record())).collect(),
             }),
             Err(e) => Outcome::failed(&classify(&e)),
         }
@@ -920,7 +922,7 @@ impl Dispatcher {
             Err(outcome) => return outcome,
         };
         let args = match admin::to_udf_args(&request.args) {
-            Ok(args) => args,
+            Ok(args) => args.unwrap_or_default(),
             Err(e) => return Outcome::error(StatusCode::INVALID_REQUEST, e.to_string()),
         };
 
@@ -930,7 +932,7 @@ impl Dispatcher {
                 &key,
                 &request.package,
                 &request.function,
-                args.as_deref(),
+                &args,
             )
             .await
         {
@@ -970,7 +972,7 @@ impl Dispatcher {
             Err(e) => return Outcome::error(StatusCode::INVALID_REQUEST, e.to_string()),
         };
         let args = match admin::to_udf_args(&request.args) {
-            Ok(args) => args,
+            Ok(args) => args.unwrap_or_default(),
             Err(e) => return Outcome::error(StatusCode::INVALID_REQUEST, e.to_string()),
         };
         // A statement with no filter is a scan, and the server tracks a
@@ -984,7 +986,7 @@ impl Dispatcher {
                 statement,
                 &request.package,
                 &request.function,
-                args.as_deref(),
+                &args,
             )
             .await
         {
@@ -1138,7 +1140,7 @@ impl Dispatcher {
             Err(outcome) => return outcome,
         };
 
-        match admin::task_of(&client, &request.handle).query_status().await {
+        match admin::query_task_status(&client, &request.handle).await {
             Ok(status) => Outcome::encoded(&admin::to_status(status)),
             Err(e) => Outcome::failed(&classify(&e)),
         }

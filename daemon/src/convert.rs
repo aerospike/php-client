@@ -95,8 +95,8 @@ pub fn to_value(wire: &WireValue) -> Result<Value, ResultOnlyValue> {
         WireValue::Float(f) => Ok(Value::Float(FloatValue::from(*f))),
         WireValue::Str(s) => Ok(Value::String(s.clone())),
         WireValue::Blob(b) => Ok(Value::Blob(b.clone())),
-        WireValue::GeoJson(json) => Ok(Value::GeoJSON(json.clone())),
-        WireValue::Hll(bytes) => Ok(Value::HLL(bytes.clone())),
+        WireValue::GeoJson(json) => Ok(Value::GeoJson(json.clone())),
+        WireValue::Hll(bytes) => Ok(Value::Hll(bytes.clone())),
         WireValue::Infinity => Ok(Value::Infinity),
         WireValue::Wildcard => Ok(Value::Wildcard),
         WireValue::List(items) => Ok(Value::List(
@@ -137,8 +137,8 @@ pub fn from_value(value: &Value) -> WireValue {
         Value::Float(f) => WireValue::Float(float_to_f64(f)),
         Value::String(s) => WireValue::Str(s.clone()),
         Value::Blob(b) => WireValue::Blob(b.clone()),
-        Value::GeoJSON(json) => WireValue::GeoJson(json.clone()),
-        Value::HLL(bytes) => WireValue::Hll(bytes.clone()),
+        Value::GeoJson(json) => WireValue::GeoJson(json.clone()),
+        Value::Hll(bytes) => WireValue::Hll(bytes.clone()),
         Value::Infinity => WireValue::Infinity,
         Value::Wildcard => WireValue::Wildcard,
         Value::List(items) => WireValue::List(items.iter().map(from_value).collect()),
@@ -157,6 +157,12 @@ pub fn from_value(value: &Value) -> WireValue {
         Value::Unknown(particle_type, data) => WireValue::Unknown {
             particle_type: *particle_type,
             data: data.clone(),
+        },
+        // `Value` is `non_exhaustive`: a particle type added by a later client
+        // still has to cross the wire as something PHP can inspect.
+        other => WireValue::Unknown {
+            particle_type: 0,
+            data: other.to_string().into_bytes(),
         },
     }
 }
@@ -311,12 +317,12 @@ mod tests {
         let geo = WireValue::GeoJson("{\"type\":\"Point\",\"coordinates\":[0,1]}".into());
         assert_eq!(
             to_value(&geo).unwrap(),
-            Value::GeoJSON("{\"type\":\"Point\",\"coordinates\":[0,1]}".into())
+            Value::GeoJson("{\"type\":\"Point\",\"coordinates\":[0,1]}".into())
         );
         assert_eq!(from_value(&to_value(&geo).unwrap()), geo);
 
         let hll = WireValue::Hll(vec![0, 4, 8]);
-        assert_eq!(to_value(&hll).unwrap(), Value::HLL(vec![0, 4, 8]));
+        assert_eq!(to_value(&hll).unwrap(), Value::Hll(vec![0, 4, 8]));
         assert_eq!(from_value(&to_value(&hll).unwrap()), hll);
 
         for (wire, value) in [
@@ -508,20 +514,20 @@ mod tests {
         let string = to_key("test", "s", &WireKey::Str("1".into())).unwrap();
         let blob = to_key("test", "s", &WireKey::Blob(vec![1])).unwrap();
 
-        assert_eq!(int.namespace, "test");
-        assert_eq!(int.set_name, "s");
-        assert_eq!(int.user_key, Some(Value::Int(1)));
-        assert_eq!(string.user_key, Some(Value::String("1".into())));
-        assert_eq!(blob.user_key, Some(Value::Blob(vec![1])));
+        assert_eq!(int.namespace(), "test");
+        assert_eq!(int.set_name(), "s");
+        assert_eq!(int.user_key(), Some(&Value::Int(1)));
+        assert_eq!(string.user_key(), Some(&Value::String("1".into())));
+        assert_eq!(blob.user_key(), Some(&Value::Blob(vec![1])));
 
-        assert_ne!(int.digest, string.digest);
-        assert_ne!(int.digest, blob.digest);
-        assert_ne!(string.digest, blob.digest);
+        assert_ne!(int.digest(), string.digest());
+        assert_ne!(int.digest(), blob.digest());
+        assert_ne!(string.digest(), blob.digest());
 
         // The digest covers the set name, so the same user key in another set
         // is another record.
         let other_set = to_key("test", "other", &WireKey::Int(1)).unwrap();
-        assert_ne!(int.digest, other_set.digest);
+        assert_ne!(int.digest(), other_set.digest());
 
         // An empty set name is the null set, not an error.
         assert!(to_key("test", "", &WireKey::Int(1)).is_ok());

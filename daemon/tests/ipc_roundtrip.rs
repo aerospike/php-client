@@ -1179,7 +1179,7 @@ fn a_server_compiled_filter_is_applied_rather_than_ignored() {
     if reply.status() == StatusCode::INVALID_REQUEST {
         let message = error_message(&payload);
         assert!(
-            message.contains("8.1.3"),
+            message.contains("8.2.0"),
             "the only acceptable refusal here is the version gate: {message}"
         );
         eprintln!("skipping: this cluster cannot compile AEL ({message})");

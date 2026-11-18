@@ -29,11 +29,14 @@ path = "src/main.rs"
 # both send or prove credentials over the wire, and the client refuses either without a
 # TLS configuration. See `config::TlsConfig`.
 #aerospike-core = { workspace = true }
-aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust", branch = "v3", features = ["rt-tokio", "tls"] }
+aerospike-core = { git = "https://github.com/aerospike/aerospike-client-rust", rev = "7b0aeedef33454d80b0f85135f50ed5ff2cad45f", features = ["rt-tokio", "tls"] }
 aerospike-php-ipc = { path = "../ipc" }
 # The daemon builds the `rustls::ClientConfig` the client policy carries, from the
 # PEM files named in its own configuration file.
-rustls = "0.23.42"
+# `ring` only, matching aerospike-core. Default rustls features also enable
+# `aws-lc-rs`, and with two providers compiled in `ClientConfig::builder`
+# panics instead of choosing one.
+rustls = { version = "0.23.42", default-features = false, features = ["ring", "logging", "std", "tls12"] }
 # The platform's trusted roots, for a cluster whose certificate came from a public
 # CA. A private CA — which is the usual Aerospike deployment — needs only
 # `tls_ca_file`, so this is opt-in through `tls_use_platform_roots`.

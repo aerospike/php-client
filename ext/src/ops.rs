@@ -2300,7 +2300,7 @@ impl HllOp {
 /// | how | needs | notes |
 /// | --- | --- | --- |
 /// | `Aerospike\\Exp::*` | nothing | composed here, packed by the client |
-/// | `Expression::ael($text)` | server 8.1.3+ | shortest to write; the server parses it |
+/// | `Expression::ael($text)` | server 8.2.0+ | shortest to write; the server parses it |
 /// | `Expression::base64($packed)` | nothing | one another client packed |
 ///
 /// **Prefer the builder** unless the text form is clearly more readable for what
