@@ -33,7 +33,7 @@ use std::fmt;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use aerospike_core::policy::{AuthMode, ClientPolicy};
+use aerospike_core::policy::{AuthMode, ClientPolicy, TlsPolicy};
 use serde::de::{self, Deserializer, Visitor};
 use serde::Deserialize;
 
@@ -895,7 +895,7 @@ impl ClusterConfig {
         // conversion can fail on an unreadable file — better to find that out
         // before anything else is resolved.
         if let Some(tls) = &self.tls {
-            policy.tls_config = Some(tls.to_rustls()?);
+            policy.tls_policy = Some(TlsPolicy::new(tls.to_rustls()?));
         }
 
         if let Some(v) = self.timeout {
@@ -1040,7 +1040,7 @@ impl ClusterConfig {
             "none" => AuthMode::None,
             "external" => AuthMode::External(user.clone(), password),
             "externalinsecure" => AuthMode::ExternalInsecure(user.clone(), password),
-            "pki" => AuthMode::PKI,
+            "pki" => AuthMode::Pki,
             other => {
                 return Err(ConfigError::new(format!(
                     "unknown auth mode '{other}': use INTERNAL, EXTERNAL, \
@@ -1069,14 +1069,14 @@ impl ClusterConfig {
                  [cluster.<name>.tls] section with a 'ca-file'. Use EXTERNAL_INSECURE only if \
                  sending the password in the clear is acceptable (testing)",
             )),
-            AuthMode::PKI if self.tls.is_none() => Err(ConfigError::new(
+            AuthMode::Pki if self.tls.is_none() => Err(ConfigError::new(
                 "auth = 'PKI' identifies the user by a client certificate, so it requires a \
                  [cluster.<name>.tls] section with 'cert-file' and 'key-file'",
             )),
             // TLS is configured but presents no certificate, so there is no
             // identity for the server to read — which it reports as an
             // authentication failure that says nothing about the cause.
-            AuthMode::PKI
+            AuthMode::Pki
                 if !self
                     .tls
                     .as_ref()
@@ -1617,7 +1617,7 @@ mod tests {
             AuthMode::External("u".into(), "p".into())
         );
         assert!(
-            policy.tls_config.is_some(),
+            policy.tls_policy.is_some(),
             "the policy must carry the TLS configuration the client needs"
         );
 

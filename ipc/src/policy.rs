@@ -154,7 +154,7 @@ pub struct WirePolicy {
     ///
     /// Any of the three forms — see [`WireExpression`]. Built trees work against
     /// every server; the Aerospike Expression Language text form needs server
-    /// 8.1.3+, and the daemon checks node versions for that one rather than
+    /// 8.2.0+, and the daemon checks node versions for that one rather than
     /// letting an older server reject the text obscurely.
     ///
     /// A record the filter rejects comes back as [`crate::StatusCode::SERVER`]

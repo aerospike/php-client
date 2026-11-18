@@ -28,17 +28,13 @@ use aerospike_core::operations::cdt_context::{
     ctx_map_key, ctx_map_key_create, ctx_map_rank, ctx_map_value,
 };
 use aerospike_core::operations::lists::{
-    self, InvertedListReturn, ListOrderType, ListPolicy, ListReturnType,
-    ListSortFlags, ListWriteFlags, ToListReturnTypeBitmask,
+    self, ListOrderType, ListPolicy, ListReturnType, ListSortFlags, ListWriteFlags,
 };
 use aerospike_core::expressions::{from_base64, pack_ael_server_filter};
-use aerospike_core::operations::exp::{
-    self, ExpReadFlags, ExpWriteFlags, ToExpReadFlagBitmask, ToExpWriteFlagBitmask,
-};
-use aerospike_core::operations::hll::{self, HLLPolicy, HLLWriteFlags};
+use aerospike_core::operations::exp::{self, ExpReadFlags, ExpWriteFlags};
+use aerospike_core::operations::hll::{self, HllPolicy, HllWriteFlags};
 use aerospike_core::operations::maps::{
-    self, InvertedMapReturn, MapOrder, MapPolicy, MapReturnType, MapWriteFlags,
-    MapWriteMode, ToMapReturnTypeBitmask,
+    self, MapOrder, MapPolicy, MapReturnType, MapWriteFlags,
 };
 use aerospike_core::operations::{scalar, CdtContext, Operation};
 use aerospike_core::{Bin, IndexMap, Value};
@@ -232,26 +228,6 @@ pub fn to_expression(
     }
 }
 
-/// A finished expression-flag bitmask, for the client's generic slots.
-///
-/// The same shape as [`Ret`] and [`MapRet`], and for the same reason: the
-/// client's parameter is generic so that a caller can name one flag or several,
-/// and this side has already combined them.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-struct ExpFlags(i64);
-
-impl ToExpReadFlagBitmask for ExpFlags {
-    fn to_bitmask(self) -> i64 {
-        self.0
-    }
-}
-
-impl ToExpWriteFlagBitmask for ExpFlags {
-    fn to_bitmask(self) -> i64 {
-        self.0
-    }
-}
-
 /// An expression from Aerospike Expression Language source.
 ///
 /// Shared with the batch rows, whose per-row filters are the same text with the
@@ -272,32 +248,33 @@ pub fn to_ael_expression(
         .map_err(|e| OpError::Expression(format!("that expression could not be packed: {e}")))
 }
 
-/// The client's read-flag bitmask.
-const fn exp_read_flags(flags: WireExpReadFlags) -> ExpFlags {
-    ExpFlags(if flags.eval_no_fail {
-        ExpReadFlags::EvalNoFail as i64
+/// The client's read flags.
+const fn exp_read_flags(flags: WireExpReadFlags) -> ExpReadFlags {
+    if flags.eval_no_fail {
+        ExpReadFlags::EVAL_NO_FAIL
     } else {
-        ExpReadFlags::Default as i64
-    })
+        ExpReadFlags::DEFAULT
+    }
 }
 
-/// The client's write-flag bitmask.
-fn exp_write_flags(flags: WireExpWriteFlags) -> ExpFlags {
+/// The client's write flags. The mode and the extra bits are one set, combined
+/// with `|`.
+fn exp_write_flags(flags: WireExpWriteFlags) -> ExpWriteFlags {
     let mut bits = match flags.write_mode {
-        WireExpWriteMode::Update => ExpWriteFlags::Default as i64,
-        WireExpWriteMode::CreateOnly => ExpWriteFlags::CreateOnly as i64,
-        WireExpWriteMode::UpdateOnly => ExpWriteFlags::UpdateOnly as i64,
+        WireExpWriteMode::Update => ExpWriteFlags::DEFAULT,
+        WireExpWriteMode::CreateOnly => ExpWriteFlags::CREATE_ONLY,
+        WireExpWriteMode::UpdateOnly => ExpWriteFlags::UPDATE_ONLY,
     };
     if flags.allow_delete {
-        bits |= ExpWriteFlags::AllowDelete as i64;
+        bits |= ExpWriteFlags::ALLOW_DELETE;
     }
     if flags.no_fail {
-        bits |= ExpWriteFlags::PolicyNoFail as i64;
+        bits |= ExpWriteFlags::POLICY_NO_FAIL;
     }
     if flags.eval_no_fail {
-        bits |= ExpWriteFlags::EvalNoFail as i64;
+        bits |= ExpWriteFlags::EVAL_NO_FAIL;
     }
-    ExpFlags(bits)
+    bits
 }
 
 /// One bitwise operation.
@@ -313,7 +290,12 @@ fn to_bit_operation(bin: &str, op: &WireBitOp) -> Result<Operation, ResultOnlyVa
             byte_size,
             flags,
             policy,
-        } => bitwise::resize(bin, *byte_size, flags.map(bit_resize), &bit_policy(*policy)),
+        } => bitwise::resize(
+            bin,
+            *byte_size,
+            flags.map(bit_resize).unwrap_or(BitwiseResizeFlags::DEFAULT),
+            &bit_policy(*policy),
+        ),
         WireBitOp::Insert {
             byte_offset,
             value: v,
@@ -491,10 +473,10 @@ const fn unset_as_minus_one(count: Option<i64>) -> i64 {
 
 pub(crate) const fn bit_resize(flags: WireBitResize) -> BitwiseResizeFlags {
     match flags {
-        WireBitResize::Default => BitwiseResizeFlags::Default,
-        WireBitResize::FromFront => BitwiseResizeFlags::FromFront,
-        WireBitResize::GrowOnly => BitwiseResizeFlags::GrowOnly,
-        WireBitResize::ShrinkOnly => BitwiseResizeFlags::ShrinkOnly,
+        WireBitResize::Default => BitwiseResizeFlags::DEFAULT,
+        WireBitResize::FromFront => BitwiseResizeFlags::FROM_FRONT,
+        WireBitResize::GrowOnly => BitwiseResizeFlags::GROW_ONLY,
+        WireBitResize::ShrinkOnly => BitwiseResizeFlags::SHRINK_ONLY,
     }
 }
 
@@ -510,33 +492,33 @@ pub(crate) const fn bit_overflow(overflow: WireBitOverflow) -> BitwiseOverflowAc
 /// mode and two flags.
 pub(crate) fn bit_policy(policy: WireBitPolicy) -> BitPolicy {
     let mut flags = match policy.write_mode {
-        WireBitWriteMode::Update => BitwiseWriteFlags::Default as u8,
-        WireBitWriteMode::UpdateOnly => BitwiseWriteFlags::UpdateOnly as u8,
-        WireBitWriteMode::CreateOnly => BitwiseWriteFlags::CreateOnly as u8,
+        WireBitWriteMode::Update => BitwiseWriteFlags::DEFAULT,
+        WireBitWriteMode::UpdateOnly => BitwiseWriteFlags::UPDATE_ONLY,
+        WireBitWriteMode::CreateOnly => BitwiseWriteFlags::CREATE_ONLY,
     };
     if policy.no_fail {
-        flags |= BitwiseWriteFlags::NoFail as u8;
+        flags |= BitwiseWriteFlags::NO_FAIL;
     }
     if policy.partial {
-        flags |= BitwiseWriteFlags::Partial as u8;
+        flags |= BitwiseWriteFlags::PARTIAL;
     }
     BitPolicy::new(flags)
 }
 
 /// The client's HyperLogLog policy, likewise.
-pub(crate) fn hll_policy(policy: WireHllPolicy) -> HLLPolicy {
+pub(crate) fn hll_policy(policy: WireHllPolicy) -> HllPolicy {
     let mut flags = match policy.write_mode {
-        WireHllWriteMode::Update => HLLWriteFlags::Default as i64,
-        WireHllWriteMode::UpdateOnly => HLLWriteFlags::UpdateOnly as i64,
-        WireHllWriteMode::CreateOnly => HLLWriteFlags::CreateOnly as i64,
+        WireHllWriteMode::Update => HllWriteFlags::DEFAULT,
+        WireHllWriteMode::UpdateOnly => HllWriteFlags::UPDATE_ONLY,
+        WireHllWriteMode::CreateOnly => HllWriteFlags::CREATE_ONLY,
     };
     if policy.no_fail {
-        flags |= HLLWriteFlags::NoFail as i64;
+        flags |= HllWriteFlags::NO_FAIL;
     }
     if policy.allow_fold {
-        flags |= HLLWriteFlags::AllowFold as i64;
+        flags |= HllWriteFlags::ALLOW_FOLD;
     }
-    HLLPolicy { flags }
+    HllPolicy::new(flags)
 }
 
 /// A `Bin` for the scalar operations that take one.
@@ -567,9 +549,9 @@ fn to_context(ctx: &WireCtx, caps: &Capabilities) -> Result<CdtContext, OpError>
         WireCtx::ListValue { value } => ctx_list_value(convert::to_value(value)?),
         WireCtx::MapIndex { index } => ctx_map_index(*index),
         WireCtx::MapRank { rank } => ctx_map_rank(*rank),
-        WireCtx::MapKey { key } => ctx_map_key(convert::to_value(key)?),
+        WireCtx::MapKey { key } => ctx_map_key(convert::to_map_key(key)?),
         WireCtx::MapKeyCreate { key, order } => {
-            ctx_map_key_create(convert::to_value(key)?, map_order(*order))
+            ctx_map_key_create(convert::to_map_key(key)?, map_order(*order))
         }
         WireCtx::MapValue { value } => ctx_map_value(convert::to_value(value)?),
 
@@ -809,6 +791,12 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
     let values = |vs: &Vec<aerospike_php_ipc::WireValue>| {
         vs.iter().map(convert::to_value).collect::<Result<Vec<_>, _>>()
     };
+    // A key is ordered and hashed. A foreign particle is not a key, even
+    // though it is a legal map value.
+    let map_key = |k| convert::to_map_key(k);
+    let map_keys = |ks: &Vec<aerospike_php_ipc::WireValue>| {
+        ks.iter().map(convert::to_map_key).collect::<Result<Vec<_>, _>>()
+    };
 
     Ok(match op {
         // Handled by `to_operation`, which has the path these two need.
@@ -819,7 +807,7 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
         WireMapOp::SetOrder { order } => maps::set_order(bin, map_order(*order)),
 
         WireMapOp::Put { policy, key, value: v } => {
-            maps::put(&map_policy(*policy), bin, value(key)?, value(v)?)
+            maps::put(&map_policy(*policy), bin, map_key(key)?, value(v)?)
         }
         WireMapOp::PutItems { policy, items } => {
             // An `IndexMap`, so the order the caller wrote survives: with an
@@ -828,23 +816,23 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
             // `HashMap` would throw the order away for no gain.
             let mut map = IndexMap::with_capacity(items.len());
             for (key, value) in items {
-                map.insert(convert::to_value(key)?, convert::to_value(value)?);
+                map.insert(convert::to_map_key(key)?, convert::to_value(value)?);
             }
             maps::put_items(&map_policy(*policy), bin, map)
         }
         WireMapOp::IncrementValue { policy, key, delta } => {
-            maps::increment_value(&map_policy(*policy), bin, value(key)?, value(delta)?)
+            maps::increment_value(&map_policy(*policy), bin, map_key(key)?, value(delta)?)
         }
         WireMapOp::DecrementValue { policy, key, delta } => {
-            maps::decrement_value(&map_policy(*policy), bin, value(key)?, value(delta)?)
+            maps::decrement_value(&map_policy(*policy), bin, map_key(key)?, value(delta)?)
         }
         WireMapOp::Clear => maps::clear(bin),
 
         WireMapOp::RemoveByKey { key, return_type } => {
-            maps::remove_by_key(bin, value(key)?, map_return(*return_type))
+            maps::remove_by_key(bin, map_key(key)?, map_return(*return_type))
         }
         WireMapOp::RemoveByKeyList { keys, return_type } => {
-            maps::remove_by_key_list(bin, values(keys)?, map_return(*return_type))
+            maps::remove_by_key_list(bin, map_keys(keys)?, map_return(*return_type))
         }
         WireMapOp::RemoveByKeyRange {
             begin,
@@ -864,14 +852,14 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
         } => match count {
             Some(count) => maps::remove_by_key_relative_index_range_count(
                 bin,
-                value(key)?,
+                map_key(key)?,
                 *index,
                 *count,
                 map_return(*return_type),
             ),
             None => maps::remove_by_key_relative_index_range(
                 bin,
-                value(key)?,
+                map_key(key)?,
                 *index,
                 map_return(*return_type),
             ),
@@ -939,10 +927,10 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
 
         WireMapOp::Size => maps::size(bin),
         WireMapOp::GetByKey { key, return_type } => {
-            maps::get_by_key(bin, value(key)?, map_return(*return_type))
+            maps::get_by_key(bin, map_key(key)?, map_return(*return_type))
         }
         WireMapOp::GetByKeyList { keys, return_type } => {
-            maps::get_by_key_list(bin, values(keys)?, map_return(*return_type))
+            maps::get_by_key_list(bin, map_keys(keys)?, map_return(*return_type))
         }
         WireMapOp::GetByKeyRange {
             begin,
@@ -962,14 +950,14 @@ fn to_map_operation(bin: &str, op: &WireMapOp) -> Result<Operation, ResultOnlyVa
         } => match count {
             Some(count) => maps::get_by_key_relative_index_range_count(
                 bin,
-                value(key)?,
+                map_key(key)?,
                 *index,
                 *count,
                 map_return(*return_type),
             ),
             None => maps::get_by_key_relative_index_range(
                 bin,
-                value(key)?,
+                map_key(key)?,
                 *index,
                 map_return(*return_type),
             ),
@@ -1062,139 +1050,99 @@ const fn map_order(order: WireMapOrder) -> MapOrder {
     }
 }
 
-pub(crate) const fn list_sort(flags: WireListSort) -> ListSortFlags {
-    // The client's flags are an enum, not a bitmask, so the two cannot be
-    // combined there either; descending wins when both are asked for, which
-    // matches the order the flags are documented in.
-    match (flags.descending, flags.drop_duplicates) {
-        (true, _) => ListSortFlags::Descending,
-        (false, true) => ListSortFlags::DropDuplicates,
-        (false, false) => ListSortFlags::Default,
+pub(crate) fn list_sort(flags: WireListSort) -> ListSortFlags {
+    let mut sort = ListSortFlags::DEFAULT;
+    if flags.descending {
+        sort |= ListSortFlags::DESCENDING;
     }
+    if flags.drop_duplicates {
+        sort |= ListSortFlags::DROP_DUPLICATES;
+    }
+    sort
 }
 
 pub(crate) fn list_policy(policy: WireListPolicy) -> ListPolicy {
-    let mut flags = Vec::new();
+    let mut flags = ListWriteFlags::DEFAULT;
     if policy.flags.add_unique {
-        flags.push(ListWriteFlags::AddUnique);
+        flags |= ListWriteFlags::ADD_UNIQUE;
     }
     if policy.flags.insert_bounded {
-        flags.push(ListWriteFlags::InsertBounded);
+        flags |= ListWriteFlags::INSERT_BOUNDED;
     }
     if policy.flags.no_fail {
-        flags.push(ListWriteFlags::NoFail);
+        flags |= ListWriteFlags::NO_FAIL;
     }
     if policy.flags.partial {
-        flags.push(ListWriteFlags::Partial);
+        flags |= ListWriteFlags::PARTIAL;
     }
-    ListPolicy::new_with_flags(list_order(policy.order), flags)
+    ListPolicy::new(list_order(policy.order), flags)
 }
 
-/// A return type the client's list functions accept.
-///
-/// They are generic over `ToListReturnTypeBitmask` so that a caller can write
-/// either `ListReturnType::Values` or `InvertedListReturn(..)`. Inversion here
-/// is a runtime flag, not a choice of type, so this newtype carries the finished
-/// bitmask into that generic slot.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct Ret(i64);
-
-impl ToListReturnTypeBitmask for Ret {
-    fn to_bitmask(self) -> i64 {
-        self.0
-    }
-}
-
-/// A map return type the client's map functions accept, as [`Ret`] is for
-/// lists.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct MapRet(i64);
-
-impl ToMapReturnTypeBitmask for MapRet {
-    fn to_bitmask(self) -> i64 {
-        self.0
-    }
-}
-
-/// The client's map return-type bitmask, inversion included.
-pub(crate) fn map_return(return_type: WireMapReturn) -> MapRet {
+/// The client's map return type, inversion included.
+pub(crate) fn map_return(return_type: WireMapReturn) -> MapReturnType {
     let kind = match return_type.kind {
-        WireMapReturnKind::None => MapReturnType::None,
-        WireMapReturnKind::Index => MapReturnType::Index,
-        WireMapReturnKind::ReverseIndex => MapReturnType::ReverseIndex,
-        WireMapReturnKind::Rank => MapReturnType::Rank,
-        WireMapReturnKind::ReverseRank => MapReturnType::ReverseRank,
-        WireMapReturnKind::Count => MapReturnType::Count,
-        WireMapReturnKind::Key => MapReturnType::Key,
-        WireMapReturnKind::Value => MapReturnType::Value,
-        WireMapReturnKind::KeyValue => MapReturnType::KeyValue,
-        WireMapReturnKind::Exists => MapReturnType::Exists,
-        WireMapReturnKind::UnorderedMap => MapReturnType::UnorderedMap,
-        WireMapReturnKind::OrderedMap => MapReturnType::OrderedMap,
+        WireMapReturnKind::None => MapReturnType::NONE,
+        WireMapReturnKind::Index => MapReturnType::INDEX,
+        WireMapReturnKind::ReverseIndex => MapReturnType::REVERSE_INDEX,
+        WireMapReturnKind::Rank => MapReturnType::RANK,
+        WireMapReturnKind::ReverseRank => MapReturnType::REVERSE_RANK,
+        WireMapReturnKind::Count => MapReturnType::COUNT,
+        WireMapReturnKind::Key => MapReturnType::KEY,
+        WireMapReturnKind::Value => MapReturnType::VALUE,
+        WireMapReturnKind::KeyValue => MapReturnType::KEY_VALUE,
+        WireMapReturnKind::Exists => MapReturnType::EXISTS,
+        WireMapReturnKind::UnorderedMap => MapReturnType::UNORDERED_MAP,
+        WireMapReturnKind::OrderedMap => MapReturnType::ORDERED_MAP,
     };
-    MapRet(if return_type.inverted {
-        InvertedMapReturn(kind).to_bitmask()
+    if return_type.inverted {
+        kind.inverted()
     } else {
-        kind.to_bitmask()
-    })
+        kind
+    }
 }
 
 /// The client's map policy.
 ///
-/// The client carries both a write mode and a flag bitmask, and the flags
-/// *replace* the mode when they are non-zero. The contract carries one mode plus
-/// the two flags that say something the mode cannot, so this is where they are
-/// combined: the flags are only used when one of those two is asked for, and
-/// they then have to re-encode the mode as well. Leaving `flags` at zero
-/// otherwise keeps a plain `UpdateOnly` working against a server older than 4.3,
-/// which is when write flags arrived.
+/// aerospike-core 3.0 dropped `MapWriteMode`. The mode and the extra flags are
+/// one [`MapWriteFlags`] set, so an `UpdateOnly` that also asks not to fail
+/// still says update-only.
 pub(crate) fn map_policy(policy: WireMapPolicy) -> MapPolicy {
-    let write_mode = match policy.write_mode {
-        WireMapWriteMode::Update => MapWriteMode::Update,
-        WireMapWriteMode::UpdateOnly => MapWriteMode::UpdateOnly,
-        WireMapWriteMode::CreateOnly => MapWriteMode::CreateOnly,
+    let mut flags = match policy.write_mode {
+        WireMapWriteMode::Update => MapWriteFlags::DEFAULT,
+        WireMapWriteMode::UpdateOnly => MapWriteFlags::UPDATE_ONLY,
+        WireMapWriteMode::CreateOnly => MapWriteFlags::CREATE_ONLY,
     };
-
-    let mut flags = 0;
-    if policy.no_fail || policy.partial {
-        flags = match policy.write_mode {
-            WireMapWriteMode::Update => MapWriteFlags::DEFAULT,
-            WireMapWriteMode::UpdateOnly => MapWriteFlags::UPDATE_ONLY,
-            WireMapWriteMode::CreateOnly => MapWriteFlags::CREATE_ONLY,
-        };
-        if policy.no_fail {
-            flags |= MapWriteFlags::NO_FAIL;
-        }
-        if policy.partial {
-            flags |= MapWriteFlags::PARTIAL;
-        }
+    if policy.no_fail {
+        flags |= MapWriteFlags::NO_FAIL;
     }
-
-    MapPolicy {
-        order: map_order(policy.order),
-        write_mode,
-        flags,
-        persist_index: policy.persist_index,
+    if policy.partial {
+        flags |= MapWriteFlags::PARTIAL;
+    }
+    let order = map_order(policy.order);
+    if policy.persist_index {
+        MapPolicy::with_persisted_index(order, flags)
+    } else {
+        MapPolicy::new(order, flags)
     }
 }
 
-/// The client's return-type bitmask, inversion included.
-pub(crate) fn list_return(return_type: WireListReturn) -> Ret {
+/// The client's list return type, inversion included.
+pub(crate) fn list_return(return_type: WireListReturn) -> ListReturnType {
     let kind = match return_type.kind {
-        WireListReturnKind::None => ListReturnType::None,
-        WireListReturnKind::Index => ListReturnType::Index,
-        WireListReturnKind::ReverseIndex => ListReturnType::ReverseIndex,
-        WireListReturnKind::Rank => ListReturnType::Rank,
-        WireListReturnKind::ReverseRank => ListReturnType::ReverseRank,
-        WireListReturnKind::Count => ListReturnType::Count,
-        WireListReturnKind::Values => ListReturnType::Values,
-        WireListReturnKind::Exists => ListReturnType::Exists,
+        WireListReturnKind::None => ListReturnType::NONE,
+        WireListReturnKind::Index => ListReturnType::INDEX,
+        WireListReturnKind::ReverseIndex => ListReturnType::REVERSE_INDEX,
+        WireListReturnKind::Rank => ListReturnType::RANK,
+        WireListReturnKind::ReverseRank => ListReturnType::REVERSE_RANK,
+        WireListReturnKind::Count => ListReturnType::COUNT,
+        WireListReturnKind::Values => ListReturnType::VALUES,
+        WireListReturnKind::Exists => ListReturnType::EXISTS,
     };
-    Ret(if return_type.inverted {
-        InvertedListReturn(kind).to_bitmask()
+    if return_type.inverted {
+        kind.inverted()
     } else {
-        kind.to_bitmask()
-    })
+        kind
+    }
 }
 
 #[cfg(test)]
@@ -1448,22 +1396,15 @@ mod tests {
         assert_eq!(built.len(), ops.len());
     }
 
-    /// The write mode and the two extra flags are one knob set on the wire and
-    /// two in the client, where the flags *replace* the mode when non-zero. The
-    /// combination has to re-encode the mode, or asking for "do not fail" would
-    /// silently turn an `UpdateOnly` into a plain update.
+    /// The write mode and the two extra flags are one flag set in aerospike-core
+    /// 3.0. Asking for "do not fail" must not drop UpdateOnly.
     #[test]
     fn a_map_write_mode_survives_being_combined_with_the_flags() {
         let plain = map_policy(WireMapPolicy {
             write_mode: WireMapWriteMode::UpdateOnly,
             ..WireMapPolicy::default()
         });
-        assert_eq!(
-            plain.flags, 0,
-            "with no extra flags the mode must be carried by write_mode, which works on a server \
-             older than 4.3"
-        );
-        assert!(matches!(plain.write_mode, MapWriteMode::UpdateOnly));
+        assert_eq!(plain.flags, MapWriteFlags::UPDATE_ONLY);
 
         let with_no_fail = map_policy(WireMapPolicy {
             write_mode: WireMapWriteMode::UpdateOnly,
@@ -1669,7 +1610,7 @@ mod tests {
         let message = error.to_string();
         assert!(message.contains("BB9A"), "{message}");
         assert!(message.contains("7.2.0"), "{message}");
-        assert!(message.contains("8.1.3"), "{message}");
+        assert!(message.contains("8.2.0"), "{message}");
 
         // A packed expression does not need the server to parse anything, so
         // the same cluster takes it.
@@ -1703,7 +1644,7 @@ mod tests {
     /// being combined with the rest of them.
     #[test]
     fn expression_write_flags_combine() {
-        assert_eq!(exp_write_flags(WireExpWriteFlags::default()).0, 0);
+        assert_eq!(exp_write_flags(WireExpWriteFlags::default()).bits(), 0);
         assert_eq!(
             exp_write_flags(WireExpWriteFlags {
                 write_mode: WireExpWriteMode::UpdateOnly,
@@ -1711,7 +1652,7 @@ mod tests {
                 no_fail: true,
                 eval_no_fail: true,
             })
-            .0,
+            .bits(),
             2 | 4 | 8 | 16
         );
         assert_eq!(
@@ -1719,11 +1660,14 @@ mod tests {
                 write_mode: WireExpWriteMode::CreateOnly,
                 ..WireExpWriteFlags::default()
             })
-            .0,
+            .bits(),
             1
         );
-        assert_eq!(exp_read_flags(WireExpReadFlags::default()).0, 0);
-        assert_eq!(exp_read_flags(WireExpReadFlags { eval_no_fail: true }).0, 16);
+        assert_eq!(exp_read_flags(WireExpReadFlags::default()).bits(), 0);
+        assert_eq!(
+            exp_read_flags(WireExpReadFlags { eval_no_fail: true }).bits(),
+            16
+        );
     }
 
     /// `None` is the client's `-1`, and it must not collide with a real count:
@@ -1740,14 +1684,15 @@ mod tests {
     /// the map policy has.
     #[test]
     fn bit_and_hll_write_modes_survive_the_flags() {
-        assert_eq!(bit_policy(WireBitPolicy::default()).flags, 0);
+        assert_eq!(bit_policy(WireBitPolicy::default()).flags.bits(), 0);
         assert_eq!(
             bit_policy(WireBitPolicy {
                 write_mode: WireBitWriteMode::UpdateOnly,
                 no_fail: true,
                 partial: true,
             })
-            .flags,
+            .flags
+            .bits(),
             2 | 4 | 8
         );
         assert_eq!(
@@ -1756,18 +1701,20 @@ mod tests {
                 no_fail: false,
                 partial: false,
             })
-            .flags,
+            .flags
+            .bits(),
             1
         );
 
-        assert_eq!(hll_policy(WireHllPolicy::default()).flags, 0);
+        assert_eq!(hll_policy(WireHllPolicy::default()).flags.bits(), 0);
         assert_eq!(
             hll_policy(WireHllPolicy {
                 write_mode: WireHllWriteMode::CreateOnly,
                 no_fail: true,
                 allow_fold: true,
             })
-            .flags,
+            .flags
+            .bits(),
             1 | 4 | 8
         );
     }
@@ -1776,12 +1723,12 @@ mod tests {
     /// wrong half of a map.
     #[test]
     fn map_inversion_reaches_the_bitmask() {
-        let plain = map_return(WireMapReturn::of(WireMapReturnKind::KeyValue)).0;
+        let plain = map_return(WireMapReturn::of(WireMapReturnKind::KeyValue)).bits();
         let inverted = map_return(WireMapReturn {
             kind: WireMapReturnKind::KeyValue,
             inverted: true,
         })
-        .0;
+        .bits();
         assert_eq!(inverted, plain ^ 0x10000);
     }
 
@@ -1856,12 +1803,12 @@ mod tests {
     /// remove the wrong half of a list.
     #[test]
     fn inversion_reaches_the_bitmask() {
-        let plain = list_return(WireListReturn::of(WireListReturnKind::Values)).0;
+        let plain = list_return(WireListReturn::of(WireListReturnKind::Values)).bits();
         let inverted = list_return(WireListReturn {
             kind: WireListReturnKind::Values,
             inverted: true,
         })
-        .0;
+        .bits();
         assert_ne!(plain, inverted);
         assert_eq!(inverted, plain ^ 0x10000);
     }
@@ -1871,7 +1818,7 @@ mod tests {
     #[test]
     fn write_flags_combine_into_the_clients_bitmask() {
         let none = list_policy(WireListPolicy::default());
-        assert_eq!(none.flags, 0);
+        assert_eq!(none.flags.bits(), 0);
 
         let all = list_policy(WireListPolicy {
             order: WireListOrder::Ordered,
@@ -1882,7 +1829,7 @@ mod tests {
                 partial: true,
             },
         });
-        assert_eq!(all.flags, 1 | 2 | 4 | 8);
+        assert_eq!(all.flags.bits(), 1 | 2 | 4 | 8);
 
         let one = list_policy(WireListPolicy {
             order: WireListOrder::Unordered,
@@ -1891,6 +1838,6 @@ mod tests {
                 ..aerospike_php_ipc::WireListWriteFlags::default()
             },
         });
-        assert_eq!(one.flags, 4);
+        assert_eq!(one.flags.bits(), 4);
     }
 }

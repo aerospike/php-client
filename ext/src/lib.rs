@@ -120,7 +120,7 @@ pub use query::{Filter, PartitionFilter, RecordSet, Statement};
 pub use record::{Bin, Bins, DaemonInfo, Key, Record};
 pub use security::{Privilege, Role, User};
 pub use txn::Transaction;
-pub use types::{Blob, GeoJson, Hll, Infinity, Wildcard};
+pub use types::{Blob, GeoJson, Hll, Infinity, Particle, Wildcard};
 
 const _: () = assert!(
     aerospike_php_ipc::is_version(env!("CARGO_PKG_VERSION")),
@@ -433,6 +433,7 @@ pub fn get_module(module: ModuleBuilder) -> ModuleBuilder {
         .class::<Blob>()
         .class::<GeoJson>()
         .class::<Hll>()
+        .class::<Particle>()
         .class::<Infinity>()
         .class::<Wildcard>()
 }

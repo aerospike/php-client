@@ -9,15 +9,16 @@
 //!
 //! The contract's side is [`aerospike_php_ipc::admin`]. What lives here is the
 //! translation, plus two things worth their own explanation: how a task handle is
-//! turned back into a client task, and how the server's `udf-list` text becomes a
+//! turned into a status query, and how the server's `udf-list` text becomes a
 //! typed list.
 //!
-//! # A task handle rebuilds its task, and nothing is kept between calls
+//! # A task handle is a description, and nothing is kept between calls
 //!
-//! `aerospike-core`'s task types — `IndexTask`, `RegisterTask`, `UdfRemoveTask`,
-//! `DropIndexTask`, `ExecuteTask` — hold a cluster handle and the identifiers
-//! needed to ask the server about the work. They keep no server-side state, so
-//! [`task_of`] reconstructs one from a [`WireTaskHandle`] on every status request.
+//! `aerospike-core` 3.0 seals its task types: the client creates them, and a
+//! binding cannot rebuild one because `Client::cluster` and the task constructors
+//! are crate-private. The questions those tasks ask are ordinary info commands,
+//! so [`query_task_status`] asks every node the same commands, through the public
+//! [`Client::nodes`] and [`Node::info`].
 //!
 //! That is what makes a handle a *description* rather than a registration: no
 //! table here, nothing to expire, and a handle stays valid across a daemon
@@ -28,62 +29,231 @@
 
 use std::sync::Arc;
 
-use aerospike_core::task::{
-    DropIndexTask, ExecuteTask, IndexTask, RegisterTask, Status, Task, UdfRemoveTask,
-};
+use aerospike_core::task::Status;
 use aerospike_core::{
-    AdminPolicy, Client, CollectionIndexType, IndexType, Node, UDFLang, Value,
+    AdminPolicy, Client, CollectionIndexType, Error, IndexType, Node, Result as AeroResult,
+    UdfLang, Value, Version,
 };
 use aerospike_php_ipc::admin::{
     WireIndexType, WireNode, WireTaskHandle, WireTaskStatus, WireUdfLang, WireUdfModule,
 };
 use aerospike_php_ipc::query::WireCollectionIndex;
 
-/// Rebuild the client task a handle describes.
+/// Ask every node how far the work a handle describes has got.
 ///
-/// A `Box<dyn Task>` rather than a match at every call site: the four kinds
-/// differ only in what they ask the server, and the caller only ever wants
-/// `query_status`.
+/// The same questions `aerospike-core`'s task types ask, asked here because those
+/// types can no longer be rebuilt from outside the crate. A handle stays a
+/// description: the identifiers travel with the request, and the progress lives
+/// on the server.
 ///
-/// The cluster comes from `client.cluster`, which is exactly what the client's own
-/// task-returning methods pass — so a rebuilt task is indistinguishable from the
-/// one the original command returned.
-#[must_use]
-pub fn task_of(client: &Client, handle: &WireTaskHandle) -> Box<dyn Task + Send + Sync> {
-    let cluster = client.cluster.clone();
+/// # Errors
+/// No node is connected, or a node answers with a response that cannot be read.
+pub async fn query_task_status(client: &Client, handle: &WireTaskHandle) -> AeroResult<Status> {
+    let nodes = client.nodes();
+    if nodes.is_empty() {
+        return Err(Error::client_error("No connected node"));
+    }
+    let policy = AdminPolicy { timeout: 3_000 };
     match handle {
         WireTaskHandle::Index {
             namespace,
             index_name,
             dropping,
         } => {
-            // Creating and dropping ask the server the same question and read the
-            // answer oppositely, which is why the handle records which it is
-            // rather than leaving the caller to interpret "the index exists".
+            // Creating and dropping ask different info commands and read the
+            // answer oppositely, which is why the handle records which it is.
             if *dropping {
-                Box::new(DropIndexTask::new(
-                    cluster,
-                    namespace.clone(),
-                    index_name.clone(),
-                ))
+                drop_index_status(&nodes, &policy, namespace, index_name).await
             } else {
-                Box::new(IndexTask::new(
-                    cluster,
-                    namespace.clone(),
-                    index_name.clone(),
-                ))
+                index_status(&nodes, &policy, namespace, index_name).await
             }
         }
         WireTaskHandle::UdfRegister { package } => {
-            Box::new(RegisterTask::new(cluster, package.clone()))
+            udf_register_status(&nodes, &policy, package).await
         }
-        WireTaskHandle::UdfRemove { package } => {
-            Box::new(UdfRemoveTask::new(cluster, package.clone()))
-        }
+        WireTaskHandle::UdfRemove { package } => udf_remove_status(&nodes, &policy, package).await,
         WireTaskHandle::Execute { task_id, scan } => {
-            Box::new(ExecuteTask::new(cluster, *task_id, *scan))
+            execute_status(&nodes, &policy, *task_id, *scan).await
         }
     }
+}
+
+/// One info command on one node. `None` means the node did not answer that command.
+async fn ask(node: &Node, policy: &AdminPolicy, command: &str) -> AeroResult<Option<String>> {
+    let response = node.info(policy, &[command]).await?;
+    Ok(response.get(command).cloned())
+}
+
+async fn index_status(
+    nodes: &[Arc<Node>],
+    policy: &AdminPolicy,
+    namespace: &str,
+    index_name: &str,
+) -> AeroResult<Status> {
+    for node in nodes {
+        let command = if node.version() >= &Version::new(8, 1, 0, 0) {
+            format!("sindex-stat:namespace={namespace};indexname={index_name}")
+        } else {
+            format!("sindex/{namespace}/{index_name}")
+        };
+        let Some(response) = ask(node, policy, &command).await? else {
+            return Err(Error::client_error("sindex-stat failed: missing response"));
+        };
+        match parse_index_load(&response)? {
+            Status::Complete => {}
+            other => return Ok(other),
+        }
+    }
+    Ok(Status::Complete)
+}
+
+fn parse_index_load(response: &str) -> AeroResult<Status> {
+    if response.is_empty() {
+        return Err(Error::client_error("sindex-stat failed: empty response"));
+    }
+    let find = "load_pct=";
+    match response.find(find) {
+        None => {
+            if response.contains("FAIL") || response.contains("ERROR") {
+                Err(Error::client_error(format!(
+                    "sindex-stat failed: {response}"
+                )))
+            } else {
+                Ok(Status::InProgress)
+            }
+        }
+        Some(index) => {
+            let pct_str: String = response[index + find.len()..]
+                .chars()
+                .take_while(char::is_ascii_digit)
+                .collect();
+            if pct_str.is_empty() {
+                return Err(Error::client_error(format!(
+                    "sindex-stat failed: could not parse load_pct from response '{response}'"
+                )));
+            }
+            match pct_str.parse::<usize>() {
+                Ok(pct) if pct >= 100 => Ok(Status::Complete),
+                Ok(_) => Ok(Status::InProgress),
+                Err(_) => Err(Error::client_error(format!(
+                    "sindex-stat failed: invalid load_pct value '{pct_str}'"
+                ))),
+            }
+        }
+    }
+}
+
+async fn drop_index_status(
+    nodes: &[Arc<Node>],
+    policy: &AdminPolicy,
+    namespace: &str,
+    index_name: &str,
+) -> AeroResult<Status> {
+    for node in nodes {
+        let command = if node.version() >= &Version::new(8, 1, 0, 0) {
+            format!("sindex-exists:namespace={namespace};indexname={index_name}")
+        } else {
+            format!("sindex-exists:ns={namespace};indexname={index_name}")
+        };
+        let Some(response) = ask(node, policy, &command).await? else {
+            return Ok(Status::NotFound);
+        };
+        // "false" is the index being gone, which is completion for a drop.
+        if response.to_lowercase() != "false" {
+            return Ok(Status::InProgress);
+        }
+    }
+    Ok(Status::Complete)
+}
+
+async fn udf_register_status(
+    nodes: &[Arc<Node>],
+    policy: &AdminPolicy,
+    package: &str,
+) -> AeroResult<Status> {
+    let needle = format!("filename={package}");
+    for node in nodes {
+        let Some(response) = ask(node, policy, "udf-list").await? else {
+            return Ok(Status::NotFound);
+        };
+        if !response.contains(&needle) {
+            return Ok(Status::InProgress);
+        }
+    }
+    Ok(Status::Complete)
+}
+
+async fn udf_remove_status(
+    nodes: &[Arc<Node>],
+    policy: &AdminPolicy,
+    package: &str,
+) -> AeroResult<Status> {
+    let needle = format!("filename={package}");
+    for node in nodes {
+        let Some(response) = ask(node, policy, "udf-list").await? else {
+            return Ok(Status::NotFound);
+        };
+        if response.contains(&needle) {
+            return Ok(Status::InProgress);
+        }
+    }
+    Ok(Status::Complete)
+}
+
+async fn execute_status(
+    nodes: &[Arc<Node>],
+    policy: &AdminPolicy,
+    task_id: u64,
+    scan: bool,
+) -> AeroResult<Status> {
+    for node in nodes {
+        let command = execute_command(node.version(), scan, task_id);
+        let Some(response) = ask(node, policy, &command).await? else {
+            return Ok(Status::InProgress);
+        };
+        match parse_execute_status(&response)? {
+            Status::Complete => {}
+            other => return Ok(other),
+        }
+    }
+    Ok(Status::Complete)
+}
+
+fn execute_command(version: &Version, scan: bool, task_id: u64) -> String {
+    let id_key = if version >= &Version::new(8, 1, 0, 0) {
+        "id"
+    } else {
+        "trid"
+    };
+    if version.supports_partition_query() {
+        format!("query-show:{id_key}={task_id}")
+    } else if version.supports_query_show() {
+        let module = if scan { "scan" } else { "query" };
+        format!("{module}-show:{id_key}={task_id}")
+    } else {
+        let module = if scan { "scan" } else { "query" };
+        format!("jobs:module={module};cmd=get-job;{id_key}={task_id}")
+    }
+}
+
+fn parse_execute_status(response: &str) -> AeroResult<Status> {
+    if response.contains("ERROR:2") {
+        return Ok(Status::Complete);
+    }
+    if response.starts_with("ERROR") {
+        return Err(Error::client_error(format!(
+            "Query execute failed: {response}"
+        )));
+    }
+    if let Some(status_idx) = response.find("status=") {
+        let status_str = &response[status_idx + "status=".len()..];
+        let status_end = status_str.find(':').unwrap_or(status_str.len());
+        if status_str[..status_end].to_lowercase().starts_with("done") {
+            return Ok(Status::Complete);
+        }
+        return Ok(Status::InProgress);
+    }
+    Ok(Status::InProgress)
 }
 
 /// The contract's task status.
@@ -124,9 +294,9 @@ pub const fn collection_index(collection: WireCollectionIndex) -> CollectionInde
 
 /// The client's UDF language.
 #[must_use]
-pub const fn udf_lang(language: WireUdfLang) -> UDFLang {
+pub const fn udf_lang(language: WireUdfLang) -> UdfLang {
     match language {
-        WireUdfLang::Lua => UDFLang::Lua,
+        WireUdfLang::Lua => UdfLang::Lua,
     }
 }
 

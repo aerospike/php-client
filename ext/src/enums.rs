@@ -351,6 +351,10 @@ pub enum PrivilegeCode {
     /// Write masked data. May be confined.
     #[php(value = "WRITE_MASKED")]
     WriteMasked,
+    /// A code this build does not name. A role read can return it; granting it
+    /// is refused.
+    #[php(value = "UNKNOWN")]
+    Unknown,
 }
 
 impl PrivilegeCode {
@@ -371,6 +375,7 @@ impl PrivilegeCode {
             PrivilegeCode::MaskingAdmin => WirePrivilegeCode::MaskingAdmin,
             PrivilegeCode::ReadMasked => WirePrivilegeCode::ReadMasked,
             PrivilegeCode::WriteMasked => WirePrivilegeCode::WriteMasked,
+            PrivilegeCode::Unknown => WirePrivilegeCode::Unknown,
         }
     }
 
@@ -391,6 +396,7 @@ impl PrivilegeCode {
             WirePrivilegeCode::MaskingAdmin => PrivilegeCode::MaskingAdmin,
             WirePrivilegeCode::ReadMasked => PrivilegeCode::ReadMasked,
             WirePrivilegeCode::WriteMasked => PrivilegeCode::WriteMasked,
+            WirePrivilegeCode::Unknown => PrivilegeCode::Unknown,
         }
     }
 
@@ -411,6 +417,7 @@ impl PrivilegeCode {
             PrivilegeCode::MaskingAdmin => "MASKING_ADMIN",
             PrivilegeCode::ReadMasked => "READ_MASKED",
             PrivilegeCode::WriteMasked => "WRITE_MASKED",
+            PrivilegeCode::Unknown => "UNKNOWN",
         }
     }
 }
@@ -432,6 +439,10 @@ pub enum TxnState {
     /// Aborted. Its writes are gone.
     #[php(value = "ABORTED")]
     Aborted,
+    /// A commit failed in doubt. Retry `commit()`. `abort()` is refused: the
+    /// server may still be rolling the writes forward.
+    #[php(value = "COMMIT_FAILED")]
+    CommitFailed,
 }
 
 impl TxnState {
@@ -443,6 +454,7 @@ impl TxnState {
             WireTxnState::Verified => TxnState::Verified,
             WireTxnState::Committed => TxnState::Committed,
             WireTxnState::Aborted => TxnState::Aborted,
+            WireTxnState::CommitFailed => TxnState::CommitFailed,
         }
     }
 }
@@ -487,8 +499,10 @@ impl CommitStatus {
 
 /// How an abort ended.
 ///
-/// As with a commit, every case means the transaction's writes are not going to
-/// land; the differences are only in how much tidying the server was left.
+/// Every case except `CommitFailed` means the transaction's writes are not
+/// going to land; the differences are only in how much tidying the server was
+/// left. `CommitFailed` means the abort was refused because a commit already
+/// failed in doubt — retry the commit.
 #[php_enum]
 #[php(name = "Aerospike\\AbortStatus")]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -505,6 +519,9 @@ pub enum AbortStatus {
     /// Rolled back, but closing the monitor record was abandoned.
     #[php(value = "CLOSE_ABANDONED")]
     CloseAbandoned,
+    /// The abort was refused: a commit already failed in doubt.
+    #[php(value = "COMMIT_FAILED")]
+    CommitFailed,
 }
 
 impl AbortStatus {
@@ -516,6 +533,7 @@ impl AbortStatus {
             WireAbortStatus::AlreadyAborted => AbortStatus::AlreadyAborted,
             WireAbortStatus::RollBackAbandoned => AbortStatus::RollBackAbandoned,
             WireAbortStatus::CloseAbandoned => AbortStatus::CloseAbandoned,
+            WireAbortStatus::CommitFailed => AbortStatus::CommitFailed,
         }
     }
 }

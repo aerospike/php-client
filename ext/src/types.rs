@@ -212,6 +212,82 @@ impl Infinity {
     }
 }
 
+/// A particle type this client does not decode, written and read as raw bytes
+/// under the server's particle-type code.
+///
+/// This is how a value written by an older client — a PHP-serialized blob,
+/// type 11, for example — round trips without being reinterpreted. It can be
+/// a bin, a list element or a map value. It cannot be a map key or a record
+/// key: those have to be a type this client understands.
+///
+/// ```php
+/// $client->put("test", "legacy", "row", [
+///     "flag" => new Aerospike\Particle(11, "b:1;"),
+/// ]);
+/// $again = $record["bins"]["flag"]; // Aerospike\Particle
+/// $again->particleType();           // 11
+/// ```
+#[php_class]
+#[php(name = "Aerospike\\Particle")]
+#[derive(Debug, Default, Clone)]
+pub struct Particle {
+    particle_type: u8,
+    bytes: Vec<u8>,
+}
+
+#[php_impl]
+impl Particle {
+    /// Wrap a particle-type code and its raw payload.
+    ///
+    /// `particle_type` is the Aerospike wire code, 0 through 255. A value
+    /// outside that range is refused rather than truncated.
+    pub fn __construct(particle_type: i64, bytes: Binary<u8>) -> PhpResult<Particle> {
+        let Ok(particle_type) = u8::try_from(particle_type) else {
+            return Err(AeroError::client(format!(
+                "Aerospike\\Particle needs a particle type in 0..=255; {particle_type} is not one"
+            ))
+            .into());
+        };
+        Ok(Particle {
+            particle_type,
+            bytes: bytes.to_vec(),
+        })
+    }
+
+    /// The server's particle-type code.
+    pub fn particle_type(&self) -> i64 {
+        i64::from(self.particle_type)
+    }
+
+    /// The undecoded payload, as a PHP string.
+    pub fn bytes(&self) -> Binary<u8> {
+        Binary::new(self.bytes.clone())
+    }
+}
+
+impl Particle {
+    /// The particle-type code, for this crate's own conversion code.
+    #[must_use]
+    pub const fn type_code(&self) -> u8 {
+        self.particle_type
+    }
+
+    /// The payload, for this crate's own conversion code.
+    #[must_use]
+    pub fn as_bytes(&self) -> &[u8] {
+        &self.bytes
+    }
+
+    /// Wrap a particle the daemon sent, with no PHP string in between.
+    #[must_use]
+    pub const fn of(particle_type: u8, bytes: Vec<u8>) -> Particle {
+        Particle {
+            particle_type,
+            bytes,
+        }
+    }
+}
+
 /// Matches any value, for CDT selections by example. See [`Infinity`] for why
 /// this is a class and not a constant.
 #[php_class]
@@ -246,6 +322,12 @@ pub fn object_to_wire(zval: &Zval) -> Option<WireValue> {
     }
     if let Some(hll) = zval.extract::<&ZendClassObject<Hll>>() {
         return Some(WireValue::Hll(hll.as_bytes().to_vec()));
+    }
+    if let Some(particle) = zval.extract::<&ZendClassObject<Particle>>() {
+        return Some(WireValue::Unknown {
+            particle_type: particle.type_code(),
+            data: particle.as_bytes().to_vec(),
+        });
     }
     if zval.extract::<&ZendClassObject<Infinity>>().is_some() {
         return Some(WireValue::Infinity);
@@ -288,6 +370,14 @@ pub fn geojson_zval(json: String) -> AeroResult<Zval> {
 /// [`AeroError`] if PHP could not allocate the object.
 pub fn hll_zval(bytes: Vec<u8>) -> AeroResult<Zval> {
     wrap(Hll { bytes }, "Aerospike\\Hll")
+}
+
+/// Build an `Aerospike\Particle` around a particle-type code and its payload.
+///
+/// # Errors
+/// [`AeroError`] if PHP could not allocate the object.
+pub fn particle_zval(particle_type: u8, bytes: Vec<u8>) -> AeroResult<Zval> {
+    wrap(Particle::of(particle_type, bytes), "Aerospike\\Particle")
 }
 
 /// Build an `Aerospike\Infinity`.

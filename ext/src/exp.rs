@@ -28,7 +28,7 @@
 //!
 //! `Aerospike\Expression::ael('$.age > 21')` is shorter, and the server does the
 //! parsing. But the Aerospike Expression Language only exists from **server
-//! 8.1.3**, and a filter is not a nicety — it is how a caller avoids reading
+//! 8.2.0**, and a filter is not a nicety — it is how a caller avoids reading
 //! records they did not ask for. A builder packs client-side, so it works against
 //! every server this client supports.
 //!
@@ -1922,7 +1922,7 @@ impl ExpHll {
 
 /// String expressions: `aerospike-core`'s `expressions::string`.
 ///
-/// **Needs server 8.1.3 or later** — these are the string operations, and the
+/// **Needs server 8.2.0 or later** — these are the string operations, and the
 /// daemon checks the cluster's versions rather than letting an older server refuse
 /// them obscurely.
 ///

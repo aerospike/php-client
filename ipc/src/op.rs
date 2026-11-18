@@ -1513,12 +1513,12 @@ impl WireHllOp {
 ///
 /// | form | packed by | needs |
 /// | --- | --- | --- |
-/// | [`Ael`](Self::Ael) | the **server**, from text | server 8.1.3+ |
+/// | [`Ael`](Self::Ael) | the **server**, from text | server 8.2.0+ |
 /// | [`Base64`](Self::Base64) | another client, already | nothing |
 /// | [`Tree`](Self::Tree) | the **daemon**, from the tree | nothing |
 ///
 /// The text form is the shortest to write and the server does the parsing, but it
-/// only exists from server 8.1.3. The tree form is packed client-side, so it works
+/// only exists from server 8.2.0. The tree form is packed client-side, so it works
 /// against every server this client supports — which for expressions matters more
 /// than for most things, since a filter is how a caller avoids reading records
 /// they did not want.
@@ -1531,7 +1531,7 @@ pub enum WireExpression {
     /// Aerospike Expression Language source, compiled by the **server**.
     ///
     /// The same language the policy `filter` takes, and the same requirement:
-    /// server 8.1.3 or later. The daemon checks the cluster's versions and
+    /// server 8.2.0 or later. The daemon checks the cluster's versions and
     /// refuses rather than letting an old server reject the text obscurely.
     Ael(String),
     /// A base64-encoded expression somebody else packed.

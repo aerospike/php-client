@@ -117,7 +117,7 @@ use crate::value;
 /// | map, sorted map | associative array |
 /// | several results for one bin | packed array, in operation order |
 /// | a map read that returned keys and values | list of `[key, value]` pairs |
-/// | a particle type this build cannot decode | `["particle_type" => int, "data" => Aerospike\Blob]` |
+/// | a particle type this build cannot decode | `Aerospike\Particle` |
 ///
 /// A **list round trips in order**, because its order is data. A **map comes
 /// back in the server's key order**, not in PHP insertion order: Aerospike has
@@ -132,7 +132,7 @@ use crate::value;
 /// # Filters make a call throw
 ///
 /// `filter` on either policy is an expression in the Aerospike Expression
-/// Language, compiled by the server (which needs server 8.1.3 or later). **A
+/// Language, compiled by the server (which needs server 8.2.0 or later). **A
 /// record the filter rejects makes the call fail**, on a read as much as on a
 /// write: the result code is 27, `FILTERED_OUT`. So "no match" is control flow
 /// a caller has to catch:

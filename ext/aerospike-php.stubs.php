@@ -6,8 +6,9 @@ namespace Aerospike {
     /**
      * How an abort ended.
      *
-     * As with a commit, every case means the transaction's writes are not going to
+     * Every case except CommitFailed means the transaction's writes are not going to
      * land; the differences are only in how much tidying the server was left.
+     * CommitFailed means the abort was refused because a commit already failed in doubt.
      */
     enum AbortStatus: string {
     /**
@@ -26,6 +27,10 @@ namespace Aerospike {
      * Rolled back, but closing the monitor record was abandoned.
      */
       case CloseAbandoned = 'CLOSE_ABANDONED';
+    /**
+     * The abort was refused: a commit already failed in doubt.
+     */
+      case CommitFailed = 'COMMIT_FAILED';
     }
 
     /**
@@ -980,7 +985,8 @@ namespace Aerospike {
      * types. A PHP string is a byte string with no way to say whether it was meant
      * as text or as binary, so **every bare string is written as a text value**;
      * wrap bytes in `Aerospike\Blob` to write them as binary, and a GeoJSON
-     * document in `Aerospike\GeoJson` so the server indexes it as geometry. A
+     * document in `Aerospike\GeoJson` so the server indexes it as geometry.
+     * `Aerospike\Particle` is accepted on the write path the same way. A
      * string that is not valid UTF-8 is refused rather than written as text.
      *
      * Reading back, those shapes come back **as their wrapper class**, so a value
@@ -997,7 +1003,7 @@ namespace Aerospike {
      * | map, sorted map | associative array |
      * | several results for one bin | packed array, in operation order |
      * | a map read that returned keys and values | list of `[key, value]` pairs |
-     * | a particle type this build cannot decode | `["particle_type" => int, "data" => Aerospike\Blob]` |
+     * | a particle type this build cannot decode | `Aerospike\Particle` |
      *
      * A **list round trips in order**, because its order is data. A **map comes
      * back in the server's key order**, not in PHP insertion order: Aerospike has
@@ -1012,7 +1018,7 @@ namespace Aerospike {
      * # Filters make a call throw
      *
      * `filter` on either policy is an expression in the Aerospike Expression
-     * Language, compiled by the server (which needs server 8.1.3 or later). **A
+     * Language, compiled by the server (which needs server 8.2.0 or later). **A
      * record the filter rejects makes the call fail**, on a read as much as on a
      * write: the result code is 27, `FILTERED_OUT`. So "no match" is control flow
      * a caller has to catch:
@@ -4300,7 +4306,7 @@ namespace Aerospike {
     /**
      * String expressions: `aerospike-core`'s `expressions::string`.
      *
-     * **Needs server 8.1.3 or later** — these are the string operations, and the
+     * **Needs server 8.2.0 or later** — these are the string operations, and the
      * daemon checks the cluster's versions rather than letting an older server refuse
      * them obscurely.
      *
@@ -4929,7 +4935,7 @@ namespace Aerospike {
      * | how | needs | notes |
      * | --- | --- | --- |
      * | `Aerospike\\Exp::*` | nothing | composed here, packed by the client |
-     * | `Expression::ael($text)` | server 8.1.3+ | shortest to write; the server parses it |
+     * | `Expression::ael($text)` | server 8.2.0+ | shortest to write; the server parses it |
      * | `Expression::base64($packed)` | nothing | one another client packed |
      *
      * **Prefer the builder** unless the text form is clearly more readable for what
@@ -5903,6 +5909,50 @@ namespace Aerospike {
          * @return int
          */
         public function length(): int {}
+    }
+
+    /**
+     * A particle type this client does not decode, carried as raw bytes under
+     * the server's particle-type code.
+     *
+     * This is how a value written by an older client — a PHP-serialized object,
+     * for example — round trips without being reinterpreted as a plain blob.
+     * It can be a bin, a list element or a map value. It cannot be a map key
+     * or a record key.
+     *
+     * ```php
+     * $client->put("test", "legacy", "row", [
+     *     "flag" => new Aerospike\Particle(11, "b:1;"),
+     *     "items" => [new Aerospike\Particle(11, "O:8:\"stdClass\":0:{}")],
+     * ]);
+     * $again = $record["bins"]["flag"]; // Aerospike\Particle
+     * $again->particleType();           // 11
+     * ```
+     */
+    class Particle {
+        /**
+         * Wrap a particle-type code and its raw payload.
+         *
+         * `particle_type` is the Aerospike wire code, 0 through 255.
+         *
+         * @param int $particle_type
+         * @param string $bytes
+         */
+        public function __construct(int $particle_type, string $bytes) {}
+
+        /**
+         * The server's particle-type code (ext-php-rs camelCase for wire `particle_type`).
+         *
+         * @return int
+         */
+        public function particleType(): int {}
+
+        /**
+         * The undecoded payload, as a PHP string.
+         *
+         * @return string
+         */
+        public function bytes(): string {}
     }
 
     /**
@@ -7954,6 +8004,10 @@ namespace Aerospike {
      * Write masked data. May be confined.
      */
       case WriteMasked = 'WRITE_MASKED';
+    /**
+     * A code this build does not name. A role read can return it; granting it is refused.
+     */
+      case Unknown = 'UNKNOWN';
     }
 
     /**
@@ -9596,6 +9650,10 @@ namespace Aerospike {
      * Aborted. Its writes are gone.
      */
       case Aborted = 'ABORTED';
+    /**
+     * A commit failed in doubt. Retry commit(). abort() is refused.
+     */
+      case CommitFailed = 'COMMIT_FAILED';
     }
 
     /**

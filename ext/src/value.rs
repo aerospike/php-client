@@ -37,11 +37,12 @@
 //!
 //! # Result-only shapes
 //!
-//! [`WireValue::MultiResult`], [`WireValue::KeyValueList`] and
-//! [`WireValue::Unknown`] are shapes only a server produces
-//! ([`WireValue::is_result_only`]). They are converted on the way in but have no
-//! way *out* of PHP, which is deliberate: the contract requires a caller never
-//! to send them.
+//! [`WireValue::MultiResult`] and [`WireValue::KeyValueList`] are shapes only a
+//! server produces ([`WireValue::is_result_only`]). They are converted on the
+//! way in but have no way *out* of PHP, which is deliberate: the contract
+//! requires a caller never to send them. [`WireValue::Unknown`] does have a way
+//! out: [`Particle`](crate::types::Particle), so a foreign value can be written
+//! back as itself, including inside a list or a map.
 
 use std::fmt;
 
@@ -183,7 +184,7 @@ fn zval_to_wire_at(zval: &Zval, path: &Path<'_>, depth: u32) -> AeroResult<WireV
     Err(AeroError::client(format!(
         "{path} is {}, which Aerospike cannot store. A bin takes null, bool, int, float, string, \
          array, or an Aerospike\\Blob, Aerospike\\GeoJson, Aerospike\\Hll, \
-         Aerospike\\OrderedMap or Aerospike\\SortedMap",
+         Aerospike\\Particle, Aerospike\\OrderedMap or Aerospike\\SortedMap",
         describe(zval)
     )))
 }
@@ -368,18 +369,11 @@ pub fn wire_to_zval(value: &WireValue) -> AeroResult<Zval> {
             }
             zval.set_hashtable(table);
         }
-        // A particle type this build cannot decode. Inspectable rather than
-        // fatal: a newer server's data type degrades to an array a caller can
-        // look at and log, instead of failing the whole read.
+        // A particle type this build cannot decode. A class, not an array:
+        // an array would be written back as a map and the type code would be
+        // gone. `Aerospike\Particle` round trips as the same particle.
         WireValue::Unknown { particle_type, data } => {
-            let mut table = ZendHashTable::with_capacity(2);
-            table
-                .insert("particle_type", i64::from(*particle_type))
-                .map_err(|error| php_internal(error, "an undecoded value"))?;
-            table
-                .insert("data", types::blob_zval(data.clone())?)
-                .map_err(|error| php_internal(error, "an undecoded value"))?;
-            zval.set_hashtable(table);
+            return types::particle_zval(*particle_type, data.clone());
         }
     }
     Ok(zval)

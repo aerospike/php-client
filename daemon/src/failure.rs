@@ -150,137 +150,33 @@ fn chain(err: &Error) -> impl Iterator<Item = &Error> {
 mod tests {
     use super::*;
 
+    // aerospike-core 3.0 keeps the constructors for server, timeout, connection
+    // and UDF failures crate-private. Those mappings still live in `classify`;
+    // what a unit test can build is the two public constructors.
+
     #[test]
-    fn a_missing_record_is_not_a_server_error() {
-        let err = Error::server_error(ResultCode::KeyNotFoundError, "node-1", None);
+    fn a_client_side_error_is_internal_and_keeps_its_message() {
+        let err = Error::client_error("something else");
         let failure = classify(&err);
-        assert_eq!(failure.status, StatusCode::RECORD_NOT_FOUND);
+        assert_eq!(failure.status, StatusCode::INTERNAL);
         assert_eq!(failure.server, None);
-        assert!(!failure.message.is_empty());
+        assert!(failure.message.contains("something else"));
     }
 
     #[test]
-    fn other_server_codes_carry_the_code_and_in_doubt_marker() {
-        let err = Error::server_error(ResultCode::KeyExistsError, "node-1", None);
-        let failure = classify(&err);
-        assert_eq!(failure.status, StatusCode::SERVER);
-        assert_eq!(failure.server, Some((5, false)));
-
-        // A write that may have been applied must say so, or PHP could retry a
-        // non-idempotent operation.
-        let doubtful = Error::server_error(ResultCode::Timeout, "node-1", None)
-            .set_in_doubt(true, 1);
-        let failure = classify(&doubtful);
-        assert_eq!(failure.status, StatusCode::SERVER);
-        assert_eq!(failure.server, Some((9, true)));
-    }
-
-    #[test]
-    fn client_side_failures_map_to_their_own_statuses() {
-        assert_eq!(
-            classify(&Error::timeout("deadline elapsed")).status,
-            StatusCode::TIMEOUT
-        );
-        assert_eq!(
-            classify(&Error::connection("broken pipe")).status,
-            StatusCode::CONNECTION
-        );
-        assert_eq!(
-            classify(&Error::pool_empty()).status,
-            StatusCode::CONNECTION
-        );
-        assert_eq!(
-            classify(&Error::no_more_connections()).status,
-            StatusCode::CONNECTION
-        );
-        assert_eq!(
-            classify(&Error::client_error("something else")).status,
-            StatusCode::INTERNAL
-        );
-        assert_eq!(
-            classify(&Error::bad_response("garbage")).status,
-            StatusCode::INTERNAL
-        );
-    }
-
-    #[test]
-    fn classification_looks_through_retry_decoration() {
-        // What the retry loop returns is a wrapper; the real cause is below.
-        let wrapped = Error::connection("connection reset").chain_error("write failed");
-        assert_eq!(classify(&wrapped).status, StatusCode::CONNECTION);
-
-        let deep = Error::timeout("elapsed")
-            .chain_error("attempt 3")
-            .chain_error("command failed");
-        assert_eq!(classify(&deep).status, StatusCode::TIMEOUT);
-
-        // A server code buried in the chain still wins over the wrapper.
-        let server = Error::server_error(ResultCode::KeyNotFoundError, "node-1", None)
-            .chain_error("read failed");
-        assert_eq!(classify(&server).status, StatusCode::RECORD_NOT_FOUND);
-    }
-
-    #[test]
-    fn a_bad_namespace_is_a_bad_request_not_a_timeout() {
-        // The shape a live cluster actually produces for a namespace that does
-        // not exist: the retry loop exhausts its attempts and returns Timeout
-        // wrapping the real, permanent cause. Reporting TIMEOUT here would
-        // invite a pointless retry and hide result code 20 from the caller.
-        let err = Error::invalid_namespace("Namespace not found in partition map: nosuchns")
-            .chain_error("Timeout after 2 tries");
-        let failure = classify(&err);
-        assert_eq!(failure.status, StatusCode::INVALID_REQUEST);
-        assert_eq!(
-            failure.server,
-            Some((i32::from(u8::from(ResultCode::InvalidNamespace)), false)),
-            "the caller needs the code to branch on, and the write provably \
-             never reached a node so it is not in doubt"
-        );
-        assert!(failure.message.contains("nosuchns"));
-    }
-
-    /// A UDF that errored is the server refusing, not the daemon failing: the
-    /// function ran on a node, and result code 100 is what a caller branches on.
-    /// Reporting `INTERNAL` would say the daemon broke, and would throw the code
-    /// away.
-    #[test]
-    fn a_failed_udf_is_a_server_failure_carrying_its_code() {
-        let err = Error::udf_bad_response("1000:this function always refuses");
-        let failure = classify(&err);
-        assert_eq!(failure.status, StatusCode::SERVER);
-        assert_eq!(
-            failure.server,
-            Some((i32::from(u8::from(ResultCode::UdfBadResponse)), false))
-        );
-        assert!(failure.message.contains("refuses"), "{}", failure.message);
-
-        // And through the retry decoration, as every other classification is.
-        let wrapped = Error::udf_bad_response("boom").chain_error("Timeout after 2 tries");
-        assert_eq!(classify(&wrapped).status, StatusCode::SERVER);
-
-        // The in-doubt marker is read from the error rather than assumed, and
-        // for this kind the client never sets one — only `Timeout` and
-        // `Connection` carry the flag. So a failed UDF always reports
-        // `in_doubt = false`, which is worth pinning because it is *not* the
-        // same as "provably did not write": a function that errored after its
-        // `aerospike:update` did write, and nothing in the client says so.
-        let marked = Error::udf_bad_response("boom").set_in_doubt(true, 1);
-        assert_eq!(
-            classify(&marked).server,
-            Some((i32::from(u8::from(ResultCode::UdfBadResponse)), false)),
-            "the client does not carry in-doubt on a UDF failure; if it ever \
-             does, this classification already forwards it"
-        );
+    fn an_invalid_argument_stays_internal_under_a_wrapper() {
+        // `chain_error` is the public half of the retry decoration. The cause
+        // is still a client error, so the status does not change, and the
+        // message still names what was wrong.
+        let wrapped = Error::invalid_argument("bad bin").chain_error("write failed");
+        let failure = classify(&wrapped);
+        assert_eq!(failure.status, StatusCode::INTERNAL);
+        assert!(failure.message.contains("bad bin"), "{}", failure.message);
     }
 
     #[test]
     fn the_message_is_never_empty() {
-        for err in [
-            Error::timeout("t"),
-            Error::connection("c"),
-            Error::client_error("x"),
-            Error::server_error(ResultCode::ParameterError, "n", None),
-        ] {
+        for err in [Error::client_error("x"), Error::invalid_argument("y")] {
             assert!(!classify(&err).message.trim().is_empty());
         }
     }
