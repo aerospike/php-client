@@ -2,9 +2,13 @@
 #
 # Aerospike Local Daemon configuration file.
 #
+# Each [clusters.<name>] table defines one Aerospike cluster. Declaring clusters
+# as top-level tables (e.g. [cluster]) is deprecated but still supported; the
+# daemon logs a notice at startup when it reads one.
+#
 # -----------------------------------------------------
 
-[cluster]
+[clusters.cluster]
 socket=/tmp/cluster.sock
 host = "1.1.1.1:3001,2.2.2.2:3002,3.3.3.3"
 user = "default-user"
@@ -122,7 +126,7 @@ ignore-other-subnet-aliases = false
 # retained despite connection failures.
 seed-only-cluster = false
 
-[cluster_tls]
+[clusters.cluster_tls]
 port = 4333
 host = "3.3.3.3"
 tls-name = "tls-name"
@@ -132,24 +136,24 @@ tls-cafile = "{{.RootCAFile}}"
 tls-certfile = "{{.CertFile}}"
 tls-keyfile = "{{.KeyFile}}"
 
-[cluster_instance]
+[clusters.cluster_instance]
 host = "3.3.3.3:3003,4.4.4.4:3004"
 user = "test-user"
 password = "test-password"
 
-[cluster_env]
+[clusters.cluster_env]
 host = "5.5.5.5:env-tls-name:1000"
 password = "env:AEROSPIKE_TEST"
 
-[cluster_envb64]
+[clusters.cluster_envb64]
 host = "6.6.6.6:env-tls-name:1000"
 password = "env-b64:AEROSPIKE_TEST"
 
-[cluster_b64]
+[clusters.cluster_b64]
 host = "7.7.7.7:env-tls-name:1000"
 password = "b64:dGVzdC1wYXNzd29yZAo="
 
-[cluster_file]
+[clusters.cluster_file]
 host = "1.1.1.1"
 password = "file:{{.PassFile}}"
 
@@ -159,3 +163,44 @@ store-file = "default1.store"
 
 [uda_instance]
 store-file = "test.store"
+
+# -----------------------------------------------------
+#
+# Management server: Prometheus metrics and health probes.
+#
+# Process-global, not per-cluster. Every value here can also be set via an
+# ASLD_* environment variable or a CLI flag; flags override env, env overrides
+# this file, this file overrides the built-in defaults. See OBSERVABILITY.md.
+#
+# The values below are the defaults and can be omitted entirely.
+#
+# -----------------------------------------------------
+
+[management]
+# Master switch and listen address for the management HTTP server.
+enabled = true
+address = ":9145"
+
+[management.metrics]
+enabled = true
+path = "/metrics"
+
+[management.liveness]
+# Liveness: cheap, no dependency checks. A failure should restart the process.
+enabled = true
+path = "/livez"
+
+[management.readiness]
+# Readiness: fails while any Aerospike cluster is disconnected, draining traffic.
+enabled = true
+path = "/readyz"
+
+[management.health]
+# Aggregate of liveness and readiness.
+enabled = true
+path = "/healthz"
+
+[management.pprof]
+# net/http/pprof. Disabled by default: it exposes process internals unauthenticated.
+enabled = false
+path = "/debug/pprof/"

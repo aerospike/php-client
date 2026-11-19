@@ -4,7 +4,8 @@
 #
 # -----------------------------------------------------
 
-[cluster]
+# Each [clusters.<name>] table defines one Aerospike cluster the daemon serves.
+[clusters.cluster]
 socket = "/tmp/asld_grpc.sock"
 host = "127.0.0.1:3000"
 #user = "default-user"
@@ -121,3 +122,10 @@ ignore-other-subnet-aliases = false
 # Peers nodes for the cluster are not discovered and seed nodes are
 # retained despite connection failures.
 seed-only-cluster = false
+
+# Management server (Prometheus metrics and health probes) is enabled by default
+# on :9145. Configure it via a [management] section, ASLD_* env vars or CLI
+# flags. See OBSERVABILITY.md for the full reference.
+#
+# [management]
+# address = ":9145"
